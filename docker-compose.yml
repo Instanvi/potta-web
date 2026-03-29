@@ -1,34 +1,9 @@
-version: "3"
+version: '3.8'
 
 services:
-
-  ################################
-  ####     AUTH SERVICE        ###
-  ################################
-
-  auth_service:
-    container_name: auth_service
-    image: ghcr.io/instanvi/app/auth
+  frontend:
+    image: ${IMAGE_REPO:-ghcr.io/instanvi/potta:latest}
+    restart: always
     ports:
-      - "5000:3000"
-
-  ################################
-  ####     DSP SERVICE         ###
-  ################################
-
-  dsp_service:
-    container_name: dsp_service
-    image: ghcr.io/instanvi/app/dsp
-    ports:
-      - "5001:3000"
-
-  ################################
-  ####     SSP SERVICE         ###
-  ################################
-
-
-  ssp_service:
-      container_name: ssp_service
-      image: ghcr.io/instanvi/app/ssp
-      ports:
-        - "5002:3000"
+      - "3004:3000"
+    env_file: .env
