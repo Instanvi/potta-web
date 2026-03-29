@@ -1,7 +1,6 @@
-import { useAuth } from '../(routes)/auth/AuthContext';
+import { signOut } from 'next-auth/react';
 
 export const useSignOut = () => {
-  const { signOut } = useAuth();
   
   return {
     signOut,

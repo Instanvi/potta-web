@@ -2,7 +2,7 @@
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext, useEffect, useState } from 'react';
 
 interface TableItem {

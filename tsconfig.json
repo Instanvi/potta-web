@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -14,23 +14,46 @@
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es2015",
-    "lib": ["es2020", "dom"],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "skipLibCheck": true,
     "paths": {
-      "@potta/*": ["./src/*"],
-      "@instanvi/core": ["src/libs/core/src/index.ts"],
-      "@instanvi/core/server": ["src/libs/core/src/server.ts"],
-      "@instanvi/ui-components": ["src/libs/ui-components/src/index.ts"],
-      "@instanvi/ui-components/server": ["src/libs/ui-components/src/server.ts"],
-      "@instanvi/utilities": ["src/libs/utilities/src/index.ts"],
-      "@instanvi/utilities/server": ["src/libs/utilities/src/server.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@potta/*": [
+        "./src/*"
+      ],
+      "@instanvi/core": [
+        "src/libs/core/src/index.ts"
+      ],
+      "@instanvi/core/server": [
+        "src/libs/core/src/server.ts"
+      ],
+      "@instanvi/ui-components": [
+        "src/libs/ui-components/src/index.ts"
+      ],
+      "@instanvi/ui-components/server": [
+        "src/libs/ui-components/src/server.ts"
+      ],
+      "@instanvi/utilities": [
+        "src/libs/utilities/src/index.ts"
+      ],
+      "@instanvi/utilities/server": [
+        "src/libs/utilities/src/server.ts"
+      ]
     },
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "**/*.ts",
@@ -38,7 +61,13 @@
     "**/*.js",
     "**/*.jsx",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": [
+    "node_modules",
+    "jest.config.ts",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }

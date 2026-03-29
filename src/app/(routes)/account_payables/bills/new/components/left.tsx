@@ -3,7 +3,7 @@ import Input from '@potta/components/input';
 import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect, useRef } from 'react';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllVendors from '@potta/app/(routes)/vendors/hooks/useGetAllVendors';
 import { Vendor } from '@potta/app/(routes)/vendors/utils/types';
 import * as Yup from 'yup';

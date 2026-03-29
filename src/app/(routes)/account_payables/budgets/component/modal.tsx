@@ -1,6 +1,6 @@
 'use client';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Input from '@potta/components/input';
 import Modal from '@potta/components/modal';
 import Select from '@potta/components/select';

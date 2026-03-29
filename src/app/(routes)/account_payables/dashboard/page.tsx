@@ -2,7 +2,7 @@
 import React from 'react';
 import RootLayout from '../../layout';
 import APMainDashboard from '../components/APMainDashboard';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const APDashboardPage = () => {
   const context = React.useContext(ContextData);

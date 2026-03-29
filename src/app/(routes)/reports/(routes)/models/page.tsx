@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { modelsMenu } from './components/modelsMenu';
 import Sidebar from '../../components/Sidebar';
 import RootLayout from '@potta/app/(routes)/layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import DynamicTable from './components/DynamicTable';
 import MyTable from '@potta/components/table';
 import DynamicAccountTable, {

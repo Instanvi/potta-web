@@ -9,7 +9,7 @@ import {
   ResizablePanelGroup,
 } from '@potta/components/resizable';
 import RootLayout from '../../../layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const NewInvoice = () => {
   const [showPreview, setShowPreview] = useState(false);

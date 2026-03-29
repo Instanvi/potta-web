@@ -11,9 +11,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ContextData } from './context';
+import { ContextData } from './providers/DataProvider';
 import { menuStructure } from './navbarLinks';
-import { useAuth } from '../app/(routes)/auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
+
 
 export type MenuItem = {
   title: string;
@@ -30,9 +31,8 @@ const slugify = (str: string) =>
     .replace(/(^-|-$)+/g, '');
 
 const ImprovedCustomNavbar = () => {
-  const { user, signOut } = useAuth
-    ? useAuth()
-    : { user: null, signOut: () => {} };
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();

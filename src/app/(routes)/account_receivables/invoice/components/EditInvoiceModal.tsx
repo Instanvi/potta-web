@@ -6,7 +6,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Left from '../new/components/left';
 import PdfView from '../new/components/pdfview';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';

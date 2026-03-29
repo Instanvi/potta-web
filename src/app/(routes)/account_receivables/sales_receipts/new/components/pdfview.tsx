@@ -1,6 +1,6 @@
 'use client';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext, useEffect, useState } from 'react';
 import { Customer } from '../../../../customers/utils/types';
 import useGetOneCustomer from '../../../../customers/hooks/useGetOneCustomer';

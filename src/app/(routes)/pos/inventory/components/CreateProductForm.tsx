@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Control, Controller } from 'react-hook-form';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Input from '@potta/components/input';
 import Checkbox from '@potta/components/checkbox';
 import TextArea from '@potta/components/textArea';

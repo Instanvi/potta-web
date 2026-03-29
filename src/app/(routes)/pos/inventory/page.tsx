@@ -5,7 +5,7 @@ import Filter from './components/filters';
 import InventoryTable from './components/table';
 import { InventoryProvider } from './_utils/context';
 import CategoryManager from './components/CategoryManager';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 const Files = () => {
   const [activeTab, setActiveTab] = useState<'inventory' | 'category'>(
     'inventory'

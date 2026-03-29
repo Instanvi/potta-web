@@ -4,7 +4,7 @@ import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect, useRef } from 'react';
 import DynamicTable from './newtableInvoice';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllVendors from '@potta/app/(routes)/vendors/hooks/useGetAllVendors';
 import Select from '@potta/components/select';
 import Checkbox from '@potta/components/checkbox';

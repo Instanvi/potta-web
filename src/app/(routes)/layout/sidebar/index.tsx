@@ -7,7 +7,7 @@ import Sidebarsinvoicing from './components/invoicing';
 import SidebarsPOS from './components/POS';
 import SidebarsTaxation from './components/taxation';
 import SidebarsPayroll from './components/payroll';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import SidebarsAccounts from './components/accounts';
 import SidebarsHome from './components/home';
 import SidebarsVoucher from './components/voucher';

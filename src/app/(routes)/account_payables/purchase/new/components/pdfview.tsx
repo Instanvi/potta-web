@@ -1,6 +1,6 @@
 'use client';
 import useGetOneVendor from '@potta/app/(routes)/vendors/hooks/useGetOneVendor';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext } from 'react';
 
 interface TableItem {

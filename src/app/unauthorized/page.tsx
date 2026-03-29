@@ -1,76 +1,126 @@
-'use client';
-import React from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+
+import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function UnauthorizedPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const errorType = searchParams.get("error");
+
+  const errorMessages: Record<string, { title: string; description: string }> = {
+    sync_failed: {
+      title: "Session Sync Failed",
+      description:
+        "We couldn't synchronize your session. This usually means your login has expired or the authentication token was invalid.",
+    },
+    missing_token: {
+      title: "Authentication Required",
+      description:
+        "No valid authentication credentials were provided. Please sign in through the main portal to continue.",
+    },
+  };
+
+  const currentError = errorMessages[errorType || ""] || {
+    title: "Access Denied",
+    description:
+      "You don't have the required permissions to access this resource. Please sign in or contact your organization administrator.",
+  };
 
   const handleRetry = () => {
-    // Clear any cached tokens and reload
-    if (typeof window !== 'undefined') {
-      localStorage.clear();
-      sessionStorage.clear();
-      document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      window.location.reload();
-    }
+    const superAppUrl =
+      process.env.NEXT_PUBLIC_SUPER_APP_URL || "http://localhost:3000";
+    const pottaOrigin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3001";
+    const callbackUrl = `${pottaOrigin}/auth-callback?callbackUrl=/`;
+
+    window.location.href = `${superAppUrl}/login?callbackUrl=${encodeURIComponent(callbackUrl)}&desktop=true`;
   };
 
   const handleGoHome = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 text-red-500">
-            <svg
-              className="h-12 w-12"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
+    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] p-6">
+      <div className="max-w-md w-full text-center space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Icon */}
+        <div className="flex justify-center">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-2xl bg-red-50 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="40"
+                height="40"
+                viewBox="0 0 256 256"
+                className="text-red-500"
+              >
+                <path
+                  fill="currentColor"
+                  d="M208 80H176V56a48 48 0 0 0-96 0v24H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16Zm-80 84a12 12 0 1 1 12-12a12 12 0 0 1-12 12Zm40-84H96V56a32 32 0 0 1 64 0v24Z"
+                />
+              </svg>
+            </div>
+            <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 text-white text-xs font-medium flex items-center justify-center">
+              !
+            </div>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Unauthorized Access
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            You don't have permission to access this resource. This could be due to:
-          </p>
-          <ul className="mt-2 text-sm text-gray-600 text-left list-disc list-inside">
-            <li>Invalid or expired authentication token</li>
-            <li>Missing authentication credentials</li>
-            <li>Insufficient permissions for this resource</li>
-          </ul>
         </div>
-        <div className="mt-8 space-y-4">
+
+        {/* Content */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium tracking-widest uppercase text-gray-400">
+            Unauthorized
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            {currentError.title}
+          </h1>
+          <p className="text-base text-gray-500 leading-relaxed max-w-sm mx-auto">
+            {currentError.description}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button
+            onClick={handleGoHome}
+            className="w-full sm:w-auto h-11 px-6 text-sm font-normal border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 256 256"
+              fill="currentColor"
+            >
+              <path d="M224 120v96a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8v-52h-48v52a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a8 8 0 0 1 2.34-5.66l88-88a8 8 0 0 1 11.32 0l88 88A8 8 0 0 1 224 120Z" />
+            </svg>
+            Go Home
+          </button>
           <button
             onClick={handleRetry}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium  text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            className="w-full sm:w-auto h-11 px-6 text-sm font-normal bg-[#2E7D32] text-white hover:bg-[#256828] transition-colors flex items-center justify-center gap-2"
           >
-            Retry Authentication
-          </button>
-          <button
-    
-            onClick={handleGoHome}
-            className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium  text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Go to Home
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 256 256"
+              fill="currentColor"
+            >
+              <path d="M224 128a96 96 0 0 1-163.86 67.86a8 8 0 0 1 11.32-11.32a80 80 0 1 0-1.67-115.1L96 96h-64V32l26.34 26.34A96 96 0 0 1 224 128Z" />
+            </svg>
+            Sign In Again
           </button>
         </div>
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            If this problem persists, please contact your system administrator.
-          </p>
-        </div>
+
+        {/* Help text */}
+        <p className="text-xs text-gray-400 pt-4">
+          If this problem persists, please contact your system administrator.
+        </p>
       </div>
     </div>
   );
-} 
+}

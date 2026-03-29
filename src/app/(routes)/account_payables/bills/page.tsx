@@ -6,7 +6,7 @@ import * as React from 'react';
 import { PaymentRequestDataTableWrapper } from './components/table';
 import Filter from './components/filters';
 import RootLayout from '../../layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 export default function DashboardPage() {
   const [search, setSearch] = React.useState('');

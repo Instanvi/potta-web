@@ -3,7 +3,7 @@
 import { useContext, useState } from 'react';
 
 import PolicyTable from './components/table';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 const Invoice = () => {
   const context = useContext(ContextData);
 

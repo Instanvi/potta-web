@@ -9,7 +9,7 @@ import RootLayout from '../layout';
 
 import { uploadFile, createFolderSimple, bulkUploadFiles } from './utils/api';
 import Select from '@potta/components/select';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const Files = () => {
   const context = useContext(ContextData);

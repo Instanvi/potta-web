@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface CartItem {
   id: string;

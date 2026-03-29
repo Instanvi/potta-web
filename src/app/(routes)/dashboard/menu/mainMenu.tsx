@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef, useContext, Fragment } from 'react';
 
 import { Menu, Transition } from '@headlessui/react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface MainMenuProps {
   children: React.ReactNode;

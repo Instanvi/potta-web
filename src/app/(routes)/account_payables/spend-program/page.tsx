@@ -12,7 +12,7 @@ import {
 import Button from '@potta/components/button';
 import NewSpendProgramSlideover from './components/NewSpendProgramSlideover';
 import { ChevronDown, CreditCard, FileText } from 'lucide-react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useQuery } from '@tanstack/react-query';
 import { getSpendPrograms } from './utils/api';
 import { Skeleton } from '@potta/components/shadcn/skeleton';

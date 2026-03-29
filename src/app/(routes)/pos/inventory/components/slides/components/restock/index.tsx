@@ -9,7 +9,7 @@ import Slider from '@potta/components/slideover';
 import SearchableSelect from '@potta/components/searchableSelect';
 import useGetAllProducts from '../../../../_hooks/useGetAllProducts';
 import useRestockProduct from '../../../../_hooks/useRestockProduct';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 import toast from 'react-hot-toast';
 import { Option } from '@potta/components/searchableSelect';

@@ -2,7 +2,7 @@
 import React, { useContext, useState } from 'react';
 import SaleInvoiceButons from './components/buttonSales';
 import TableOPS from './components/table';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 // import Calculator from "@/app/(routes)/calculator/page";
 import OtherMethod from './components/otherPayment';
 

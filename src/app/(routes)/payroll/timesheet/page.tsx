@@ -21,7 +21,7 @@ import { toast } from 'react-hot-toast';
 import Button from '@potta/components/button';
 import DateNavigation from './components/DateNavigation';
 import NewTimeEntryModal from './components/NewTimeEntryModal';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 // Create a client
 const queryClient = new QueryClient({

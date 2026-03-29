@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import SaleInvoiceTable from './component/saleInvoiceTable';
 import SaleInvoiceCard from './component/saleInvoiceCard';
 
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Print from './component/print/page';
 import RootLayout from '../layout';
 import { Toaster } from 'sonner';

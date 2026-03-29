@@ -4,7 +4,7 @@ import RootLayout from '../layout';
 import DateNavigation from '../payroll/timesheet/components/DateNavigation';
 import Boxes from './components/Boxes';
 import DashboardContent from './components/DashboardContent';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 const Payment = () => {
   // State for date navigation
   const [cycleTab, setCycleTab] = useState('Daily');

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import { usePathname } from 'next/navigation';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import SidebarProfile from './SidebarProfile';
 import { AiOutlineFileProtect } from 'react-icons/ai';
 

@@ -6,10 +6,13 @@ import CryptoJS from "crypto-js";
  */
 const SECRET_KEY = process.env.NEXT_PUBLIC_AUTH_PAYLOAD_SECRET || "instanvi-auth-default-secret-3x#k9";
 
+import { User } from "@/types/auth";
+
 export interface AuthPayload {
   token?: string;
   organizationId?: string;
   organizationName?: string;
+  user?: User;
 }
 
 export const EncryptionUtils = {

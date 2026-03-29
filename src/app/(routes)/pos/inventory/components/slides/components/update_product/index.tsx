@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Notes from './components/notes';
 import Attachments from './components/attachments';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Input from '@potta/components/input';
 import Checkbox from '@potta/components/checkbox';
 import { Controller, useForm } from 'react-hook-form';

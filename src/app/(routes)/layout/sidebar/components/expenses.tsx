@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import { usePathname } from 'next/navigation';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import SidebarProfile from './SidebarProfile';
 import Icon from '@potta/components/icon_fonts/icon';
 import { MdPolicy } from 'react-icons/md';

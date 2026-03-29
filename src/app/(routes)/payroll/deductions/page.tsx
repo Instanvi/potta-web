@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import DeductionFilters from './components/filters';
 import DeductionTable from './components/table';
 import RootLayout from '../../layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const DeductionsPage = () => {
   const context = useContext(ContextData);

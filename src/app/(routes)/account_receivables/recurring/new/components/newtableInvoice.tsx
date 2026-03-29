@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import SearchSelect, { Option } from '@potta/components/search-select'; // Import Option type
 import useGetAllProducts from '@potta/app/(routes)/pos/hooks/useGetAllProducts';
 

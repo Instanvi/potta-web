@@ -1,5 +1,5 @@
 'use client';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext, useState, useEffect } from 'react';
 import { dataMenu } from './components/dataMenu';
 import Sidebar from '../../components/Sidebar';

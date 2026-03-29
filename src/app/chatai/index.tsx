@@ -11,7 +11,7 @@ import {
   Minimize2,
 } from 'lucide-react';
 import { useAuth } from '../(routes)/auth/AuthContext';
-import { ContextData } from '../../components/context';
+import { ContextData } from '../../components/providers/DataProvider';
 import {
   webSocketService,
   getAuthToken,

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Settings, LogOut, ChevronDown, X } from 'lucide-react';
-import { useAuth } from '../../../auth/AuthContext';
+import { useSession, signOut } from 'next-auth/react';
 import Icon from '@potta/components/icon_fonts/icon';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -13,7 +13,8 @@ interface SidebarProfileProps {
 const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
-  const { user, signOut } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user as any;
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();

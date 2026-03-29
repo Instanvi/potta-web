@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import RootLayout from '../layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import DashboardCollection from '../dashboard/components/collection';
 
 const AccountReceivablesDashboard = () => {

@@ -2,7 +2,7 @@
 import { useContext } from 'react';
 import RootLayout from '../../layout';
 import PolicyTable from '../../policies/components/table';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const Invoice = () => {
   const context = useContext(ContextData);

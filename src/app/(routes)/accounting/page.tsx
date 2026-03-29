@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 
 import RootLayout from '../layout';
 import TableAccount from './components/table';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const Account = () => {
   const context = useContext(ContextData);

@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import SearchSelect, { Option } from '@potta/components/search-select';
 // You'll need to create this hook
 import Input from '@potta/components/input';

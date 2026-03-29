@@ -114,6 +114,8 @@ export interface AnalyticsOptions {
   employee_id?: string;
   employment_type?: string;
   use_mock_data?: boolean;
+  location_id?: string;
+  organization_id?: string;
 }
 
 export interface TrendsOptions {
@@ -230,6 +232,12 @@ abstract class BaseAnalyticsService {
     }
     if (options.use_mock_data !== undefined) {
       params.append('use_mock_data', options.use_mock_data.toString());
+    }
+    if (options.location_id) {
+      params.append('location_id', options.location_id);
+    }
+    if (options.organization_id) {
+      params.append('organization_id', options.organization_id);
     }
 
     console.log(

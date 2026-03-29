@@ -9,7 +9,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Button from '@potta/components/button';
 
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 import toast from 'react-hot-toast';
 import Text from '@potta/components/textDisplay';

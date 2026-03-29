@@ -19,7 +19,7 @@ import Filter from './components/filters';
 import RootLayout from '../../../layout';
 import { TeamCard } from './components/teamCard';
 import PolicyEditor from './components/policyEditor';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 export default function DashboardPage() {
   const context = React.useContext(ContextData);

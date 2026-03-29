@@ -6,7 +6,7 @@ import Select from '@potta/components/select';
 import { useForm, Controller } from 'react-hook-form';
 import Button from '@potta/components/button';
 import Address from './address';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 // import {
 //   UpdateVendorPayload,
 //   updateVendorSchema,

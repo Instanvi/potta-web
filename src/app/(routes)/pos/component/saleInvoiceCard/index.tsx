@@ -1,7 +1,7 @@
 'use client';
 import Input from '@potta/components/input';
 import React, { useState, useContext, useEffect } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { Filter, Product } from '../../utils/types';
 import useGetAllProducts from '../../hooks/useGetAllProducts';
 import Image from 'next/image';

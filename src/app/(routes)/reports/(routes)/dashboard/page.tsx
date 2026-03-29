@@ -8,7 +8,7 @@ import {
 } from '../../../../../services/analyticsService';
 import SearchableSelect from '../../../../../components/searchableSelect';
 import RootLayout from '@potta/app/(routes)/layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import InventoryDashboard from './components/InventoryDashboard';
 import ExpensesDashboard from './components/ExpensesDashboard';
 import SalesDashboard from './components/SalesDashboard';

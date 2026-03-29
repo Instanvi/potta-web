@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useContext, useEffect } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import RootLayout from '../../../layout';
 import TreasurySidebar from '../../components/TreasurySidebar';
 import TreasuryOverview from '../../components/TreasuryOverview';

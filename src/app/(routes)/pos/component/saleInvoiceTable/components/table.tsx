@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useContext } from 'react';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from './orderSummary';
 
 // Import or define the LineItem type

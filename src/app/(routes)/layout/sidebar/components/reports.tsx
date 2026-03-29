@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import { usePathname, useRouter } from 'next/navigation';
 import Icon from '@potta/components/icon_fonts/icon';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { SiDatabricks } from 'react-icons/si';
 import { svgIcons } from '@potta/components/svg_icons/IconsSvg';
 import SidebarProfile from './SidebarProfile';

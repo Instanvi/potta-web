@@ -9,7 +9,7 @@ import PTODetailSlider from './components/PTODetailSlider';
 import PTOCard from './components/PTOCard';
 import PottaLoader from '@potta/components/pottaloader';
 import { useContext } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 // Create a client
 const queryClient = new QueryClient();

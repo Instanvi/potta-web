@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 import InvoiceTableComponents from '../../account_receivables/credit/components/table';
 const Invoice = () => {

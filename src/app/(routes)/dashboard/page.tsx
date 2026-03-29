@@ -6,7 +6,7 @@ import Select from '../../../components/select';
 import DashboardCollection from './components/collection';
 import DashboardExpenses from './components/expenses';
 import CustomDatePicker from '../../../components/customDatePicker';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const Dashboard = () => {
   const [swipe, setSwipe] = useState('collection');

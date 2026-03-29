@@ -1,5 +1,5 @@
 'use client';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 import RootLayout from '../../layout';
 import ProformaInvoiceTable from './components/table';

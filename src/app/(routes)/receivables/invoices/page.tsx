@@ -4,7 +4,7 @@ import RootLayout from "../../layout";
 import NewInvoice from "./components/newInvoice";
 // import InvoiceTable from "./table";
 // import NewInvoice from "../modals/showNewInvoice";
-import { ContextData } from "@potta/components/context";
+import { ContextData } from "@potta/components/providers/DataProvider";
 function classNames(...classes: string[]): string {
     return classes.filter(Boolean).join(" ");
 }

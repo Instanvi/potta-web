@@ -6,7 +6,7 @@ import {
   AccordionItemPanel,
 } from 'react-accessible-accordion';
 import React, { useContext } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from '../orderSummary';
 
 const OtherPayment = () => {

@@ -1,6 +1,6 @@
 import Button from '@potta/components/button';
 import React, { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import HoldOrderButton from '../holdOn';
 import { toast } from 'sonner';
 import { ReceiptPrinter } from '../../../print/receiptPrinter';

@@ -12,7 +12,7 @@ import EmployeeModal from './components/EmployeeModal';
 import ConfirmationModal from './components/ConfirmationModal';
 import { useEmployeeAPI } from './hooks/useEmployeeAPI';
 import { DEFAULT_PAGE_SIZE, STORAGE_KEYS } from './constants';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const EmployeeDetailsPage = dynamic(() => import('./[id]/page'), {
   ssr: false,

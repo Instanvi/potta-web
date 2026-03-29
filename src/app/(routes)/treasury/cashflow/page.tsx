@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useContext } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import RootLayout from '../../layout';
 import ForecastHeader from './components/ForecastHeader';
 import CashBalanceCard from './components/CashBalanceCard';

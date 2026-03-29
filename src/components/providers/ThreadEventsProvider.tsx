@@ -12,7 +12,7 @@ import {
 import { io, Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { getAuthConfig } from '../../../config/auth.config';
-import { useAuth } from '../(routes)/auth/AuthContext';
+import { useAuth } from '../../app/(routes)/auth/AuthContext';
 import { THREAD_QUERY_KEYS } from '../../hooks/useThreads';
 import type { ThreadEntityType } from '../../services/threadService';
 

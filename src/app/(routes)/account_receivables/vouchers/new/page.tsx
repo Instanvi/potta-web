@@ -14,7 +14,7 @@ import Audience from './components/audience';
 import Scheduling from './components/scheduling';
 import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks'; // Import the hook
-import { ContextData } from '../../../../../components/context';
+import { ContextData } from '../../../../../components/providers/DataProvider';
 import { Loader2 } from 'lucide-react';
 
 // Define a new type that includes all possible tab values

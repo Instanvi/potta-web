@@ -5,7 +5,7 @@ import Filter from './components/filters';
 import SingleBudget from './components/data';
 import BudgetTable from './components/table';
 import { useParams } from 'next/navigation';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 const BudgetDetailsPage = () => {
   const params = useParams();
   const budgetId = params.id as string;

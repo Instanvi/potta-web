@@ -11,7 +11,7 @@ import {
 } from '@potta/components/resizable';
 import RootLayout from '../../../layout';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { extractInvoiceFromFile } from './api/extractInvoice';
 
 const NewInvoiceInner = () => {

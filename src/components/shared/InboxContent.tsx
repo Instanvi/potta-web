@@ -4,7 +4,7 @@ import TerminalDatatable from '../../app/(routes)/inbox/components/terminalTable
 import BillDatatable from '../../app/(routes)/inbox/components/billTable';
 import ReimbusementDatatable from '../../app/(routes)/inbox/components/reimburesmentTable';
 import Terminalstable from '../../app/(routes)/inbox/components/terminal';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 const InboxContent = () => {
   const context = React.useContext(ContextData);
   const [active, setActive] = useState('Transaction');

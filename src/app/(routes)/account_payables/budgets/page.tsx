@@ -9,7 +9,7 @@ import Input from '@potta/components/input';
 import Filter from '../components/filters';
 import { useBudgets } from './hooks/useBudgets';
 import { Skeleton } from '@potta/components/shadcn/skeleton';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const BudgetCardSkeleton = () => (
   <div className="bg-white shadow-sm rounded-lg p-6">

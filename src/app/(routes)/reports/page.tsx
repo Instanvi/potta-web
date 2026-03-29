@@ -5,7 +5,7 @@ import Sidebar from './components/Sidebar';
 import SearchBar from './components/SearchBar';
 import { reportCategories, reportData } from './utils/dummyData';
 import { ReportCategoryId, ReportCategory, Report } from './utils/types';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { reportCharts } from './components/DashboardSampleCards';
 import ReportChartCard from './components/ReportChartCard';
 import RootLayout from '../layout';

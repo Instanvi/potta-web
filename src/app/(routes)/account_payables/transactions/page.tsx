@@ -7,7 +7,7 @@ import { PaymentRequestDataTableWrapper } from './components/table';
 import Filter from './components/filters';
 import RootLayout from '../../layout';
 import { mockPaymentRequests } from '../budgets/details/utils/data';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 // Import your components and data
 
 // Import the NEW Table Wrapper Component

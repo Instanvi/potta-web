@@ -1,6 +1,6 @@
 'use client';
 
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import InvoiceTableComponents from './components/table';
 
 

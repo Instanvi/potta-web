@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Slider from '@potta/components/slideover';
 import Button from '@potta/components/button';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetOneVendor from '../hooks/useGetOneVendor';
 import { PhoneFlag } from './table';
 import { Badge } from '@potta/components/shadcn/badge';

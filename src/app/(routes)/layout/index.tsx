@@ -4,7 +4,7 @@ import Sidebars from './sidebar';
 import Navbar from './navbar';
 import { useContext, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { ContextData } from '../../../components/context';
+import { ContextData } from '../../../components/providers/DataProvider';
 import { Toaster } from 'sonner';
 import PottaLoader from '../../../components/pottaloader';
 import ChatAI from '../../../app/chatai';

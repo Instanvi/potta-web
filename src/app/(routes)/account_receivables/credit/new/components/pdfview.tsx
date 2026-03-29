@@ -1,7 +1,7 @@
 'use client';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext } from 'react';
 import useGetOneInvoice from '../hooks/useGetOneInvoice';
 

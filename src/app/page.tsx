@@ -38,10 +38,8 @@ import {
 import { Button } from '@potta/components/shadcn/button';
 import { ScrollArea } from '@potta/components/shadcn/scroll-area';
 import { Badge } from '@potta/components/shadcn/badge';
-import { AuthProvider } from './(routes)/auth/AuthContext';
 import RootLayout from './(routes)/layout';
-import { ContextData } from '@potta/components/context';
-// import RootLayout from './(routes)/layout';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface GridItem {
   value: string;
@@ -264,7 +262,6 @@ const WelcomePage = () => {
   ).length;
   const context = useContext(ContextData);
   return (
-    <AuthProvider>
       <RootLayout>
         <div
           className={`${
@@ -563,7 +560,6 @@ const WelcomePage = () => {
           </div>
         </div>
       </RootLayout>
-    </AuthProvider>
   );
 };
 

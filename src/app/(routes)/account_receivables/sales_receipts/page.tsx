@@ -2,7 +2,7 @@
 
 import React from 'react';
 import RootLayout from '../../layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import SaleTable from './components/table';
 
 const Files = () => {

@@ -4,7 +4,7 @@ import './globals.css';
 import 'remixicon/fonts/remixicon.css';
 import 'react-accessible-accordion/dist/fancy-example.css';
 
-import { AppProviders } from './providers';
+import { AppProviders } from '@potta/components/providers/AppProviders';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

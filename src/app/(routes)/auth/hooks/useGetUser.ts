@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getMe } from '../api';
 import { useContext, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface UserSession {
   expiresAt: string;

@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 // Function to get currency symbol based on currency code
 const getCurrencySymbol = (currencyCode: string): string => {

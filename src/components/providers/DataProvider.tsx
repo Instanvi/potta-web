@@ -6,7 +6,7 @@ import {
   allUsers,
   payoutsList,
   TerminalList,
-} from '../app/arrays/usecontextData';
+} from '../../app/arrays/usecontextData';
 
 interface InvoiceItem {
   id: number;
@@ -79,6 +79,8 @@ interface ContextType {
   setSelectedPaymentMethod: (method: string) => void;
   paymentAmount: number;
   setPaymentAmount: (amount: number) => void;
+  activeSidebar: string;
+  setActiveSidebar: (sidebar: string) => void;
 }
 
 interface Children {
@@ -140,6 +142,7 @@ const DataProvider: React.FC<Children> = ({ children }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>('cash');
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [activeSidebar, setActiveSidebar] = useState<string>('default');
 
   const [orderSummary, setOrderSummary] = useState<OrderSummary>({
     subtotal: 0,
@@ -217,6 +220,8 @@ const DataProvider: React.FC<Children> = ({ children }) => {
         setSelectedPaymentMethod,
         paymentAmount,
         setPaymentAmount,
+        activeSidebar,
+        setActiveSidebar,
       }}
     >
       {children}

@@ -6,7 +6,7 @@ import { Dialog, Transition } from '@headlessui/react';
 
 import { LargeSideMenuItem } from './sideMenuItem';
 import SmallSideMenuItem from './sideMenuItem';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface Link {
   text: string;

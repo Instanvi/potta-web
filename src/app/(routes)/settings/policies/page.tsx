@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useContext } from 'react';
 import { Shield, FileText, Car, CreditCard, Users, Building, Settings } from 'lucide-react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import PolicyTable from './components/PolicyTable';
 import PolicySidebar from './components/PolicySidebar';
 

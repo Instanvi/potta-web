@@ -7,7 +7,7 @@ import Input from '@potta/components/input';
 import Button from '@potta/components/button';
 import { DateInput } from '@potta/components/customDatePicker';
 import TextArea from '@potta/components/textArea';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import {
   ResizableHandle,
   ResizablePanel,

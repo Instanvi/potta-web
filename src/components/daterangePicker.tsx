@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
-import { ContextData } from "./context";
+import { ContextData } from "./providers/DataProvider";
 
 export default function DateRangePickerComponent() {
     const context = useContext(ContextData);

@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useAuth } from '../(routes)/auth/AuthContext';
+import { signOut } from 'next-auth/react';
 import Button from '@potta/components/button';
 
 interface SignOutButtonProps {
@@ -16,7 +16,7 @@ const SignOutButton: React.FC<SignOutButtonProps> = ({
   size = 'md',
   children = 'Sign Out',
 }) => {
-  const { signOut } = useAuth();
+
 
   const handleSignOut = () => {
     if (confirm('Are you sure you want to sign out?')) {

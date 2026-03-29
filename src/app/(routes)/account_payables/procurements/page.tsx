@@ -13,7 +13,7 @@ import {
   Package,
   MoreVertical,
 } from 'lucide-react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useCallback } from 'react';
 import {
   useGetSpendRequests,

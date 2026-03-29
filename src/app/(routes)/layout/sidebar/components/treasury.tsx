@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import { usePathname } from 'next/navigation';
 import { CreditCard, BarChart2, Wallet } from 'lucide-react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { svgIcons } from '@potta/components/svg_icons/IconsSvg';
 import SidebarProfile from './SidebarProfile';
 import { GiReceiveMoney } from 'react-icons/gi';

@@ -16,7 +16,7 @@ import {
   Settings as SettingsIcon,
   Monitor,
 } from 'lucide-react';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { Separator } from '@potta/components/shadcn/seperator';
 
 const SettingsPage = () => {

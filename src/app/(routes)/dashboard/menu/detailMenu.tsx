@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import Link from 'next/link';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface DetailMenuProps {
   children: ReactNode;

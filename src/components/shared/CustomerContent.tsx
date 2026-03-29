@@ -3,7 +3,7 @@ import React from 'react';
 import Boxes from '../../app/(routes)/customers/components/boxes';
 import TableComponents from '../../app/(routes)/customers/components/table';
 import { toast } from 'react-hot-toast';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 
 const CustomerContent = () => {

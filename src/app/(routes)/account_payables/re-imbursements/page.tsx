@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReimbursementDataTableWrapper } from './components/table';
 import Filter from './components/filters';
 import RootLayout from '../../layout';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useGetReimbursements } from './hooks/useReimbursements';
 import { Reimbursement } from './utils/api-types';
 

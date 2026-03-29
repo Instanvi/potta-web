@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Filter from './components/Filters';
 import TransactionsTable from './components/TransactionsTable';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 
 const TransactionsPage = () => {

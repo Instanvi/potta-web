@@ -1,7 +1,7 @@
 'use client';
 import React, { useContext, useEffect, useState } from 'react';
 import Slider from '@potta/components/slideover';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import { useGetOneReceipt } from '../hooks/useGetOneReceipt';
 import Button from '@potta/components/button';
 

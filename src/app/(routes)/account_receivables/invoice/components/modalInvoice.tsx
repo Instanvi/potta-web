@@ -1,5 +1,5 @@
 'use client';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Modal from '@potta/components/modal';
 import { FC, useContext, useState } from 'react';
 import { Button, Dialog, DialogPanel, DialogTitle } from '@headlessui/react'

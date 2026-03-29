@@ -10,7 +10,7 @@ import Select from '@potta/components/select';
 import BankAccountDetailsWideCard from '../components/BankAccountDetailsWideCard';
 import { useDeactivateBankAccount } from '../hooks/useDeactivateBankAccount';
 import toast from 'react-hot-toast';
-import { ContextData } from '@potta/components/context';
+import { ContextData } from '@potta/components/providers/DataProvider';
 
 const BankAccountDetailsPage = () => {
   const params = useParams();

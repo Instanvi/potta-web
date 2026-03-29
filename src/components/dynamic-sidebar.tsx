@@ -1,7 +1,7 @@
 'use client';
 import React, { useContext } from 'react';
 import { usePathname } from 'next/navigation';
-import { ContextData } from './context';
+import { ContextData } from './providers/DataProvider';
 import SidebarsPayment from '../app/(routes)/layout/sidebar/components/payments';
 import SidebarsExpenses from '../app/(routes)/layout/sidebar/components/expenses';
 import Sidebarsinvoicing from '../app/(routes)/layout/sidebar/components/invoicing';

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Bell, Inbox } from 'lucide-react'; // Import the icons
 import PosCustomersBox from './boxes/PosCustomersBox';
 import PosSalesBox from './boxes/PosSalesBox';
-import { ContextData } from '../../../../components/context';
+import { ContextData } from '../../../../components/providers/DataProvider';
 import VouchersBox from '../../account_receivables/vouchers/components/boxVouchers';
 import InvoiceBox from './boxes/InvoiceBox';
 import VendorsBox from './boxes/PosVendorsBox';
