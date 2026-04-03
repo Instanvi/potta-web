@@ -4,7 +4,7 @@ import React, { useState, useContext } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { Bell, Inbox } from 'lucide-react'; // Import the icons
+import { Bell, Inbox, User } from 'lucide-react'; // Import the icons
 import PosCustomersBox from './boxes/PosCustomersBox';
 import PosSalesBox from './boxes/PosSalesBox';
 import { ContextData } from '../../../../components/providers/DataProvider';
@@ -14,6 +14,7 @@ import VendorsBox from './boxes/PosVendorsBox';
 import ProformaInvoiceBox from '../../account_payables/proforma-invoices/components/ProformaInvoiceBox';
 import AppLauncher from '../../../../components/AppLauncher';
 import GlobalSearch from '../../../../components/GlobalSearch';
+import { useSession } from 'next-auth/react';
 
 const urlRouters = [
   {
@@ -94,7 +95,6 @@ const routesWithoutBlueBackground = [
   { main: 'pos' },
   { main: 'files' },
   { main: 'payments' },
-  { main: 'organigrammer' },
   { main: 'account_payables' },
   { main: 'treasury' },
   { main: 'account_receivables' },
@@ -119,6 +119,7 @@ export default function Navbar({
 }: {
   showChatAI?: boolean;
 }) {
+  const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const context = useContext(ContextData);
@@ -426,18 +427,32 @@ export default function Navbar({
           <GlobalSearch />
         </div>
 
-        <div className="flex items-center gap-4 px-4">
+        <div className="flex items-center gap-2 pr-6">
           {/* Inbox Icon */}
-          <button className="p-2 rounded-full transition-colors">
-            <Inbox size={20} className="text-gray-600 hover:text-gray-800" />
+          <button className="p-2.5 rounded-full hover:bg-gray-50 transition-colors group relative">
+            <Inbox size={20} className="text-gray-600 group-hover:text-gray-800" />
           </button>
           {/* Notification Icon */}
-          <button className="p-2 rounded-full transition-colors">
-            <Bell size={20} className="text-gray-600 hover:text-gray-800" />
+          <button className="p-2.5 rounded-full hover:bg-gray-50 transition-colors group relative">
+            <Bell size={20} className="text-gray-600 group-hover:text-gray-800" />
+            <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
+
+          <div className="w-px h-6 bg-gray-200 mx-2"></div>
 
           {/* App Launcher */}
           <AppLauncher />
+
+          {/* User Profile Initials/Avatar */}
+          <div className="ml-2">
+            <div className="h-10 w-10 rounded-full bg-green-800 flex items-center justify-center text-white font-medium text-sm cursor-pointer hover:bg-green-900 transition-colors shadow-sm overflow-hidden">
+              {session?.user?.name ? (
+                session.user.name.split(' ').map((n) => n[0]).join('').toUpperCase()
+              ) : (
+                <User size={20} />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

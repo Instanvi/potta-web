@@ -6,16 +6,11 @@ import 'react-accessible-accordion/dist/fancy-example.css';
 
 import { AppProviders } from '@potta/components/providers/AppProviders';
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
-});
+import { Plus_Jakarta_Sans } from 'next/font/google';
 
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
 });
 
 export const metadata: Metadata = {
@@ -36,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-[#F8F9FA] antialiased`}
+        className={`${jakarta.variable} font-sans bg-[#F8F9FA] antialiased`}
       >
         <AppProviders>{children}</AppProviders>
       </body>

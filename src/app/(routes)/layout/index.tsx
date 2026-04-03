@@ -23,7 +23,6 @@ export default function RootLayout({
   const [show, setShow] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === '/';
-  const isOrganigrammer = pathname === '/organigrammer';
   const isReports = pathname.startsWith('/reports');
   const context = useContext(ContextData);
 
@@ -59,8 +58,6 @@ export default function RootLayout({
 
           <div
             className={`flex duration-500 ease-in-out ${
-              isOrganigrammer ? '!pl-0' : ''
-            } ${
               useSidebar
                 ? show || context?.toggle
                   ? 'flex w-full pl-[35px]' // When ChatAI is open OR sidebar is collapsed

@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { Icon as Iconify } from '@iconify/react';
 import { cn } from '@potta/lib/utils';
-import useCloseOnOusideClick from '@potta/app/_hooks/useCloseOnOusideClick';
+import useCloseOnOutsideClick from '@potta/hooks/useCloseOnOutsideClick';
 export type IOption = {
   value: string;
   label: string;
@@ -28,7 +28,7 @@ const CustomSelect: FC<SelectProps> = ({
     setIsOpen(false);
   };
 
-  const { selectRef } = useCloseOnOusideClick({ setIsOpen });
+  const { selectRef } = useCloseOnOutsideClick({ setIsOpen });
 
   return (
     <div className="relative min-w-[8rem] w-fit shrink-0" ref={selectRef}>

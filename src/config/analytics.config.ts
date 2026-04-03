@@ -88,14 +88,14 @@ analyticsAxios.interceptors.response.use(
     }
 
     // Handle specific error cases
-    if (error.response?.status === 404) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      if (typeof window !== "undefined") {
+        import("next-auth/react").then(({ signOut }) => {
+          signOut({ callbackUrl: "/login" });
+        });
+      }
+    } else if (error.response?.status === 404) {
       console.warn('⚠️ Potta FP&A API: Resource not found');
-    } else if (error.response?.status === 500) {
-      console.error('💥 Potta FP&A API: Internal server error');
-    } else if (error.code === 'ECONNABORTED') {
-      console.error('⏰ Potta FP&A API: Request timeout');
-    } else if (!error.response) {
-      console.error('🌐 Potta FP&A API: Network error - no response received');
     }
 
     return Promise.reject(error);

@@ -1073,17 +1073,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               <CalendarIcon size={16} />
               Date
             </button>
-            <button
-              onClick={() => setActiveFilterTab('organigram')}
-              className={`flex-1 px-3 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-all duration-300 ease-in-out ${
-                activeFilterTab === 'organigram'
-                  ? 'text-green-600 border-b-2 border-green-600 bg-green-50'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Network size={16} />
-              Organigram
-            </button>
+
           </div>
 
           {/* Filter Content */}
@@ -1370,86 +1360,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onClose }) => {
               </div>
             )}
 
-            {activeFilterTab === 'organigram' && (
-              <div className="space-y-4 animate-in fade-in-0 slide-in-from-right-2 duration-300">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">
-                  Organizational Structure
-                </h4>
 
-                {/* Current User Context */}
-                <div className="bg-green-50 border border-green-200 p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MapPin size={16} className="text-green-600" />
-                    <span className="text-sm font-medium text-green-800">
-                      Your Position
-                    </span>
-                  </div>
-                  <div className="text-sm text-green-700">
-                    <div className="font-medium">
-                      {context?.data?.userRole || 'User Role'}
-                    </div>
-                    <div className="text-xs text-green-600">
-                      {context?.data?.branchName || 'Department'} •{' '}
-                      {context?.data?.organizationName || 'Organization'} • Core
-                      Technology
-                    </div>
-                  </div>
-                </div>
-
-                {/* Entity Type Filter */}
-                <div>
-                  <Select
-                    options={[
-                      { value: 'all', label: 'All Entities' },
-                      { value: 'department', label: 'Departments' },
-                      { value: 'employee', label: 'Employees' },
-                      { value: 'location', label: 'Locations' },
-                      { value: 'business_unit', label: 'Business Units' },
-                    ]}
-                    selectedValue={departmentValue}
-                    onChange={setDepartmentValue}
-                    bg=""
-                    label="Entity Type"
-                    labelClass="text-xs font-medium text-gray-700 mb-2 block"
-                  />
-                </div>
-
-                {/* Include Children Filter */}
-                <div>
-                  <Select
-                    options={[
-                      { value: 'true', label: 'Include Children' },
-                      { value: 'false', label: 'Current Level Only' },
-                    ]}
-                    selectedValue={departmentValue}
-                    onChange={setDepartmentValue}
-                    bg=""
-                    label="Hierarchy Level"
-                    labelClass="text-xs font-medium text-gray-700 mb-2 block"
-                  />
-                </div>
-
-                {/* Entity ID Filter */}
-                <div>
-                  <Select
-                    options={[
-                      { value: 'current', label: 'Current Position' },
-                      { value: 'department', label: 'Current Department' },
-                      { value: 'location', label: 'Current Location' },
-                      {
-                        value: 'business_unit',
-                        label: 'Current Business Unit',
-                      },
-                    ]}
-                    selectedValue={departmentValue}
-                    onChange={setDepartmentValue}
-                    bg=""
-                    label="Entity ID"
-                    labelClass="text-xs font-medium text-gray-700 mb-2 block"
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Filter Actions */}

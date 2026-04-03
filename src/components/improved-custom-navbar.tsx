@@ -357,10 +357,10 @@ const ImprovedCustomNavbar = () => {
               <div className="p-2">
                 <div className="px-3 py-2 border-b border-gray-100 mb-1">
                   <p className="text-sm font-medium text-gray-900">
-                    {user?.user?.firstName || user?.user?.username || 'User'}
+                    {user?.name || 'User'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {user?.user?.email || ''}
+                    {user?.email || ''}
                   </p>
                 </div>
                 <button className="flex items-center w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50  transition-colors duration-200">

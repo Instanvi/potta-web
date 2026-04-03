@@ -54,6 +54,7 @@ export interface Hierarchy {
     id: string;
     name: string;
   };
+  location_id?: string;
   organization_structure?: {
     id: string;
     department_name: string;
@@ -61,6 +62,17 @@ export interface Hierarchy {
     level: number;
     path: string;
   };
+  organizational_structure_id?: string;
+  geo_unit?: {
+    id: string;
+    name?: string;
+  };
+  geographical_unit_id?: string;
+  sub_business?: {
+    id: string;
+    name?: string;
+  };
+  sub_business_id?: string;
   [key: string]: unknown;
 }
 
@@ -69,10 +81,10 @@ export interface App {
   name: string;
   status?: string;
   api_key?: string;
-  environment?: "PROD" | "SANDBOX" | "ADMIN";
+  environment?: 'PROD' | 'SANDBOX' | 'ADMIN';
 }
 
-export interface AuthResponse {
+export interface AuthSessionResponse {
   session?: {
     id: string;
     token: string;
@@ -112,3 +124,4 @@ export interface SignUpPayload {
 export interface VerifyEmailPayload {
   token: string;
 }
+export type AuthResponse = AuthSessionResponse;

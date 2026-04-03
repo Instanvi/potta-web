@@ -121,7 +121,17 @@ export const PottaAppPermissions: PermissionDefinition[] = [
   },
   {
     resource: "SpendProgram",
-    action: ["view", "create", "update", "update-program", "delete"],
+    action: [
+      "view",
+      "view-all",
+      "create",
+      "update",
+      "delete",
+      "archive",
+      "fund",
+      "assign",
+      "view-stats",
+    ],
   },
   {
     resource: "Vouchers",

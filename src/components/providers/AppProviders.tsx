@@ -10,13 +10,16 @@ import { ThreadEventsProvider } from './ThreadEventsProvider';
 import { useState } from 'react';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000
-      }
-    }
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+          },
+        },
+      })
+  );
 
   return (
     <SessionProvider>
@@ -25,9 +28,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           <ThreadEventsProvider>
             <HeroUIProvider>
               <Toaster position="top-center" />
-              <UserDataLoader>
-                {children}
-              </UserDataLoader>
+              {/* <UserDataLoader> */}
+              {children}
+              {/* </UserDataLoader> */}
             </HeroUIProvider>
           </ThreadEventsProvider>
         </DataProvider>

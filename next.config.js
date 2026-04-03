@@ -9,9 +9,6 @@ const nextConfig = {
     ],
   },
   cacheComponents: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   poweredByHeader: false,
   reactStrictMode: true,
   output: 'standalone',

@@ -163,8 +163,6 @@ const useGetUser = () => {
     ? BYPASS_AUTH_ROUTES.some((route) => pathname.includes(route))
     : false;
 
-  // Check if we're on organigram page (special case - no whoami calls)
-  const isOrganigramPage = pathname ? pathname.includes('/organigram') : false;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['whoami'],
@@ -172,24 +170,22 @@ const useGetUser = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
-    enabled: !devMode && !isBypassRoute && !isOrganigramPage, // Disable the query in dev mode, on bypass routes, and on organigram page
+    enabled: !devMode && !isBypassRoute, // Disable the query in dev mode, on bypass routes
   });
 
   // Update context with user information when data is available
   useEffect(() => {
     if (
-      (devMode || isBypassRoute || isOrganigramPage) &&
+      (devMode || isBypassRoute) &&
       context &&
       !hasUpdatedContext.current
     ) {
-      // In dev mode, on bypass routes, or on organigram page, provide dummy data
+      // In dev mode, on bypass routes, provide dummy data
       console.log(
         `useGetUser: ${
           devMode
             ? 'DEV MODE'
-            : isBypassRoute
-            ? 'BYPASS ROUTE'
-            : 'ORGANIGRAM PAGE'
+            : 'BYPASS ROUTE'
         } active – providing dummy user data`
       );
 
@@ -444,18 +440,18 @@ const useGetUser = () => {
       // Mark that we've updated the context
       hasUpdatedContext.current = true;
     }
-  }, [data, devMode, isBypassRoute, isOrganigramPage]); // Remove context from dependencies to prevent infinite loop
+  }, [data, devMode, isBypassRoute]); // Remove context from dependencies to prevent infinite loop
 
   console.log('Context:', context?.data);
   console.log('Hierarchy in context:', context?.data?.fullUserData?.hierarchy);
 
   return {
     data:
-      devMode || isBypassRoute || isOrganigramPage
+      devMode || isBypassRoute
         ? undefined
         : (data as WhoAmIResponse | undefined),
-    isLoading: devMode || isBypassRoute || isOrganigramPage ? false : isLoading,
-    error: devMode || isBypassRoute || isOrganigramPage ? null : error,
+    isLoading: devMode || isBypassRoute ? false : isLoading,
+    error: devMode || isBypassRoute ? null : error,
   };
 };
 
