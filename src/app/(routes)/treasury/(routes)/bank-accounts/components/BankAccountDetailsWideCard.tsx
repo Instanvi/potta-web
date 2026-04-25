@@ -101,7 +101,7 @@ const BankAccountDetailsWideCard: React.FC<BankAccountDetailsWideCardProps> = ({
       <Card className="bg-white shadow-sm transition-shadow duration-200 relative overflow-hidden w-full">
         <CardHeader className="pb-4 !p-4 flex flex-row justify-between items-start">
           <div>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
               <Skeleton className="h-6 w-40 mb-2" />
             </CardTitle>
             <div className="mt-1 flex items-center gap-2">
@@ -167,7 +167,7 @@ const BankAccountDetailsWideCard: React.FC<BankAccountDetailsWideCardProps> = ({
     <Card className="bg-white shadow-sm transition-shadow duration-200 relative overflow-hidden w-full">
       <CardHeader className="pb-4 !p-4 flex flex-row justify-between items-start">
         <div>
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
             {mainLabel}
             {subLabel && (
               <span className="ml-2 text-gray-400 text-base">{subLabel}</span>
@@ -239,7 +239,7 @@ const BankAccountDetailsWideCard: React.FC<BankAccountDetailsWideCardProps> = ({
           <Detail
             label="Balance"
             value={
-              <span className="text-xl font-bold text-blue-700">
+              <span className="text-xl font-medium text-blue-700">
                 {current_balance}
               </span>
             }
@@ -304,7 +304,7 @@ const Detail = ({ label, value }: { label: string; value: any }) => (
     <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
       {label}
     </span>
-    <span className="text-base text-gray-800 font-semibold whitespace-nowrap">
+    <span className="text-base text-gray-800 font-medium whitespace-nowrap">
       {value || '-'}
     </span>
   </div>

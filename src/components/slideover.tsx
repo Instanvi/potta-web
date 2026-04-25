@@ -200,7 +200,7 @@ const Slider: FC<props> = ({
                       }`}
                     >
                       <div className="flex-1 flex gap-10 items-end">
-                        <DialogTitle className="text-xl !font-semibold text-gray-900">
+                        <DialogTitle className="text-xl !font-medium text-gray-900">
                           {title}
                         </DialogTitle>
                         {/* Tabs */}

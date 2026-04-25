@@ -11,4 +11,8 @@ export const authService = {
     );
     return res.data;
   },
+
+  async logout(): Promise<void> {
+    await axios.post(`${authApiUrl}/auth/sign-out`, {});
+  },
 };

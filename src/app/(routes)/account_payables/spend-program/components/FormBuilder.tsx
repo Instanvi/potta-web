@@ -155,7 +155,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
     <div className="bg-white border border-gray-200 p-6 min-h-[400px] w-full pb-0">
       <div className="flex items-center mb-4 justify-between">
         <div className="">
-          <h3 className="text-xl font-semibold mb-2">Request form</h3>
+          <h3 className="text-xl font-medium mb-2">Request form</h3>
           <div className="text-gray-600">Add questions</div>
         </div>
         <div className='flex items-center gap-2'>
@@ -203,10 +203,10 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
                 >
                   <FiX />
                 </button>
-                <h4 className="text-lg font-semibold mb-4">
+                <h4 className="text-lg font-medium mb-4">
                   Select question type
                 </h4>
-                <div className="mb-2 text-xs font-semibold text-gray-500">
+                <div className="mb-2 text-xs font-medium text-gray-500">
                   Basic fields
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -224,7 +224,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
                     </button>
                   ))}
                 </div>
-                <div className="mb-2 text-xs font-semibold text-gray-500">
+                <div className="mb-2 text-xs font-medium text-gray-500">
                   Department fields
                 </div>
                 <div className="grid grid-cols-2 gap-3">

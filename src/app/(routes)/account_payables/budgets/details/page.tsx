@@ -39,8 +39,8 @@ export default function DashboardPage() {
   const filteredRequests = mockPaymentRequests.filter(
     (req) =>
       req.madeBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.madeTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.category.toLowerCase().includes(searchTerm.toLowerCase())
+      (req.madeTo ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (req.category ?? '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Example: Simulate loading (replace with actual API call)
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         {/* Top Row Cards (same as before) */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6 xl:grid-cols-6">
           <div className="col-span-2">
-            <BudgetCard budget={mockBudget} />
+            <BudgetCard budget={mockBudget as any} />
           </div>
           <TerminalsCard count={9} />
           <TeamCard teamMembers={mockTeam} />

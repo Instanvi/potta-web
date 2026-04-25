@@ -113,7 +113,7 @@ const BenefitContent: React.FC<BenefitProps> = ({ personId, onComplete }) => {
       <div className="space-y-6">
         {/* Header */}
         <div className="border-b border-gray-200 pb-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-medium text-gray-900">
             Employee Benefits
           </h2>
           <p className="text-sm text-gray-600 mt-1">

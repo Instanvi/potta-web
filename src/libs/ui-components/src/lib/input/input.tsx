@@ -39,7 +39,7 @@ const Input: React.FC<Props> = ({
   return (
     <div className={`w-full ${className}`}>
       <div className='flex gap-1 items-center'>
-        <label htmlFor="" className="capitalize font-semibold text-[0.75rem]">
+        <label htmlFor="" className="capitalize font-medium text-[0.75rem]">
           {label}
         </label>
         {verified && <i className='ri-checkbox-circle-fill text-green-700 -mt-1' />}

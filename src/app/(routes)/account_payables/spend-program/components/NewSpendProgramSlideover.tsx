@@ -170,7 +170,7 @@ const NewSpendProgramSlideover: React.FC<NewSpendProgramSlideoverProps> = ({
                     <div className="font-medium text-base flex items-center gap-2">
                       {type.label}
                       {/* {type.plus && (
-                        <span className="bg-yellow-300 text-xs text-gray-900 font-semibold px-2 py-0.5 rounded ml-1">
+                        <span className="bg-yellow-300 text-xs text-gray-900 font-medium px-2 py-0.5 rounded ml-1">
                           Plus
                         </span>
                       )} */}
@@ -194,7 +194,7 @@ const NewSpendProgramSlideover: React.FC<NewSpendProgramSlideoverProps> = ({
           {selected === 'PROCUREMENT' && (
             <div className="">
               <div className="">
-                <div className="text-2xl font-semibold mb-4">
+                <div className="text-2xl font-medium mb-4">
                   What's this program for?
                 </div>
                 <input

@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import moment from 'moment';
 import toast from 'react-hot-toast';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 
 import { IFilter } from '../_utils/types';
 import {
@@ -574,7 +574,12 @@ const InvoiceTable = () => {
         </div>
       </div>
 
-      <DataGrid columns={columns} data={filteredData} isLoading={isLoading} />
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        isLoading={isLoading}
+        withRowSelection
+      />
 
       {/* Modals */}
       <ModalInvoice isOpen={isOpen} setIsOpen={setIsOpen} />

@@ -871,7 +871,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           {/* Consolidated Cash Flow Metrics Skeleton */}
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Consolidated Cash Flow Metrics
               </CardTitle>
             </CardHeader>
@@ -899,7 +899,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           {/* Consolidated Balance Sheet Metrics Skeleton */}
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Consolidated Balance Sheet Metrics
               </CardTitle>
             </CardHeader>
@@ -930,7 +930,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           {/* Consolidated Income Statement Skeleton */}
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Consolidated Income Statement - FY'25 (FCFA)
               </CardTitle>
             </CardHeader>
@@ -952,7 +952,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           {/* OPEX Summary Skeleton */}
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 OPEX Summary - Jan'25 (FCFA)
               </CardTitle>
             </CardHeader>
@@ -965,7 +965,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         {/* Bottom Section - Cashflow Bridge Skeleton */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Cashflow Bridge
             </CardTitle>
           </CardHeader>
@@ -1007,7 +1007,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         {/* Consolidated Cash Flow Metrics */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Consolidated Cash Flow Metrics
             </CardTitle>
           </CardHeader>
@@ -1027,7 +1027,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     </span>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl font-medium text-gray-900">
                       {metric.value}
                     </p>
                     <p
@@ -1047,7 +1047,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         {/* Consolidated Balance Sheet Metrics */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Consolidated Balance Sheet Metrics
             </CardTitle>
           </CardHeader>
@@ -1067,7 +1067,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     </span>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl font-medium text-gray-900">
                       {metric.value}
                     </p>
                     <p
@@ -1090,7 +1090,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         {/* Consolidated Income Statement */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Consolidated Income Statement - FY'25 (FCFA)
             </CardTitle>
           </CardHeader>
@@ -1186,7 +1186,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         {/* OPEX Summary */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               OPEX Summary - Jan'25 (FCFA)
             </CardTitle>
           </CardHeader>
@@ -1201,7 +1201,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
       {/* Bottom Section - Cashflow Bridge */}
       <Card className="bg-white border-0">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-medium text-gray-900">
             Cashflow Bridge
           </CardTitle>
         </CardHeader>

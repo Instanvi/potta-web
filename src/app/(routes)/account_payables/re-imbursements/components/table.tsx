@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   MoreVertical,
   Eye,
@@ -117,7 +118,7 @@ export function ReimbursementDataTableWrapper({
       accessorKey: 'employeeId',
       header: 'Employee',
       cell: ({ row: { original } }) => (
-        <span className="font-semibold">
+        <span className="font-medium">
           {getEmployeeName(original.employeeId, employees?.data || [])}
         </span>
       ),

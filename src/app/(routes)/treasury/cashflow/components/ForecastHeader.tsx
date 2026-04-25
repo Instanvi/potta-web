@@ -78,7 +78,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       <div className="flex items-center justify-between mb-6">
         {/* Left side - Title */}
         <div className="flex items-center space-x-6">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-medium text-gray-900">
             Cash Flow Forecast
           </h1>
         </div>

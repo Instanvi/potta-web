@@ -331,7 +331,7 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
               onClick={() => setTabs('Address')}
               className={`px-4 py-2.5 duration-500 ease-in-out ${
                 tabs == 'Address' &&
-                'border-b  border-green-500 text-green-500 font-thin '
+                'border-b  border-green-500 text-green-500 font-normal '
               } cursor-pointer `}
             >
               <p>Address</p>
@@ -341,7 +341,7 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
               onClick={() => setTabs('Tax')}
               className={`px-4 py-2.5 duration-500 ease-in-out ${
                 tabs == 'Tax' &&
-                'border-b border-green-500 text-green-500 font-thin '
+                'border-b border-green-500 text-green-500 font-normal '
               } cursor-pointer `}
             >
               <p>Tax ID</p>

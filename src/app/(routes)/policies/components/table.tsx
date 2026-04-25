@@ -168,7 +168,7 @@ const PolicyCard = ({
         <div className="flex justify-between items-start gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <CardTitle className="text-lg font-semibold truncate text-gray-900">
+              <CardTitle className="text-lg font-medium truncate text-gray-900">
                 {policy.name}
               </CardTitle>
               <span

@@ -3,9 +3,17 @@ import type { JWT } from "next-auth/jwt";
 
 export const authConfig: NextAuthConfig = {
   pages: {
-    signIn: "/sign-in",
+    signIn: "/login",
   },
   callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isPublic =
+        nextUrl.pathname === "/login" ||
+        nextUrl.pathname.startsWith("/auth-callback");
+      if (isPublic) return true;
+      return isLoggedIn;
+    },
     async jwt({ token, user }: { token: JWT; user?: any }) {
       if (user) {
         token.id = user.id;

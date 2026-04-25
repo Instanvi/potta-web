@@ -349,7 +349,7 @@ const SliderVendor = () => {
               onClick={() => setTabs('Address')}
               className={`px-4 py-2.5 duration-500 ease-in-out ${
                 tabs == 'Address' &&
-                'border-b  border-green-500 text-green-500 font-thin '
+                'border-b  border-green-500 text-green-500 font-normal '
               } cursor-pointer `}
             >
               <p>Address</p>
@@ -358,7 +358,7 @@ const SliderVendor = () => {
               onClick={() => setTabs('Notes')}
               className={`px-4 py-2.5 duration-500 ease-in-out ${
                 tabs == 'Notes' &&
-                'border-b border-green-500 text-green-500 font-thin '
+                'border-b border-green-500 text-green-500 font-normal '
               } cursor-pointer `}
             >
               <p>Notes</p>
@@ -368,7 +368,7 @@ const SliderVendor = () => {
               onClick={() => setTabs('Tax')}
               className={`px-4 py-2.5 duration-500 ease-in-out ${
                 tabs == 'Tax' &&
-                'border-b border-green-500 text-green-500 font-thin '
+                'border-b border-green-500 text-green-500 font-normal '
               } cursor-pointer `}
             >
               <p>Tax ID</p>

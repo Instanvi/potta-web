@@ -85,7 +85,7 @@ const ExpensesBreakdownCard: React.FC = () => (
           <Bar data={data} options={options} />
         </div>
         <div className="mt-3 text-xs flex items-center gap-1">
-          <span className="font-semibold text-black">Top Category:</span>
+          <span className="font-medium text-black">Top Category:</span>
           <span className="text-green-600">Payroll ($12,000)</span>
         </div>
       </CardContent>

@@ -19,7 +19,7 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Income Statement Report</h1>
+        <h1 className="text-2xl font-medium">Income Statement Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
               <DollarSign className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Revenue</p>
-                <p className="text-xl font-bold">${kpis.totalRevenue.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalRevenue.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
               <TrendingUp className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Gross Margin</p>
-                <p className="text-xl font-bold">{kpis.grossProfitMargin.toFixed(2)}%</p>
+                <p className="text-xl font-medium">{kpis.grossProfitMargin.toFixed(2)}%</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
               <PieChart className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Operating Margin</p>
-                <p className="text-xl font-bold">{kpis.operatingProfitMargin.toFixed(2)}%</p>
+                <p className="text-xl font-medium">{kpis.operatingProfitMargin.toFixed(2)}%</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
               <BarChart className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Net Margin</p>
-                <p className="text-xl font-bold">{kpis.netProfitMargin.toFixed(2)}%</p>
+                <p className="text-xl font-medium">{kpis.netProfitMargin.toFixed(2)}%</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
               <LineChart className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">EBITDA</p>
-                <p className="text-xl font-bold">${kpis.ebitda.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.ebitda.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -90,54 +90,54 @@ const IncomeStatementReport: React.FC<IncomeStatementReportProps> = ({
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell className="font-semibold">Revenue</TableCell>
+                <TableCell className="font-medium">Revenue</TableCell>
                 <TableCell className="text-right">${incomeStatement.revenue.toLocaleString()}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="font-semibold">Cost of Goods Sold</TableCell>
+                <TableCell className="font-medium">Cost of Goods Sold</TableCell>
                 <TableCell className="text-right text-red-600">
                   (${incomeStatement.cogs.toLocaleString()})
                 </TableCell>
               </TableRow>
               <TableRow className="border-t">
-                <TableCell className="font-semibold">Gross Profit</TableCell>
-                <TableCell className="text-right font-bold">
+                <TableCell className="font-medium">Gross Profit</TableCell>
+                <TableCell className="text-right font-medium">
                   ${incomeStatement.grossProfit.toLocaleString()}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="font-semibold">Operating Expenses</TableCell>
+                <TableCell className="font-medium">Operating Expenses</TableCell>
                 <TableCell className="text-right text-red-600">
                   (${incomeStatement.operatingExpenses.toLocaleString()})
                 </TableCell>
               </TableRow>
               <TableRow className="border-t">
-                <TableCell className="font-semibold">Operating Profit (EBIT)</TableCell>
-                <TableCell className="text-right font-bold">
+                <TableCell className="font-medium">Operating Profit (EBIT)</TableCell>
+                <TableCell className="text-right font-medium">
                   ${incomeStatement.operatingProfit.toLocaleString()}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="font-semibold">Interest Expense</TableCell>
+                <TableCell className="font-medium">Interest Expense</TableCell>
                 <TableCell className="text-right text-red-600">
                   (${incomeStatement.interestExpense.toLocaleString()})
                 </TableCell>
               </TableRow>
               <TableRow className="border-t">
-                <TableCell className="font-semibold">Pre-tax Profit</TableCell>
+                <TableCell className="font-medium">Pre-tax Profit</TableCell>
                 <TableCell className="text-right">
                   ${incomeStatement.preTaxProfit.toLocaleString()}
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="font-semibold">Taxes</TableCell>
+                <TableCell className="font-medium">Taxes</TableCell>
                 <TableCell className="text-right text-red-600">
                   (${incomeStatement.taxes.toLocaleString()})
                 </TableCell>
               </TableRow>
               <TableRow className="border-t">
-                <TableCell className="font-semibold text-lg">Net Profit</TableCell>
-                <TableCell className="text-right font-bold text-lg">
+                <TableCell className="font-medium text-lg">Net Profit</TableCell>
+                <TableCell className="text-right font-medium text-lg">
                   ${incomeStatement.netProfit.toLocaleString()}
                 </TableCell>
               </TableRow>

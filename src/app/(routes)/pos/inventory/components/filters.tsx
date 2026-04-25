@@ -2,18 +2,15 @@
 import Button from '@potta/components/button';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import toast from 'react-hot-toast';
 
 import ProductStepperModal from './ProductStepperModal';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@potta/components/shadcn/dropdown';
+import { CustomSheet } from '@potta/components/ui/sheet';
 import { Proportions, SquareStack } from 'lucide-react';
 import RestockModal from './slides/components/restock';
 import { useInventory } from '../_utils/context';
 import DynamicFilter from '@potta/components/dynamic-filter';
+import useImportProductsCsv from '../_hooks/useImportProductsCsv';
 
 const Filter = () => {
   const { selectedProduct, filters, setFilters } = useInventory();
@@ -28,7 +25,10 @@ const Filter = () => {
     'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS'
   >('INVENTORY');
   const [isRestockOpen, setIsRestockOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false);
+  const [isImportingCsv, setIsImportingCsv] = useState(false);
+  const csvInputRef = React.useRef<HTMLInputElement | null>(null);
+  const importCsvMutation = useImportProductsCsv();
 
   const handleChange = (value: string) => {
     setSelectedValue(value);
@@ -52,6 +52,43 @@ const Filter = () => {
   const handleSearchClear = () => {
     setSearchValue('');
     setFilters({ ...filters, search: '' });
+  };
+
+  const handleOpenCsvPicker = () => {
+    csvInputRef.current?.click();
+  };
+
+  const handleCsvSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast.error('Please select a valid CSV file.');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      setIsImportingCsv(true);
+      await importCsvMutation.mutateAsync({ file });
+      toast.success('Products import started successfully.');
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          'Failed to import CSV file.'
+      );
+    } finally {
+      setIsImportingCsv(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleSelectCreateType = (
+    type: 'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS'
+  ) => {
+    setStepperProductType(type);
+    setIsCreateSheetOpen(false);
+    setIsStepperOpen(true);
   };
 
   const filterConfig = [
@@ -101,6 +138,13 @@ const Filter = () => {
 
         {/* Right side - Action Buttons */}
         <div className="flex items-center space-x-2 ml-4 relative">
+          <input
+            ref={csvInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={handleCsvSelected}
+          />
           <Button
             type={'button'}
             color
@@ -120,66 +164,65 @@ const Filter = () => {
           <Button
             type={'button'}
             color
-            text="Export"
+            text={isImportingCsv ? 'Importing...' : 'Import CSV'}
             icon={<img src="/images/export.svg" />}
             theme="lightBlue"
+            onClick={handleOpenCsvPicker}
+            disabled={isImportingCsv}
           />
-          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="px-4 py-2.5 bg-[#005D1F] text-white hover:bg-green-900 flex items-center gap-2 "
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                <i className="ri-file-add-line"></i>
-                New Item
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-full z-[9999]"
-              sideOffset={5}
-              collisionPadding={10}
-            >
-              <DropdownMenuItem
-                onClick={() => {
-                  setStepperProductType('INVENTORY');
-                  setIsStepperOpen(true);
-                  setIsDropdownOpen(false);
-                }}
-              >
-                Inventory
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setStepperProductType('NON_INVENTORY');
-                  setIsStepperOpen(true);
-                  setIsDropdownOpen(false);
-                }}
-              >
-                Non-Inventory
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setStepperProductType('ASSEMBLY');
-                  setIsStepperOpen(true);
-                  setIsDropdownOpen(false);
-                }}
-              >
-                Assembly
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setStepperProductType('SIMPLEGROUPS');
-                  setIsStepperOpen(true);
-                  setIsDropdownOpen(false);
-                }}
-              >
-                Groups
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button
+            type="button"
+            className="flex items-center gap-2 bg-[#005D1F] px-4 py-2.5 text-white hover:bg-green-900"
+            onClick={() => setIsCreateSheetOpen(true)}
+          >
+            <i className="ri-file-add-line" />
+            New Item
+          </button>
         </div>
       </div>
+
+      <CustomSheet
+        open={isCreateSheetOpen}
+        onOpenChange={setIsCreateSheetOpen}
+        side="left"
+        heading="Create Products/Service"
+        footer={<></>}
+      >
+        <div className="mx-auto mt-8 w-full max-w-xl space-y-4">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
+            onClick={() => handleSelectCreateType('INVENTORY')}
+          >
+            <span>Inventory Item</span>
+            <i className="ri-arrow-right-line text-lg" />
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
+            onClick={() => handleSelectCreateType('NON_INVENTORY')}
+          >
+            <span>Non Inventory Item</span>
+            <i className="ri-arrow-right-line text-lg" />
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
+            onClick={() => handleSelectCreateType('ASSEMBLY')}
+          >
+            <span>Assembly Item</span>
+            <i className="ri-arrow-right-line text-lg" />
+          </button>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
+            onClick={() => handleSelectCreateType('SIMPLEGROUPS')}
+          >
+            <span>Groups Item</span>
+            <i className="ri-arrow-right-line text-lg" />
+          </button>
+        </div>
+      </CustomSheet>
 
       <ProductStepperModal
         open={isStepperOpen}

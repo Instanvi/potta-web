@@ -731,7 +731,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
             <p className="text-sm text-gray-600 font-medium">{title}</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
+            <p className="text-3xl font-medium text-gray-900">{value}</p>
             <p className="text-xs text-gray-500 mt-1">
               <span className="text-green-600">↗ {trendPercent}%</span> vs last
               period
@@ -758,7 +758,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Revenue growth
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -780,7 +780,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
 
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Sales payments
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -802,7 +802,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
 
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Receivables aging
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -817,7 +817,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
                     <span className="text-sm font-medium text-gray-700">
                       {item.period}
                     </span>
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-medium text-gray-900">
                       {formatCurrency(item.amount)}
                     </span>
                   </div>
@@ -837,7 +837,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Top revenue sources
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -859,7 +859,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
 
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Top customers
             </CardTitle>
             <p className="text-sm text-gray-600">Your top sales customers.</p>
@@ -879,7 +879,7 @@ const SalesDashboard: React.FC<SalesDashboardProps> = ({ timeGranularity }) => {
 
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Top debtors
             </CardTitle>
             <p className="text-sm text-gray-600">Your top sales debtors.</p>

@@ -30,15 +30,15 @@ const ReportCard = ({ report, icon }) => {
           <div className="flex flex-row justify-between mt-2">
             <div>
               <div className="text-xs text-gray-500">Current Month</div>
-              <div className="text-lg font-bold text-green-700">$22,000</div>
+              <div className="text-lg font-medium text-green-700">$22,000</div>
             </div>
             <div>
               <div className="text-xs text-gray-500">Growth Rate</div>
-              <div className="text-lg font-bold text-green-700">+10.5%</div>
+              <div className="text-lg font-medium text-green-700">+10.5%</div>
             </div>
             <div>
               <div className="text-xs text-gray-500">YTD Revenue</div>
-              <div className="text-lg font-bold text-green-700">$101,000</div>
+              <div className="text-lg font-medium text-green-700">$101,000</div>
             </div>
           </div>
         </CardContent>
@@ -72,15 +72,15 @@ const ReportCard = ({ report, icon }) => {
           <div className="flex flex-row justify-between mt-2">
             <div>
               <div className="text-xs text-gray-500">Net Cash Inflow</div>
-              <div className="text-lg font-bold text-blue-700">$4,500</div>
+              <div className="text-lg font-medium text-blue-700">$4,500</div>
             </div>
             <div>
               <div className="text-xs text-gray-500">Total Inflow</div>
-              <div className="text-lg font-bold text-blue-700">$16,000</div>
+              <div className="text-lg font-medium text-blue-700">$16,000</div>
             </div>
             <div>
               <div className="text-xs text-gray-500">Total Outflow</div>
-              <div className="text-lg font-bold text-red-700">$11,500</div>
+              <div className="text-lg font-medium text-red-700">$11,500</div>
             </div>
           </div>
         </CardContent>

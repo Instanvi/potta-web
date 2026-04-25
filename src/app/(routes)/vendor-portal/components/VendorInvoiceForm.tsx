@@ -221,7 +221,7 @@ const VendorInvoiceForm: React.FC<VendorInvoiceFormProps> = ({
               <div className="w-full max-w-4xl">
                 {/* Header */}
                 <div className="mb-6">
-                  <h1 className="text-2xl font-bold text-gray-900">
+                  <h1 className="text-2xl font-medium text-gray-900">
                     Create Vendor Invoice
                   </h1>
                   <p className="text-gray-600 mt-1">
@@ -393,7 +393,7 @@ const VendorInvoiceForm: React.FC<VendorInvoiceFormProps> = ({
                           {currency} {discountAmount.toFixed(2)}
                         </span>
                       </div>
-                      <div className="flex justify-between font-bold text-lg border-t pt-2">
+                      <div className="flex justify-between font-medium text-lg border-t pt-2">
                         <span>Total:</span>
                         <span>
                           {currency} {totalAmount.toFixed(2)}

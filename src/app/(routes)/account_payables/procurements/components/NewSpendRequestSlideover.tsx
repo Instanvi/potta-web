@@ -227,7 +227,7 @@ const NewSpendRequestSlideover: React.FC<NewSpendRequestSlideoverProps> = ({
       <form onSubmit={handleSubmit} className="w-full max-w-4xl space-y-6">
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-medium text-gray-900">
             Basic Information
           </h3>
 
@@ -317,7 +317,7 @@ const NewSpendRequestSlideover: React.FC<NewSpendRequestSlideoverProps> = ({
         {/* Items */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Items</h3>
+            <h3 className="text-lg font-medium text-gray-900">Items</h3>
             <button
               type="button"
               onClick={handleAddItem}
@@ -452,7 +452,7 @@ const NewSpendRequestSlideover: React.FC<NewSpendRequestSlideoverProps> = ({
 
         {/* Total Amount Summary */}
         <div className="bg-gray-50 p-4 lg">
-          <div className="flex items-center justify-between text-lg font-semibold">
+          <div className="flex items-center justify-between text-lg font-medium">
             <span className="text-gray-700">Total Requested Amount:</span>
             <span className="text-green-900">
               {new Intl.NumberFormat('en-US', {

@@ -289,7 +289,7 @@ const PaidInvoicesTable: React.FC = () => {
     <div className="bg-white p-6 ">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Paid Bills</h2>
+          <h2 className="text-xl font-medium text-gray-900">Paid Bills</h2>
           <p className="text-sm text-gray-600 mt-1">
             Bills that have been approved and paid
           </p>

@@ -123,7 +123,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-medium text-gray-900">
                   {policy.name}
                 </h2>
                 <div className="flex items-center gap- mt-1">
@@ -158,7 +158,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
             <div className="space-y-8">
               {/* Policy Overview */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <Info className="h-5 w-5" />
                   Policy Overview
                 </h3>
@@ -171,7 +171,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
                       <p className="text-sm font-medium text-gray-500">
                         Created
                       </p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {policy.createdAt
                           ? formatDate(policy.createdAt)
                           : 'N/A'}
@@ -185,7 +185,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Rules</p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {policy.rules.length}{' '}
                         {policy.rules.length === 1 ? 'Rule' : 'Rules'}
                       </p>
@@ -208,7 +208,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
 
               {/* Policy Requirements Summary */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <CheckCircle className="h-5 w-5" />
                   Requirements
                 </h3>
@@ -234,7 +234,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
               {/* Additional Info */}
               {policy.additionalRequirements && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <FileText className="h-5 w-5" />
                     Additional Requirements
                   </h3>
@@ -249,7 +249,7 @@ const ViewPolicyModal = ({ open, setOpen, policy }: ViewPolicyModalProps) => {
           {/* Right Side - Detailed Rules */}
           <div className="w-2/3 p-6 overflow-y-auto">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <Settings className="h-5 w-5" />
                 Policy Rules & Requirements
               </h3>

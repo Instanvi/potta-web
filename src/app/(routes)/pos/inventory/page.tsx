@@ -23,21 +23,31 @@ const Files = () => {
           <div className="w-[30%] flex mb-6">
             <div
               onClick={() => setActiveTab('inventory')}
-              className={`w-full h-12 flex justify-center cursor-pointer items-center bg-[#F3FBFB] ${
-                activeTab === 'inventory' &&
-                'border-b-2 border-[#154406] text-[#154406] font-medium'
+              className={`flex h-12 w-full cursor-pointer items-center justify-center bg-[#F3FBFB] ${
+                activeTab === 'inventory' && 'border-b-2 border-[#154406]'
               }`}
             >
-              <p>Inventory</p>
+              <p
+                className={`text-base font-normal ${
+                  activeTab === 'inventory' ? 'text-[#154406]' : 'text-black/70'
+                }`}
+              >
+                Inventory
+              </p>
             </div>
             <div
               onClick={() => setActiveTab('category')}
-              className={`w-full h-12 flex justify-center cursor-pointer items-center bg-[#F3FBFB] ${
-                activeTab === 'category' &&
-                'border-b-2 border-[#154406] text-[#154406] font-medium'
+              className={`flex h-12 w-full cursor-pointer items-center justify-center bg-[#F3FBFB] ${
+                activeTab === 'category' && 'border-b-2 border-[#154406]'
               }`}
             >
-              <p>Category</p>
+              <p
+                className={`text-base font-normal ${
+                  activeTab === 'category' ? 'text-[#154406]' : 'text-black/70'
+                }`}
+              >
+                Category
+              </p>
             </div>
           </div>
           {activeTab === 'inventory' ? (

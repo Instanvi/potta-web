@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Settings, LogOut, ChevronDown, X } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
-import Icon from '@potta/components/icon_fonts/icon';
+import { useSession } from 'next-auth/react';
+import { signOutWithAuthApi } from '@/lib/auth-sign-out';
+import { List } from '@phosphor-icons/react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 import { useRouter } from 'next/navigation';
@@ -46,7 +47,7 @@ const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
   };
 
   const confirmSignOut = () => {
-    signOut();
+    void signOutWithAuthApi();
     setShowSignOutModal(false);
   };
 
@@ -64,7 +65,7 @@ const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
                 context?.toggle ? 'flex justify-center' : 'flex justify-start'
               }`}
             >
-              <Icon icon="Menu-1" size={23} className="" />
+              <List size={23} weight="regular" className="text-black" />
             </button>
           </div>
 
@@ -93,22 +94,22 @@ const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
 
               {/* Profile Icon with Green Border */}
               <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-sm border-2 border-green-800 flex-shrink-0">
-                <User className="h-5 w-5 text-green-800" />
+                <User className="h-5 w-5 text-black" />
               </div>
 
               {!context?.toggle && (
                 <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-medium  truncate">
+                  <p className="truncate text-base font-medium text-black">
                     {user?.name || 'User'}
                   </p>
-                  <p className="text-xs text-gray-600 truncate">
+                  <p className="truncate text-base text-black">
                     {user?.email || ''}
                   </p>
                 </div>
               )}
 
               {!context?.toggle && (
-                <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-hover:rotate-180 flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-black transition-transform duration-200 group-hover:rotate-180" />
               )}
             </button>
 
@@ -116,7 +117,7 @@ const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
             {showUserMenu && (
               <div
                 ref={dropdownRef}
-                className="absolute mb-2 w-56 bg-white shadow-sm border border-gray-200 rounded-sm z-[9999]"
+                className="absolute z-[9999] mb-2 w-56 rounded-sm border border-stone-200 bg-white shadow-sm"
                 style={{
                   position: 'fixed',
                   bottom: '1px',
@@ -125,26 +126,26 @@ const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
                 }}
               >
                 <div className="p-2">
-                  <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                    <p className="text-sm font-medium text-gray-900">
+                  <div className="mb-1 border-b border-stone-200 px-3 py-2">
+                    <p className="text-base font-medium text-black">
                       {user?.name || 'User'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-base text-black">
                       {user?.email || ''}
                     </p>
                   </div>
-                  <button className="flex items-center w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                    <User className="h-4 w-4 mr-3 text-gray-500" />
+                  <button className="flex w-full items-center px-3 py-2.5 text-base text-black transition-colors duration-200 hover:bg-stone-50">
+                    <User className="mr-3 h-4 w-4 text-black" />
                     Profile
                   </button>
-                  <button onClick={() => router.push('/settings')} className="flex items-center w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                    <Settings className="h-4 w-4 mr-3 text-gray-500" />
+                  <button onClick={() => router.push('/settings')} className="flex w-full items-center px-3 py-2.5 text-base text-black transition-colors duration-200 hover:bg-stone-50">
+                    <Settings className="mr-3 h-4 w-4 text-black" />
                     Settings
                   </button>
-                  <hr className="my-1 border-gray-100" />
+                  <hr className="my-1 border-stone-200" />
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    className="flex w-full items-center px-3 py-2.5 text-base text-red-600 transition-colors duration-200 hover:bg-red-50"
                   >
                     <LogOut className="h-4 w-4 mr-3" />
                     Sign out
@@ -161,22 +162,22 @@ const SidebarProfile: React.FC<SidebarProfileProps> = ({ context }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center">
           <div className="bg-white p-6 w-96">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Sign Out</h3>
+              <h3 className="text-lg font-medium text-black">Sign Out</h3>
               <button
                 onClick={() => setShowSignOutModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-black hover:opacity-70"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-gray-600 mb-6">
+            <p className="mb-6 text-base text-black">
               Are you sure you want to sign out? You will be redirected to the
               login page.
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowSignOutModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-base text-black transition-colors hover:opacity-80"
               >
                 Cancel
               </button>

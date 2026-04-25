@@ -8,7 +8,7 @@ const Taxation = () => {
             <div className="h-[80vh] w-full px-4 flex justify-center items-center">
 
                 <div className="" >
-                    <div className="text-center font-thin text-3xl mb-10">
+                    <div className="text-center font-normal text-3xl mb-10">
                         <h3>What would you like</h3>
                         <h3>to file for today?</h3>
                     </div>

@@ -440,12 +440,7 @@ const InvoiceTable = () => {
         </div>
       </div>
 
-      <DataGrid
-        data={filteredData}
-        columns={columns}
-        loading={isLoading}
-        containerRef={containerRef}
-      />
+      <DataGrid data={filteredData} columns={columns} loading={isLoading} />
 
       {/* Create Purchase Order Modal */}
       <Slider

@@ -8,25 +8,25 @@ const Pages = () => {
                     <td className='flex py-2 px-2 space-x-3'>
                         <img src="/icons/pages-green.svg" alt="" />
                         <div>
-                            <p className='font-semibold'>Back To School</p>
-                            <p className='font-thin text-gray-500'>Card Number</p>
+                            <p className='font-medium'>Back To School</p>
+                            <p className='font-normal text-gray-500'>Card Number</p>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <p className='font-thin '>Spend , Collect</p>
+                            <p className='font-normal '>Spend , Collect</p>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <p className='font-semibold'>XAF 350,000 </p>
-                            <p className='font-thin text-gray-500'>Collected</p>
+                            <p className='font-medium'>XAF 350,000 </p>
+                            <p className='font-normal text-gray-500'>Collected</p>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <p className='font-semibold'>XAF 350,000 </p>
-                            <p className='font-thin text-gray-500'>Distributed</p>
+                            <p className='font-medium'>XAF 350,000 </p>
+                            <p className='font-normal text-gray-500'>Distributed</p>
                         </div>
                     </td>
                     <td>
@@ -35,7 +35,7 @@ const Pages = () => {
                                 <button className='px-4 py-1 text-green-500 bg-green-50'>Active</button>
                             </div>
                             <div className='-ml-5 pr-5'>
-                                <p className='font-thin text-gray-900'><i className='ri-more-line text-2xl'></i></p>
+                                <p className='font-normal text-gray-900'><i className='ri-more-line text-2xl'></i></p>
                             </div>
                         </div>
                     </td>

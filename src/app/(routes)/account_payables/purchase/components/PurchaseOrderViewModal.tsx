@@ -99,7 +99,7 @@ const PurchaseOrderViewModal: React.FC<PurchaseOrderViewModalProps> = ({
                     <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
                       <div className="h-36 w-full flex items-center justify-between px-8 bg-green-800">
                         <div>
-                          <p className="text-3xl font-semibold text-white">
+                          <p className="text-3xl font-medium text-white">
                             Purchase Order
                           </p>
                           <p className="text-white mt-2">
@@ -128,7 +128,7 @@ const PurchaseOrderViewModal: React.FC<PurchaseOrderViewModalProps> = ({
                       <div className="p-5 space-y-16 bg-white">
                         <div className="mt-5 w-full flex space-x-5">
                           <div className="flex w-[40%] space-x-2">
-                            <h3 className="font-bold">Vendor: </h3>
+                            <h3 className="font-medium">Vendor: </h3>
                             <div className="space-y-2 text-sm text-gray-600 flex-col">
                               <p>{purchaseOrderDetails.salePerson.name}</p>
                               <p>{purchaseOrderDetails.salePerson.email}</p>
@@ -142,7 +142,7 @@ const PurchaseOrderViewModal: React.FC<PurchaseOrderViewModalProps> = ({
                             </div>
                           </div>
                           <div className="flex space-x-2">
-                            <h3 className="font-bold">Ship To: </h3>
+                            <h3 className="font-medium">Ship To: </h3>
                             <div className="space-y-2 text-sm text-gray-600 flex-col">
                               <p>Company Name</p>
                               <p>company@email.com</p>
@@ -296,7 +296,7 @@ const PurchaseOrderViewModal: React.FC<PurchaseOrderViewModalProps> = ({
                               </div>
                             </div>
                             <hr className="my-4 border-t-2 border-gray-300" />
-                            <div className="flex justify-between font-bold">
+                            <div className="flex justify-between font-medium">
                               <div className="w-1/2">Total:</div>
                               <div className="w-1/2 text-right pr-20">
                                 XAF{' '}

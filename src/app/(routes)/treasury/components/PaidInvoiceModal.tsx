@@ -72,13 +72,13 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
     <div className="w-full h-full bg-[#F2F2F2] overflow-y-auto">
       <div className="flex min-h-full flex-col items-center justify-center overflow-y-auto w-full scroll bg-[#F2F2F2]">
         <div className="flex min-w-[45rem] justify-between w-full p-8">
-          <h3 className="text-xl font-semibold">Payment Receipt</h3>
+          <h3 className="text-xl font-medium">Payment Receipt</h3>
         </div>
         <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
           {/* Header */}
           <div className="h-36 w-full flex items-center justify-between px-8 bg-green-700">
             <div>
-              <p className="text-3xl font-semibold text-white">
+              <p className="text-3xl font-medium text-white">
                 Payment Receipt
               </p>
               <p className="text-white mt-2">#{paymentData.paymentId}</p>
@@ -101,7 +101,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
             {/* Payment Details */}
             <div className="mt-5 w-full flex space-x-5">
               <div className="flex w-[40%] space-x-2">
-                <h3 className="font-bold">From: </h3>
+                <h3 className="font-medium">From: </h3>
                 <div className="space-y-2 text-sm text-gray-600 flex-col">
                   <p>{paymentData.customerName}</p>
                   <p>{paymentData.customerEmail}</p>
@@ -110,7 +110,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
                 </div>
               </div>
               <div className="flex space-x-2">
-                <h3 className="font-bold">To: </h3>
+                <h3 className="font-medium">To: </h3>
                 <div className="space-y-2 text-sm text-gray-600 flex-col">
                   <p>Instanvi Sarl</p>
                   <p>hello@instanvi.com</p>
@@ -122,7 +122,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
             {/* Payment Method Details */}
             <div className="bg-gray-50 p-4 ">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3">
                 Payment Method
               </h4>
               <div className="flex items-center space-x-3">
@@ -157,7 +157,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
             {/* Invoice Details */}
             <div className="bg-gray-50 p-4 ">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3">
                 Invoice Details
               </h4>
               <div className="space-y-2 text-sm">
@@ -188,7 +188,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
             {/* Payment Summary */}
             <div className="bg-gray-50 p-4 ">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3">
                 Payment Summary
               </h4>
               <div className="space-y-2">
@@ -205,7 +205,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
                   </span>
                 </div>
                 <hr className="my-2 border-gray-300" />
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between font-medium text-lg">
                   <span>Total Paid:</span>
                   <span className="text-green-600">
                     {paymentData.currency} {paymentData.netAmount.toFixed(2)}
@@ -219,7 +219,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
               <div className="flex items-center space-x-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
                 <div>
-                  <h4 className="font-semibold text-green-900">
+                  <h4 className="font-medium text-green-900">
                     Payment Confirmed
                   </h4>
                   <p className="text-sm text-green-700">
@@ -238,7 +238,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
   const PaymentDetailsView = () => (
     <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
       <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-2xl font-medium text-gray-900 mb-2">
           Payment Details
         </h3>
         <p className="text-gray-600">Complete payment information and status</p>
@@ -247,7 +247,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
       <div className="space-y-6">
         {/* Payment Status */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">Payment Status</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Payment Status</h4>
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-5 h-5 text-green-500" />
             <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
@@ -258,7 +258,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
         {/* Payment Information */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">
+          <h4 className="font-medium text-gray-900 mb-3">
             Payment Information
           </h4>
           <div className="space-y-3">
@@ -305,7 +305,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
         {/* Customer Information */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">
+          <h4 className="font-medium text-gray-900 mb-3">
             Customer Information
           </h4>
           <div className="space-y-2 text-sm">
@@ -326,7 +326,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
         {/* Payment Timeline */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">Payment Timeline</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Payment Timeline</h4>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -377,7 +377,7 @@ const PaidInvoiceModal: React.FC<PaidInvoiceModalProps> = ({
 
         {/* Actions */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">Actions</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Actions</h4>
           <div className="space-y-2">
             <Button
               text="Download Receipt (PDF)"

@@ -83,7 +83,7 @@ const ModalInvoice: FC<IModalInvoice> = ({ isOpen, setIsOpen }) => {
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                  <h3 className="text-xl font-medium text-gray-900 mb-1">
                     {item.title}
                   </h3>
                   <p className="text-lg text-gray-500">

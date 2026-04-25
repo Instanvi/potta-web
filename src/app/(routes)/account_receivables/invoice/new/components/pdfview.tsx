@@ -112,7 +112,7 @@ const PdfView = () => {
   return (
     <div className="flex min-h-full flex-col items-start justify-center overflow-y-auto w-full scroll bg-[#F2F2F2]">
       <div className="flex min-w-[45rem] justify-between w-full p-8 pb-2">
-        <h3 className="text-xl font-semibold">PDF Preview</h3>
+        <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>
 
       {/* Color Selection */}
@@ -152,7 +152,7 @@ const PdfView = () => {
           style={{ backgroundColor: invoiceColor }}
         >
           <div>
-            <p className="text-3xl font-semibold text-white">{invoiceType}</p>
+            <p className="text-3xl font-medium text-white">{invoiceType}</p>
             <p className="text-white mt-2">#{invoiceNumber}</p>
           </div>
           <div className="text-right text-white">
@@ -170,9 +170,9 @@ const PdfView = () => {
         <div className="p-5 space-y-16 bg-white">
           <div className="mt-5 w-full flex space-x-5">
             <div className="flex w-[40%] space-x-2">
-              <h3 className="font-bold">From: </h3>
+              <h3 className="font-medium">From: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">
-                <p className="font-semibold">
+                <p className="font-medium">
                   {contextData.organizationName ||
                     contextData.companyName ||
                     'Instanvi Inc'}
@@ -199,7 +199,7 @@ const PdfView = () => {
               </div>
             </div>
             <div className="flex space-x-2">
-              <h3 className="font-bold">To: </h3>
+              <h3 className="font-medium">To: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">
                 {customerLoading ? (
                   <p>Loading customer details...</p>
@@ -225,7 +225,7 @@ const PdfView = () => {
 
           {shippingAddress && (
             <div className="mt-4">
-              <h3 className="font-bold">Shipping Address:</h3>
+              <h3 className="font-medium">Shipping Address:</h3>
               <p className="text-sm text-gray-600">{shippingAddress}</p>
             </div>
           )}
@@ -336,7 +336,7 @@ const PdfView = () => {
               </div>
               {/* Horizontal Line */}
               <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-bold">
+              <div className="flex justify-between font-medium">
                 <div className="w-1/2">Total:</div>
                 <div className="w-1/2 text-right pr-20">
                   {currencySymbol}

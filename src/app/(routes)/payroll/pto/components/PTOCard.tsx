@@ -89,7 +89,7 @@ const PTOCard: React.FC<PTOCardProps> = ({ pto, onClick }) => {
             {getTypeIcon(pto.type)}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm">
+            <h3 className="font-medium text-gray-900 text-sm">
               {getPTOTypeName(pto.type)}
             </h3>
             <p className="text-xs text-gray-500">PTO Policy</p>
@@ -102,7 +102,7 @@ const PTOCard: React.FC<PTOCardProps> = ({ pto, onClick }) => {
       <div className="space-y-4">
         {/* Days Remaining - Large Display */}
         <div className="text-center py-3">
-          <div className="text-3xl font-bold text-gray-900 mb-1">
+          <div className="text-3xl font-medium text-gray-900 mb-1">
             {formatDaysValue(pto.days_remaining)}
           </div>
           <p className="text-xs text-gray-500">Days Remaining</p>

@@ -134,7 +134,7 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Cash Flow Trend</h3>
+        <h3 className="text-lg font-medium text-gray-900">Cash Flow Trend</h3>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600">Period:</span>

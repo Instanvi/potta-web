@@ -770,7 +770,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
       {/* Executive Summary Section */}
       {/* <Card className="bg-white border-0">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-medium text-gray-900">
             Executive summary
           </CardTitle>
         </CardHeader>
@@ -838,7 +838,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
                   />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-medium text-gray-900">
                     {kpi.value}
                   </p>
                   <p
@@ -860,7 +860,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
         {/* New ARR vs Target Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               New ARR vs Target
             </CardTitle>
           </CardHeader>
@@ -913,7 +913,7 @@ const InvestorDashboard: React.FC<InvestorDashboardProps> = ({
         {/* New vs Expansion ARR Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               New vs Expansion ARR
             </CardTitle>
           </CardHeader>

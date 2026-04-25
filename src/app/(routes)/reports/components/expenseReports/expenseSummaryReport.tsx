@@ -20,7 +20,7 @@ const ExpenseSummaryReport: React.FC<ExpenseSummaryReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Expense Summary Report</h1>
+        <h1 className="text-2xl font-medium">Expense Summary Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -34,7 +34,7 @@ const ExpenseSummaryReport: React.FC<ExpenseSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Expenses</p>
-                <p className="text-xl font-bold">${kpis.totalExpenses.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalExpenses.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -45,7 +45,7 @@ const ExpenseSummaryReport: React.FC<ExpenseSummaryReportProps> = ({
               <Receipt className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Transactions</p>
-                <p className="text-xl font-bold">{kpis.numberOfTransactions}</p>
+                <p className="text-xl font-medium">{kpis.numberOfTransactions}</p>
               </div>
             </div>
           </CardBody>
@@ -56,7 +56,7 @@ const ExpenseSummaryReport: React.FC<ExpenseSummaryReportProps> = ({
               <TrendingUp className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Highest Category</p>
-                <p className="text-xl font-bold">{kpis.highestExpenseCategory}</p>
+                <p className="text-xl font-medium">{kpis.highestExpenseCategory}</p>
               </div>
             </div>
           </CardBody>
@@ -67,7 +67,7 @@ const ExpenseSummaryReport: React.FC<ExpenseSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Average Amount</p>
-                <p className="text-xl font-bold">${kpis.averageExpenseAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.averageExpenseAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -78,7 +78,7 @@ const ExpenseSummaryReport: React.FC<ExpenseSummaryReportProps> = ({
               <CreditCard className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Common Payment</p>
-                <p className="text-xl font-bold">{kpis.mostUsedPaymentMethod}</p>
+                <p className="text-xl font-medium">{kpis.mostUsedPaymentMethod}</p>
               </div>
             </div>
           </CardBody>

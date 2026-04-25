@@ -50,7 +50,7 @@ const InvoiceBreakdown: React.FC<InvoiceBreakdownProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-medium text-gray-900">
           Collection by Payment Method
         </h2>
         <div className="blue-100 ">
@@ -100,7 +100,7 @@ const InvoiceBreakdown: React.FC<InvoiceBreakdownProps> = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-gray-900">
                     {formatCurrency(item.amount)}
                   </p>
                 </div>

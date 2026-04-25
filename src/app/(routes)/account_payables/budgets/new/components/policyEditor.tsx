@@ -156,7 +156,7 @@ const PolicyEditor: React.FC = () => {
       {/* Rules Section */}
       <Card className="border-0">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Rule</CardTitle>
+          <CardTitle className="text-xl font-medium">Rule</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 ">
           {policyState.rules.map((rule, index) => (
@@ -164,7 +164,7 @@ const PolicyEditor: React.FC = () => {
               key={rule.id}
               className="p-4 py-8 border-dotted border border-green-600 bg-white rounded-xs space-y-3 relative shadow-sm"
             >
-              <span className=" font-semibold">When</span>
+              <span className=" font-medium">When</span>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
                 {/* Field (Readonly for now, make Select if needed) */}
                 <div className="col-span-1 sm:col-span-1">
@@ -254,7 +254,7 @@ const PolicyEditor: React.FC = () => {
       {/* Approvers Section */}
       <Card className='border-0'>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Approvers</CardTitle>
+          <CardTitle className="text-lg font-medium">Approvers</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Either By Section */}

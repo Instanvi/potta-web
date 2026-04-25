@@ -28,9 +28,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           <ThreadEventsProvider>
             <HeroUIProvider>
               <Toaster position="top-center" />
-              {/* <UserDataLoader> */}
               {children}
-              {/* </UserDataLoader> */}
             </HeroUIProvider>
           </ThreadEventsProvider>
         </DataProvider>

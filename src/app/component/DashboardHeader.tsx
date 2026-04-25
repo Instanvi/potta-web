@@ -19,18 +19,18 @@ export const DashboardHeader = () => {
     <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
       <div className="space-y-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-black sm:text-4xl">
             Welcome back{session?.user?.name ? `, ${session.user.name.split(' ')[0]}` : ''}
           </h1>
-          <p className="text-lg text-slate-500 font-medium">
+          <p className="text-base font-normal text-black">
             Control your business with precision and ease.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-slate-400">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100 shadow-sm">
-            <Calendar className="h-4 w-4 text-green-600" />
-            <span className="text-slate-600">
+        <div className="flex flex-wrap items-center gap-6 text-base font-normal text-black">
+          <div className="flex items-center gap-2.5 rounded-full border border-stone-200/80 bg-stone-50 px-3.5 py-2">
+            <Calendar className="h-5 w-5 shrink-0 text-black" />
+            <span className="text-black">
               {currentTime?.toLocaleDateString('en-US', {
                 weekday: 'short',
                 month: 'short',
@@ -38,18 +38,18 @@ export const DashboardHeader = () => {
               })}
             </span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100 shadow-sm">
-            <Clock className="h-4 w-4 text-green-600" />
-            <span className="text-slate-600">
+          <div className="flex items-center gap-2.5 rounded-full border border-stone-200/80 bg-stone-50 px-3.5 py-2">
+            <Clock className="h-5 w-5 shrink-0 text-black" />
+            <span className="text-black">
               {currentTime?.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
               })}
             </span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100 shadow-sm">
-            <BarChart3 className="h-4 w-4 text-green-600" />
-            <span className="text-slate-600">{unreadTotal} pending tasks</span>
+          <div className="flex items-center gap-2.5 rounded-full border border-stone-200/80 bg-stone-50 px-3.5 py-2">
+            <BarChart3 className="h-5 w-5 shrink-0 text-black" />
+            <span className="text-black">{unreadTotal} pending tasks</span>
           </div>
         </div>
       </div>

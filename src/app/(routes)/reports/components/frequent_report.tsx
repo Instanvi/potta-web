@@ -35,7 +35,7 @@ const Frequent = () => {
                         return (
                             <div key={items.id} className={`border w-full p-5 `}>
                                 <div className='flex justify-between'>
-                                    <h3 className='font-semibold'>{items.title}</h3>
+                                    <h3 className='font-medium'>{items.title}</h3>
                                     {items.selected ? <i className="ri-star-fill border text-white"></i> : <i className="ri-star-fill text-yellow-500"></i>}
                                 </div>
                                 <p className='mt-2 text-gray-500 mt-2'>{items.desc}</p>

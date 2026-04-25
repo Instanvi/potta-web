@@ -66,7 +66,7 @@ const DeleteBenefit: React.FC<DeleteBenefitProps> = ({
           </div>
 
           <div className="mt-3 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               Delete Benefit
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">

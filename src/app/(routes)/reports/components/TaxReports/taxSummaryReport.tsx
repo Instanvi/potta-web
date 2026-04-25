@@ -20,7 +20,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Tax Summary Report</h1>
+        <h1 className="text-2xl font-medium">Tax Summary Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -34,7 +34,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
               <Calculator className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Taxable Amount</p>
-                <p className="text-xl font-bold">${kpis.totalTaxableAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalTaxableAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -45,7 +45,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Tax Collected</p>
-                <p className="text-xl font-bold">${kpis.totalTaxCollected.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalTaxCollected.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -56,7 +56,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
               <Receipt className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Tax Paid</p>
-                <p className="text-xl font-bold">${kpis.totalTaxPaid.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalTaxPaid.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -67,7 +67,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
               <AlertCircle className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Outstanding</p>
-                <p className="text-xl font-bold">${kpis.outstandingTaxLiability.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.outstandingTaxLiability.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -78,7 +78,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
               <PieChart className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Tax Types</p>
-                <p className="text-xl font-bold">{kpis.taxTypesCollected.length}</p>
+                <p className="text-xl font-medium">{kpis.taxTypesCollected.length}</p>
               </div>
             </div>
           </CardBody>
@@ -89,7 +89,7 @@ const TaxSummaryReport: React.FC<TaxSummaryReportProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <CardBody className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Tax Types Breakdown</h2>
+            <h2 className="text-lg font-medium mb-4">Tax Types Breakdown</h2>
             <div className="space-y-2">
               {kpis.taxTypesCollected.map((type) => (
                 <div key={type.taxType} className="flex justify-between items-center">

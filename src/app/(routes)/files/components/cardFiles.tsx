@@ -443,7 +443,7 @@ const CardFile: React.FC<CardFileProps> = ({
         {!!deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
             <div className="bg-white  p-6 w-80">
-              <h3 className="text-lg font-bold mb-2 text-red-600">
+              <h3 className="text-lg font-medium mb-2 text-red-600">
                 Delete {deleteType === 'folder' ? 'Folder' : 'File'}?
               </h3>
               <p className="mb-4">
@@ -672,7 +672,7 @@ const CardFile: React.FC<CardFileProps> = ({
       {!!deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white p-6 w-80">
-            <h3 className="text-lg font-bold mb-2 text-red-600">
+            <h3 className="text-lg font-medium mb-2 text-red-600">
               Delete {deleteType === 'folder' ? 'Folder' : 'File'}?
             </h3>
             <p className="mb-4">

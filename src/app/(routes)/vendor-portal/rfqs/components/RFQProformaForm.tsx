@@ -122,7 +122,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white p-8 max-w-md w-full text-center">
           <div className="text-green-600 text-6xl mb-4">✓</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          <h1 className="text-2xl font-medium text-gray-800 mb-2">
             Proforma Invoice Submitted!
           </h1>
           <p className="text-gray-600 mb-6">
@@ -132,7 +132,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
           <div className="bg-gray-50 p-4">
             <p className="text-sm text-gray-600">
               Total Amount:{' '}
-              <span className="font-bold text-lg text-gray-800">
+              <span className="font-medium text-lg text-gray-800">
                 XAF {calculateTotal().toFixed(2)}
               </span>
             </p>
@@ -149,7 +149,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
         <div className="bg-white p-6 mb-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              <h1 className="text-3xl font-medium text-gray-800 mb-2">
                 Request for Quotation
               </h1>
               <p className="text-gray-600">RFQ #{rfqData.rfqNumber}</p>
@@ -158,7 +158,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
             {rfqData.deadline && (
               <div className="text-right">
                 <p className="text-sm text-gray-600">Deadline</p>
-                <p className="font-semibold text-gray-800">
+                <p className="font-medium text-gray-800">
                   {new Date(rfqData.deadline).toLocaleDateString()}
                 </p>
               </div>
@@ -175,7 +175,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
         {/* Instructions */}
         {rfqData.instructions && (
           <div className="bg-white p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-medium text-gray-800 mb-4">
               Instructions
             </h2>
             <p className="text-gray-700 whitespace-pre-wrap">
@@ -187,7 +187,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
         {/* Pricing Form */}
         <form onSubmit={handleSubmit}>
           <div className="bg-white p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-medium text-gray-800 mb-4">
               Pricing Information
             </h2>
             <p className="text-sm text-gray-600 mb-6">
@@ -212,19 +212,19 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
                         Item
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
                         Specifications
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">
                         Quantity
                       </th>
-                      <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">
                         Unit Price (XAF)
                       </th>
-                      <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">
                         Total Amount (XAF)
                       </th>
                     </tr>
@@ -272,7 +272,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
                           />
                         </td>
                         <td className="px-4 py-4 text-right">
-                          <span className="font-semibold text-gray-800">
+                          <span className="font-medium text-gray-800">
                             XAF {item.totalAmount.toFixed(2)}
                           </span>
                         </td>
@@ -283,12 +283,12 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
                     <tr className="bg-gray-50">
                       <td
                         colSpan={4}
-                        className="px-4 py-4 text-right font-bold text-gray-800"
+                        className="px-4 py-4 text-right font-medium text-gray-800"
                       >
                         Total Amount:
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="text-xl font-bold text-green-600">
+                        <span className="text-xl font-medium text-green-600">
                           XAF {calculateTotal().toFixed(2)}
                         </span>
                       </td>
@@ -303,13 +303,13 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
           {rfqData.terms &&
             (rfqData.terms.paymentTerms || rfqData.terms.warrantyTerms) && (
               <div className="bg-white p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-medium text-gray-800 mb-4">
                   Terms & Conditions
                 </h3>
                 <div className="space-y-3">
                   {rfqData.terms.paymentTerms && (
                     <div>
-                      <p className="text-sm font-semibold text-gray-700">
+                      <p className="text-sm font-medium text-gray-700">
                         Payment Terms:
                       </p>
                       <p className="text-gray-600">
@@ -319,7 +319,7 @@ const RFQProformaForm: React.FC<RFQProformaFormProps> = ({
                   )}
                   {rfqData.terms.warrantyTerms && (
                     <div>
-                      <p className="text-sm font-semibold text-gray-700">
+                      <p className="text-sm font-medium text-gray-700">
                         Warranty Terms:
                       </p>
                       <p className="text-gray-600">

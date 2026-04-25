@@ -78,7 +78,7 @@ const ViewCustomerSlider: React.FC<CustomerDetailsProps> = ({
           <div className="w-full grid grid-cols-2 gap-3">
             <Text name="Email" value={data.email} height />
             <div className="">
-              <span className="mb-3 text-gray-900 font-bold">Phone Number</span>
+              <span className="mb-3 text-gray-900 font-medium">Phone Number</span>
               <div className={`w-full py-1.5' px-4 mt-2`}>
                 {data.phone && <PhoneFlag phoneNumber={`${data.phone}`} />}
               </div>

@@ -1,31 +1,38 @@
 import React from 'react';
 import { mostUsedApps } from './data';
 
+interface QuickActionItemProps {
+  item: typeof mostUsedApps[0];
+}
+
+const QuickActionItem = ({ item }: QuickActionItemProps) => {
+  const AppIcon = item.icon;
+  return (
+    <a
+      href={`/${item.value}`}
+      className="group rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+    >
+      <div className="flex items-center gap-3 rounded-lg border border-stone-200/80 bg-stone-50/60 px-4 py-3 transition-all duration-200 hover:border-green-200/90 hover:bg-white hover:shadow-[0_1px_3px_rgba(21,128,61,0.08)] group-active:scale-[0.99]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-md border border-stone-200/70 bg-white transition-colors group-hover:border-green-200/80">
+          <AppIcon className="h-5 w-5 text-black transition-colors group-hover:text-black" />
+        </div>
+        <span className="whitespace-nowrap text-base font-normal text-black">
+          {item.label}
+        </span>
+      </div>
+    </a>
+  );
+};
+
 export const QuickActions = () => (
   <div className="flex flex-col gap-3">
-    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+    <h2 className="m-0 px-1 text-base font-medium uppercase tracking-wide text-black">
       Quick Access
-    </span>
+    </h2>
     <div className="flex flex-wrap gap-2">
-      {mostUsedApps.map((item) => {
-        const AppIcon = item.icon;
-        return (
-          <a
-            href={`/${item.value}`}
-            key={item.value}
-            className="group rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
-          >
-            <div className="bg-slate-50/50 border border-slate-200/60 px-4 py-2.5 flex items-center gap-3 hover:bg-white hover:border-green-200 hover:shadow-sm transition-all duration-200 rounded-lg group-active:scale-95">
-              <div className="w-8 h-8 rounded-md bg-white border border-slate-100 flex items-center justify-center shadow-sm group-hover:border-green-100 transition-colors">
-                <AppIcon className="w-4 h-4 text-slate-500 group-hover:text-green-600 transition-colors" />
-              </div>
-              <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900 whitespace-nowrap">
-                {item.label}
-              </span>
-            </div>
-          </a>
-        );
-      })}
+      {mostUsedApps.map((item) => (
+        <QuickActionItem key={item.value} item={item} />
+      ))}
     </div>
   </div>
 );

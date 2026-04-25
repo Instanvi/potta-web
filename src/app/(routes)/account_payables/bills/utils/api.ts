@@ -1,7 +1,7 @@
 import axios from 'config/axios.config';
 
-export async function fetchBills() {
-  const response = await axios.get('/bills');
+export async function fetchBills(params?: Record<string, any>) {
+  const response = await axios.get('/bills', { params });
   return response.data;
 }
 

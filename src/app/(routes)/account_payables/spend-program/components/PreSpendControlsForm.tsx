@@ -116,13 +116,13 @@ const PreSpendControlsForm: React.FC<PreSpendControlsFormProps> = ({
 
   return (
     <div className="w-full max-w-[1000px] mx-auto p-8 ">
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-3xl font-medium mb-6">
         Create "{programName || 'Procurement - Contractors'}"
       </h1>
       <div className="mb-6 border border-gray-200">
         <div className="flex justify-between p-4 items-center">
           <div className="">
-            <div className=" text-lg font-semibold">
+            <div className=" text-lg font-medium">
               {programName || 'Procurement - Contractors'}
             </div>
             <div className="text-gray-500 text-sm">All customer requests.</div>
@@ -132,14 +132,14 @@ const PreSpendControlsForm: React.FC<PreSpendControlsFormProps> = ({
         <hr />
         <div className="flex items-center p-4 justify-between">
           <div className="flex flex-col">
-            <div className="text-sm font-semibold">Spend program type</div>
+            <div className="text-sm font-medium">Spend program type</div>
             <div className="text-gray-700">Procurement</div>
           </div>
           {/* <FaEdit className="text-gray-700" /> */}
         </div>
       </div>
       <div className="mb-8 pb-8">
-        <div className="text-xl font-bold mb-4">Pre-spend controls</div>
+        <div className="text-xl font-medium mb-4">Pre-spend controls</div>
 
         {/* Allow employees to request from this program */}
         <div className="mb-6">

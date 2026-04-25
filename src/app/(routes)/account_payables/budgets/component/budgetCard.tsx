@@ -87,7 +87,7 @@ const approversToUsers = (budget: Budget): User[] => {
       id: approver.approverId,
       name: name,
       initials: getInitialsFromName(name),
-      imageUrl: approver.approver?.profile_url || null,
+      imageUrl: approver.approver?.profile_url || undefined,
     };
   });
 };
@@ -166,10 +166,9 @@ export function BudgetCard({
     e.preventDefault();
     try {
       setIsLoading('approve');
-      await budgetsApi.approveBudget(budget.uuid, {
-        organizationId: budget.organizationId,
-        branchId: budget.branchId,
-      });
+      const approverId =
+        budget.createdBy ?? budget.approvers?.[0]?.approverId ?? '';
+      await budgetsApi.approveBudget(budget.uuid, approverId);
 
       // Success toast
       toast.success(`Budget "${budget.name}" has been approved successfully.`, {
@@ -234,7 +233,7 @@ export function BudgetCard({
           <div className="flex justify-between items-start gap-2">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg font-medium">
                   {budget.name}
                 </CardTitle>
                 <div

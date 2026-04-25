@@ -89,14 +89,14 @@ const AccountReceivablesDashboard: React.FC<
         {/* Outstanding Amount Card */}
         <div className="bg-white  p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Outstanding amount
             </h3>
             <Info className="w-4 h-4 text-gray-400" />
           </div>
 
           <div className="mb-4">
-            <div className="text-3xl font-bold text-gray-900">
+            <div className="text-3xl font-medium text-gray-900">
               {formatCurrency(outstandingData.total)}
             </div>
           </div>
@@ -139,7 +139,7 @@ const AccountReceivablesDashboard: React.FC<
         {/* Ageing Balance Card */}
         <div className="bg-white  p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Ageing balance
             </h3>
             <Info className="w-4 h-4 text-gray-400" />
@@ -188,7 +188,7 @@ const AccountReceivablesDashboard: React.FC<
       <div className="bg-white  p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               DSO, days sales outstanding: A key performance indicator of your
               cashflow
             </h3>
@@ -218,7 +218,7 @@ const AccountReceivablesDashboard: React.FC<
                 <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-gray-900">467</div>
+                <div className="text-3xl font-medium text-gray-900">467</div>
                 <div className="text-sm text-gray-600">days</div>
                 <div className="flex items-center text-sm text-red-600">
                   <TrendingUp className="w-4 h-4 mr-1" />
@@ -274,7 +274,7 @@ const AccountReceivablesDashboard: React.FC<
       {/* Main Debtors Table */}
       <div className="bg-white  p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Main debtors</h3>
+          <h3 className="text-lg font-medium text-gray-900">Main debtors</h3>
           <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
             See all
           </button>

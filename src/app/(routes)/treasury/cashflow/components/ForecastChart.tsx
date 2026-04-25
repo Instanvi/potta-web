@@ -226,7 +226,7 @@ const ForecastChart: React.FC<ForecastChartProps> = ({ data, viewMode }) => {
   return (
     <div className="bg-white p-6 border border-gray-200">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
           Cash Flow Forecast
         </h3>
         <p className="text-sm text-gray-600">

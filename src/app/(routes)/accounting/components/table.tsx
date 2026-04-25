@@ -395,7 +395,7 @@ const TableAccount = () => {
 
                 {/* Show level badge for clarity */}
                 <span
-                  className={`ml-2 text-xs px-2 py-0.5 rounded-full font-semibold bg-opacity-60 text-gray-600`}
+                  className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium bg-opacity-60 text-gray-600`}
                 >
                   L{level}
                 </span>
@@ -403,7 +403,7 @@ const TableAccount = () => {
             </td>
             <td className="py-2 px-4 truncate">
               <span
-                className={`px-2 py-1 rounded-full font-semibold  text-gray-800`}
+                className={`px-2 py-1 rounded-full font-medium  text-gray-800`}
               >
                 {account.type}
               </span>
@@ -530,7 +530,7 @@ const TableAccount = () => {
             </colgroup>
             <thead className="bg-green-50 h-16 border border-gray-200">
               <tr className="text-lg border-gray-200">
-                <th className="text-left font-semibold py-2 px-4 text-gray-800">
+                <th className="text-left font-medium py-2 px-4 text-gray-800">
                   Account Name
                 </th>
                 <th className="text-left py-2 px-4 text-gray-800">Type</th>

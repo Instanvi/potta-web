@@ -128,7 +128,7 @@ const EditScenarioModal: React.FC<EditScenarioModalProps> = ({
               <FileText className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-medium text-gray-900">
                 Edit Scenario
               </h2>
               <p className="text-sm text-gray-500">Update scenario details</p>

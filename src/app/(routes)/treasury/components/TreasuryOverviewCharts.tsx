@@ -124,7 +124,7 @@ const TreasuryOverviewCharts: React.FC<TreasuryOverviewChartsProps> = ({
       {/* Aging Balance Chart */}
       <div className="bg-white p-6 ">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{chartTitle}</h3>
+          <h3 className="text-lg font-medium text-gray-900">{chartTitle}</h3>
           <Info className="w-4 h-4 text-gray-400" />
         </div>
         <div className="h-64">
@@ -139,7 +139,7 @@ const TreasuryOverviewCharts: React.FC<TreasuryOverviewChartsProps> = ({
       {/* Beneficiaries Ranking */}
       <div className="bg-white p-6 ">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-medium text-gray-900">
             {beneficiariesTitle}
           </h3>
           <Info className="w-4 h-4 text-gray-400" />
@@ -152,14 +152,14 @@ const TreasuryOverviewCharts: React.FC<TreasuryOverviewChartsProps> = ({
                 className="flex items-center justify-between"
               >
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-gray-100 flex items-center justify-center text-xs font-semibold mr-3">
+                  <div className="w-8 h-8 bg-gray-100 flex items-center justify-center text-xs font-medium mr-3">
                     {index + 1}
                   </div>
                   <span className="text-sm text-gray-900 truncate max-w-32">
                     {beneficiary.name}
                   </span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-medium text-gray-900">
                   {formatCurrency(beneficiary.amount)}
                 </span>
               </div>

@@ -89,7 +89,7 @@ const FormPreview: React.FC<FormPreviewProps> = ({
 
   return (
     <div className="bg-white  whitespace-nowrap border-gray-200  p-2 min-h-[400px] w-full">
-      <h2 className="text-2xl font-bold mb-6">
+      <h2 className="text-2xl font-medium mb-6">
         {programName
           ? `Request “${programName}”`
           : 'Request “Procurement - Contractors”'}
@@ -97,7 +97,7 @@ const FormPreview: React.FC<FormPreviewProps> = ({
       {/* Always-present editable fields */}
       <div className="mb-8">
         <div className="mb-6">
-          <div className="text-lg font-semibold mb-2">
+          <div className="text-lg font-medium mb-2">
             Is it one-time or recurring?*
           </div>
           <div className="flex gap-3 mb-2">
@@ -136,7 +136,7 @@ const FormPreview: React.FC<FormPreviewProps> = ({
           </div>
         </div>
         <div className="mb-6">
-          <div className="text-lg font-semibold mb-2">How much?</div>
+          <div className="text-lg font-medium mb-2">How much?</div>
           <div className="border rounded-none p-4 mb-2">
             <RadioGroup
               className="flex gap-6 mb-4 rounded-none"
@@ -211,7 +211,7 @@ const FormPreview: React.FC<FormPreviewProps> = ({
             ))}
             <div className="flex items-center justify-between mt-2">
               <div className="text-gray-700 font-medium">Total</div>
-              <div className="text-lg font-bold">XAF{total.toFixed(2)}</div>
+              <div className="text-lg font-medium">XAF{total.toFixed(2)}</div>
             </div>
             <button
               type="button"

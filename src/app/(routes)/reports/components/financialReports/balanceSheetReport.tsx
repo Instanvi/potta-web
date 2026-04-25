@@ -19,7 +19,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Balance Sheet Report</h1>
+        <h1 className="text-2xl font-medium">Balance Sheet Report</h1>
         <div className="text-sm text-gray-500">
           <p>As of: {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
               <Building2 className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Assets</p>
-                <p className="text-xl font-bold">${kpis.totalAssets.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalAssets.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
               <Wallet className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Liabilities</p>
-                <p className="text-xl font-bold">${kpis.totalLiabilities.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalLiabilities.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
               <Scale className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Net Worth</p>
-                <p className="text-xl font-bold">${kpis.netWorth.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.netWorth.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
               <TrendingUp className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Equity/Asset</p>
-                <p className="text-xl font-bold">{(kpis.equityToAssetRatio * 100).toFixed(2)}%</p>
+                <p className="text-xl font-medium">{(kpis.equityToAssetRatio * 100).toFixed(2)}%</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
               <PieChart className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Debt/Equity</p>
-                <p className="text-xl font-bold">{kpis.debtToEquityRatio.toFixed(2)}</p>
+                <p className="text-xl font-medium">{kpis.debtToEquityRatio.toFixed(2)}</p>
               </div>
             </div>
           </CardBody>
@@ -89,7 +89,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
         {/* Assets */}
         <Card>
           <CardBody className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Assets</h2>
+            <h2 className="text-lg font-medium mb-4">Assets</h2>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Current Assets</span>
@@ -99,7 +99,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
                 <span>Fixed Assets</span>
                 <span>${balanceSheet.assets.fixedAssets.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between font-bold pt-2 border-t">
+              <div className="flex justify-between font-medium pt-2 border-t">
                 <span>Total Assets</span>
                 <span>${balanceSheet.assets.totalAssets.toLocaleString()}</span>
               </div>
@@ -110,7 +110,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
         {/* Liabilities */}
         <Card>
           <CardBody className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Liabilities</h2>
+            <h2 className="text-lg font-medium mb-4">Liabilities</h2>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Current Liabilities</span>
@@ -120,7 +120,7 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
                 <span>Long-term Liabilities</span>
                 <span>${balanceSheet.liabilities.longTermLiabilities.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between font-bold pt-2 border-t">
+              <div className="flex justify-between font-medium pt-2 border-t">
                 <span>Total Liabilities</span>
                 <span>${balanceSheet.liabilities.totalLiabilities.toLocaleString()}</span>
               </div>
@@ -131,13 +131,13 @@ const BalanceSheetReport: React.FC<BalanceSheetReportProps> = ({
         {/* Equity */}
         <Card>
           <CardBody className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Shareholders Equity</h2>
+            <h2 className="text-lg font-medium mb-4">Shareholders Equity</h2>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Shareholders Equity</span>
                 <span>${balanceSheet.equity.shareholdersEquity.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between font-bold pt-2 border-t">
+              <div className="flex justify-between font-medium pt-2 border-t">
                 <span>Total Equity</span>
                 <span>${balanceSheet.equity.totalEquity.toLocaleString()}</span>
               </div>

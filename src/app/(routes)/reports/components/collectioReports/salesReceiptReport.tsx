@@ -19,7 +19,7 @@ const SalesReceiptReport: React.FC<SalesReceiptReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Sales Receipt Report</h1>
+        <h1 className="text-2xl font-medium">Sales Receipt Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const SalesReceiptReport: React.FC<SalesReceiptReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Transactions</p>
-                <p className="text-xl font-bold">${kpis.totalTransactionAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalTransactionAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const SalesReceiptReport: React.FC<SalesReceiptReportProps> = ({
               <Receipt className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Amount Received</p>
-                <p className="text-xl font-bold">${kpis.totalAmountReceived.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalAmountReceived.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const SalesReceiptReport: React.FC<SalesReceiptReportProps> = ({
               <Repeat className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Number of Transactions</p>
-                <p className="text-xl font-bold">{kpis.numberOfTransactions}</p>
+                <p className="text-xl font-medium">{kpis.numberOfTransactions}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const SalesReceiptReport: React.FC<SalesReceiptReportProps> = ({
               <Calculator className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Average Value</p>
-                <p className="text-xl font-bold">${kpis.averageTransactionValue.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.averageTransactionValue.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const SalesReceiptReport: React.FC<SalesReceiptReportProps> = ({
               <CreditCard className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Most Used Payment</p>
-                <p className="text-xl font-bold">{kpis.mostUsedPaymentMethod}</p>
+                <p className="text-xl font-medium">{kpis.mostUsedPaymentMethod}</p>
               </div>
             </div>
           </CardBody>

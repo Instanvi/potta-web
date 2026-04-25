@@ -58,13 +58,13 @@ const PdfView = () => {
   return (
     <div className="flex min-h-full flex-col items-center justify-center overflow-y-auto w-full scroll bg-[#F2F2F2]">
       <div className="flex min-w-[45rem] justify-between w-full p-8">
-        <h3 className="text-xl font-semibold">Purchase Order Preview</h3>
+        <h3 className="text-xl font-medium">Purchase Order Preview</h3>
       </div>
 
       <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
         <div className="h-36 w-full flex items-center justify-between px-8 bg-green-800">
           <div>
-            <p className="text-3xl font-semibold text-white">Purchase Order</p>
+            <p className="text-3xl font-medium text-white">Purchase Order</p>
             {/* <p className="text-white mt-2">Draft</p> */}
           </div>
           <div className="text-right text-white">
@@ -80,7 +80,7 @@ const PdfView = () => {
         <div className="p-5 space-y-8 bg-white">
           <div className="grid grid-cols-2 gap-8">
             <div>
-              <h3 className="font-bold text-gray-700 mb-2">Vendor:</h3>
+              <h3 className="font-medium text-gray-700 mb-2">Vendor:</h3>
               <div className="text-sm text-gray-600 space-y-1">
                 {vendorLoading ? (
                   <p>Loading vendor details...</p>
@@ -108,7 +108,7 @@ const PdfView = () => {
             </div>
 
             <div>
-              <h3 className="font-bold text-gray-700 mb-2">Ship To:</h3>
+              <h3 className="font-medium text-gray-700 mb-2">Ship To:</h3>
               <p className="text-sm text-gray-600">
                 {shippingAddress || 'No shipping address specified'}
               </p>
@@ -194,8 +194,8 @@ const PdfView = () => {
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2">
-                  <span className="font-bold">Total:</span>
-                  <span className="font-bold">
+                  <span className="font-medium">Total:</span>
+                  <span className="font-medium">
                     XAF{' '}
                     {tableData
                       .reduce((sum, item) => {
@@ -212,7 +212,7 @@ const PdfView = () => {
 
           <div className="grid grid-cols-2 gap-8 mt-8 pt-6 border-t">
             <div>
-              <h3 className="font-bold text-gray-700 mb-2">
+              <h3 className="font-medium text-gray-700 mb-2">
                 Payment Information:
               </h3>
               <p className="text-sm">
@@ -229,7 +229,7 @@ const PdfView = () => {
 
             {contextData.note && (
               <div>
-                <h3 className="font-bold text-gray-700 mb-2">Notes:</h3>
+                <h3 className="font-medium text-gray-700 mb-2">Notes:</h3>
                 <p className="text-sm text-gray-600">{contextData.note}</p>
               </div>
             )}

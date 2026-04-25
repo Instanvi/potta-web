@@ -10,7 +10,7 @@ const VendorPortalSuccess = () => {
           <CheckCircle className="h-16 w-16 text-green-500" />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-medium text-gray-900 mb-4">
           Invoice Created Successfully!
         </h1>
 

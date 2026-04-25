@@ -197,7 +197,7 @@ const FormQuestionCard: React.FC<FormQuestionCardProps> = ({
     const options = question.options || [];
     return (
       <div className="mb-2">
-        <div className="mb-1 text-xs font-semibold text-gray-500">Options</div>
+        <div className="mb-1 text-xs font-medium text-gray-500">Options</div>
         <div className="flex flex-col gap-1">
           {options.length === 0 && (
             <div className="text-xs text-gray-400 italic">No options yet</div>

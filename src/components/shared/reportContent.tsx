@@ -703,7 +703,7 @@ const ReportsContent: React.FC = () => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 text-gray-500 duration-500 ease-in-out ${
               activeTab === tab.id &&
-              'border-b border-green-900 text-green-900 font-thin'
+              'border-b border-green-900 text-green-900 font-normal'
             } cursor-pointer flex items-center`}
           >
             <p>{tab.label.replace(' Reports', '')}</p>
@@ -722,7 +722,7 @@ const ReportsContent: React.FC = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-4 text-gray-500 hover:bg-[#F3FBFB] cursor-pointer flex items-center ${
-                    activeTab === tab.id && 'text-green-900 font-thin'
+                    activeTab === tab.id && 'text-green-900 font-normal'
                   }`}
                 >
                   {tab.icon}

@@ -47,7 +47,7 @@ const RightSideModal: React.FC<RightSideModalProps> = ({
                 } bg-white shadow-xl flex flex-col`}
               >
                 <div className="flex items-center justify-between px-6 py-4 border-b">
-                  <h2 className="text-lg font-semibold">{title}</h2>
+                  <h2 className="text-lg font-medium">{title}</h2>
                   <button
                     onClick={() => setOpen(false)}
                     className="text-gray-400 hover:text-gray-600 focus:outline-none"

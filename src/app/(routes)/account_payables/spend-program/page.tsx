@@ -177,7 +177,7 @@ const SpendProgramPage = () => {
                 <div className="bg-green-50 p-2 rounded">
                   {getProgramIcon(program.type)}
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 flex-1">
+                <h2 className="text-lg font-medium text-gray-900 flex-1">
                   {program.name}
                 </h2>
                 <Badge
@@ -197,7 +197,7 @@ const SpendProgramPage = () => {
                 </span>
                 <span className="flex cursor-pointer items-center gap-1 text-xs">
                   <span
-                    className={`grid place-content-center text-center w-5 h-5 rounded-full text-white text-xs font-bold ${
+                    className={`grid place-content-center text-center w-5 h-5 rounded-full text-white text-xs font-medium ${
                       program.purchaseOrders > 0
                         ? 'bg-green-900'
                         : 'bg-gray-300'

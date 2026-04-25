@@ -145,7 +145,7 @@ const KYCVerificationForm: React.FC<KYCVerificationFormProps> = ({
       {/* Header */}
       <div className="bg-white shadow-sm border border-gray-200 p-6 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-medium text-gray-900">
             KYC Verification
           </h1>
           <p className="text-gray-600 mt-1">
@@ -156,7 +156,7 @@ const KYCVerificationForm: React.FC<KYCVerificationFormProps> = ({
 
       {/* Instructions */}
       <div className="bg-white shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">
           Upload Your Documents
         </h2>
         <div className="bg-blue-50 border border-blue-200 p-4">
@@ -171,7 +171,7 @@ const KYCVerificationForm: React.FC<KYCVerificationFormProps> = ({
       {/* Document Upload Section */}
       <div className="bg-white shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-medium text-gray-900">
             Documents
           </h2>
           <Button

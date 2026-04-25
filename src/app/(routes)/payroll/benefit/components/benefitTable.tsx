@@ -77,7 +77,7 @@ const BenefitTable: React.FC<BenefitTableProps> = ({
 
     return (
       <span
-        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${config.color}`}
+        className={`px-2 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${config.color}`}
       >
         {config.text}
       </span>

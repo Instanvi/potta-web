@@ -19,7 +19,7 @@ const PurchaseOrderReport: React.FC<PurchaseOrderReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Purchase Order Report</h1>
+        <h1 className="text-2xl font-medium">Purchase Order Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const PurchaseOrderReport: React.FC<PurchaseOrderReportProps> = ({
               <ShoppingCart className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total PO Amount</p>
-                <p className="text-xl font-bold">${kpis.totalPurchaseOrderAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalPurchaseOrderAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const PurchaseOrderReport: React.FC<PurchaseOrderReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Paid</p>
-                <p className="text-xl font-bold">${kpis.totalAmountPaid.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalAmountPaid.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const PurchaseOrderReport: React.FC<PurchaseOrderReportProps> = ({
               <TrendingUp className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Outstanding Amount</p>
-                <p className="text-xl font-bold">${kpis.totalOutstandingAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalOutstandingAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const PurchaseOrderReport: React.FC<PurchaseOrderReportProps> = ({
               <Package className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Total POs</p>
-                <p className="text-xl font-bold">{kpis.numberOfPurchaseOrders}</p>
+                <p className="text-xl font-medium">{kpis.numberOfPurchaseOrders}</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const PurchaseOrderReport: React.FC<PurchaseOrderReportProps> = ({
               <Building className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Fulfilled POs</p>
-                <p className="text-xl font-bold">{kpis.percentageFulfilledPOs}%</p>
+                <p className="text-xl font-medium">{kpis.percentageFulfilledPOs}%</p>
               </div>
             </div>
           </CardBody>

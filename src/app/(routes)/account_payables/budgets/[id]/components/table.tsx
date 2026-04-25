@@ -13,9 +13,9 @@ import {
 } from '@potta/components/shadcn/dropdown';
 
 const statusColors: Record<string, string> = {
-  completed: 'text-green-600 font-semibold',
-  failed: 'text-red-600 font-semibold',
-  pending: 'text-yellow-600 font-semibold',
+  completed: 'text-green-600 font-medium',
+  failed: 'text-red-600 font-medium',
+  pending: 'text-yellow-600 font-medium',
 };
 
 interface BudgetTableProps {
@@ -145,8 +145,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           <MyTable
             columns={columns}
             data={filteredData}
-            ExpandableComponent={null}
-            expanded={false}
             pagination={Array.isArray(filteredData) && filteredData.length > 9}
           />
           <BudgetTransactionSlider

@@ -148,7 +148,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{displayName}</CardTitle>
+          <CardTitle className="text-lg font-medium">{displayName}</CardTitle>
           <span
             className={`inline-flex items-center px-2.5 py-0.5  text-xs font-medium ${getCategoryColor(
               category
@@ -173,7 +173,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{displayName}</CardTitle>
+          <CardTitle className="text-lg font-medium">{displayName}</CardTitle>
           {getTrendIcon(kpiData?.calculation_details?.trend)}
         </div>
         <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ const KpiCard: React.FC<KpiCardProps> = ({
       <CardContent>
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900">
+            <div className="text-3xl font-medium text-gray-900">
               {kpiData?.value !== undefined && kpiData?.value !== null
                 ? formatValue(kpiData.value, kpiData?.unit || 'number')
                 : 'No data available'}

@@ -78,7 +78,7 @@ const NewInvoice: React.FC = () => {
                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-none px-4 pb-4 pt-5 text-left transition-all w-4/5 md:w-4/5 lg:w-3/5">
                   <div className=" bg-white transform overflow-hidden rounded-lg py-4 pb-8">
                     <div className="flex flex-col pb-2 px-4">
-                      <center><h1 className="text-xl font-semibold">Select Invoicing type</h1></center>
+                      <center><h1 className="text-xl font-medium">Select Invoicing type</h1></center>
                       <div
                         className="text-3xl cursor-pointer flex justify-end"
                         onClick={() => {
@@ -95,7 +95,7 @@ const NewInvoice: React.FC = () => {
                               {/* <i className="ri-file-line text-3xl"></i> */}
                               <img src={invoice.icon} alt={invoice.icon} className="h-10 w-auto" />
                               <div className="">
-                                <span className="font-semibold">{invoice.value}</span>
+                                <span className="font-medium">{invoice.value}</span>
                                 <p>{invoice.description}</p>
                               </div>
                             </div>

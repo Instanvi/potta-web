@@ -61,7 +61,7 @@ const CashFlowTrends: React.FC<CashFlowTrendsProps> = ({
     if (active && payload && payload.length) {
       return (
         <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-          <p className="font-semibold text-gray-900 mb-2">{label}</p>
+          <p className="font-medium text-gray-900 mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: {formatCurrency(entry.value)}
@@ -226,7 +226,7 @@ const CashFlowTrends: React.FC<CashFlowTrendsProps> = ({
     <div className="bg-white border border-gray-200 rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-medium text-gray-900">
             Cash Flow Trends
           </h3>
           <p className="text-sm text-gray-600 mt-1">
@@ -270,7 +270,7 @@ const CashFlowTrends: React.FC<CashFlowTrendsProps> = ({
 
       {/* Detailed Table */}
       <div className="mt-6">
-        <h4 className="text-sm font-semibold text-gray-900 mb-4">
+        <h4 className="text-sm font-medium text-gray-900 mb-4">
           Monthly Cash Flow Breakdown
         </h4>
         <div className="overflow-x-auto">
@@ -334,7 +334,7 @@ const CashFlowTrends: React.FC<CashFlowTrendsProps> = ({
                     >
                       {formatCurrency(item.net)}
                     </td>
-                    <td className="py-3 px-4 text-right text-gray-900 font-semibold">
+                    <td className="py-3 px-4 text-right text-gray-900 font-medium">
                       {formatCurrency(item.cashBalance || 0)}
                     </td>
                   </tr>
@@ -349,20 +349,20 @@ const CashFlowTrends: React.FC<CashFlowTrendsProps> = ({
       <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
         <div>
           <p className="text-xs text-gray-600">Total Inflow</p>
-          <p className="text-lg font-semibold text-green-600">
+          <p className="text-lg font-medium text-green-600">
             {formatCurrency(data.reduce((sum, item) => sum + item.cashIn, 0))}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-600">Total Outflow</p>
-          <p className="text-lg font-semibold text-red-600">
+          <p className="text-lg font-medium text-red-600">
             {formatCurrency(data.reduce((sum, item) => sum + item.cashOut, 0))}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-600">Net Flow</p>
           <p
-            className={`text-lg font-semibold ${
+            className={`text-lg font-medium ${
               data.reduce((sum, item) => sum + item.net, 0) >= 0
                 ? 'text-green-600'
                 : 'text-red-600'
@@ -373,7 +373,7 @@ const CashFlowTrends: React.FC<CashFlowTrendsProps> = ({
         </div>
         <div>
           <p className="text-xs text-gray-600">End Balance</p>
-          <p className="text-lg font-semibold text-gray-900">
+          <p className="text-lg font-medium text-gray-900">
             {formatCurrency(
               dataWithBalance[dataWithBalance.length - 1]?.cashBalance || 0
             )}

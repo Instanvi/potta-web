@@ -96,7 +96,7 @@ const ViewRiskPolicyModal = ({
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
           <div className="text-center">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               Error Loading Policy
             </h3>
             <p className="text-gray-600 mb-4">
@@ -222,7 +222,7 @@ const ViewRiskPolicyModal = ({
                       <p className="text-sm font-medium text-gray-500">
                         Created
                       </p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {formatDate(displayPolicy.createdAt)}
                       </p>
                     </div>
@@ -236,7 +236,7 @@ const ViewRiskPolicyModal = ({
                       <p className="text-sm font-medium text-gray-500">
                         Last Updated
                       </p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {formatDate(displayPolicy.updatedAt)}
                       </p>
                     </div>
@@ -248,7 +248,7 @@ const ViewRiskPolicyModal = ({
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Rules</p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {displayPolicy.rules?.length || 0}{' '}
                         {(displayPolicy.rules?.length || 0) === 1
                           ? 'Rule'
@@ -451,7 +451,7 @@ const ViewRiskPolicyModal = ({
               {policy.submissionRequirements &&
                 Object.keys(policy.submissionRequirements).length > 0 && (
                   <div className="mt-6">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                       <i className="ri-file-check-line text-gray-600" />
                       Submission Requirements
                     </h4>

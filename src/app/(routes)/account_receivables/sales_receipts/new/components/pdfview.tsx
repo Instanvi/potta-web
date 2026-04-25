@@ -77,11 +77,11 @@ const PdfView = () => {
   return (
     <div className="flex  flex-col items-center justify-center overflow-y-auto w-full bg-[#F2F2F2]">
       <div className="flex min-w-[30rem] justify-between w-full p-8">
-        <h3 className="text-xl font-semibold">PDF Preview</h3>
+        <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>
       <div className="max-w-[48rem] bg-white space-y-4 min-w-[45rem] w-full">
         <div className="h-36 w-full flex items-center justify-between px-4 bg-green-800">
-          <p className="text-3xl mt-5 font-semibold text-white">
+          <p className="text-3xl mt-5 font-medium text-white">
             Sales Receipt
           </p>
           <div className="text-right text-white">
@@ -210,7 +210,7 @@ const PdfView = () => {
               </div>
               {/* Horizontal Line */}
               <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-bold">
+              <div className="flex justify-between font-medium">
                 <div className="w-1/2">Total:</div>
                 <div className="w-1/2 text-right pr-20">
                   {total.toFixed(2)}

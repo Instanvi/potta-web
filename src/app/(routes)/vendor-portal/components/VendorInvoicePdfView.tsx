@@ -55,7 +55,7 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">INVOICE</h1>
+              <h1 className="text-3xl font-medium text-white mb-2">INVOICE</h1>
               <p className="text-green-100">
                 Invoice{' '}
                 {invoiceData.orderNumber || invoiceData.vendorInvoiceNumber
@@ -67,11 +67,11 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
             </div>
             <div className="text-right">
               <div className="text-sm text-green-100">Invoice Date</div>
-              <div className="font-semibold text-white">
+              <div className="font-medium text-white">
                 {format(invoiceData.invoiceDate, 'MMM dd, yyyy')}
               </div>
               <div className="text-sm text-green-100 mt-2">Due Date</div>
-              <div className="font-semibold text-white">
+              <div className="font-medium text-white">
                 {format(invoiceData.dueDate, 'MMM dd, yyyy')}
               </div>
             </div>
@@ -85,7 +85,7 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
           {/* Vendor and Company Info */}
           <div className="grid grid-cols-2 gap-8 mb-8">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">From:</h3>
+              <h3 className="font-medium text-gray-900 mb-2">From:</h3>
               <div className="text-gray-700">
                 <p className="font-medium">{invoiceData.vendor.name}</p>
                 <p>{invoiceData.vendor.email}</p>
@@ -106,7 +106,7 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">To:</h3>
+              <h3 className="font-medium text-gray-900 mb-2">To:</h3>
               <div className="text-gray-700">
                 <p className="font-medium">Company Name</p>
                 <p>company@email.com</p>
@@ -123,7 +123,7 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
           {/* Payment Information */}
           <div className="grid grid-cols-2 gap-8 mb-8">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">
+              <h3 className="font-medium text-gray-900 mb-2">
                 Payment Method:
               </h3>
               <p className="text-gray-700">
@@ -131,7 +131,7 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">
+              <h3 className="font-medium text-gray-900 mb-2">
                 Payment Terms:
               </h3>
               <p className="text-gray-700">{invoiceData.paymentTerms}</p>
@@ -143,22 +143,22 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left font-semibold">
+                  <th className="border border-gray-300 px-4 py-2 text-left font-medium">
                     Description
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-right font-semibold">
+                  <th className="border border-gray-300 px-4 py-2 text-right font-medium">
                     Qty
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-right font-semibold">
+                  <th className="border border-gray-300 px-4 py-2 text-right font-medium">
                     Unit Price
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-right font-semibold">
+                  <th className="border border-gray-300 px-4 py-2 text-right font-medium">
                     Tax Rate
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-right font-semibold">
+                  <th className="border border-gray-300 px-4 py-2 text-right font-medium">
                     Discount
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-right font-semibold">
+                  <th className="border border-gray-300 px-4 py-2 text-right font-medium">
                     Total
                   </th>
                 </tr>
@@ -196,24 +196,24 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-700">Subtotal:</span>
-                  <span className="font-semibold">
+                  <span className="font-medium">
                     {invoiceData.currency} {invoiceData.subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Tax:</span>
-                  <span className="font-semibold">
+                  <span className="font-medium">
                     {invoiceData.currency} {invoiceData.taxAmount.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Discount:</span>
-                  <span className="font-semibold">
+                  <span className="font-medium">
                     {invoiceData.currency}{' '}
                     {invoiceData.discountAmount.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
+                <div className="flex justify-between text-lg font-medium border-t pt-2">
                   <span>Total:</span>
                   <span>
                     {invoiceData.currency} {invoiceData.totalAmount.toFixed(2)}
@@ -226,7 +226,7 @@ const VendorInvoicePdfView: React.FC<VendorInvoicePdfViewProps> = ({
           {/* Notes */}
           {invoiceData.notes && (
             <div className="mb-8">
-              <h3 className="font-semibold text-gray-900 mb-2">Notes:</h3>
+              <h3 className="font-medium text-gray-900 mb-2">Notes:</h3>
               <p className="text-gray-700">{invoiceData.notes}</p>
             </div>
           )}

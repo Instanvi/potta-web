@@ -279,7 +279,7 @@ const AnalyticsChartCard: React.FC<AnalyticsChartCardProps> = ({
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <CardTitle className="text-lg font-medium">{title}</CardTitle>
           <p className="text-sm text-gray-600">{description}</p>
         </CardHeader>
         <CardContent>
@@ -297,7 +297,7 @@ const AnalyticsChartCard: React.FC<AnalyticsChartCardProps> = ({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">
+        <CardTitle className="text-lg font-medium">
           {title}
           {data?.year && (
             <span className="text-sm font-normal text-green-600 ml-2">
@@ -313,19 +313,19 @@ const AnalyticsChartCard: React.FC<AnalyticsChartCardProps> = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
               <p className="text-gray-500">Total</p>
-              <p className="font-semibold text-black">{summary.total}</p>
+              <p className="font-medium text-black">{summary.total}</p>
             </div>
             <div className="text-center">
               <p className="text-gray-500">Average</p>
-              <p className="font-semibold text-gray-700">{summary.average}</p>
+              <p className="font-medium text-gray-700">{summary.average}</p>
             </div>
             <div className="text-center">
               <p className="text-gray-500">Max</p>
-              <p className="font-semibold text-gray-800">{summary.max}</p>
+              <p className="font-medium text-gray-800">{summary.max}</p>
             </div>
             <div className="text-center">
               <p className="text-gray-500">Min</p>
-              <p className="font-semibold text-gray-600">{summary.min}</p>
+              <p className="font-medium text-gray-600">{summary.min}</p>
             </div>
           </div>
         )}

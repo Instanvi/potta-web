@@ -258,7 +258,7 @@ const BalanceBox: React.FC<BalanceBoxProps> = ({
               <i className="ri-arrow-right-up-line text-green-400"></i>
             </div>
             <div className="py-4 flex-1 flex flex-col justify-center">
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-3xl font-medium">
                 {formatCurrency(totalAmount)}
               </h1>
             </div>
@@ -281,7 +281,7 @@ const BalanceBox: React.FC<BalanceBoxProps> = ({
               <i className="ri-arrow-left-down-line text-green-400"></i>
             </div>
             <div className="py-4 flex-1 flex flex-col justify-center">
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-3xl font-medium">
                 {formatCurrency(totalBudgetSpent)}
               </h1>
             </div>

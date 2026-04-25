@@ -632,7 +632,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
             <p className="text-sm text-gray-600 font-medium">{title}</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
+            <p className="text-3xl font-medium text-gray-900">{value}</p>
             <p className="text-xs text-gray-500 mt-1">
               <span className="text-green-600">↗ {trendPercent}%</span> vs last
               period
@@ -736,7 +736,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
         {/* Expenses Growth Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Expenses growth
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -759,7 +759,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
         {/* Expenses Payments Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Expenses payments
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -782,7 +782,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
         {/* Payables Aging - Third card on the same line */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Payables aging
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -797,7 +797,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
                     <span className="text-sm font-medium text-gray-700">
                       {item.period}
                     </span>
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-medium text-gray-900">
                       {formatCurrency(item.amount)}
                     </span>
                   </div>
@@ -819,7 +819,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
         {/* Top expenses sources */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Top expenses sources
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -845,7 +845,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
         {/* Top vendors */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Top vendors
             </CardTitle>
             <p className="text-sm text-gray-600">Your top expenses vendors.</p>
@@ -866,7 +866,7 @@ const ExpensesDashboard: React.FC<ExpensesDashboardProps> = ({
         {/* Top debtors */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Top debtors
             </CardTitle>
             <p className="text-sm text-gray-600">Your top expenses debtors.</p>

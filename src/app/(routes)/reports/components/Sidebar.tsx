@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className={`flex items-center px-3 py-2 text-left transition-colors duration-200 text-gray-600 hover:bg-green-50 hover:text-green-900
                   ${
                     isActive
-                      ? 'bg-green-100 text-green-900 font-semibold border-l-4 border-l-green-600'
+                      ? 'bg-green-100 text-green-900 font-medium border-l-4 border-l-green-600'
                       : 'border-l-4 border-l-transparent'
                   }
                   rounded-none w-full`}

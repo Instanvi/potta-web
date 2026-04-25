@@ -19,7 +19,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Cash Flow Statement</h1>
+        <h1 className="text-2xl font-medium">Cash Flow Statement</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               <ArrowUpCircle className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Operating Cash</p>
-                <p className="text-xl font-bold">${kpis.totalOperatingCash.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalOperatingCash.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               <Briefcase className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Investing Cash</p>
-                <p className="text-xl font-bold">${kpis.totalInvestingCash.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalInvestingCash.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               <ArrowDownCircle className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Financing Cash</p>
-                <p className="text-xl font-bold">${kpis.totalFinancingCash.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalFinancingCash.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               <LineChart className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Net Cash Flow</p>
-                <p className="text-xl font-bold">${kpis.netCashFlow.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.netCashFlow.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               <DollarSign className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Cash Balance</p>
-                <p className="text-xl font-bold">${kpis.cashBalance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.cashBalance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -90,12 +90,12 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell className="font-semibold">Opening Cash Balance</TableCell>
+                <TableCell className="font-medium">Opening Cash Balance</TableCell>
                 <TableCell className="text-right">${cashFlow.openingBalance.toLocaleString()}</TableCell>
               </TableRow>
 
               <TableRow className="border-t">
-                <TableCell className="font-semibold">Cash from Operating Activities</TableCell>
+                <TableCell className="font-medium">Cash from Operating Activities</TableCell>
                 <TableCell className="text-right">
                   <span className={cashFlow.operatingActivities >= 0 ? 'text-green-600' : 'text-red-600'}>
                     ${cashFlow.operatingActivities.toLocaleString()}
@@ -104,7 +104,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               </TableRow>
 
               <TableRow>
-                <TableCell className="font-semibold">Cash from Investing Activities</TableCell>
+                <TableCell className="font-medium">Cash from Investing Activities</TableCell>
                 <TableCell className="text-right">
                   <span className={cashFlow.investingActivities >= 0 ? 'text-green-600' : 'text-red-600'}>
                     ${cashFlow.investingActivities.toLocaleString()}
@@ -113,7 +113,7 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               </TableRow>
 
               <TableRow>
-                <TableCell className="font-semibold">Cash from Financing Activities</TableCell>
+                <TableCell className="font-medium">Cash from Financing Activities</TableCell>
                 <TableCell className="text-right">
                   <span className={cashFlow.financingActivities >= 0 ? 'text-green-600' : 'text-red-600'}>
                     ${cashFlow.financingActivities.toLocaleString()}
@@ -122,8 +122,8 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               </TableRow>
 
               <TableRow className="border-t">
-                <TableCell className="font-semibold">Net Increase in Cash</TableCell>
-                <TableCell className="text-right font-bold">
+                <TableCell className="font-medium">Net Increase in Cash</TableCell>
+                <TableCell className="text-right font-medium">
                   <span className={cashFlow.netIncreaseInCash >= 0 ? 'text-green-600' : 'text-red-600'}>
                     ${cashFlow.netIncreaseInCash.toLocaleString()}
                   </span>
@@ -131,8 +131,8 @@ const CashFlowReport: React.FC<CashFlowReportProps> = ({
               </TableRow>
 
               <TableRow className="border-t">
-                <TableCell className="font-semibold text-lg">Closing Cash Balance</TableCell>
-                <TableCell className="text-right font-bold text-lg">
+                <TableCell className="font-medium text-lg">Closing Cash Balance</TableCell>
+                <TableCell className="text-right font-medium text-lg">
                   ${cashFlow.closingBalance.toLocaleString()}
                 </TableCell>
               </TableRow>

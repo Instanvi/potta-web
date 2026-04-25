@@ -272,32 +272,32 @@ const ForecastChart: React.FC<ForecastChartProps> = ({
       <div className="grid grid-cols-5 gap-1 text-xs">
         <div className="text-left">
           <p className="text-gray-500 font-medium text-[10px]">Total</p>
-          <p className="font-semibold text-black text-[11px] leading-tight">
+          <p className="font-medium text-black text-[11px] leading-tight">
             {(totalValue / 1000).toFixed(0)}K XAF
           </p>
         </div>
         <div className="text-left">
           <p className="text-gray-500 font-medium text-[10px]">Avg</p>
-          <p className="font-semibold text-gray-700 text-[11px] leading-tight">
+          <p className="font-medium text-gray-700 text-[11px] leading-tight">
             {(averageValue / 1000).toFixed(0)}K XAF
           </p>
         </div>
         <div className="text-left">
           <p className="text-gray-500 font-medium text-[10px]">Max</p>
-          <p className="font-semibold text-gray-800 text-[11px] leading-tight">
+          <p className="font-medium text-gray-800 text-[11px] leading-tight">
             {(maxValue / 1000).toFixed(0)}K XAF
           </p>
         </div>
         <div className="text-left">
           <p className="text-gray-500 font-medium text-[10px]">Min</p>
-          <p className="font-semibold text-gray-600 text-[11px] leading-tight">
+          <p className="font-medium text-gray-600 text-[11px] leading-tight">
             {(minValue / 1000).toFixed(0)}K XAF
           </p>
         </div>
         <div className="text-left">
           <p className="text-gray-500 font-medium text-[10px]">Growth</p>
           <p
-            className={`font-semibold text-[11px] leading-tight ${
+            className={`font-medium text-[11px] leading-tight ${
               growthRate >= 0 ? 'text-green-600' : 'text-red-600'
             }`}
           >

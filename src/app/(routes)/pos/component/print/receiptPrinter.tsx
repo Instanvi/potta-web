@@ -36,15 +36,15 @@ export class ReceiptPrinter {
             <img src="/icons/logo.svg" class="h-16 text-center w-auto" alt="" />
           </center>
           <p class="prints text-center text-xl font-medium">Food Rep</p>
-          <p class="prints font-thin text-center">Douala - Cameroon</p>
-          <p class="prints font-thin text-center">Monday - Sunday</p>
-          <p class="prints font-thin text-center">From 08H00 - 22H00</p>
-          <p class="prints font-thin text-center text-xl">----------------</p>
+          <p class="prints font-normal text-center">Douala - Cameroon</p>
+          <p class="prints font-normal text-center">Monday - Sunday</p>
+          <p class="prints font-normal text-center">From 08H00 - 22H00</p>
+          <p class="prints font-normal text-center text-xl">----------------</p>
           <div class="w-full justify-center mt-5">
             <table class="w-full">
               <tr>
-                <td><p class="font-thin prints">Bill Number</p></td>
-                <td class="text-right"><p class="font-thin prints">${
+                <td><p class="font-normal prints">Bill Number</p></td>
+                <td class="text-right"><p class="font-normal prints">${
                   orderData.orderNumber
                 }</p></td>
               </tr>
@@ -52,10 +52,10 @@ export class ReceiptPrinter {
                 .map(
                   (item) => `
                 <tr>
-                  <td><p class="font-thin prints">${item.quantity} x ${
+                  <td><p class="font-normal prints">${item.quantity} x ${
                     item.name
                   }</p></td>
-                  <td class="text-right"><p class="font-thin prints">${
+                  <td class="text-right"><p class="font-normal prints">${
                     item.price * item.quantity
                   }</p></td>
                 </tr>
@@ -63,35 +63,35 @@ export class ReceiptPrinter {
                 )
                 .join('')}
               <tr>
-                <td><p class="font-thin prints">Qty</p></td>
-                <td class="text-right"><p class="font-thin prints">${
+                <td><p class="font-normal prints">Qty</p></td>
+                <td class="text-right"><p class="font-normal prints">${
                   orderData.orderItems.length
                 }</p></td>
               </tr>
               <tr>
-                <td><p class="font-thin prints">Total Price:</p></td>
-                <td class="text-right"><p class="font-thin prints">${orderData.total.toFixed(
+                <td><p class="font-normal prints">Total Price:</p></td>
+                <td class="text-right"><p class="font-normal prints">${orderData.total.toFixed(
                   2
                 )} XAF</p></td>
               </tr>
               <tr>
-                <td><p class="font-thin prints">Cash Amount:</p></td>
-                <td class="text-right"><p class="font-thin prints">${orderData.cashAmount.toFixed(
+                <td><p class="font-normal prints">Cash Amount:</p></td>
+                <td class="text-right"><p class="font-normal prints">${orderData.cashAmount.toFixed(
                   2
                 )} XAF</p></td>
               </tr>
               <tr>
-                <td><p class="font-thin prints">Change:</p></td>
-                <td class="text-right"><p class="font-thin prints">${orderData.change.toFixed(
+                <td><p class="font-normal prints">Change:</p></td>
+                <td class="text-right"><p class="font-normal prints">${orderData.change.toFixed(
                   2
                 )} XAF</p></td>
               </tr>
             </table>
           </div>
-          <p class="font-thin text-center my-2 prints">${moment(
+          <p class="font-normal text-center my-2 prints">${moment(
             orderData.timestamp
           ).format('MM Do YYYY, h:mm:ss a')}</p>
-          <p class="font-thin text-center my-2 prints">Thank you for your fidelity</p>
+          <p class="font-normal text-center my-2 prints">Thank you for your fidelity</p>
           <div class="w-full flex justify-center relative">
             <svg id="barcode"></svg>
           </div>

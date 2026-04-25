@@ -116,7 +116,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
   const ApprovalView = () => (
     <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
       <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-2xl font-medium text-gray-900 mb-2">
           Invoice Details
         </h3>
         <p className="text-gray-600">Review invoice information</p>
@@ -125,7 +125,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
       <div className="space-y-6">
         {/* Current Status */}
         <div className="bg-white p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-900 mb-3">Current Status</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Current Status</h4>
           <div className="flex items-center space-x-2">
             <span
               className={`inline-flex items-center px-3 py-1 text-sm font-medium ${
@@ -149,7 +149,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
 
         {/* Invoice Summary */}
         <div className="bg-white p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-900 mb-3">Invoice Summary</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Invoice Summary</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Invoice Number:</span>
@@ -208,7 +208,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
 
         {/* Invoice Type */}
         <div className="bg-white p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-900 mb-3">Invoice Type</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Invoice Type</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Type:</span>
@@ -242,7 +242,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
         {/* Risk Evaluation */}
         {invoice.riskSeverity && (
           <div className="bg-white p-4 border border-gray-200">
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-medium text-gray-900 mb-3">
               Risk Evaluation
             </h4>
             <div className="space-y-3">
@@ -301,7 +301,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
         {invoice.riskEvaluationDetails?.alerts &&
           invoice.riskEvaluationDetails.alerts.length > 0 && (
             <div className="bg-white p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-3">Risk Alerts</h4>
+              <h4 className="font-medium text-gray-900 mb-3">Risk Alerts</h4>
               <div className="space-y-2">
                 {invoice.riskEvaluationDetails.alerts.map((alert, index) => (
                   <div
@@ -332,7 +332,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
         {/* Approval/Rejection Details */}
         {(invoice.approvedBy || invoice.rejectedBy) && (
           <div className="bg-white p-4 border border-gray-200">
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-medium text-gray-900 mb-3">
               Approval Details
             </h4>
             <div className="space-y-2">
@@ -379,7 +379,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
 
         {/* Status Timeline */}
         <div className="bg-white p-4 border border-gray-200">
-          <h4 className="font-semibold text-gray-900 mb-3">Status Timeline</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Status Timeline</h4>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -462,7 +462,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
                 <div className=" flex-1 min-h-full bg-white space-y-8  min-w-[45rem] w-full mb-10">
                   <div className="h-36 w-full flex items-center justify-between px-8 bg-green-700">
                     <div>
-                      <p className="text-3xl font-semibold text-white">
+                      <p className="text-3xl font-medium text-white">
                         {invoice.invoiceType}
                       </p>
                       <p className="text-white mt-2">
@@ -486,7 +486,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
                   <div className="p-5 space-y-16 bg-white">
                     <div className="mt-5 w-full flex space-x-5">
                       <div className="flex w-[40%] space-x-2">
-                        <h3 className="font-bold">From: </h3>
+                        <h3 className="font-medium">From: </h3>
                         <div className="space-y-2 text-sm text-gray-600 flex-col">
                           <p>Instanvi Sarl</p>
                           <p>hello@instanvi.com</p>
@@ -495,7 +495,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <h3 className="font-bold">To: </h3>
+                        <h3 className="font-medium">To: </h3>
                         <div className="space-y-2 text-sm text-gray-600 flex-col">
                           <p>
                             {invoice.customer
@@ -667,7 +667,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
                           </div>
                         </div>
                         <hr className="my-4 border-t-2 border-gray-300" />
-                        <div className="flex justify-between font-bold">
+                        <div className="flex justify-between font-medium">
                           <div className="w-1/2">Total:</div>
                           <div className="w-1/2 text-right pr-20">
                             {invoice.currency}{' '}

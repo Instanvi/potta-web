@@ -51,7 +51,7 @@ const PurchaseOrderTimelineView: React.FC<PurchaseOrderTimelineViewProps> = ({
   ];
 
   // Get current user info
-  const currentUser = user?.user?.user || user;
+  const currentUser = (user as any)?.user?.user || user;
   const currentUserId =
     currentUser?.id || currentUser?.sessionUserId || 'current-user';
   const currentUserName =

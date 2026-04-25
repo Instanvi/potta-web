@@ -381,7 +381,7 @@ const DashboardExpenses = () => {
                         className="flex w-full border-b py-2 justify-between"
                       >
                         <div className="flex items-center gap-2">
-                          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold">
+                          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-medium">
                             {data.name
                               .split(' ')
                               .map((n) => n[0])

@@ -18,13 +18,15 @@ import {
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
 import { Button } from '@potta/components/shadcn/button';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import { ColumnDef } from '@tanstack/react-table';
 
 import { Icon } from '@iconify/react';
-import { useBills } from '../new/hooks/useBills';
-import useApproveBill from '../new/hooks/useApproveBill';
-import useRejectBill from '../new/hooks/useRejectBill';
+import {
+  useApproveBill,
+  useBills,
+  useRejectBill,
+} from '@potta/hooks/api/accountPayables';
 import toast from 'react-hot-toast';
 import BillDetailsSlideover from './BillDetailsSlideover';
 import Filter from './filters';
@@ -429,12 +431,13 @@ export function PaymentRequestDataTableWrapper({
         
       </div>
 
-      <DataGrid
+      <DataTable
         columns={columns}
         data={filteredRequests}
         isLoading={isLoading}
         showPagination={true}
         pageSize={10}
+        withRowSelection
       />
 
       <BillDetailsSlideover

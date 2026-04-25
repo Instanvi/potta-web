@@ -232,31 +232,31 @@ export default function DynamicTable() {
             <tr className="bg-gray-50">
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider w-5/12"
+                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-5/12"
               >
                 Product
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider w-2/12"
+                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-2/12"
               >
                 Qty
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider w-2/12"
+                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-2/12"
               >
                 Price
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider w-2/12"
+                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-2/12"
               >
                 Tax
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-500 uppercase tracking-wider w-1/12"
+                className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-1/12"
               >
                 Actions
               </th>

@@ -28,7 +28,7 @@ const CustomNavbar = () => {
 
   return (
     <nav className="flex gap-4 items-center p-4 bg-white sticky top-0 left-0 z-30 w-full shadow-sm">
-      <div className="font-bold text-xl text-black">
+      <div className="font-medium text-xl text-black">
         <img
           src="/images/pottaLogo.svg"
           alt="Potta Logo"

@@ -33,7 +33,7 @@ const ARMetrics: React.FC<ARMetricsProps> = ({ metrics, formatCurrency }) => {
                   <p className="text-sm font-medium text-gray-600">
                     {metric.name}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-medium text-gray-900">
                     {metric.name === 'Average Invoice Value'
                       ? formatCurrency(metric.value)
                       : metric.value.toLocaleString()}

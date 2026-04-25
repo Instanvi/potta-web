@@ -19,7 +19,7 @@ const TopVendors: React.FC<TopVendorsProps> = ({ data, formatCurrency }) => {
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Top Vendors</h2>
+        <h2 className="text-xl font-medium text-gray-900">Top Vendors</h2>
         <div className="p-2 bg-green-100">
           <Building2 className="h-5 w-5 text-green-600" />
         </div>
@@ -43,7 +43,7 @@ const TopVendors: React.FC<TopVendorsProps> = ({ data, formatCurrency }) => {
               >
                 <div className="flex items-center space-x-3">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                       isTopVendor
                         ? 'bg-green-600 text-white'
                         : 'bg-gray-200 text-gray-600'
@@ -66,7 +66,7 @@ const TopVendors: React.FC<TopVendorsProps> = ({ data, formatCurrency }) => {
                 </div>
                 <div className="text-right">
                   <p
-                    className={`text-sm font-semibold ${
+                    className={`text-sm font-medium ${
                       isTopVendor ? 'text-green-900' : 'text-gray-900'
                     }`}
                   >
@@ -94,7 +94,7 @@ const TopVendors: React.FC<TopVendorsProps> = ({ data, formatCurrency }) => {
         <div className="mt-6 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>Total Vendor Payments</span>
-            <span className="font-semibold text-gray-900">
+            <span className="font-medium text-gray-900">
               {formatCurrency(totalAmount)}
             </span>
           </div>

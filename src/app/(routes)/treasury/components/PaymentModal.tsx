@@ -152,7 +152,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           >
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-medium">
                 {isSuccess ? 'Payment Successful' : 'Make Payment'}
               </h2>
               {!isSuccess && (
@@ -174,7 +174,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-medium text-gray-900 mb-2">
                     Payment Completed Successfully
                   </h3>
                   <p className="text-gray-600 text-center mb-4">
@@ -199,7 +199,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   {/* Invoice Details */}
                   {selectedInvoice && (
                     <div className="bg-gray-50 p-4 ">
-                      <h3 className="font-semibold text-gray-900 mb-2">
+                      <h3 className="font-medium text-gray-900 mb-2">
                         Bill Details
                       </h3>
                       <div className="space-y-2 text-sm">
@@ -238,7 +238,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
                   {/* Payment Method Selection */}
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">
+                    <h3 className="font-medium text-gray-900 mb-3">
                       Select Payment Method
                     </h3>
                     <div className="space-y-3">

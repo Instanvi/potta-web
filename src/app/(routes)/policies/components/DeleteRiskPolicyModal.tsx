@@ -65,7 +65,7 @@ const DeleteRiskPolicyModal: React.FC<DeleteRiskPolicyModalProps> = ({
                 <Trash2 className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-medium text-gray-900">
                   Delete Risk Policy
                 </h2>
                 <p className="text-sm text-gray-600">

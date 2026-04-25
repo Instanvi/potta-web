@@ -184,7 +184,7 @@ const CreateRiskPolicyModal: React.FC<CreateRiskPolicyModalProps> = ({
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
           <div className="text-center">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               Error Loading Policy
             </h3>
             <p className="text-gray-600 mb-4">
@@ -220,7 +220,7 @@ const CreateRiskPolicyModal: React.FC<CreateRiskPolicyModalProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl font-medium">
             {displayPolicy ? 'Edit Risk Policy' : 'Create Risk Policy'}
           </h2>
           <button

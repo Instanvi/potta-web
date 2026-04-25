@@ -91,8 +91,17 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
     // Call the create product API with components
     mutation.mutate(finalProductData, {
       onSuccess: (response) => {
+        const createdProductId =
+          response?.data?.uuid ??
+          response?.uuid ??
+          response?.data?.id ??
+          response?.id;
+        if (!createdProductId) {
+          toast.error('Product created but no product ID was returned.');
+          return;
+        }
         toast.success('Product created successfully!');
-        setProductId(response.data?.uuid || 'temp-id');
+        setProductId(createdProductId);
         setProductData(finalProductData);
         setActive('confirm');
       },
@@ -165,7 +174,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
           <div onClick={() => setActive('create')}>
             <p
               className={`whitespace-nowrap ${
-                active === 'create' && 'text-green-700 font-semibold'
+                active === 'create' && 'text-green-700 font-medium'
               } cursor-pointer text-left`}
             >
               Create Product
@@ -177,7 +186,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
               <p
                 className={`whitespace-nowrap ${
                   ['components', 'confirm', 'upload'].includes(active) &&
-                  'text-green-700 font-semibold'
+                  'text-green-700 font-medium'
                 } cursor-pointer text-left`}
               >
                 {productType === 'ASSEMBLY'
@@ -197,7 +206,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
             <p
               className={`whitespace-nowrap ${
                 ['confirm', 'upload'].includes(active) &&
-                'text-green-700 font-semibold'
+                'text-green-700 font-medium'
               } cursor-pointer text-left ${
                 !isUploadStepEnabled() ? 'opacity-50 cursor-not-allowed' : ''
               }`}
@@ -233,7 +242,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
 
             {active === 'confirm' && productId && (
               <div className="p-8 flex flex-col items-center justify-center">
-                <h2 className="text-lg font-bold mb-4">
+                <h2 className="text-lg font-medium mb-4">
                   Product Created Successfully!
                 </h2>
                 <p className="mb-6 text-gray-600">

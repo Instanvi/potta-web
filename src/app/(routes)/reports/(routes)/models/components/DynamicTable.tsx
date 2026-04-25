@@ -73,7 +73,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
           <tr key={key}>
             <td
               colSpan={columns.length}
-              className="px-6 py-3 bg-gray-50 font-semibold text-gray-700 border-b"
+              className="px-6 py-3 bg-gray-50 font-medium text-gray-700 border-b"
               style={{ fontStyle: 'italic' }}
             >
               {row.label}
@@ -88,7 +88,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
           <tr
             className={`${
               highlightRow && highlightRow(row)
-                ? 'bg-green-50 font-bold'
+                ? 'bg-green-50 font-medium'
                 : level % 2 === 0
                 ? 'bg-white'
                 : 'bg-gray-50'
@@ -158,7 +158,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
           {columns.map((col, i) => (
             <th
               key={col.key}
-              className={`px-6 py-3 text-xs font-bold text-gray-700 uppercase tracking-wider border-b ${
+              className={`px-6 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider border-b ${
                 col.align === 'right' ? 'text-right' : 'text-left'
               } ${i !== columns.length - 1 ? 'border-r' : ''}`}
             >

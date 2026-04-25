@@ -47,7 +47,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             <div className="w-96 bg-gray-50 p-4 space-y-3">
               <div className="w-full flex justify-between py-2 border-b border-gray-200">
                 <span className="font-medium text-gray-600">Subtotal</span>
-                <p className="font-semibold text-lg text-gray-800">
+                <p className="font-medium text-lg text-gray-800">
                   ${subtotal.toFixed(2)}
                 </p>
               </div>
@@ -58,7 +58,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <span className="font-medium text-gray-600">
                     Item Discounts
                   </span>
-                  <p className="font-semibold text-red-500 text-lg">
+                  <p className="font-medium text-red-500 text-lg">
                     -${itemDiscounts.toFixed(2)}
                   </p>
                 </div>
@@ -70,7 +70,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <span className="font-medium text-gray-600">
                     Coupon Discount
                   </span>
-                  <p className="font-semibold text-red-500 text-lg">
+                  <p className="font-medium text-red-500 text-lg">
                     -${discount.toFixed(2)}
                   </p>
                 </div>
@@ -82,7 +82,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <span className="font-medium text-gray-600">
                     Total Discount
                   </span>
-                  <p className="font-semibold text-red-500 text-lg">
+                  <p className="font-medium text-red-500 text-lg">
                     -${totalDiscount.toFixed(2)}
                   </p>
                 </div>
@@ -90,13 +90,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
               <div className="w-full flex justify-between py-2 border-b border-gray-200">
                 <span className="font-medium text-gray-600">Tax</span>
-                <p className="font-semibold text-lg text-gray-800">
+                <p className="font-medium text-lg text-gray-800">
                   ${tax.toFixed(2)}
                 </p>
               </div>
               <div className="w-full flex justify-between py-3 bg-green-50 px-3">
-                <span className="font-semibold text-gray-800">Total</span>
-                <p className="font-bold text-xl text-green-700">
+                <span className="font-medium text-gray-800">Total</span>
+                <p className="font-medium text-xl text-green-700">
                   ${total.toFixed(2)}
                 </p>
               </div>

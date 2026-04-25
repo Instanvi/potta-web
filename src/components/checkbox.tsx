@@ -45,7 +45,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
         </div>
         <label
           htmlFor={id}
-          className="text-sm font-semibold text-gray-600 cursor-pointer"
+          className="text-sm font-medium text-gray-600 cursor-pointer"
         >
           {label}
         </label>

@@ -93,7 +93,7 @@ const BankAccountCard: React.FC<BankAccountCardProps> = ({
         <Card className="bg-white shadow-sm hover:shadow-sm transition-shadow duration-200 relative overflow-hidden">
           <CardHeader className="pb-4 !p-4 flex flex-row justify-between items-start">
             <div>
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
                 {mainLabel}
                 {subLabel && (
                   <span className="ml-2 text-gray-400 text-base">
@@ -136,7 +136,7 @@ const BankAccountCard: React.FC<BankAccountCardProps> = ({
           </CardHeader>
           <CardContent className="flex flex-col items-end justify-end pt-6 pb-2">
             <span className="text-xs text-gray-500 mb-1">Balance</span>
-            <span className="text-2xl font-bold text-gray-800">
+            <span className="text-2xl font-medium text-gray-800">
               {formatCurrency(balance, currency)} {currency}
             </span>
           </CardContent>

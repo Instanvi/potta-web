@@ -147,7 +147,7 @@ const ViewVendorSlider: React.FC<VendorDetailsProps> = ({
     <div className="bg-white border border-gray-200 rounded-lg p-6">
       <div className="flex items-center space-x-2 mb-4">
         <div className="p-2 bg-blue-50 rounded-lg">{icon}</div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
       </div>
       {children}
     </div>
@@ -206,7 +206,7 @@ const ViewVendorSlider: React.FC<VendorDetailsProps> = ({
                     <Building className="h-8 w-8 text-gray-600" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-medium text-gray-900">
                       {data.name}
                     </h2>
                     <p className="text-gray-600 capitalize">{data.type}</p>

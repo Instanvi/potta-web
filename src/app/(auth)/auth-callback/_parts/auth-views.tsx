@@ -41,7 +41,7 @@ export function AuthErrorView({
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-xl font-medium tracking-tight">
             {canRetry ? "Connection Issue" : "Sync Failed"}
           </h1>
           <p className="text-sm text-gray-500 leading-relaxed">

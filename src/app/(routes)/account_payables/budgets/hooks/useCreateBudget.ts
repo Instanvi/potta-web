@@ -21,7 +21,7 @@ export const useCreateBudget = () => {
 
   const {
     mutateAsync: createBudget,
-    isLoading: loading,
+    isPending: loading,
     error,
     data: createdBudget,
   } = useMutation({

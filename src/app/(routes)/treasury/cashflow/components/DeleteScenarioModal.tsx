@@ -67,7 +67,7 @@ const DeleteScenarioModal: React.FC<DeleteScenarioModalProps> = ({
               <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-medium text-gray-900">
                 Delete Scenario
               </h2>
               <p className="text-sm text-gray-500">

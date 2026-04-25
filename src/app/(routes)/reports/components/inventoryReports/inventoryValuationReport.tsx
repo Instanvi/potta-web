@@ -19,7 +19,7 @@ const InventoryValuationReport: React.FC<InventoryValuationReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Inventory Valuation Report</h1>
+        <h1 className="text-2xl font-medium">Inventory Valuation Report</h1>
         <div className="space-x-2">
           <button className="inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium shadow-sm text-gray-700 bg-white hover:bg-gray-50">
             <Printer className="h-4 w-4 mr-2" />
@@ -53,25 +53,25 @@ const InventoryValuationReport: React.FC<InventoryValuationReportProps> = ({
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Total Inventory Value</p>
-            <p className="text-2xl font-bold">${kpis.totalInventoryValue.toLocaleString()}</p>
+            <p className="text-2xl font-medium">${kpis.totalInventoryValue.toLocaleString()}</p>
           </CardBody>
         </Card>
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Average Unit Cost</p>
-            <p className="text-2xl font-bold">${kpis.averageUnitCost.toLocaleString()}</p>
+            <p className="text-2xl font-medium">${kpis.averageUnitCost.toLocaleString()}</p>
           </CardBody>
         </Card>
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Most Expensive Item</p>
-            <p className="text-2xl font-bold">{kpis.mostExpensiveItem}</p>
+            <p className="text-2xl font-medium">{kpis.mostExpensiveItem}</p>
           </CardBody>
         </Card>
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Least Expensive Item</p>
-            <p className="text-2xl font-bold">{kpis.leastExpensiveItem}</p>
+            <p className="text-2xl font-medium">{kpis.leastExpensiveItem}</p>
           </CardBody>
         </Card>
       </div>

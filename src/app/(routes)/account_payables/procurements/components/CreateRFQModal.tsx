@@ -331,7 +331,7 @@ const CreateRFQModal: React.FC<CreateRFQModalProps> = ({
 
           {/* Terms & Conditions */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Terms & Conditions
             </h3>
 
@@ -370,7 +370,7 @@ const CreateRFQModal: React.FC<CreateRFQModalProps> = ({
 
           {/* Vendor Selection */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Select Vendors
             </h3>
 
@@ -396,7 +396,7 @@ const CreateRFQModal: React.FC<CreateRFQModalProps> = ({
           {/* Items Preview */}
           {spendRequest?.items && spendRequest.items.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900">
                 Items from Spend Request
               </h3>
               <div className="bg-gray-50 p-4 lg space-y-2">
@@ -444,7 +444,7 @@ const CreateRFQModal: React.FC<CreateRFQModalProps> = ({
               <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
                 <AlertCircle className="h-6 w-6 text-red-600" />
               </div>
-              <DialogTitle className="text-lg font-semibold text-gray-900">
+              <DialogTitle className="text-lg font-medium text-gray-900">
                 Validation Error
               </DialogTitle>
             </div>

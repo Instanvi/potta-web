@@ -41,7 +41,7 @@ const MainMenu: FC<MainMenuProps> = ({ children }) => {
         <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
         <div className="flex justify-between grow items-center">
-          <h1 className="text-xl font-bold capitalize">{context?.link}</h1>
+          <h1 className="text-xl font-medium capitalize">{context?.link}</h1>
 
           <div className="flex items-center gap-x-4 lg:gap-x-6">
             <div className="p-2 rounded-lg border flex justify-evenly items-center text-black">

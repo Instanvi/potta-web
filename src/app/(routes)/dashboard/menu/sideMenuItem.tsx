@@ -19,7 +19,7 @@ const SmallSideMenuItem: FC<SmallSideMenuItemProps> = ({ href, icon, active, tex
                 <li
                     className={classNames(
                         active
-                            ? "font-bold border-r-2 border-[#154406] text-[#154406]"
+                            ? "font-medium border-r-2 border-[#154406] text-[#154406]"
                             : "text-gray-500 hover:text-white hover:bg-[#154406] group-hover:text-white group-hover:bg-[#154406]",
                         "text-sm relative flex items-center py-2 px-4 cursor-pointer"
                     )}
@@ -51,9 +51,9 @@ export const LargeSideMenuItem: FC<LargeSideMenuItemProps> = ({ text, href, icon
                 href={href}
                 className={classNames(
                     active
-                        ? " font-bold border-r-2 border-[#154406] text-[#154406]"
+                        ? " font-medium border-r-2 border-[#154406] text-[#154406]"
                         : "text-gray-500 hover:text-[#154406] hover:bg-gray-50",
-                    " py-4 text-sm font-semibold flex px-10 capitalize"
+                    " py-4 text-sm font-medium flex px-10 capitalize"
                 )}
             >
                 <i className={`${icon} -mt-1 text-xl mr-2`}></i>

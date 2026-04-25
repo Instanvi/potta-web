@@ -150,7 +150,7 @@ const PayCash = () => {
   return (
     <div className="p-4 h-full bg-white ">
       <div className="flex justify-between items-center mb-8">
-        <h3 className="text-2xl font-semibold text-gray-800">Cash Payment</h3>
+        <h3 className="text-2xl font-medium text-gray-800">Cash Payment</h3>
         {lastOrderData && (
           <button
             onClick={handleReprint}
@@ -194,20 +194,20 @@ const PayCash = () => {
           <div className="space-y-4">
             <div className="w-full flex justify-between py-3 border-b border-gray-200">
               <span className="font-medium text-gray-600">Total</span>
-              <p className="font-semibold text-lg text-gray-800">
+              <p className="font-medium text-lg text-gray-800">
                 {total.toFixed(2)} XAF
               </p>
             </div>
             <div className="w-full flex justify-between py-3 border-b border-gray-200">
               <span className="font-medium text-gray-600">Cash Amount</span>
-              <p className="font-semibold text-lg text-gray-800">
+              <p className="font-medium text-lg text-gray-800">
                 {cashAmount.toFixed(2)} XAF
               </p>
             </div>
             <div className="w-full flex justify-between py-3 bg-green-50 px-3">
-              <span className="font-semibold text-gray-800">Change</span>
+              <span className="font-medium text-gray-800">Change</span>
               <p
-                className={`font-bold text-xl ${
+                className={`font-medium text-xl ${
                   change < 0 ? 'text-red-500' : 'text-green-700'
                 }`}
               >

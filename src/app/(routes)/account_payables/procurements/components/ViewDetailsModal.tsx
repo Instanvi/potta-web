@@ -147,7 +147,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
         <div className="bg-white border border-gray-200 p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-medium text-gray-900 mb-2">
                 {item.title}
               </h2>
               <p className="text-sm text-gray-500">
@@ -171,7 +171,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
         {/* Spend Request Specific Details */}
         {type === 'SPEND_REQUEST' && (
           <div className="bg-white border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
               Request Information
             </h3>
 
@@ -181,7 +181,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
                   <DollarSign className="w-4 h-4" />
                   <span>Requested Amount</span>
                 </div>
-                <p className="text-xl font-bold text-green-900">
+                <p className="text-xl font-medium text-green-900">
                   {formatCurrency((item as SpendRequest).requestedAmount || 0)}
                 </p>
               </div>
@@ -240,7 +240,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
         {/* RFQ Specific Details */}
         {type === 'RFQ' && (
           <div className="bg-white border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
               RFQ Information
             </h3>
 
@@ -315,7 +315,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
 
         {/* Items List */}
         <div className="bg-white border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
             <Package className="w-5 h-5" />
             Items
           </h3>
@@ -336,7 +336,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
                         {lineItem.category}
                       </p>
                     </div>
-                    <span className="font-bold text-green-900">
+                    <span className="font-medium text-green-900">
                       {formatCurrency(lineItem.totalAmount)}
                     </span>
                   </div>
@@ -380,7 +380,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
             {type === 'RFQ' &&
               (item as RFQ).requirements?.items?.map((lineItem, index) => (
                 <div
-                  key={lineItem.id}
+                  key={index}
                   className="border border-gray-200 p-4 rounded-lg"
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -421,7 +421,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
         {/* Approval History (if available for Spend Requests) */}
         {type === 'SPEND_REQUEST' && (
           <div className="bg-white border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
               Approval Information
             </h3>
 
@@ -470,7 +470,7 @@ const ViewDetailsModal: React.FC<ViewDetailsModalProps> = ({
           (item as RFQ).vendorList &&
           (item as RFQ).vendorList!.length > 0 && (
             <div className="bg-white border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Invited Vendors
               </h3>
 

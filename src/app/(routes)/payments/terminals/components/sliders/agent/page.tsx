@@ -97,7 +97,7 @@ const SliderAgent = () => {
             onClick={() => setTabs('control')}
             className={`px-4 py-2.5 duration-500 ease-out ease-in ${
               tabs == 'control' &&
-              'border-b  border-green-500 text-green-500 font-thin '
+              'border-b  border-green-500 text-green-500 font-normal '
             } cursor-pointer `}
           >
             <p>Controls</p>
@@ -106,7 +106,7 @@ const SliderAgent = () => {
             onClick={() => setTabs('policies')}
             className={`px-4 py-2.5 duration-500 ease-out ease-in ${
               tabs == 'policies' &&
-              'border-b border-green-500 text-green-500 font-thin '
+              'border-b border-green-500 text-green-500 font-normal '
             } cursor-pointer `}
           >
             <p>Policies</p>
@@ -115,7 +115,7 @@ const SliderAgent = () => {
             onClick={() => setTabs('info')}
             className={`px-4 py-2.5 duration-500 ease-out ease-in ${
               tabs == 'info' &&
-              'border-b border-green-500 text-green-500 font-thin '
+              'border-b border-green-500 text-green-500 font-normal '
             } cursor-pointer `}
           >
             <p>Additional Infos </p>

@@ -60,7 +60,7 @@ const providerDetails = {
     instructions: (amount: number, code: string) => (
       <>
         <div className="mb-2 text-gray-700">
-          Dial <span className="font-mono font-bold">*126#</span> on your phone.
+          Dial <span className="font-mono font-medium">*126#</span> on your phone.
         </div>
       </>
     ),
@@ -80,7 +80,7 @@ const providerDetails = {
     instructions: (amount: number, code: string) => (
       <>
         <div className="mb-2 text-gray-700">
-          Dial <span className="font-mono font-bold">#150*14#</span> on your
+          Dial <span className="font-mono font-medium">#150*14#</span> on your
           phone.
         </div>
       </>
@@ -193,7 +193,7 @@ const PayNowPage = () => {
     <div className="max-w-md mx-auto mt-5 bg-white border border-gray-200 p-8">
       {/* Only show the amount and payment section */}
       <div className="flex flex-col items-center gap-8">
-        <div className="text-gray-700 font-semibold">Amount Due</div>
+        <div className="text-gray-700 font-medium">Amount Due</div>
         <div className="text-4xl font-extrabold text-green-700">
           {currencySymbol}
           {total.toLocaleString()} XAF
@@ -203,7 +203,7 @@ const PayNowPage = () => {
           {waiting ? (
             <div className="flex flex-col items-center justify-center h-full py-16">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-6" />
-              <div className="text-xl font-bold text-green-700 mb-2">
+              <div className="text-xl font-medium text-green-700 mb-2">
                 Waiting for payment confirmation…
               </div>
               <div className="text-gray-600 text-center">
@@ -213,7 +213,7 @@ const PayNowPage = () => {
             </div>
           ) : (
             <>
-              <h2 className="text-lg font-bold mb-2 text-gray-800">
+              <h2 className="text-lg font-medium mb-2 text-gray-800">
                 Choose Payment Method
               </h2>
               <div className="w-full flex flex-col gap-3">
@@ -228,7 +228,7 @@ const PayNowPage = () => {
                     onClick={() => setSelectedProvider(key as 'mtn' | 'orange')}
                   >
                     {p.icon}
-                    <span className="font-semibold text-base">{p.label}</span>
+                    <span className="font-medium text-base">{p.label}</span>
                     <span className="flex-1" />
                     {selectedProvider === key && (
                       <i className="ri-check-line text-green-700 text-xl" />

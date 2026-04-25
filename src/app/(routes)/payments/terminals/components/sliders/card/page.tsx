@@ -71,10 +71,10 @@ const SliderCard = () => {
                 </div>
 
                 <div className='flex w-fit bg-green-100  mt-7'>
-                    <div onClick={() => setTabs('control')} className={`px-4 py-2.5 duration-500 ease-out ease-in ${tabs == 'control' && 'border-b  border-green-500 text-green-500 font-thin '} cursor-pointer `}>
+                    <div onClick={() => setTabs('control')} className={`px-4 py-2.5 duration-500 ease-out ease-in ${tabs == 'control' && 'border-b  border-green-500 text-green-500 font-normal '} cursor-pointer `}>
                         <p>Controls</p>
                     </div>
-                    <div onClick={() => setTabs('policies')} className={`px-4 py-2.5 duration-500 ease-out ease-in ${tabs == 'policies' && 'border-b border-green-500 text-green-500 font-thin '} cursor-pointer `}>
+                    <div onClick={() => setTabs('policies')} className={`px-4 py-2.5 duration-500 ease-out ease-in ${tabs == 'policies' && 'border-b border-green-500 text-green-500 font-normal '} cursor-pointer `}>
                         <p>Policies</p>
                     </div>
                 </div>

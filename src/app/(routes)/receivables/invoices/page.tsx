@@ -69,7 +69,7 @@ export default function Invoicing(): JSX.Element {
                                 className="w-full h-full "
                             />
                         </div>
-                        <h1 className="text-5xl font-bold mb-4">Create new invoice</h1>
+                        <h1 className="text-5xl font-medium mb-4">Create new invoice</h1>
                         <div className="w-[300px]">
                             <p className="text-center text-gray-400 text-sm">
                                 Apply today and start using our banking app after documents
@@ -86,48 +86,48 @@ export default function Invoicing(): JSX.Element {
                     <div className="grid grid-cols-1 gap-y-4 gap-x-2 py-2 w-full sm:grid-cols-3">
                         <div className="flex flex-col border  px-5 py-4">
                             <div className="flex justify-between">
-                                <h1 className="text-gray-400 text-sm font-semibold">
+                                <h1 className="text-gray-400 text-sm font-medium">
                                     Total invoices
                                 </h1>
                                 <i className="ri-arrow-right-up-line text-green-400"></i>
                             </div>
                             <div className="py-4">
-                                <h1 className="text-3xl font-bold">CFA 9.650,00</h1>
+                                <h1 className="text-3xl font-medium">CFA 9.650,00</h1>
                             </div>
                             <div className="flex justify-between">
-                                <h1 className="text-sm font-semibold">Send 142 invoices</h1>
+                                <h1 className="text-sm font-medium">Send 142 invoices</h1>
                                 <h1 className="text-sm text-green-400">+10%</h1>
                             </div>
                         </div>
 
                         <div className="flex flex-col border  px-5 py-4">
                             <div className="flex justify-between">
-                                <h1 className="text-gray-400 text-sm font-semibold">
+                                <h1 className="text-gray-400 text-sm font-medium">
                                     Paid invoices
                                 </h1>
                                 <i className="ri-arrow-left-down-line text-red-400"></i>
                             </div>
                             <div className="py-4">
-                                <h1 className="text-3xl font-bold">CFA 9.650,00</h1>
+                                <h1 className="text-3xl font-medium">CFA 9.650,00</h1>
                             </div>
                             <div className="flex justify-between">
-                                <h1 className="text-sm font-semibold">From 122 customers</h1>
+                                <h1 className="text-sm font-medium">From 122 customers</h1>
                                 <h1 className="text-sm text-red-400">-2%</h1>
                             </div>
                         </div>
 
                         <div className="flex flex-col border  px-5 py-4">
                             <div className="flex justify-between">
-                                <h1 className="text-gray-400 text-sm font-semibold">
+                                <h1 className="text-gray-400 text-sm font-medium">
                                     Unpaid Invoices
                                 </h1>
                                 <i className="ri-arrow-right-up-line text-green-400"></i>
                             </div>
                             <div className="py-4">
-                                <h1 className="text-3xl font-bold">CFA 889.650,00</h1>
+                                <h1 className="text-3xl font-medium">CFA 889.650,00</h1>
                             </div>
                             <div className="flex justify-between">
-                                <h1 className="text-sm font-semibold">From customers</h1>
+                                <h1 className="text-sm font-medium">From customers</h1>
                                 <h1 className="text-sm text-green-400">+15%</h1>
                             </div>
                         </div>

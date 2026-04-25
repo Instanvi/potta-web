@@ -89,12 +89,12 @@ const PdfView = () => {
   return (
     <div className="flex min-h-full flex-col items-center justify-center overflow-y-auto w-full scroll bg-[#F2F2F2]">
       <div className="flex min-w-[45rem] justify-between w-full p-8">
-        <h3 className="text-xl font-semibold">PDF Preview</h3>
+        <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>
       <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
         <div className="h-36 w-full flex items-center justify-between px-8 bg-yellow-800">
           <div>
-            <p className="text-3xl font-semibold text-white">Recurring {invoiceType}</p>
+            <p className="text-3xl font-medium text-white">Recurring {invoiceType}</p>
             <p className="text-white mt-2">#{invoiceNumber}</p>
           </div>
           <div className="text-right text-white">
@@ -112,7 +112,7 @@ const PdfView = () => {
         
         {/* Recurring Information Box */}
         <div className="px-8 py-4 bg-blue-50 border-l-4 border-blue-500">
-          <h3 className="font-bold text-blue-800 mb-2">Recurring Schedule</h3>
+          <h3 className="font-medium text-blue-800 mb-2">Recurring Schedule</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p><strong>Frequency:</strong> {frequency}</p>
@@ -133,7 +133,7 @@ const PdfView = () => {
         <div className="p-5 space-y-16 bg-white">
           <div className="mt-5 w-full flex space-x-5">
             <div className="flex w-[40%] space-x-2">
-              <h3 className="font-bold">From: </h3>
+              <h3 className="font-medium">From: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">
                 <p>ABC Company</p>
                 <p>hello@ABCcompany.com</p>
@@ -142,7 +142,7 @@ const PdfView = () => {
               </div>
             </div>
             <div className="flex space-x-2">
-              <h3 className="font-bold">To: </h3>
+              <h3 className="font-medium">To: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">
                 {customerLoading ? (
                   <p>Loading customer details...</p>
@@ -168,7 +168,7 @@ const PdfView = () => {
 
           {shippingAddress && (
             <div className="mt-4">
-              <h3 className="font-bold">Shipping Address:</h3>
+              <h3 className="font-medium">Shipping Address:</h3>
               <p className="text-sm text-gray-600">{shippingAddress}</p>
             </div>
           )}
@@ -279,7 +279,7 @@ const PdfView = () => {
               </div>
               {/* Horizontal Line */}
               <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-bold">
+              <div className="flex justify-between font-medium">
                 <div className="w-1/2">Total:</div>
                 <div className="w-1/2 text-right pr-20">
                   {currencySymbol}

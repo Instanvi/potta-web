@@ -407,7 +407,7 @@ const ApiDebugTest: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-medium text-gray-900 mb-2">
           Potta FP&A Metrics API Debug Test
         </h2>
         <p className="text-gray-600">
@@ -417,13 +417,13 @@ const ApiDebugTest: React.FC = () => {
 
       {/* Test Controls */}
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
           Test Controls
         </h3>
 
         {/* KPI Tests */}
         <div className="mb-4">
-          <h4 className="text-md font-semibold text-gray-800 mb-2">
+          <h4 className="text-md font-medium text-gray-800 mb-2">
             KPI Endpoints
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -453,7 +453,7 @@ const ApiDebugTest: React.FC = () => {
 
         {/* Finance Tests */}
         <div className="mb-4">
-          <h4 className="text-md font-semibold text-gray-800 mb-2">
+          <h4 className="text-md font-medium text-gray-800 mb-2">
             Finance Endpoints
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -490,7 +490,7 @@ const ApiDebugTest: React.FC = () => {
 
         {/* Human Capital Tests */}
         <div className="mb-4">
-          <h4 className="text-md font-semibold text-gray-800 mb-2">
+          <h4 className="text-md font-medium text-gray-800 mb-2">
             Human Capital Endpoints
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -527,7 +527,7 @@ const ApiDebugTest: React.FC = () => {
 
         {/* Sales & Inventory Tests */}
         <div className="mb-4">
-          <h4 className="text-md font-semibold text-gray-800 mb-2">
+          <h4 className="text-md font-medium text-gray-800 mb-2">
             Sales & Inventory Endpoints
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -581,7 +581,7 @@ const ApiDebugTest: React.FC = () => {
 
       {/* Results */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Test Results</h3>
+        <h3 className="text-lg font-medium text-gray-900">Test Results</h3>
         {results.length === 0 ? (
           <div className="text-gray-500 text-center py-8">
             No test results yet. Click a test button above to start debugging.
@@ -597,7 +597,7 @@ const ApiDebugTest: React.FC = () => {
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-900">{result.test}</h4>
+                <h4 className="font-medium text-gray-900">{result.test}</h4>
                 <span className="text-sm text-gray-500">
                   {result.timestamp}
                 </span>

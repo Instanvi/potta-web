@@ -95,7 +95,7 @@ const DashboardPage: React.FC = () => {
         </div>
         {activeTab !== 'general' && (
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl w-full font-bold text-gray-900">
+            <h1 className="text-2xl w-full font-medium text-gray-900">
               {dashboardTabs.find((tab) => tab.id === activeTab)?.name}
             </h1>
 
@@ -142,7 +142,7 @@ const DashboardPage: React.FC = () => {
         ) : (
           <div className="space-y-8">
             <div className="text-center py-12">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              <h2 className="text-2xl font-medium text-gray-900 mb-4">
                 Dashboard
               </h2>
               <p className="text-gray-600">Dashboard content coming soon...</p>

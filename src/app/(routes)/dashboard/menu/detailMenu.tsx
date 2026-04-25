@@ -54,7 +54,7 @@ const DetailMenu: FC<DetailMenuProps> = ({ children, id, title, backLink }) => {
             <Link href={backLink}>
               <i className="ri-arrow-left-s-line text-xl"></i>
             </Link>
-            <h1 className="text-xl font-bold">
+            <h1 className="text-xl font-medium">
               {title} {id}
             </h1>
           </div>

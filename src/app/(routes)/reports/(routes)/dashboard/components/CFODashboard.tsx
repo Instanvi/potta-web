@@ -707,7 +707,7 @@ const CFODashboard: React.FC<CFODashboardProps> = ({ timeGranularity }) => {
 
           {/* Below Title: Current Value */}
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-2xl font-medium text-gray-900">{value}</p>
           </div>
 
           {/* Bottom: Last Period Value */}

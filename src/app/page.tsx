@@ -27,7 +27,7 @@ const WelcomePage = () => {
   if (!mounted) {
     return (
       <RootLayout>
-        <div className={`${context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-0'} p-6 space-y-8 bg-white min-h-screen animate-pulse`}>
+        <div className={`${context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-0'} min-h-full space-y-8 bg-white p-6 animate-pulse`}>
            <div className="w-full h-32 bg-slate-50 rounded-lg"></div>
         </div>
       </RootLayout>
@@ -36,7 +36,7 @@ const WelcomePage = () => {
 
   return (
     <RootLayout>
-      <div className={`${context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-0'} p-6 space-y-8 bg-white min-h-screen`}>
+      <div className={`${context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-0'} min-h-full space-y-8 bg-white p-6`}>
         
         {/* Header & Stats */}
         <DashboardHeader />
@@ -54,7 +54,7 @@ const WelcomePage = () => {
 
         {/* All Applications Section */}
         <section>
-          <h2 className="text-lg font-semibold text-slate-800 mb-4 px-1">All Applications</h2>
+          <h2 className="mb-4 px-1 text-lg text-black">All Applications</h2>
           <PortfolioGrid />
         </section>
 

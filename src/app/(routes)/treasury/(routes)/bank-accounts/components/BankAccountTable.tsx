@@ -116,7 +116,7 @@ const BankAccountTable: React.FC<BankAccountTableProps> = ({
       selector: (row: any) => row.balance,
       sortable: true,
       minWidth: '120px',
-      cell: (row: any) => <span className="font-semibold">{row.balance}</span>,
+      cell: (row: any) => <span className="font-medium">{row.balance}</span>,
     },
     {
       name: '',

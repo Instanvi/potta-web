@@ -138,7 +138,7 @@ const DynamicAccountTable: React.FC<DynamicAccountTableProps> = ({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`py-2 px-4 text-gray-800 font-semibold ${
+                  className={`py-2 px-4 text-gray-800 font-medium ${
                     col.align === 'right' ? 'text-right' : 'text-left'
                   }`}
                 >

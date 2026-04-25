@@ -79,7 +79,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
   return (
     <div className="bg-white   p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-medium text-gray-900">
           Recent Transactions
         </h3>
         <div className="flex items-center space-x-2">
@@ -144,7 +144,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
                     {transaction.type}
                   </span>
                   <span
-                    className={`font-semibold ${
+                    className={`font-medium ${
                       transaction.amount >= 0
                         ? 'text-green-600'
                         : 'text-red-600'

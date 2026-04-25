@@ -36,7 +36,7 @@ const TreasuryMetrics: React.FC<TreasuryMetricsProps> = ({
                   <p className="text-sm font-medium text-gray-600">
                     {metric.name}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-medium text-gray-900">
                     {metric.name.toLowerCase().includes('ratio')
                       ? metric.value.toFixed(2)
                       : metric.name.toLowerCase().includes('days')

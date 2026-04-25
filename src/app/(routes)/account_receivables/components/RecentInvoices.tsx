@@ -80,7 +80,7 @@ const RecentInvoices: React.FC<RecentInvoicesProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Recent Invoices</h2>
+        <h2 className="text-xl font-medium text-gray-900">Recent Invoices</h2>
         <button
           onClick={() =>
             (window.location.href = '/account_receivables/invoice')
@@ -110,7 +110,7 @@ const RecentInvoices: React.FC<RecentInvoicesProps> = ({
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-900">
                   {formatCurrency(invoice.amount)}
                 </p>
                 <div className="flex items-center space-x-2">

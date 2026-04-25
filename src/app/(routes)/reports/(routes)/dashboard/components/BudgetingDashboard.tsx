@@ -584,7 +584,7 @@ const BudgetingDashboard: React.FC<BudgetingDashboardProps> = ({
                   />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-medium text-gray-900">
                     {kpi.value}
                   </p>
                   <p
@@ -606,7 +606,7 @@ const BudgetingDashboard: React.FC<BudgetingDashboardProps> = ({
         {/* Revenue Scenarios Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Revenue Scenarios - FY
             </CardTitle>
           </CardHeader>
@@ -620,7 +620,7 @@ const BudgetingDashboard: React.FC<BudgetingDashboardProps> = ({
         {/* P&L Summary */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               P&L Summary - FY25
             </CardTitle>
           </CardHeader>

@@ -237,7 +237,7 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
           {/* Show parent account info when creating child */}
           {account && (
             <div className="mb-4 p-3 bg-green-50 border border-green-200">
-              <p className="text-xs font-semibold text-green-800 mb-1">
+              <p className="text-xs font-medium text-green-800 mb-1">
                 Creating child account under:
               </p>
               <div className="text-xs text-green-700">

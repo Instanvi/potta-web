@@ -3,6 +3,8 @@ import React from 'react';
 import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import Image from 'next/image';
+import { CustomSearchBar } from '@potta/components/shared/CustomSearchBar';
+import { CreateBillSheet } from './CreateBillSheet';
 
 interface FilterProps {
   search: string;
@@ -42,6 +44,7 @@ const Filter: React.FC<FilterProps> = ({
   paymentMethod,
   onPaymentMethodChange,
 }) => {
+  const [sheetOpen, setSheetOpen] = React.useState(false);
   const filterConfig = [
     {
       key: 'status',
@@ -62,13 +65,20 @@ const Filter: React.FC<FilterProps> = ({
   return (
     <div className="w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4 whitespace-normal break-words">
       <div className="flex-1">
-        <DynamicFilter
-          searchValue={search}
-          onSearchChange={(e) => onSearchChange(e.target.value)}
-          onSearchClear={onSearchClear}
-          searchPlaceholder="Search bills..."
-          filters={filterConfig}
-        />
+        <div className="space-y-3">
+          <CustomSearchBar
+            value={search}
+            onChange={onSearchChange}
+            placeholder="search bills"
+          />
+          <DynamicFilter
+            searchValue={search}
+            onSearchChange={(e) => onSearchChange(e.target.value)}
+            onSearchClear={onSearchClear}
+            searchPlaceholder="Search bills..."
+            filters={filterConfig}
+          />
+        </div>
       </div>
       <div className="flex flex-row gap-2 justify-end items-center mt-2 md:mt-0">
         <Button
@@ -90,9 +100,10 @@ const Filter: React.FC<FilterProps> = ({
           icon={<i className="ri-file-add-line"></i>}
           theme="default"
           type={'button'}
-          onClick={() => (window.location.href = '/account_payables/bills/new')}
+          onClick={() => setSheetOpen(true)}
         />
       </div>
+      <CreateBillSheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </div>
   );
 };

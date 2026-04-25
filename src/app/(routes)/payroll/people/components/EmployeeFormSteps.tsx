@@ -27,7 +27,7 @@ const EmployeeFormSteps: React.FC<EmployeeFormStepsProps> = ({
       >
         <p
           className={`whitespace-nowrap text-left ${
-            isActive ? 'text-green-700 font-semibold' : ''
+            isActive ? 'text-green-700 font-medium' : ''
           }`}
         >
           {label}

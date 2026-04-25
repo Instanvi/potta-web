@@ -28,7 +28,7 @@ const ModalPrint: React.FC<PrintModalProps> = ({ open, setOpen, data }) => {
       title="Print Receipt"
     >
       <div className="p-6" id="printable-content">
-        <h2 className="text-2xl font-bold mb-4">Receipt</h2>
+        <h2 className="text-2xl font-medium mb-4">Receipt</h2>
         <div className="mb-6">
           <p>Date: {new Date().toLocaleDateString()}</p>
           <p>Time: {new Date().toLocaleTimeString()}</p>
@@ -71,7 +71,7 @@ const ModalPrint: React.FC<PrintModalProps> = ({ open, setOpen, data }) => {
               <span>Tax:</span>
               <span>${data.tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between font-bold border-t pt-2">
+            <div className="flex justify-between font-medium border-t pt-2">
               <span>Total:</span>
               <span>${data.total.toFixed(2)}</span>
             </div>

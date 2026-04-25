@@ -67,7 +67,7 @@ const TreasuryOverviewMetrics: React.FC<TreasuryOverviewMetricsProps> = ({
             <p className="text-sm text-gray-500">
               {content.totalOutstandingLabel}
             </p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-2xl font-medium text-gray-900">
               {formatCurrency(totalToPay)}
             </p>
           </div>
@@ -86,7 +86,7 @@ const TreasuryOverviewMetrics: React.FC<TreasuryOverviewMetricsProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">{content.scheduledLabel}</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-2xl font-medium text-gray-900">
               {formatCurrency(scheduledTransactions)}
             </p>
           </div>
@@ -105,7 +105,7 @@ const TreasuryOverviewMetrics: React.FC<TreasuryOverviewMetricsProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">{content.paidLabel}</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-2xl font-medium text-gray-900">
               {formatCurrency(paidTransactions)}
             </p>
           </div>
@@ -124,7 +124,7 @@ const TreasuryOverviewMetrics: React.FC<TreasuryOverviewMetricsProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">{content.pendingLabel}</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-2xl font-medium text-gray-900">
               {invoicesToPay + transactionsToPay + entriesToPrepare}
             </p>
           </div>

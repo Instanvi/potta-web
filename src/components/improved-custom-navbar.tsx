@@ -13,7 +13,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ContextData } from './providers/DataProvider';
 import { menuStructure } from './navbarLinks';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 
 
 export type MenuItem = {
@@ -41,11 +42,11 @@ const ImprovedCustomNavbar = () => {
   const isHome = pathname === '/';
 
   return (
-    <nav className="flex gap-6 items-center px-6 py-4 bg-white sticky top-0 left-0 z-30 w-full shadow-sm border-b border-gray-100">
+    <nav className="sticky left-0 top-0 z-30 flex w-full items-center gap-6 border-b border-black/10 bg-white px-6 py-4 shadow-sm">
       {/* Logo */}
       <Link
         href="/"
-        className="font-bold cursor-pointer text-xl text-black flex-shrink-0"
+        className="font-medium cursor-pointer text-xl text-black flex-shrink-0"
       >
         <img
           src="/images/pottaLogo.svg"
@@ -378,7 +379,7 @@ const ImprovedCustomNavbar = () => {
                 <button
                   onClick={() => {
                     if (confirm('Are you sure you want to sign out?')) {
-                      signOut();
+                      void signOutWithAuthApi();
                     }
                   }}
                   className="flex items-center w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50  transition-colors duration-200"

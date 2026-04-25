@@ -266,7 +266,7 @@ export function TimeInput({
                   </Select>
                 </div>
 
-                <span className="text-2xl font-bold pt-6">:</span>
+                <span className="text-2xl font-medium pt-6">:</span>
 
                 {/* Minute selector */}
                 <div className="flex flex-col items-center">

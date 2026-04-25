@@ -46,7 +46,7 @@ const AssetTable = () => {
         else if (status === 'Decommissioned') color = ' text-red-600';
         return (
           <span
-            className={`inline-block px-3 py-1 rounded-full text-md font-semibold ${color}`}
+            className={`inline-block px-3 py-1 rounded-full text-md font-medium ${color}`}
           >
             {status}
           </span>

@@ -91,7 +91,7 @@ const AccountPayablesPage = () => {
     if (selectedSubmenu) {
       return (
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900">
+          <h2 className="text-2xl font-medium mb-4 text-gray-900">
             {selectedSubmenu
               .replace(/_/g, ' ')
               .replace(/\b\w/g, (l) => l.toUpperCase())}
@@ -107,7 +107,7 @@ const AccountPayablesPage = () => {
 
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4 text-gray-900">
+        <h2 className="text-2xl font-medium mb-4 text-gray-900">
           Account Payables
         </h2>
         <div className="bg-white p-6 border border-gray-200">

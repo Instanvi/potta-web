@@ -281,7 +281,7 @@ const Left = () => {
       </div>
 
       <hr className="my-5" />
-      <h3 className="text-xl font-thin my-2">Notes</h3>
+      <h3 className="text-xl font-normal my-2">Notes</h3>
       <textarea
         value={note}
         onChange={(e) => handleInputChange('note', e.target.value)}

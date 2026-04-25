@@ -173,7 +173,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-medium text-gray-900">
           {productType === 'ASSEMBLY' ? 'Assembly Products' : 'Group Products'}
         </h2>
         <Button type="button" text="Back" theme="gray" onClick={onBack} />

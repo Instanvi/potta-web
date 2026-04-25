@@ -19,7 +19,7 @@ const CustomerSummaryReport: React.FC<CustomerSummaryReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Customer Summary Report</h1>
+        <h1 className="text-2xl font-medium">Customer Summary Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const CustomerSummaryReport: React.FC<CustomerSummaryReportProps> = ({
               <Users className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Customers</p>
-                <p className="text-xl font-bold">{kpis.totalCustomers}</p>
+                <p className="text-xl font-medium">{kpis.totalCustomers}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const CustomerSummaryReport: React.FC<CustomerSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Purchases</p>
-                <p className="text-xl font-bold">${kpis.totalPurchases.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalPurchases.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const CustomerSummaryReport: React.FC<CustomerSummaryReportProps> = ({
               <TrendingUp className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Avg Customer Value</p>
-                <p className="text-xl font-bold">${kpis.averageCustomerValue.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.averageCustomerValue.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const CustomerSummaryReport: React.FC<CustomerSummaryReportProps> = ({
               <UserCheck className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Active Customers</p>
-                <p className="text-xl font-bold">{kpis.numberOfActiveCustomers}</p>
+                <p className="text-xl font-medium">{kpis.numberOfActiveCustomers}</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const CustomerSummaryReport: React.FC<CustomerSummaryReportProps> = ({
               <Award className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Most Valuable</p>
-                <p className="text-xl font-bold">{kpis.mostValuableCustomer}</p>
+                <p className="text-xl font-medium">{kpis.mostValuableCustomer}</p>
               </div>
             </div>
           </CardBody>

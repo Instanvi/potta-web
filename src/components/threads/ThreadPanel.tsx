@@ -1033,7 +1033,7 @@ export const ThreadPanel = ({
             <MessageSquare className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">
+            <h3 className="text-sm font-medium text-gray-900">
               {thread?.subject || entityDisplayName || 'Conversation'}
             </h3>
             {(() => {

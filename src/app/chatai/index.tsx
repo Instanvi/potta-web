@@ -172,7 +172,7 @@ const ChatAI = ({ onClose }: ChatAIProps) => {
 
     return (
       <div className="mt-3 bg-gray-50 p-4 rounded-lg">
-        <h4 className="font-semibold text-sm text-gray-700 mb-2">Data Response:</h4>
+        <h4 className="font-medium text-sm text-gray-700 mb-2">Data Response:</h4>
         <div className="overflow-x-auto">
           <table className="min-w-full text-xs">
             <thead>
@@ -197,7 +197,7 @@ const ChatAI = ({ onClose }: ChatAIProps) => {
 
   const renderSourceBadge = (source: 'potta' | 'fpa' | null) => {
     if (!source) return null;
-    const baseClasses = 'px-2 py-1 text-[10px] font-bold rounded-full uppercase';
+    const baseClasses = 'px-2 py-1 text-[10px] font-medium rounded-full uppercase';
     return source === 'potta' 
       ? <span className={`${baseClasses} bg-blue-100 text-blue-800`}>Potta</span>
       : <span className={`${baseClasses} bg-purple-100 text-purple-800`}>FPA</span>;
@@ -205,7 +205,7 @@ const ChatAI = ({ onClose }: ChatAIProps) => {
 
   const renderTypeBadge = (messageType: 'actual' | 'forecast' | null) => {
     if (!messageType) return null;
-    const baseClasses = 'px-2 py-1 text-[10px] font-bold rounded-full uppercase';
+    const baseClasses = 'px-2 py-1 text-[10px] font-medium rounded-full uppercase';
     return messageType === 'actual'
       ? <span className={`${baseClasses} bg-green-100 text-green-800`}>Actual</span>
       : <span className={`${baseClasses} bg-orange-100 text-orange-800`}>Forecast</span>;
@@ -220,10 +220,10 @@ const ChatAI = ({ onClose }: ChatAIProps) => {
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-900">Livra AI</h3>
+            <h3 className="font-medium text-slate-900">Livra AI</h3>
             <div className="flex items-center space-x-2">
               <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{connectionStatus}</span>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{connectionStatus}</span>
             </div>
           </div>
         </div>
@@ -273,7 +273,7 @@ const ChatAI = ({ onClose }: ChatAIProps) => {
                   <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce [animation-delay:0.2s]"></div>
                   <div className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                 </div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Livra is thinking...</span>
+                <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">Livra is thinking...</span>
               </div>
             </div>
           </div>

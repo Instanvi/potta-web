@@ -265,7 +265,7 @@ const SliderSchedule = () => {
     >
       <div className="flex flex-col gap-5 w-full max-w-4xl">
         <div>
-          <p className="mb-2 font-semibold">PTO Type</p>
+          <p className="mb-2 font-medium">PTO Type</p>
           <Select
             options={typeOptions}
             selectedValue={formData.type}
@@ -275,7 +275,7 @@ const SliderSchedule = () => {
         </div>
 
         <div>
-          <p className="mb-2 font-semibold">Cycle Type</p>
+          <p className="mb-2 font-medium">Cycle Type</p>
           <Select
             options={cycleTypeOptions}
             selectedValue={formData.cycleType}
@@ -285,7 +285,7 @@ const SliderSchedule = () => {
         </div>
 
         <div>
-          <p className="mb-2 font-semibold">Accrual Rate</p>
+          <p className="mb-2 font-medium">Accrual Rate</p>
           <Input
             name="accrualRate"
             type="text"
@@ -304,7 +304,7 @@ const SliderSchedule = () => {
         </div>
 
         <div>
-          <p className="mb-2 font-semibold">Total Entitled Days</p>
+          <p className="mb-2 font-medium">Total Entitled Days</p>
           <Input
             name="totalEntitledDays"
             type="text"

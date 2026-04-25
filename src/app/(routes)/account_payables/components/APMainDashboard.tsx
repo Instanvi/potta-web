@@ -18,7 +18,6 @@ import VendorBreakdown from './VendorBreakdown';
 import PaymentChart from './PaymentChart';
 import TopVendors from './TopVendors';
 import RecentBills from './RecentBills';
-import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import {
@@ -27,9 +26,12 @@ import {
   PopoverTrigger,
 } from '@potta/components/shadcn/popover';
 import { Calendar } from '@potta/components/shadcn/calendar';
-import { pottaAnalyticsService } from '@potta/services/analyticsService';
-import { useGetBills } from '@potta/app/(routes)/treasury/hooks/useBills';
-import axios from 'config/axios.config';
+import {
+  useApBalance,
+  useApBills,
+  useApExpenses,
+  useApVendors,
+} from '@potta/hooks/api/accountPayables';
 
 interface APMainDashboardProps {
   type?: 'ap';
@@ -77,105 +79,13 @@ const APMainDashboard: React.FC<APMainDashboardProps> = ({ type = 'ap' }) => {
     customDate?.to?.toDateString(),
   ]);
 
-  // Fetch AP balance data for payment analysis
-  const { data: apBalanceData, isLoading: apLoading } = useQuery({
-    queryKey: [
-      'ap-balance',
-      calculatedDateRange?.from?.toISOString(),
-      calculatedDateRange?.to?.toISOString(),
-    ],
-    queryFn: async () => {
-      const timeGranularity = 'monthly';
-      const params: any = {
-        metrics: ['vendor_running_balance'],
-        dimensions: ['time'],
-        time_granularity: timeGranularity,
-        use_mock_data: true,
-      };
-
-      // Add date filtering
-      if (calculatedDateRange?.from) {
-        params.start_date = calculatedDateRange.from.toISOString();
-      }
-      if (calculatedDateRange?.to) {
-        params.end_date = calculatedDateRange.to.toISOString();
-      }
-
-      return await pottaAnalyticsService.finance.getAnalytics(
-        'ap_balance',
-        params
-      );
-    },
-    staleTime: 0,
-    refetchOnWindowFocus: false,
-  });
-
-  // Fetch expense data for vendor analysis
-  const { data: expenseData, isLoading: expenseLoading } = useQuery({
-    queryKey: [
-      'expense-vendors',
-      calculatedDateRange?.from?.toISOString(),
-      calculatedDateRange?.to?.toISOString(),
-    ],
-    queryFn: async () => {
-      const params: any = {
-        metrics: ['total_expenses'],
-        dimensions: ['time', 'vendor'],
-        time_granularity: 'monthly',
-        use_mock_data: true,
-      };
-
-      // Add date filtering
-      if (calculatedDateRange?.from) {
-        params.start_date = calculatedDateRange.from.toISOString();
-      }
-      if (calculatedDateRange?.to) {
-        params.end_date = calculatedDateRange.to.toISOString();
-      }
-
-      return await pottaAnalyticsService.finance.getAnalytics(
-        'expenses',
-        params
-      );
-    },
-  });
-
-  // Fetch real bills data with date filtering
-  const { data: billsData, isLoading: billsLoading } = useQuery({
-    queryKey: [
-      'bills-ap-dashboard',
-      calculatedDateRange?.from?.toISOString(),
-      calculatedDateRange?.to?.toISOString(),
-    ],
-    queryFn: async () => {
-      const filter: any = {
-        page: 1,
-        limit: 50,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-      };
-
-      // Add date filtering for bills
-      if (calculatedDateRange?.from) {
-        filter.startDate = calculatedDateRange.from.toISOString();
-      }
-      if (calculatedDateRange?.to) {
-        filter.endDate = calculatedDateRange.to.toISOString();
-      }
-
-      const response = await axios.get('/bills', { params: filter });
-      return response.data;
-    },
-  });
-
-  // Fetch vendors data
-  const { data: vendorsData, isLoading: vendorsLoading } = useQuery({
-    queryKey: ['vendors-ap-dashboard'],
-    queryFn: async () => {
-      const response = await axios.get('/vendors');
-      return response.data;
-    },
-  });
+  const { data: apBalanceData, isLoading: apLoading } =
+    useApBalance(calculatedDateRange);
+  const { data: expenseData, isLoading: expenseLoading } =
+    useApExpenses(calculatedDateRange);
+  const { data: billsData, isLoading: billsLoading } =
+    useApBills(calculatedDateRange);
+  const { data: vendorsData, isLoading: vendorsLoading } = useApVendors();
 
   // Process AP balance data
   const apData = apBalanceData?.data || [];

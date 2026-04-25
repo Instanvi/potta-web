@@ -23,7 +23,7 @@ const Value: React.FC<{ children: React.ReactNode; highlight?: boolean }> = ({
 }) => (
   <span
     className={`text-gray-900 break-all ${
-      highlight ? 'font-bold text-lg text-green-700' : ''
+      highlight ? 'font-medium text-lg text-green-700' : ''
     }`}
   >
     {children}
@@ -33,7 +33,7 @@ const Value: React.FC<{ children: React.ReactNode; highlight?: boolean }> = ({
 const SectionHeader: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => (
-  <div className="uppercase tracking-wide text-xs font-bold text-gray-400 mb-4 mt-2">
+  <div className="uppercase tracking-wide text-xs font-medium text-gray-400 mb-4 mt-2">
     {children}
   </div>
 );
@@ -64,7 +64,7 @@ const BillDetailsSlideover: React.FC<BillDetailsSlideoverProps> = ({
                   {bill.invoiceNumber || bill.invoiceId}
                 </div>
                 <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 ${
                     bill.status === 'Approved'
                       ? 'bg-green-50 text-green-700'
                       : bill.status === 'Rejected'

@@ -23,7 +23,7 @@ const CustomDeleteModal: React.FC<DeleteProps> = ({
         onClick={() => setOpen(false)}
       />
       <div className="relative bg-white p-8 max-w-md w-full z-[1050]">
-        <h2 className="text-lg font-semibold mb-4">Delete Bank Account</h2>
+        <h2 className="text-lg font-medium mb-4">Delete Bank Account</h2>
         <p className="mb-6">
           Are you sure you want to delete this bank account? This action cannot
           be undone.

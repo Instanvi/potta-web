@@ -493,7 +493,7 @@ const GeneralDashboard: React.FC<GeneralDashboardProps> = ({
             <Icon className="w-4 h-4 text-gray-400" />
           </div>
           <div>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
+            <p className="text-3xl font-medium text-gray-900">{value}</p>
             <p className="text-xs text-gray-500 mt-1">
               {trendPercent > 0 ? (
                 <span className="text-green-600">
@@ -590,7 +590,7 @@ const GeneralDashboard: React.FC<GeneralDashboardProps> = ({
       <div className="space-y-8">
         {/* Welcome Message and Time Period */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-medium text-gray-900">
             Welcome back, Vagaly LLC
           </h1>
           <div className="w-48">
@@ -637,7 +637,7 @@ const GeneralDashboard: React.FC<GeneralDashboardProps> = ({
     <div className="space-y-8">
       {/* Welcome Message and Time Period - Flexed on same line */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-medium text-gray-900">
           Welcome back, Vagaly LLC
         </h1>
         <div className="w-48">
@@ -675,7 +675,7 @@ const GeneralDashboard: React.FC<GeneralDashboardProps> = ({
       {/* Cashflow Chart - Full Width */}
       <Card className="bg-white border-0">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">
+          <CardTitle className="text-lg font-medium text-gray-900">
             Cashflow
           </CardTitle>
         </CardHeader>
@@ -688,7 +688,7 @@ const GeneralDashboard: React.FC<GeneralDashboardProps> = ({
 
       {/* Explore potta Section */}
       {/* <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900">Explore Potta</h2>
+        <h2 className="text-xl font-medium text-gray-900">Explore Potta</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {exploreTymsData.map((item, index) => (
             <Card key={index} className="bg-white border-0  duration-300">
@@ -698,7 +698,7 @@ const GeneralDashboard: React.FC<GeneralDashboardProps> = ({
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                       <item.icon className="w-5 h-5 text-green-600" />
                     </div>
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-medium text-gray-900">
                       {item.title}
                     </h3>
                   </div>

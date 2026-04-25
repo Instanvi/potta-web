@@ -26,10 +26,16 @@ const Filter = ({
 
   const handleCreateBudget = (budgetData: {
     name: string;
-    goal: string;
-    recurrence: string;
-    approvalRequirement: string;
-    atLeastCount?: number;
+    description?: string;
+    totalAmount: number;
+    startDate: string;
+    endDate: string;
+    organizationId: string;
+    branchId: string;
+    policies: string[];
+    recurrenceType?: string;
+    recurrenceInterval?: number;
+    recurrenceEndDate?: string;
   }) => {
     // Here you would typically save the budget data to your backend
     console.log('Budget created:', budgetData);
@@ -47,7 +53,6 @@ const Filter = ({
       ],
       value: status,
       onChange: setStatus,
-      
     },
     {
       key: 'date',

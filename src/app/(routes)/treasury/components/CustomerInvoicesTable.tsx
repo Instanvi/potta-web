@@ -137,9 +137,9 @@ const CustomerInvoicesTable: React.FC = () => {
     const due = moment(dueDate);
     const diff = due.diff(now, 'days');
 
-    if (diff < 0) return 'text-red-600 font-semibold'; // Overdue
-    if (diff <= 3) return 'text-orange-600 font-semibold'; // Due soon
-    if (diff <= 7) return 'text-yellow-600 font-semibold'; // Due this week
+    if (diff < 0) return 'text-red-600 font-medium'; // Overdue
+    if (diff <= 3) return 'text-orange-600 font-medium'; // Due soon
+    if (diff <= 7) return 'text-yellow-600 font-medium'; // Due this week
     return 'text-gray-600'; // Normal
   };
 
@@ -383,7 +383,7 @@ const CustomerInvoicesTable: React.FC = () => {
   return (
     <div className="bg-white p-6 ">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-medium text-gray-900">
           Customer Invoices
         </h2>
       </div>

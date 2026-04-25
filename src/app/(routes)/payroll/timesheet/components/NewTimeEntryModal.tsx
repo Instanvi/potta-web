@@ -254,7 +254,7 @@ const NewTimeEntryModal: React.FC<NewTimeEntryModalProps> = ({
             {/* Header */}
             <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-6 border-b">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold">New Time Entry</h2>
+                <h2 className="text-xl font-medium">New Time Entry</h2>
               </div>
               <button
                 onClick={handleClose}
@@ -341,7 +341,7 @@ const NewTimeEntryModal: React.FC<NewTimeEntryModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
                     Break (minutes) <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -365,7 +365,7 @@ const NewTimeEntryModal: React.FC<NewTimeEntryModalProps> = ({
 
                 {/* Optional notes field */}
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">
                     Notes
                   </label>
                   <textarea

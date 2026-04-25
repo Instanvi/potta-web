@@ -301,7 +301,7 @@ const PTODetailSlider: React.FC<PTODetailSliderProps> = ({
                 {getTypeIcon(pto.type)}
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-xl font-medium text-gray-900">
                   {getPTOTypeName(pto.type)}
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">
@@ -319,7 +319,7 @@ const PTODetailSlider: React.FC<PTODetailSliderProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* PTO Information */}
             <div className="bg-white border border-gray-200  p-5">
-              <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center">
+              <h4 className="text-base font-medium text-gray-900 mb-4 flex items-center">
                 <i className="ri-information-line mr-2 text-blue-600"></i>
                 PTO Information
               </h4>
@@ -344,7 +344,7 @@ const PTODetailSlider: React.FC<PTODetailSliderProps> = ({
                   <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                     Accrual Rate
                   </dt>
-                  <dd className="text-lg font-semibold text-gray-900 mt-1">
+                  <dd className="text-lg font-medium text-gray-900 mt-1">
                     {pto.accrual_rate} days/cycle
                   </dd>
                 </div>
@@ -353,13 +353,13 @@ const PTODetailSlider: React.FC<PTODetailSliderProps> = ({
 
             {/* Usage Statistics */}
             <div className="bg-white border border-gray-200  p-5">
-              <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center">
+              <h4 className="text-base font-medium text-gray-900 mb-4 flex items-center">
                 <i className="ri-bar-chart-line mr-2 text-green-600"></i>
                 Usage Statistics
               </h4>
               <div className="space-y-4">
                 <div className="text-center py-3">
-                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                  <div className="text-3xl font-medium text-gray-900 mb-1">
                     {pto.days_remaining}
                   </div>
                   <p className="text-xs text-gray-500">Days Remaining</p>
@@ -388,7 +388,7 @@ const PTODetailSlider: React.FC<PTODetailSliderProps> = ({
 
             {/* Date Information */}
             <div className="bg-white border border-gray-200  p-5">
-              <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center">
+              <h4 className="text-base font-medium text-gray-900 mb-4 flex items-center">
                 <i className="ri-calendar-line mr-2 text-orange-600"></i>
                 Date Information
               </h4>
@@ -424,7 +424,7 @@ const PTODetailSlider: React.FC<PTODetailSliderProps> = ({
 
           {/* Actions Section */}
           <div className="bg-white border border-gray-200  p-5">
-            <h4 className="text-base font-semibold text-gray-900 mb-4 flex items-center">
+            <h4 className="text-base font-medium text-gray-900 mb-4 flex items-center">
               <i className="ri-settings-3-line mr-2 text-purple-600"></i>
               Administrative Actions
             </h4>

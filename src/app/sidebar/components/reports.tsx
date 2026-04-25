@@ -1,87 +1,98 @@
 import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import { usePathname, useRouter } from 'next/navigation';
-import Icon from '@potta/components/icon_fonts/icon';
+import { usePathname } from 'next/navigation';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { SiDatabricks } from 'react-icons/si';
-import { svgIcons } from '@potta/components/svg_icons/IconsSvg';
 import SidebarProfile from './SidebarProfile';
-import { LuChartPie } from 'react-icons/lu';
-import { PiCubeFocusLight } from 'react-icons/pi';
+import {
+  ChartPie,
+  Cube,
+  Database,
+  SquaresFour,
+} from '@phosphor-icons/react';
+import { SB_ICON, sbClass, sbWeight } from './sidebarPhosphor';
 
 const SidebarsReports = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const str = pathname.split('/');
   const context = useContext(ContextData);
 
-return (
+  const dashOn = str[2] == 'dashboard';
+  const repRoot = str[1] === 'reports' && !str[2];
+  const modelsOn = str[1] === 'reports' && str[2] === 'models';
+  const dataOn = str[1] === 'reports' && str[2] === 'data';
+
+  return (
     <Sidebar
+      backgroundColor="#F9F9F9"
       collapsedWidth="65px"
       width="180px"
       transitionDuration={500}
       collapsed={context?.toggle}
       toggled={true}
       breakPoint="md"
-      className="relative !border-none bg-blue-500 h-[100vh] z-30 side"
+      className="relative z-30 h-[100vh] !border-none side"
     >
       <Menu className="relative h-[76vh]" closeOnClick>
         <MenuItem
-          className="font-thin"
+          className="font-normal"
           href="/"
           icon={
-            <img src="/icons/Potta.svg" className="h-16 w-16 mt-2" alt="logo" />
+            <img src="/icons/Potta.svg" className="mt-2 h-16 w-16" alt="logo" />
           }
         >
           {' '}
         </MenuItem>
         <MenuItem
-          active={str[2] == 'dashboard' ? true : false}
+          active={dashOn}
           className="mt-8"
           href="/reports/dashboard"
-          icon={svgIcons.dashboard(str[2] == 'dashboard' ? 'white' : '#6b7280')}
+          icon={
+            <SquaresFour
+              size={SB_ICON}
+              weight={sbWeight(dashOn)}
+              className={sbClass(dashOn)}
+            />
+          }
         >
-          {' '}
-          <h3 className="text-md mt-[2px]">Dashboard</h3>{' '}
+          <h3 className="text-md mt-[2px]">Dashboard</h3>
         </MenuItem>
         <MenuItem
-          active={str[1] === 'reports' && !str[2]}
+          active={repRoot}
           className=""
           href="/reports"
           icon={
-            <LuChartPie
-              size={21}
-              color={str[1] == 'reports' && !str[2] ? 'white' : 'black'}
+            <ChartPie
+              size={SB_ICON}
+              weight={sbWeight(repRoot)}
+              className={sbClass(repRoot)}
             />
           }
         >
           <h3 className="text-md mt-[2px]">Reports</h3>
         </MenuItem>
         <MenuItem
-          active={str[1] === 'reports' && str[2] === 'models'}
+          active={modelsOn}
           className=""
           href="/reports/models"
           icon={
-            <PiCubeFocusLight
-              size={21}
-              color={
-                str[1] == 'reports' && str[2] === 'models' ? 'white' : 'black'
-              }
+            <Cube
+              size={SB_ICON}
+              weight={sbWeight(modelsOn)}
+              className={sbClass(modelsOn)}
             />
           }
         >
           <h3 className="text-md mt-1.5">Models</h3>
         </MenuItem>
         <MenuItem
-          active={str[1] === 'reports' && str[2] === 'data'}
+          active={dataOn}
           className=""
           href="/reports/data"
           icon={
-            <SiDatabricks
-              size={21}
-              color={
-                str[1] == 'reports' && str[2] == 'data' ? 'white' : 'black'
-              }
+            <Database
+              size={SB_ICON}
+              weight={sbWeight(dataOn)}
+              className={sbClass(dataOn)}
             />
           }
         >

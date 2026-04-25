@@ -355,7 +355,7 @@ const NewShiftModal: React.FC<NewShiftModalProps> = ({
           >
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white z-10">
-              <h2 className="text-xl font-semibold">Add Shift</h2>
+              <h2 className="text-xl font-medium">Add Shift</h2>
               <button
                 onClick={handleClose}
                 className="p-2"
@@ -473,7 +473,7 @@ const NewShiftModal: React.FC<NewShiftModalProps> = ({
 
                 {/* Color Selection */}
                 <div className="px-6 pt-2">
-                  <label className="block text-sm font-semibold mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Shift Color
                   </label>
                   <div className="grid grid-cols-4 gap-2">
@@ -506,7 +506,7 @@ const NewShiftModal: React.FC<NewShiftModalProps> = ({
 
                 {/* Repeat on Days */}
                 <div className="px-6 pt-2">
-                  <label className="block text-sm font-semibold mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Repeat on Days
                   </label>
                   <div className="flex justify-between">
@@ -546,7 +546,7 @@ const NewShiftModal: React.FC<NewShiftModalProps> = ({
 
                 {/* Applies To Roles */}
                 <div className="px-6 pt-2">
-                  <label className="block text-sm font-semibold mb-2">
+                  <label className="block text-sm font-medium mb-2">
                     Applies To Roles
                   </label>
                   {isLoadingRoles ? (

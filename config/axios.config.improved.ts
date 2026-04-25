@@ -84,8 +84,9 @@ function redirectToAuth(): void {
   if (typeof window === 'undefined') return;
 
   const config = getAuthConfig();
-  const authUrl = new URL(config.authUrl);
-  authUrl.searchParams.set('redirectUrl', window.location.href);
+  const authUrlStr = config.authUrl || 'https://auth.instanvi.com';
+  const authUrl = new URL(authUrlStr);
+  authUrl.searchParams.set('callbackUrl', window.location.href);
   window.location.href = authUrl.toString();
 }
 

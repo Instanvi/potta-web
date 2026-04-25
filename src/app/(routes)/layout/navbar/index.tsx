@@ -411,13 +411,13 @@ export default function Navbar({
 
   return (
     <nav
-      className={`w-full sticky z-20 top-0 ${
-        pathname.includes('reports') ? 'border-b border-gray-300' : ''
-      } ${bgColorClass}  space-y-10`}
+      className={`sticky top-0 z-20 w-full border-b border-black/10 ${bgColorClass} space-y-10`}
     >
-      <div className={`flex justify-between items-center ${bgColorClass}`}>
+      <div
+        className={`flex items-center justify-between ${bgColorClass}`}
+      >
         <div className={`flex ml-16 items-center gap-20 py-4`}>
-          <h1 className="font-medium text-3xl text-start capitalize">
+          <h1 className="text-start text-xl font-semibold capitalize text-black">
             {getTitle()}
           </h1>
         </div>

@@ -41,7 +41,7 @@ const DeletePolicyModal = ({
     <div className="fixed inset-0 z-50 bg-black/50">
       <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Delete Policy</h2>
+          <h2 className="text-lg font-medium">Delete Policy</h2>
           <button
             onClick={() => setOpen(false)}
             className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"

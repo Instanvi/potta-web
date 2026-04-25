@@ -59,7 +59,7 @@ export default function CreateRulePage() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Create Approval Rule</h1>
+        <h1 className="text-2xl font-medium mb-6">Create Approval Rule</h1>
         <div className="bg-white p-6">
           <ApprovalRuleForm 
             onSubmit={handleSubmit} 

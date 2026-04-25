@@ -328,7 +328,7 @@ const BankAccount: React.FC<BankAccountProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-4 pt-5 px-6">
-      <h2 className="text-xl font-bold mb-4">Direct Deposit Information</h2>
+      <h2 className="text-xl font-medium mb-4">Direct Deposit Information</h2>
       <p className="text-gray-600 mb-4">
         Add bank account details for direct deposit
       </p>

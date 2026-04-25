@@ -80,14 +80,14 @@ const AccountPayablesDashboard: React.FC<AccountPayablesDashboardProps> = ({
         {/* Outstanding Amount Card */}
         <div className="bg-white  p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Outstanding amount
             </h3>
             <Info className="w-4 h-4 text-gray-400" />
           </div>
 
           <div className="mb-4">
-            <div className="text-3xl font-bold text-gray-900">
+            <div className="text-3xl font-medium text-gray-900">
               {formatCurrency(outstandingData.total)}
             </div>
           </div>
@@ -130,7 +130,7 @@ const AccountPayablesDashboard: React.FC<AccountPayablesDashboardProps> = ({
         {/* Ageing Balance Card */}
         <div className="bg-white  p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Ageing balance
             </h3>
             <Info className="w-4 h-4 text-gray-400" />
@@ -179,7 +179,7 @@ const AccountPayablesDashboard: React.FC<AccountPayablesDashboardProps> = ({
       <div className="bg-white  p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               DPO, days payable outstanding: A key performance indicator of your
               cash management
             </h3>
@@ -209,7 +209,7 @@ const AccountPayablesDashboard: React.FC<AccountPayablesDashboardProps> = ({
                 <div className="w-8 h-8 bg-green-500 rounded-full"></div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-gray-900">42</div>
+                <div className="text-3xl font-medium text-gray-900">42</div>
                 <div className="text-sm text-gray-600">days</div>
                 <div className="flex items-center text-sm text-red-600">
                   <TrendingUp className="w-4 h-4 mr-1" />
@@ -265,7 +265,7 @@ const AccountPayablesDashboard: React.FC<AccountPayablesDashboardProps> = ({
       {/* Main Vendors Table */}
       <div className="bg-white  p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Main vendors</h3>
+          <h3 className="text-lg font-medium text-gray-900">Main vendors</h3>
           <button className="text-green-600 hover:text-green-700 text-sm font-medium">
             See all
           </button>

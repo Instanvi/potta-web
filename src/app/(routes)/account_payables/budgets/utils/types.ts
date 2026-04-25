@@ -44,6 +44,11 @@ export interface Approver {
   uuid: string;
   budgetId: string;
   approverId: string;
+  approver?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    profile_url?: string | null;
+  } | null;
   approved: boolean;
   branchId: string | null;
   createdAt: string;

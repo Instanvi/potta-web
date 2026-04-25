@@ -113,7 +113,7 @@ const ForecastTable: React.FC<ForecastTableProps> = ({ data, viewMode }) => {
   return (
     <div className="bg-white border border-gray-200 overflow-hidden">
       <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
           Forecast Details
         </h3>
         <p className="text-sm text-gray-600">
@@ -218,7 +218,7 @@ const ForecastTable: React.FC<ForecastTableProps> = ({ data, viewMode }) => {
           <div className="flex items-center space-x-6">
             <div className="text-start">
               <div className="text-xs text-gray-500">Total Inflow</div>
-              <div className="text-sm font-semibold text-green-600">
+              <div className="text-sm font-medium text-green-600">
                 {formatLargeCurrency(
                   reorderedData.reduce((sum, item) => sum + item.cash_inflow, 0)
                 )}
@@ -226,7 +226,7 @@ const ForecastTable: React.FC<ForecastTableProps> = ({ data, viewMode }) => {
             </div>
             <div className="text-start">
               <div className="text-xs text-gray-500">Total Outflow</div>
-              <div className="text-sm font-semibold text-red-600">
+              <div className="text-sm font-medium text-red-600">
                 {formatLargeCurrency(
                   reorderedData.reduce(
                     (sum, item) => sum + item.cash_outflow,
@@ -238,7 +238,7 @@ const ForecastTable: React.FC<ForecastTableProps> = ({ data, viewMode }) => {
             <div className="text-start">
               <div className="text-xs text-gray-500">Net Flow</div>
               <div
-                className={`text-sm font-semibold ${
+                className={`text-sm font-medium ${
                   reorderedData.reduce(
                     (sum, item) => sum + item.net_cash_flow,
                     0

@@ -79,7 +79,7 @@ const LiquidityMetrics: React.FC<LiquidityMetricsProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-medium text-gray-900">
           Liquidity Metrics
         </h3>
         <Info className="w-4 h-4 text-gray-400" />
@@ -130,7 +130,7 @@ const LiquidityMetrics: React.FC<LiquidityMetricsProps> = ({
                 </TooltipProvider>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="font-semibold text-gray-900">
+                <span className="font-medium text-gray-900">
                   {metric.value.toFixed(2)}
                 </span>
                 <span
@@ -145,8 +145,8 @@ const LiquidityMetrics: React.FC<LiquidityMetricsProps> = ({
 
         <div className="border-t pt-4">
           <div className="flex justify-between items-center">
-            <span className="text-gray-900 font-semibold">Working Capital</span>
-            <span className="font-semibold text-lg text-blue-600">
+            <span className="text-gray-900 font-medium">Working Capital</span>
+            <span className="font-medium text-lg text-blue-600">
               {formatCurrency(workingCapital)}
             </span>
           </div>

@@ -57,12 +57,12 @@ const CashBalanceCard: React.FC<CashBalanceCardProps> = ({
                   isPositive ? 'text-green-600' : 'text-red-600'
                 }`}
               />
-              <h3 className="text-lg font-semibold text-gray-700">
+              <h3 className="text-lg font-medium text-gray-700">
                 Cash Balance
               </h3>
             </div>
             <div
-              className={`text-4xl font-bold ${
+              className={`text-4xl font-medium ${
                 isPositive ? 'text-green-700' : 'text-red-700'
               }`}
             >
@@ -88,10 +88,10 @@ const CashBalanceCard: React.FC<CashBalanceCardProps> = ({
           ) : (
             <TrendingDown className="h-5 w-5 text-red-600" />
           )}
-          <h3 className="text-sm font-semibold text-gray-700">Net Cash Flow</h3>
+          <h3 className="text-sm font-medium text-gray-700">Net Cash Flow</h3>
         </div>
         <div
-          className={`text-2xl font-bold ${
+          className={`text-2xl font-medium ${
             cashFlowTrend ? 'text-green-600' : 'text-red-600'
           }`}
         >
@@ -102,7 +102,7 @@ const CashBalanceCard: React.FC<CashBalanceCardProps> = ({
 
       {/* Cash flow breakdown */}
       <div className="bg-white p-6 border border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+        <h3 className="text-sm font-medium text-gray-700 mb-3">
           Cash Flow Breakdown
         </h3>
 
@@ -112,7 +112,7 @@ const CashBalanceCard: React.FC<CashBalanceCardProps> = ({
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <span className="text-xs text-gray-600">Inflow</span>
             </div>
-            <span className="text-sm font-semibold text-green-600">
+            <span className="text-sm font-medium text-green-600">
               {formatLargeCurrency(totalInflow)}
             </span>
           </div>
@@ -122,16 +122,16 @@ const CashBalanceCard: React.FC<CashBalanceCardProps> = ({
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <span className="text-xs text-gray-600">Outflow</span>
             </div>
-            <span className="text-sm font-semibold text-red-600">
+            <span className="text-sm font-medium text-red-600">
               {formatLargeCurrency(totalOutflow)}
             </span>
           </div>
 
           <div className="border-t border-gray-200 pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-700">Net</span>
+              <span className="text-xs font-medium text-gray-700">Net</span>
               <span
-                className={`text-sm font-bold ${
+                className={`text-sm font-medium ${
                   netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}
               >

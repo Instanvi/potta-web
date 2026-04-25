@@ -77,7 +77,7 @@ const Page: React.FC = () => {
         {/* Main Content */}
         <main className="flex-1 px-4 py-4 overflow-y-auto h-full">
           {tableLabel && (
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-medium text-gray-800 mb-4">
               {tableLabel}
             </h2>
           )}

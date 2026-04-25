@@ -19,7 +19,7 @@ const VendorAgingReport: React.FC<VendorAgingReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Vendor Aging Report</h1>
+        <h1 className="text-2xl font-medium">Vendor Aging Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const VendorAgingReport: React.FC<VendorAgingReportProps> = ({
               <AlertCircle className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Outstanding</p>
-                <p className="text-xl font-bold">${kpis.totalOutstandingBalance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalOutstandingBalance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const VendorAgingReport: React.FC<VendorAgingReportProps> = ({
               <Clock className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">0-30 Days</p>
-                <p className="text-xl font-bold">${kpis.total0To30DaysBalance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.total0To30DaysBalance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const VendorAgingReport: React.FC<VendorAgingReportProps> = ({
               <Calendar className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">31-60 Days</p>
-                <p className="text-xl font-bold">${kpis.total31To60DaysBalance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.total31To60DaysBalance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const VendorAgingReport: React.FC<VendorAgingReportProps> = ({
               <Award className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Most Overdue</p>
-                <p className="text-xl font-bold">{kpis.mostOverdueVendor}</p>
+                <p className="text-xl font-medium">{kpis.mostOverdueVendor}</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const VendorAgingReport: React.FC<VendorAgingReportProps> = ({
               <Percent className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Overdue %</p>
-                <p className="text-xl font-bold">{kpis.percentageOverdueVendors}%</p>
+                <p className="text-xl font-medium">{kpis.percentageOverdueVendors}%</p>
               </div>
             </div>
           </CardBody>

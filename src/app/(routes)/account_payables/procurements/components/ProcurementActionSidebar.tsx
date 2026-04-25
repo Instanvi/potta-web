@@ -64,7 +64,7 @@ const ProcurementActionSidebar: React.FC<ProcurementActionSidebarProps> = ({
               <Dialog.Panel className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-medium text-gray-900">
                     Actions
                   </h2>
                   <button

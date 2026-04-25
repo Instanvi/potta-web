@@ -52,6 +52,20 @@ export const productApi = {
       throw error;
     }
   },
+  importCsv: async (params: { file?: File; s3Key?: string }) => {
+    const formData = new FormData();
+    if (params.file) {
+      formData.append('file', params.file);
+    }
+    if (params.s3Key) {
+      formData.append('s3Key', params.s3Key);
+    }
+
+    const result = await axios.post('/item/import-csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return result?.data;
+  },
 };
 
 export const productCategoryApi = {

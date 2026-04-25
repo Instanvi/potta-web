@@ -13,7 +13,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ContextData } from './providers/DataProvider';
-import { signOut } from 'next-auth/react';
+import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 
 // --- Constants ---
 
@@ -141,7 +141,7 @@ const UserMenu = ({
           <button
             onClick={() => {
               if (confirm('Are you sure you want to sign out?')) {
-                signOut();
+                void signOutWithAuthApi();
               }
             }}
             className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -191,7 +191,7 @@ const EnhancedNavbar = () => {
             </Link>
 
             <div className="hidden md:flex items-center ml-2 pl-4 border-l border-gray-200 h-6">
-              <h1 className="text-lg font-semibold text-gray-800 tracking-tight">
+              <h1 className="text-lg font-medium text-gray-800 tracking-tight">
                 {getPageTitle(pathname)}
               </h1>
             </div>

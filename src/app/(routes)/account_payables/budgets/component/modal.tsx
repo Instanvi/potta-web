@@ -62,6 +62,8 @@ const NewBudget: FC = () => {
       icon={<i className="ri-add-line"></i>}
       title="New Budget"
       text="Add New Budget"
+      open={open}
+      setOpen={setOpen}
     >
       <div className="bg-white transform overflow-hidden rounded-md py-4">
         <div className="flex flex-col  px-4 border-b"></div>

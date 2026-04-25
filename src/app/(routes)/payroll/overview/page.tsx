@@ -24,7 +24,7 @@ const Overview = () => {
         <div className="px-14">
           {/* Header Section */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-medium text-gray-900 mb-2">
               Payroll Overview
             </h1>
             <p className="text-gray-600">

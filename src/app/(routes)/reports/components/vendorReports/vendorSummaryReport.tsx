@@ -19,7 +19,7 @@ const VendorSummaryReport: React.FC<VendorSummaryReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Vendor Summary Report</h1>
+        <h1 className="text-2xl font-medium">Vendor Summary Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const VendorSummaryReport: React.FC<VendorSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Purchases</p>
-                <p className="text-xl font-bold">${kpis.totalPurchases.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalPurchases.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const VendorSummaryReport: React.FC<VendorSummaryReportProps> = ({
               <Building className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Amount Paid</p>
-                <p className="text-xl font-bold">${kpis.totalAmountPaid.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalAmountPaid.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const VendorSummaryReport: React.FC<VendorSummaryReportProps> = ({
               <AlertCircle className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Outstanding</p>
-                <p className="text-xl font-bold">${kpis.totalOutstandingBalance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalOutstandingBalance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -66,7 +66,7 @@ const VendorSummaryReport: React.FC<VendorSummaryReportProps> = ({
               <Users className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Active Vendors</p>
-                <p className="text-xl font-bold">{kpis.numberOfActiveVendors}</p>
+                <p className="text-xl font-medium">{kpis.numberOfActiveVendors}</p>
               </div>
             </div>
           </CardBody>
@@ -77,7 +77,7 @@ const VendorSummaryReport: React.FC<VendorSummaryReportProps> = ({
               <Award className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Largest Vendor</p>
-                <p className="text-xl font-bold">{kpis.largestVendorByPurchases}</p>
+                <p className="text-xl font-medium">{kpis.largestVendorByPurchases}</p>
               </div>
             </div>
           </CardBody>

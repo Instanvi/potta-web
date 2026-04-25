@@ -104,7 +104,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="px-6 pt-6 pb-4">
           {getIcon()}
           <div className="mt-3 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               {title}
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">{message}</p>

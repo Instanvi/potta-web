@@ -265,7 +265,7 @@ const ReportsPage: React.FC = () => {
           {shouldShowKpiSection && (
             <div className="mb-8">
               {/* <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-medium text-gray-900">
                   Key Performance Indicators
                 </h2>
                 <div className="flex items-center gap-2">
@@ -337,11 +337,11 @@ const ReportsPage: React.FC = () => {
               {/* Finance Module Fragment */}
               <div className="pb-6 mb-6 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-black">
+                  <h2 className="text-lg font-medium text-black">
                     Finance Analytics
                   </h2>
                   <button
-                    className="text-green-700 font-semibold underline hover:underline text-sm px-3 py-1"
+                    className="text-green-700 font-medium underline hover:underline text-sm px-3 py-1"
                     onClick={() => {
                       setActiveTab('financial_analytics' as ReportCategoryId);
                       setInitialOpenSubmenu('financial_analytics');
@@ -376,11 +376,11 @@ const ReportsPage: React.FC = () => {
               {/* Human Capital Module Fragment */}
               <div className="pb-6 mb-6 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-black">
+                  <h2 className="text-lg font-medium text-black">
                     Human Capital Analytics
                   </h2>
                   <button
-                    className="text-green-700 font-semibold underline hover:underline text-sm px-3 py-1"
+                    className="text-green-700 font-medium underline hover:underline text-sm px-3 py-1"
                     onClick={() => {
                       setActiveTab('human_capital' as ReportCategoryId);
                       setInitialOpenSubmenu('human_capital');
@@ -415,11 +415,11 @@ const ReportsPage: React.FC = () => {
               {/* Sales & Inventory Module Fragment */}
               <div className="pb-6 mb-6 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-black">
+                  <h2 className="text-lg font-medium text-black">
                     Sales & Inventory Analytics
                   </h2>
                   <button
-                    className="text-green-700 font-semibold underline hover:underline text-sm px-3 py-1"
+                    className="text-green-700 font-medium underline hover:underline text-sm px-3 py-1"
                     onClick={() => {
                       setActiveTab('sales_inventory' as ReportCategoryId);
                       setInitialOpenSubmenu('sales_inventory');

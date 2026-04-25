@@ -14,7 +14,7 @@ const OtherPayment = () => {
   return (
     <div className="p-8 h-full bg-white">
       <div className="mb-8">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-2">
+        <h3 className="text-2xl font-medium text-gray-800 mb-2">
           Other Payment Methods
         </h3>
         <p className="text-gray-600">Select your preferred payment method</p>

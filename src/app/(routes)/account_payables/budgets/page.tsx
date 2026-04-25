@@ -51,6 +51,8 @@ const BudgetCardSkeleton = () => (
 export default function BudgetsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('active');
+  const [status, setStatus] = useState('all');
+  const [date, setDate] = useState('All Time');
   const { budgets, meta, loading, error, updateFilter, refetch } = useBudgets();
 
   // Debounced search effect
@@ -94,13 +96,22 @@ export default function BudgetsPage() {
 
   return (
     <RootLayout>
-      <div className={`${
+      <div
+        className={`${
           context?.layoutMode === 'sidebar' ? 'pl-16 !mt-4' : 'pl-5 !mt-4'
-        } h-full pr-5 w-full`}>
+        } h-full pr-5 w-full`}
+      >
         {/* Header Section */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           {/* Search and Filters */}
-          <Filter />
+          <Filter
+            search={searchTerm}
+            setSearch={setSearchTerm}
+            status={status}
+            setStatus={setStatus}
+            date={date}
+            setDate={setDate}
+          />
         </div>
 
         {/* Custom Tabs */}

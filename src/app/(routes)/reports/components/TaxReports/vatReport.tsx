@@ -20,7 +20,7 @@ const VATGSTReport: React.FC<VATGSTReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">VAT/GST Report</h1>
+        <h1 className="text-2xl font-medium">VAT/GST Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -34,7 +34,7 @@ const VATGSTReport: React.FC<VATGSTReportProps> = ({
               <ArrowUpCircle className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">VAT Collected</p>
-                <p className="text-xl font-bold">${kpis.totalVATCollected.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalVATCollected.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -45,7 +45,7 @@ const VATGSTReport: React.FC<VATGSTReportProps> = ({
               <ArrowDownCircle className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">VAT Paid</p>
-                <p className="text-xl font-bold">${kpis.totalVATPaid.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalVATPaid.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -56,7 +56,7 @@ const VATGSTReport: React.FC<VATGSTReportProps> = ({
               <Receipt className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Net Liability</p>
-                <p className="text-xl font-bold">${kpis.netVATLiability.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.netVATLiability.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -67,7 +67,7 @@ const VATGSTReport: React.FC<VATGSTReportProps> = ({
               <Calculator className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Taxable Sales</p>
-                <p className="text-xl font-bold">${kpis.totalTaxableSales.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalTaxableSales.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -78,7 +78,7 @@ const VATGSTReport: React.FC<VATGSTReportProps> = ({
               <DollarSign className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Taxable Purchases</p>
-                <p className="text-xl font-bold">${kpis.totalTaxablePurchases.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalTaxablePurchases.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>

@@ -224,8 +224,8 @@ const SingleBudget = () => {
   // Calculate amounts and percentages
   const totalAmount = parseFloat(budget.totalAmount);
   const availableAmount = parseFloat(budget.availableAmount);
-  const accountBalance = budget.budgetedAccount?.currentBalance
-    ? parseFloat(budget.budgetedAccount.currentBalance.toString())
+  const accountBalance = budget.budgetedAccount?.initialBalance
+    ? parseFloat(budget.budgetedAccount.initialBalance.toString())
     : 0;
   const spentAmount = totalAmount - availableAmount;
 

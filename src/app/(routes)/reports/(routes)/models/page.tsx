@@ -63,7 +63,7 @@ const plTableColumns = [
     sortable: false,
     width: '40%',
     cell: (row: PLRow) => (
-      <span className={row.children ? 'font-semibold' : ''}>{row.label}</span>
+      <span className={row.children ? 'font-medium' : ''}>{row.label}</span>
     ),
   },
   {
@@ -203,7 +203,7 @@ export default function ModelsPage() {
         <main className="h-full overflow-hidden flex flex-col min-h-0 px-4 py-4">
           {showTableId && (
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-medium text-gray-800">
                 {tableLabel}
               </h2>
               <Button

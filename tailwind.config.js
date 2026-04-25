@@ -12,6 +12,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-outfit)', 'sans-serif'],
+      },
+      /* Only Outfit weights loaded: 400 / 500 / 600 — map heavier utilities to 600 */
+      fontWeight: {
+        bold: '600',
+        extrabold: '600',
+        black: '600',
+      },
       colors: {
         primary: {
           DEFAULT: '#237804',

@@ -174,7 +174,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
                 {getTypeIcon(benefit.type)}
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-xl font-medium text-gray-900">
                   {benefit.name}
                 </h3>
                 <p className="text-sm text-gray-600 mt-1">
@@ -208,19 +208,19 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
           {/* Main Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="text-base font-semibold text-gray-900 mb-4">
+              <h4 className="text-base font-medium text-gray-900 mb-4">
                 Benefit Information
               </h4>
               <dl className="space-y-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Value</dt>
-                  <dd className="text-lg font-semibold text-gray-900 mt-1">
+                  <dd className="text-lg font-medium text-gray-900 mt-1">
                     {formatCurrency(benefit.value)}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Rate</dt>
-                  <dd className="text-lg font-semibold text-gray-900 mt-1">
+                  <dd className="text-lg font-medium text-gray-900 mt-1">
                     {formatRate(benefit.rate, benefit.value)}
                   </dd>
                 </div>
@@ -242,7 +242,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
             </div>
 
             <div>
-              <h4 className="text-base font-semibold text-gray-900 mb-4">
+              <h4 className="text-base font-medium text-gray-900 mb-4">
                 Financial Details
               </h4>
               <dl className="space-y-4">
@@ -267,7 +267,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
                     <dt className="text-sm font-medium text-gray-500">
                       Tax Cap
                     </dt>
-                    <dd className="text-sm font-semibold text-gray-900 mt-1">
+                    <dd className="text-sm font-medium text-gray-900 mt-1">
                       {formatCurrency(benefit.tax_cap)}
                     </dd>
                   </div>
@@ -276,7 +276,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
                   <dt className="text-sm font-medium text-gray-500">
                     Salary Cap
                   </dt>
-                  <dd className="text-sm font-semibold text-gray-900 mt-1">
+                  <dd className="text-sm font-medium text-gray-900 mt-1">
                     {formatCurrency(benefit.salary_cap)}
                   </dd>
                 </div>
@@ -285,7 +285,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
                     <dt className="text-sm font-medium text-gray-500">
                       Max Amount
                     </dt>
-                    <dd className="text-sm font-semibold text-gray-900 mt-1">
+                    <dd className="text-sm font-medium text-gray-900 mt-1">
                       {formatCurrency(benefit.max_amount)}
                     </dd>
                   </div>
@@ -296,7 +296,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
 
           {/* Access Information */}
           <div>
-            <h4 className="text-base font-semibold text-gray-900 mb-4">
+            <h4 className="text-base font-medium text-gray-900 mb-4">
               Access Information
             </h4>
             <dl className="space-y-4">
@@ -340,7 +340,7 @@ const ViewBenefit: React.FC<ViewBenefitProps> = ({
 
           {/* Dates */}
           <div>
-            <h4 className="text-base font-semibold text-gray-900 mb-4">
+            <h4 className="text-base font-medium text-gray-900 mb-4">
               Important Dates
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

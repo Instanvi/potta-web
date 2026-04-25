@@ -6,7 +6,7 @@ const PayInfoTab = ({ employee }: { employee: any }) => (
     <div className="flex w-full gap-8">
       {/* Line Chart Placeholder */}
       <div className="flex-1 bg-white border rounded-lg p-4 flex flex-col justify-between min-h-[260px]">
-        <div className="font-semibold mb-2">Pay History</div>
+        <div className="font-medium mb-2">Pay History</div>
         <div className="flex-1 flex items-end">
           {/* Replace this with a real chart later */}
           <div className="w-full h-40 border-b border-green-500 relative">
@@ -19,7 +19,7 @@ const PayInfoTab = ({ employee }: { employee: any }) => (
       </div>
       {/* Pie Chart and Legend Placeholder */}
       <div className="w-80 bg-white border rounded-lg p-4 flex flex-col items-center">
-        <div className="font-semibold mb-2">Year to Date Average</div>
+        <div className="font-medium mb-2">Year to Date Average</div>
         {/* Pie chart placeholder */}
         <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center mb-4">
           {/* Replace with real pie chart */}

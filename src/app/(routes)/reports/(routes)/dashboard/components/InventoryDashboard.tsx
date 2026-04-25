@@ -524,7 +524,7 @@ const InventoryDashboard: React.FC<InventoryDashboardProps> = ({
               <div className="text-red-500 text-sm">{error}</div>
             ) : (
               <>
-                <p className="text-3xl font-bold text-gray-900">{value}</p>
+                <p className="text-3xl font-medium text-gray-900">{value}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   <span
                     className={`${
@@ -619,7 +619,7 @@ const InventoryDashboard: React.FC<InventoryDashboardProps> = ({
         {/* Inventory Balance Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Inventory balance
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -642,7 +642,7 @@ const InventoryDashboard: React.FC<InventoryDashboardProps> = ({
         {/* Cost of Goods Sold Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Cost of goods sold
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -665,7 +665,7 @@ const InventoryDashboard: React.FC<InventoryDashboardProps> = ({
         {/* Turnover Rate Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Turnover rate
             </CardTitle>
             <p className="text-sm text-gray-600">

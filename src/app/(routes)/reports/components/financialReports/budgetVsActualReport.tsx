@@ -36,7 +36,7 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Budget vs. Actual Report</h1>
+        <h1 className="text-2xl font-medium">Budget vs. Actual Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -50,7 +50,7 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
               <DollarSign className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Budget</p>
-                <p className="text-xl font-bold">${kpis.totalBudgetedAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalBudgetedAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -61,7 +61,7 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
               <BarChart2 className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Actual</p>
-                <p className="text-xl font-bold">${kpis.totalActualAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalActualAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -72,7 +72,7 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
               <TrendingUp className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Variance</p>
-                <p className="text-xl font-bold">${kpis.totalVariance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalVariance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -83,7 +83,7 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
               <PieChart className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Avg Variance %</p>
-                <p className="text-xl font-bold">{kpis.averageVariancePercentage.toFixed(2)}%</p>
+                <p className="text-xl font-medium">{kpis.averageVariancePercentage.toFixed(2)}%</p>
               </div>
             </div>
           </CardBody>
@@ -94,7 +94,7 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
               <AlertTriangle className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Over Budget</p>
-                <p className="text-xl font-bold">{kpis.overBudgetCategories}</p>
+                <p className="text-xl font-medium">{kpis.overBudgetCategories}</p>
               </div>
             </div>
           </CardBody>
@@ -126,12 +126,12 @@ const BudgetVsActualReport: React.FC<BudgetVsActualReportProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell className="font-semibold">Category</TableCell>
-                <TableCell className="font-semibold">Period</TableCell>
-                <TableCell className="font-semibold">Budgeted</TableCell>
-                <TableCell className="font-semibold">Actual</TableCell>
-                <TableCell className="font-semibold">Variance</TableCell>
-                <TableCell className="font-semibold">Variance %</TableCell>
+                <TableCell className="font-medium">Category</TableCell>
+                <TableCell className="font-medium">Period</TableCell>
+                <TableCell className="font-medium">Budgeted</TableCell>
+                <TableCell className="font-medium">Actual</TableCell>
+                <TableCell className="font-medium">Variance</TableCell>
+                <TableCell className="font-medium">Variance %</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>

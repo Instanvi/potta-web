@@ -2,16 +2,18 @@
 import React, { useContext } from 'react';
 import { usePathname } from 'next/navigation';
 import { ContextData } from './providers/DataProvider';
-import SidebarsPayment from '../app/(routes)/layout/sidebar/components/payments';
-import SidebarsExpenses from '../app/(routes)/layout/sidebar/components/expenses';
-import Sidebarsinvoicing from '../app/(routes)/layout/sidebar/components/invoicing';
-import SidebarsPOS from '../app/(routes)/layout/sidebar/components/POS';
-import SidebarsTaxation from '../app/(routes)/layout/sidebar/components/taxation';
-import SidebarsPayroll from '../app/(routes)/layout/sidebar/components/payroll';
-import SidebarsAccounts from '../app/(routes)/layout/sidebar/components/accounts';
-import SidebarsHome from '../app/(routes)/layout/sidebar/components/home';
-import SidebarsVoucher from '../app/(routes)/layout/sidebar/components/voucher';
-import SidebarsBankAccounts from '../app/(routes)/layout/sidebar/components/bankAccounts';
+import {
+  SidebarsAccounts,
+  SidebarsBankAccounts,
+  SidebarsExpenses,
+  SidebarsHome,
+  SidebarsInvoicing,
+  SidebarsPayment,
+  SidebarsPayroll,
+  SidebarsPOS,
+  SidebarsTaxation,
+  SidebarsVoucher,
+} from '@potta/app/sidebar/components/subsidebars';
 
 const DynamicSidebar = () => {
   const pathname = usePathname();
@@ -39,7 +41,7 @@ const DynamicSidebar = () => {
         case 'expenses':
           return <SidebarsExpenses />;
         case 'invoice':
-          return <Sidebarsinvoicing />;
+          return <SidebarsInvoicing />;
         case 'pos':
           return <SidebarsPOS />;
         case 'payroll':
@@ -60,7 +62,7 @@ const DynamicSidebar = () => {
       case 'expenses':
         return <SidebarsExpenses />;
       case 'invoice':
-        return <Sidebarsinvoicing />;
+        return <SidebarsInvoicing />;
       case 'pos':
         return <SidebarsPOS />;
       case 'taxation':

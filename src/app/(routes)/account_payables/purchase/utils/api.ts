@@ -5,6 +5,12 @@ import {
   PurchaseOrderDetails,
 } from './types';
 
+export type {
+  PurchaseOrderFilter,
+  CreatePurchaseOrderData,
+  PurchaseOrderDetails,
+};
+
 export async function fetchPurchaseOrders(filter: PurchaseOrderFilter) {
   const response = await axios.post(
     '/purchase-order/filter',

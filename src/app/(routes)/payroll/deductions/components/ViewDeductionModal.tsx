@@ -133,7 +133,7 @@ const ViewDeductionModal = ({
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-medium text-gray-900">
                   {deduction.name}
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
@@ -170,7 +170,7 @@ const ViewDeductionModal = ({
             <div className="max-w-4xl mx-auto space-y-8">
               {/* Deduction Overview */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <Info className="h-5 w-5" />
                   Deduction Overview
                 </h3>
@@ -181,7 +181,7 @@ const ViewDeductionModal = ({
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Type</p>
-                      <p className="text-sm font-semibold text-gray-900 capitalize">
+                      <p className="text-sm font-medium text-gray-900 capitalize">
                         {deduction.type}
                       </p>
                     </div>
@@ -192,7 +192,7 @@ const ViewDeductionModal = ({
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Mode</p>
-                      <p className="text-sm font-semibold text-gray-900 capitalize">
+                      <p className="text-sm font-medium text-gray-900 capitalize">
                         {deduction.mode}
                       </p>
                     </div>
@@ -203,7 +203,7 @@ const ViewDeductionModal = ({
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Value</p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {deduction.type === 'percentage'
                           ? `${deduction.value}%`
                           : formatCurrency(Number(deduction.value))}
@@ -218,7 +218,7 @@ const ViewDeductionModal = ({
                       <p className="text-sm font-medium text-gray-500">
                         Applies To
                       </p>
-                      <p className="text-sm font-semibold text-gray-900 capitalize">
+                      <p className="text-sm font-medium text-gray-900 capitalize">
                         {deduction.applies_to}
                       </p>
                     </div>
@@ -229,7 +229,7 @@ const ViewDeductionModal = ({
               {/* Description */}
               {deduction.description && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <FileText className="h-5 w-5" />
                     Description
                   </h3>
@@ -243,7 +243,7 @@ const ViewDeductionModal = ({
 
               {/* Tax Information */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                   <Calculator className="h-5 w-5" />
                   Tax Information
                 </h3>
@@ -280,7 +280,7 @@ const ViewDeductionModal = ({
               {/* Brackets Information */}
               {deduction.brackets && deduction.brackets.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <Calculator className="h-5 w-5" />
                     Tax Brackets
                   </h3>
@@ -308,7 +308,7 @@ const ViewDeductionModal = ({
               {/* Metadata */}
               {(deduction.createdAt || deduction.updatedAt) && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
                     Metadata
                   </h3>
@@ -322,7 +322,7 @@ const ViewDeductionModal = ({
                           <p className="text-sm font-medium text-gray-500">
                             Created
                           </p>
-                          <p className="text-sm font-semibold text-gray-900">
+                          <p className="text-sm font-medium text-gray-900">
                             {formatDate(deduction.createdAt)}
                           </p>
                         </div>
@@ -337,7 +337,7 @@ const ViewDeductionModal = ({
                           <p className="text-sm font-medium text-gray-500">
                             Last Updated
                           </p>
-                          <p className="text-sm font-semibold text-gray-900">
+                          <p className="text-sm font-medium text-gray-900">
                             {formatDate(deduction.updatedAt)}
                           </p>
                         </div>

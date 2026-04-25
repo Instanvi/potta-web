@@ -439,7 +439,7 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
               </div>
             ) : (
               <>
-                <p className="text-2xl font-bold text-gray-900">{value}</p>
+                <p className="text-2xl font-medium text-gray-900">{value}</p>
                 <div className="flex items-center space-x-1">
                   {trendDirection === 'up' ? (
                     <TrendingUp className="h-4 w-4 text-green-600" />
@@ -563,7 +563,7 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
         {/* Headcount by Department Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Headcount by Department
             </CardTitle>
             <p className="text-sm text-gray-600">
@@ -586,7 +586,7 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
         {/* Org Chart - Commented out for replacement */}
         {/* <Card className="bg-white border-0">
            <CardHeader className="pb-4">
-             <CardTitle className="text-lg font-semibold text-gray-900">
+             <CardTitle className="text-lg font-medium text-gray-900">
                Org Chart
              </CardTitle>
              <p className="text-sm text-gray-600">
@@ -598,13 +598,13 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
                {/* CEO Level */}
         {/* <div className="text-center">
                  <div className="inline-block p-4 bg-blue-100 rounded-lg border-2 border-blue-300">
-                   <div className="font-semibold text-blue-900">
+                   <div className="font-medium text-blue-900">
                      {orgChartData.name}
                    </div>
                    <div className="text-sm text-blue-700">
                      {orgChartData.title}
                    </div>
-                   <div className="text-lg font-bold text-blue-900">
+                   <div className="text-lg font-medium text-blue-900">
                      {orgChartData.salary}
                    </div>
                  </div>
@@ -620,13 +620,13 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
                  {orgChartData.reports?.map((report, index) => (
                    <div key={index} className="text-center">
                      <div className="inline-block p-3 bg-green-100 rounded-lg border-2 border-green-300">
-                       <div className="font-semibold text-green-900">
+                       <div className="font-medium text-green-900">
                          {report.name}
                        </div>
                        <div className="text-sm text-green-700">
                          {report.title}
                        </div>
-                       <div className="text-lg font-bold text-green-900">
+                       <div className="text-lg font-medium text-green-900">
                          {report.salary}
                        </div>
                        {report.teamSize && (
@@ -652,7 +652,7 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
                                  <div className="text-xs text-gray-700">
                                    {subReport.title}
                                  </div>
-                                 <div className="text-sm font-bold text-gray-900">
+                                 <div className="text-sm font-medium text-gray-900">
                                    {subReport.salary}
                                  </div>
                                </div>
@@ -674,7 +674,7 @@ const HeadcountDashboard: React.FC<HeadcountDashboardProps> = ({
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 HRIS Data
               </CardTitle>
               <p className="text-sm text-gray-600">

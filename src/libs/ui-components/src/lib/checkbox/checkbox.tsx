@@ -20,7 +20,7 @@ const Checkbox: FC<Props> = ({ text, value, name, onChange }) => {
       />
       <label
         htmlFor={name}
-        className={`font-semibold text-sm cursor-pointer ${value ? "text-black" : "text-gray-500"}`}
+        className={`font-medium text-sm cursor-pointer ${value ? "text-black" : "text-gray-500"}`}
       >
         {text}
       </label>

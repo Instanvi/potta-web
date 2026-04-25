@@ -223,10 +223,19 @@ const CreateProduct: React.FC<CreateProductProps> = ({
         onSuccess: (response) => {
           toast.success('Product created successfully!');
           reset();
+          const createdProductId =
+            response?.data?.uuid ??
+            response?.uuid ??
+            response?.data?.id ??
+            response?.id;
 
           if (onProductCreated) {
+            if (!createdProductId) {
+              toast.error('Product created but no product ID was returned.');
+              return;
+            }
             // Call the callback with the created product ID and data
-            onProductCreated(response.data?.uuid || 'temp-id', payload);
+            onProductCreated(createdProductId, payload);
           } else {
             setIsOpen(false);
           }
@@ -441,7 +450,7 @@ const CreateProduct: React.FC<CreateProductProps> = ({
         {(structure === 'ASSEMBLY' || structure === 'SIMPLEGROUPS') && (
           <div className="mt-12 pb-20">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900">
                 {structure === 'ASSEMBLY'
                   ? 'Assembly Components'
                   : 'Group Components'}
@@ -510,7 +519,7 @@ const CreateProduct: React.FC<CreateProductProps> = ({
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Select Components</h3>
+                <h3 className="text-lg font-medium">Select Components</h3>
                 <button
                   onClick={() => setShowComponentModal(false)}
                   className="text-gray-500 hover:text-gray-700"

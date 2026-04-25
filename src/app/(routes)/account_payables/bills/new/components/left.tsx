@@ -207,7 +207,7 @@ const Left = () => {
       description: item.name,
       quantity: item.qty,
       discountCap: 0,
-      discountType: 'FLAT_RATE',
+      discountType: 'FlatRate',
       unitPrice: Number(item.price),
       taxRate: item.tax,
       discountRate: 0,
@@ -456,9 +456,10 @@ const Left = () => {
       <TextArea
         value={note}
         label="Notes"
+        name="notes"
         onchange={(e: any) => handleInputChange('notes', e.target.value)}
         placeholder="Enter notes"
-        errors={errors.notes ? { message: errors.notes } : undefined}
+        errors={errors.notes}
       />
 
       <div className="fixed bottom-0 left-0 right-0 p-2 bg-white border-t border-gray-200 flex justify-end space-x-3">

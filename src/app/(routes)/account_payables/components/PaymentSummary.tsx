@@ -19,7 +19,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Payment Summary</h2>
+        <h2 className="text-xl font-medium text-gray-900">Payment Summary</h2>
         <div className="p-2 bg-green-100">
           <DollarSign className="h-5 w-5 text-green-600" />
         </div>
@@ -33,7 +33,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Total Paid</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {formatCurrency(data.totalPaid)}
               </p>
             </div>
@@ -47,7 +47,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Total Bills</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {data.totalBills}
               </p>
             </div>
@@ -63,7 +63,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
               <p className="text-sm font-medium text-gray-600">
                 Average Bill Value
               </p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {formatCurrency(data.averageBillValue)}
               </p>
             </div>
@@ -77,7 +77,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Payment Rate</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {data.paymentRate}%
               </p>
             </div>

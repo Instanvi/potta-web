@@ -136,10 +136,19 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         onSuccess: (response) => {
           toast.success('Product created successfully!');
           reset();
+          const createdProductId =
+            response?.data?.uuid ??
+            response?.uuid ??
+            response?.data?.id ??
+            response?.id;
 
           if (onProductCreated) {
+            if (!createdProductId) {
+              toast.error('Product created but no product ID was returned.');
+              return;
+            }
             // Call the callback with the created product ID and data
-            onProductCreated(response.data?.uuid || 'temp-id', payload);
+            onProductCreated(createdProductId, payload);
           }
         },
         onError: (error) => {
@@ -335,7 +344,8 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                       handleSubmit((data) => {
                         // Store the form data and trigger next step
                         if (onProductCreated) {
-                          onProductCreated('temp-id', data);
+                          // ID is not available yet; stepper should create product later.
+                          onProductCreated('', data);
                         }
                       })();
                     }

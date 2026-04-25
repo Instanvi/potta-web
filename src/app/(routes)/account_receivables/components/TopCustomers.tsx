@@ -20,7 +20,7 @@ const TopCustomers: React.FC<TopCustomersProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-medium text-gray-900">
           Top Revenue Sources
         </h2>
         <button
@@ -45,7 +45,7 @@ const TopCustomers: React.FC<TopCustomersProps> = ({
               >
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
-                    <span className="text-sm font-semibold text-green-600">
+                    <span className="text-sm font-medium text-green-600">
                       {index + 1}
                     </span>
                   </div>
@@ -59,7 +59,7 @@ const TopCustomers: React.FC<TopCustomersProps> = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-gray-900">
                     {formatCurrency(customer.amount)}
                   </p>
                 </div>

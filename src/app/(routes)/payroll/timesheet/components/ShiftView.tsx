@@ -733,7 +733,7 @@ const ShiftView: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-gray-600" />
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-2xl font-medium text-gray-900">
                 Shift Management
               </h1>
             </div>
@@ -858,7 +858,7 @@ const ShiftView: React.FC = () => {
                       scope="col"
                       className={`px-4 py-4 text-center text-sm font-medium ${
                         isToday(date.fullDate)
-                          ? 'text-green-600 font-bold bg-green-50'
+                          ? 'text-green-600 font-medium bg-green-50'
                           : 'text-gray-700'
                       } tracking-wider w-28 border-r`}
                     >
@@ -866,7 +866,7 @@ const ShiftView: React.FC = () => {
                         <span className="text-xs text-gray-500">
                           {date.day}
                         </span>
-                        <span className="text-lg font-semibold">
+                        <span className="text-lg font-medium">
                           {date.date}
                         </span>
                       </div>
@@ -933,15 +933,15 @@ const ShiftView: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap border-r">
-                    <div className="text-sm font-bold text-gray-900">Total</div>
+                    <div className="text-sm font-medium text-gray-900">Total</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold border-r">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border-r">
                     {formatHours(calculateTotalHours())}
                   </td>
                   {weekDates.map((date) => (
                     <td
                       key={`total-${date.dayIndex}`}
-                      className={`px-6 py-4 whitespace-nowrap text-sm font-bold border-r ${
+                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium border-r ${
                         isToday(date.fullDate)
                           ? 'text-green-600'
                           : 'text-gray-700'

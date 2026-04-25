@@ -1,13 +1,12 @@
-import { signOut } from 'next-auth/react';
+import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 
 export const useSignOut = () => {
-  
   return {
-    signOut,
+    signOut: signOutWithAuthApi,
     signOutWithConfirm: () => {
       if (confirm('Are you sure you want to sign out?')) {
-        signOut();
+        void signOutWithAuthApi();
       }
-    }
+    },
   };
-}; 
+};

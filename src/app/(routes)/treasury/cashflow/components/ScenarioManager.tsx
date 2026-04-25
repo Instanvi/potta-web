@@ -223,7 +223,7 @@ const ScenarioManager: React.FC<ScenarioManagerProps> = ({
       {/* Scenario List */}
       <div className="bg-white p-6 -xl border border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-medium text-gray-900">
             Forecast Scenarios
           </h3>
           <button
@@ -333,7 +333,7 @@ const ScenarioManager: React.FC<ScenarioManagerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 -xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900">
                 {modalMode === 'create' && 'Create New Scenario'}
                 {modalMode === 'edit' && 'Edit Scenario'}
                 {modalMode === 'adjustments' && 'Manage Adjustments'}

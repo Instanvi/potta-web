@@ -73,9 +73,15 @@ const ProductCreateStep: React.FC<ProductCreateStepProps> = ({
       delete formData.taxRate;
       mutation.mutate(formData, {
         onSuccess: (data: any) => {
+          const createdProductId =
+            data?.data?.uuid ?? data?.uuid ?? data?.data?.id ?? data?.id;
+          if (!createdProductId) {
+            toast.error('Product created but no product ID was returned.');
+            return;
+          }
           toast.success('Product created successfully!');
           reset();
-          onSuccess(data?.uuid || 'new-product-id');
+          onSuccess(createdProductId);
         },
         onError: () => {
           toast.error('Failed to create product');
@@ -91,7 +97,7 @@ const ProductCreateStep: React.FC<ProductCreateStepProps> = ({
       onSubmit={handleSubmit(onSubmit)}
       className="relative w-full max-w-6xl mx-auto p-8"
     >
-      <h2 className="text-lg font-bold mb-4">Create Product</h2>
+      <h2 className="text-lg font-medium mb-4">Create Product</h2>
       <div className="w-full">
         <Input
           label="Product Name"

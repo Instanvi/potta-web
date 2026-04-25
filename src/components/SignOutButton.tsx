@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { signOut } from 'next-auth/react';
+import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 import Button from '@potta/components/button';
 
 interface SignOutButtonProps {
@@ -20,7 +20,7 @@ const SignOutButton: React.FC<SignOutButtonProps> = ({
 
   const handleSignOut = () => {
     if (confirm('Are you sure you want to sign out?')) {
-      signOut();
+      void signOutWithAuthApi();
     }
   };
 

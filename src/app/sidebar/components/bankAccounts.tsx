@@ -1,11 +1,10 @@
 import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import Icon from '../../../../../components/icon_fonts/icon';
 import { usePathname } from 'next/navigation';
-import { CreditCard, BarChart2 } from 'lucide-react';
+import { Bank, ChartPie, CreditCard } from '@phosphor-icons/react';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { svgIcons } from '@potta/components/svg_icons/IconsSvg';
 import SidebarProfile from './SidebarProfile';
+import { SB_ICON, sbClass, sbWeight } from './sidebarPhosphor';
 
 const SidebarsBankAccounts = () => {
   const pathname = usePathname();
@@ -13,69 +12,69 @@ const SidebarsBankAccounts = () => {
   const context = useContext(ContextData);
   const isActive = (path: string) => pathname.startsWith(path);
 
+  const listOn = str[1] == 'bank-accounts' && (str[2] == undefined || str[2] === '');
+  const txOn = isActive('/bank-accounts/transactions');
+  const repOn = isActive('/reports');
+
   return (
     <Sidebar
+      backgroundColor="#F9F9F9"
       collapsedWidth="65px"
       width="200px"
       transitionDuration={500}
       collapsed={context?.toggle}
       toggled={true}
       breakPoint="md"
-      className="relative !border-none bg-blue-500 h-[100vh] z-30 side"
+      className="relative z-30 h-[100vh] !border-none side"
     >
       <Menu className="relative h-[76vh]" closeOnClick>
         <MenuItem
-          className="mt-4 font-thin"
+          className="mt-4 font-normal"
           href="/"
           icon={
-            <img src="/icons/Potta.svg" className="h-16 w-16 mt-2" alt="logo" />
+            <img src="/icons/Potta.svg" className="mt-2 h-16 w-16" alt="logo" />
           }
         >
           {' '}
         </MenuItem>
-        {/* Dashboard */}
         <MenuItem
-          active={
-            str[1] == 'bank-accounts' && (str[2] == undefined || str[2] === '')
-          }
+          active={listOn}
           className="mt-8"
           href="/bank-accounts"
-          icon={svgIcons.courthouse(
-            str[1] == 'bank-accounts' && (str[2] == undefined || str[2] === '')
-              ? 'white'
-              : 'black'
-          )}
+          icon={
+            <Bank
+              size={SB_ICON}
+              weight={sbWeight(listOn)}
+              className={sbClass(listOn)}
+            />
+          }
         >
           <h3 className="text-md">Bank Accounts</h3>
         </MenuItem>
-        {/* Transactions */}
         <MenuItem
-          active={isActive('/bank-accounts/transactions')}
+          active={txOn}
           className=""
           href="/bank-accounts/transactions"
           icon={
             <CreditCard
-              className={`h-6 w-6 ${
-                isActive('/bank-accounts/transactions')
-                  ? 'text-white'
-                  : 'text-gray-500'
-              }`}
+              size={SB_ICON}
+              weight={sbWeight(txOn)}
+              className={sbClass(txOn)}
             />
           }
         >
           <h3 className="text-md">Transactions</h3>
         </MenuItem>
-        {/* Reports */}
         <MenuItem
-          active={isActive('/reports')}
+          active={repOn}
           className=""
           href="/reports"
           icon={
-            str[2] == 'reports' ? (
-              <img src="/images/sideExpensesIcons/white/2.svg" />
-            ) : (
-              <img src="/images/sideDashboardIcons/dahsboard.svg" />
-            )
+            <ChartPie
+              size={SB_ICON}
+              weight={sbWeight(repOn)}
+              className={sbClass(repOn)}
+            />
           }
         >
           <h3 className="text-md">Reports</h3>

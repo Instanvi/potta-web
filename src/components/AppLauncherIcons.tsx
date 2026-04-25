@@ -3,7 +3,7 @@ import React from 'react';
 export const AppLauncherIcons = {
   home: (
     <div className="w-[50px] h-[50px] bg-[#237804] rounded-full flex items-center justify-center">
-      <span className="text-[#ABD529] text-lg font-bold">H</span>
+      <span className="text-[#ABD529] text-lg font-medium">H</span>
     </div>
   ),
   treasury: (

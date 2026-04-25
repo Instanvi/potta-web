@@ -65,7 +65,7 @@ const EmployeeDetailsPage: React.FC<EmployeeDetailsPageProps> = ({
           className="w-28 h-28 rounded-full object-cover mb-4 self-center"
         />
         <div className="text-left w-full space-y-2">
-          {/* <div className="flex items-center gap-2 text-sm text-gray-500 font-semibold">
+          {/* <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
             <RiUserLine />
             {loadingRoles ? 'Loading...' : roleName}
           </div> */}

@@ -131,7 +131,7 @@ const TimesheetTable = ({
         // For the total row, show bold text
         if (row.original.isTotal) {
           return (
-            <div className="font-bold text-md">{row.original.employee}</div>
+            <div className="font-medium text-md">{row.original.employee}</div>
           );
         }
 
@@ -157,7 +157,7 @@ const TimesheetTable = ({
       accessorKey: 'totalHours',
       header: 'Total Hours',
       cell: ({ row }: { row: { original: any } }) => (
-        <div className={row.original.isTotal ? 'font-bold text-lg' : ''}>
+        <div className={row.original.isTotal ? 'font-medium text-lg' : ''}>
           {row.original.totalHours}
         </div>
       ),
@@ -166,7 +166,7 @@ const TimesheetTable = ({
       accessorKey: 'breakTime',
       header: 'Break',
       cell: ({ row }: { row: { original: any } }) => (
-        <div className={row.original.isTotal ? 'font-bold text-lg' : ''}>
+        <div className={row.original.isTotal ? 'font-medium text-lg' : ''}>
           {row.original.breakTime || '0 min'}
         </div>
       ),
@@ -250,7 +250,7 @@ const TimesheetTable = ({
       accessorKey: 'regularHours',
       header: 'Regular Hrs',
       cell: ({ row }: { row: { original: any } }) => (
-        <div className={row.original.isTotal ? 'font-bold text-lg' : ''}>
+        <div className={row.original.isTotal ? 'font-medium text-lg' : ''}>
           {row.original.regularHours}
         </div>
       ),
@@ -259,7 +259,7 @@ const TimesheetTable = ({
       accessorKey: 'overTime',
       header: 'Overtime',
       cell: ({ row }: { row: { original: any } }) => (
-        <div className={row.original.isTotal ? 'font-bold text-lg' : ''}>
+        <div className={row.original.isTotal ? 'font-medium text-lg' : ''}>
           {row.original.overTime}
         </div>
       ),

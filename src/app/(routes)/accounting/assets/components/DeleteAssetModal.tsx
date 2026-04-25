@@ -47,7 +47,7 @@ const DeleteAssetModal = ({
         <DialogHeader>
           <DialogTitle>Delete Asset</DialogTitle>
         </DialogHeader>
-        <div className="text-red-600 font-semibold mb-4">
+        <div className="text-red-600 font-medium mb-4">
           Are you sure you want to delete this asset? This action cannot be
           undone.
         </div>

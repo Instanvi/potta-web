@@ -30,7 +30,7 @@ const InvoiceModal: FC<IInvoiceModal> = ({open,onClose}) => {
                   </div>
                   <div className="mt-5 p-5">
                     <p className="text-gray-600">Send to </p>
-                    <h3 className="text-2xl mt-1 font-semibold">Apple Inc.</h3>
+                    <h3 className="text-2xl mt-1 font-medium">Apple Inc.</h3>
                     <div className="mt-3 space-y-2 flex-col">
                       <p>Department 98</p>
                       <p>44-46 Morningside Road</p>
@@ -76,25 +76,25 @@ const InvoiceModal: FC<IInvoiceModal> = ({open,onClose}) => {
                       </thead>
                       <tbody>
                       <tr className="border-b border-dashed">
-                        <td className="px-4 py-2 font-bold">Marketing Materials</td>
+                        <td className="px-4 py-2 font-medium">Marketing Materials</td>
                         <td className="px-4 py-2">$50</td>
                         <td className="px-4 py-2">150</td>
                         <td className="px-4 py-2">$7,500</td>
                       </tr>
                       <tr className="border-b border-dashed">
-                        <td className="px-4 py-2 font-bold">Website Design</td>
+                        <td className="px-4 py-2 font-medium">Website Design</td>
                         <td className="px-4 py-2">$50</td>
                         <td className="px-4 py-2">150</td>
                         <td className="px-4 py-2">$7,500</td>
                       </tr>
                       <tr className="border-b border-dashed">
-                        <td className="px-4 py-2 font-bold">Mobile App</td>
+                        <td className="px-4 py-2 font-medium">Mobile App</td>
                         <td className="px-4 py-2">$50</td>
                         <td className="px-4 py-2">150</td>
                         <td className="px-4 py-2">$7,500</td>
                       </tr>
                       <tr className="border-b border-dashed">
-                        <td className="px-4 py-2 font-bold">Printing Equipment</td>
+                        <td className="px-4 py-2 font-medium">Printing Equipment</td>
                         <td className="px-4 py-2">$50</td>
                         <td className="px-4 py-2">150</td>
                         <td className="px-4 py-2">$7,500</td>
@@ -123,7 +123,7 @@ const InvoiceModal: FC<IInvoiceModal> = ({open,onClose}) => {
                         <div className="flex justify-end ">
                           <div className="flex space-x-10">
                             <p>Total : </p>
-                            <h4 className="text-2xl font-semibold">$11,547</h4>
+                            <h4 className="text-2xl font-medium">$11,547</h4>
                           </div>
                         </div>
                       </div>

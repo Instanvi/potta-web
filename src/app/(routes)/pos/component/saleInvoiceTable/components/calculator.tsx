@@ -99,7 +99,7 @@ const Calculator: React.FC = () => {
             type="text"
             value={result}
             readOnly
-            className="w-full h-20 text-right text-4xl font-bold p-2"
+            className="w-full h-20 text-right text-4xl font-medium p-2"
             placeholder="Result"
           />
 

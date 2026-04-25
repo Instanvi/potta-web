@@ -1,17 +1,20 @@
 import React from 'react';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
 import Button from '@potta/components/button';
-import useGetAllProductCategories from '../_hooks/useGetAllProductCategories';
-import useCreateProductCategory from '../_hooks/useCreateProductCategory';
-import { ProductCategory } from '../_utils/types';
-import { productCategorySchema } from '../_utils/validation';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@potta/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@potta/components/shadcn/dropdown';
-import * as yup from 'yup';
 import Input from '@potta/components/input';
 import { useProductCategoryManager } from '../_hooks/useProductCategoryManager';
 
@@ -19,11 +22,8 @@ const CategoryManager = () => {
   const {
     modalOpen,
     setModalOpen,
-    openPopover,
-    setOpenPopover,
     editMode,
     setEditMode,
-    editId,
     setEditId,
     deleteId,
     setDeleteId,
@@ -41,16 +41,23 @@ const CategoryManager = () => {
     createCategory,
   } = useProductCategoryManager();
 
+  const closeCategorySheet = () => {
+    setModalOpen(false);
+    setEditMode(false);
+    setEditId(null);
+    reset();
+  };
+
   const columns = [
     {
       accessorKey: 'name',
       header: 'Name',
-      cell: ({ row: { original } }) => original.name,
+      // cell: ({ row: { original } }) => original.name,
     },
     {
       accessorKey: 'description',
       header: 'Description',
-      cell: ({ row: { original } }) => original.description,
+      // cell: ({ row: { original } }) => original.description,
     },
     {
       accessorKey: 'createdAt',
@@ -87,7 +94,7 @@ const CategoryManager = () => {
   return (
     <div className="py-10 w-full">
       <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Product Categories</h2>
+        <h2 className="text-2xl font-medium">Product Categories</h2>
         <Button text={'Add Category'} type="button" onClick={handleOpenModal} />
       </div>
       <DataGrid
@@ -95,68 +102,75 @@ const CategoryManager = () => {
         data={data?.data || []}
         isLoading={isLoading}
       />
-      {/* Modal for creating or editing a category */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-300">
-          <div className="bg-white p-8 w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
-            <h3 className="text-xl font-semibold mb-4">
+      <Sheet
+        open={modalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) {
+            closeCategorySheet();
+          }
+        }}
+      >
+        <SheetContent
+          side="left"
+          className="flex h-full w-full flex-col p-0 sm:max-w-[420px]"
+        >
+          <SheetHeader className="border-b border-black/10 px-4 py-4">
+            <SheetTitle>
               {editMode ? 'Edit Category' : 'Add Category'}
-            </h3>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <Input
-                  label="Name"
-                  type="text"
-                  name="name"
-                  register={register}
-                  errors={errors.name}
-                  required
-                />
-              </div>
-              <div>
-                <Input
-                  label="Description"
-                  type="text"
-                  name="description"
-                  register={register}
-                  errors={errors.description}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  text="Cancel"
-                  type="button"
-                  theme="gray"
-                  onClick={() => {
-                    setModalOpen(false);
-                    setEditMode(false);
-                    setEditId(null);
-                    reset();
-                  }}
-                />
-                <Button
-                  text={
-                    createCategory.isPending
-                      ? editMode
-                        ? 'Saving...'
-                        : 'Saving...'
-                      : editMode
-                      ? 'Save Changes'
-                      : 'Save'
-                  }
-                  type="submit"
-                  isLoading={createCategory.isPending}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </SheetTitle>
+            <SheetDescription className="text-black/70">
+              Create and manage product categories.
+            </SheetDescription>
+          </SheetHeader>
+          <form
+            id="category-form-sheet"
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
+          >
+            <Input
+              label="Name"
+              type="text"
+              name="name"
+              register={register}
+              errors={errors.name}
+              required
+            />
+            <Input
+              label="Description"
+              type="text"
+              name="description"
+              register={register}
+              errors={errors.description}
+            />
+          </form>
+          <SheetFooter className="mt-0 border-t border-black/10 px-4 py-3">
+            <Button
+              text="Cancel"
+              type="button"
+              theme="gray"
+              onClick={closeCategorySheet}
+            />
+            <Button
+              text={
+                createCategory.isPending
+                  ? 'Saving...'
+                  : editMode
+                  ? 'Save Changes'
+                  : 'Save'
+              }
+              type="button"
+              onClick={handleSubmit(onSubmit)}
+              isLoading={createCategory.isPending}
+            />
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
       {/* Delete confirmation modal */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-300">
           <div className="bg-white shadow-lg p-8 w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
-            <h3 className="text-xl font-semibold mb-4">Delete Category</h3>
+            <h3 className="text-xl font-medium mb-4">Delete Category</h3>
             <p>Are you sure you want to delete this category?</p>
             <div className="flex justify-end gap-2 mt-6">
               <Button

@@ -29,7 +29,7 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-medium text-gray-900">
           Cash Flow Summary
         </h2>
         <div className="p-2 bg-green-100">
@@ -45,7 +45,7 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Cash In</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {formatCurrency(cashIn)}
               </p>
             </div>
@@ -59,7 +59,7 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Cash Out</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {formatCurrency(cashOut)}
               </p>
             </div>
@@ -78,7 +78,7 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
             <div>
               <p className="text-sm font-medium text-gray-600">Net Cash Flow</p>
               <p
-                className={`text-lg font-semibold ${
+                className={`text-lg font-medium ${
                   netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}
               >
@@ -95,7 +95,7 @@ const CashFlowSummary: React.FC<CashFlowSummaryProps> = ({
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Cash Flow %</p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {cashFlowPercentage}%
               </p>
             </div>

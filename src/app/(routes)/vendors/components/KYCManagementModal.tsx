@@ -382,7 +382,7 @@ const KYCManagementModal: React.FC<KYCManagementModalProps> = ({
             {/* KYC Status Overview */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-medium text-gray-900">
                   KYC Status Overview
                 </h3>
                 {getStatusBadge(kycData.status)}
@@ -435,7 +435,7 @@ const KYCManagementModal: React.FC<KYCManagementModalProps> = ({
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-medium text-gray-900">
                     Submitted Documents ({documents.length})
                   </h3>
                   {isLoadingDocuments && (
@@ -619,7 +619,7 @@ const KYCManagementModal: React.FC<KYCManagementModalProps> = ({
             {/* Verification Notes */}
             {kycData.status === 'PENDING' && documents.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Verification Notes
                 </h3>
                 <textarea

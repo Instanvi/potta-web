@@ -151,10 +151,10 @@ const Box: FC<data> = () => {
                         <div key={id} className='w-fit h-36 p-5'>
                             <div className='flex gap-1'>
                                 <div>
-                                    <p className='font-bold text-xl'>{item.name}</p>
+                                    <p className='font-medium text-xl'>{item.name}</p>
                                 </div>
                                 <div>
-                                    <button className='text-md font-semibold rounded-full px-2 py-0.5 flex items-center bg-green-50 text-green-600'>
+                                    <button className='text-md font-medium rounded-full px-2 py-0.5 flex items-center bg-green-50 text-green-600'>
                                         <ArrowUp className='h-4 w-4 ' />
                                         <p>{item.percent}%</p>
                                     </button>

@@ -20,7 +20,7 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Accounts Payable Aging Report</h1>
+        <h1 className="text-2xl font-medium">Accounts Payable Aging Report</h1>
         <div className="text-sm text-gray-500">
           <p>As of: {reportPeriod.endDate}</p>
         </div>
@@ -34,7 +34,7 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
               <Building className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Payables</p>
-                <p className="text-xl font-bold">${kpis.totalOutstandingPayables.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalOutstandingPayables.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -45,7 +45,7 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
               <Clock className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">0-30 Days</p>
-                <p className="text-xl font-bold">${kpis.total0To30Days.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.total0To30Days.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -56,7 +56,7 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
               <Calendar className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">31-60 Days</p>
-                <p className="text-xl font-bold">${kpis.total31To60Days.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.total31To60Days.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -67,7 +67,7 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
               <AlertCircle className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Most Overdue</p>
-                <p className="text-xl font-bold truncate" title={kpis.mostOverdueVendor}>
+                <p className="text-xl font-medium truncate" title={kpis.mostOverdueVendor}>
                   {kpis.mostOverdueVendor}
                 </p>
               </div>
@@ -80,7 +80,7 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
               <TrendingUp className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">% Overdue</p>
-                <p className="text-xl font-bold">{kpis.percentageOverdue.toFixed(2)}%</p>
+                <p className="text-xl font-medium">{kpis.percentageOverdue.toFixed(2)}%</p>
               </div>
             </div>
           </CardBody>
@@ -93,15 +93,15 @@ const APAgingReport: React.FC<APAgingReportProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell className="font-semibold">Vendor</TableCell>
-                <TableCell className="font-semibold">Invoice #</TableCell>
-                <TableCell className="font-semibold">Total</TableCell>
-                <TableCell className="font-semibold">0-30 Days</TableCell>
-                <TableCell className="font-semibold">31-60 Days</TableCell>
-                <TableCell className="font-semibold">61-90 Days</TableCell>
-                <TableCell className="font-semibold">90+ Days</TableCell>
-                <TableCell className="font-semibold">Status</TableCell>
-                <TableCell className="font-semibold">Last Payment</TableCell>
+                <TableCell className="font-medium">Vendor</TableCell>
+                <TableCell className="font-medium">Invoice #</TableCell>
+                <TableCell className="font-medium">Total</TableCell>
+                <TableCell className="font-medium">0-30 Days</TableCell>
+                <TableCell className="font-medium">31-60 Days</TableCell>
+                <TableCell className="font-medium">61-90 Days</TableCell>
+                <TableCell className="font-medium">90+ Days</TableCell>
+                <TableCell className="font-medium">Status</TableCell>
+                <TableCell className="font-medium">Last Payment</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>

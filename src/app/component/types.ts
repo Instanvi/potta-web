@@ -13,7 +13,7 @@ export interface ListItem {
   description: string;
   icon: LucideIcon;
   read?: boolean;
-  timestamp?: string;
+  timestamp?: string | Date;
   priority?: 'high' | 'medium' | 'low';
   type?: 'message' | 'system' | 'reminder' | 'alert';
 }

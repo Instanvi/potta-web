@@ -37,7 +37,7 @@ const ReimbursementDetails = ({ reimbursement }: ReimbursementDetailsProps) => {
       {/* Header with Status */}
       <div className="bg-white border border-gray-200  p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-medium text-gray-900">
             Reimbursement Details
           </h3>
           <Badge
@@ -99,7 +99,7 @@ const ReimbursementDetails = ({ reimbursement }: ReimbursementDetailsProps) => {
 
       {/* Description */}
       <div className="bg-white border border-gray-200  p-6">
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">
+        <h4 className="text-sm font-medium text-gray-700 mb-2">
           Description
         </h4>
         <p className="text-gray-900">{reimbursement.description}</p>
@@ -110,7 +110,7 @@ const ReimbursementDetails = ({ reimbursement }: ReimbursementDetailsProps) => {
         reimbursement.paymentDate ||
         reimbursement.paymentRef) && (
         <div className="bg-white border border-gray-200  p-6">
-          <h4 className="text-sm font-semibold text-gray-700 mb-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-4">
             Processing Information
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

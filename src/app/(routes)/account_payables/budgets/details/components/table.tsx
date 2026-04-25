@@ -93,7 +93,7 @@ export function PaymentRequestDataTableWrapper({
         selector: (row: PaymentRequest) => row.madeBy,
         sortable: true,
         cell: (row: PaymentRequest) => (
-          <span className="font-semibold">{row.madeBy}</span>
+          <span className="font-medium">{row.madeBy}</span>
         ),
         minWidth: '120px',
       },
@@ -192,11 +192,6 @@ export function PaymentRequestDataTableWrapper({
       selectable={true} // Enable checkboxes as per design
       pagination={false} // Disable pagination as per design
       pending={isLoading} // Pass loading state
-      color={false} // Use the default light header color
-      size={false} // Use the default size
-      expanded={false} // Not needed
-      ExpandableComponent={null} // Not needed
-      minHeight="400px"
       // --- Add these if/when implementing server-side pagination ---
       // paginationServer={true}
       // paginationTotalRows={totalRowCount}

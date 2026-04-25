@@ -58,7 +58,7 @@ const RecentBills: React.FC<RecentBillsProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Recent Bills</h2>
+        <h2 className="text-xl font-medium text-gray-900">Recent Bills</h2>
         <div className="p-2 bg-green-100">
           <FileText className="h-5 w-5 text-green-600" />
         </div>
@@ -83,7 +83,7 @@ const RecentBills: React.FC<RecentBillsProps> = ({
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-900">
                   {formatCurrency(bill.amount)}
                 </p>
                 <span

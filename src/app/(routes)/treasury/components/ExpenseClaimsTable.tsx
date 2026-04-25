@@ -174,7 +174,7 @@ const ExpenseClaimsTable: React.FC = () => {
       accessorKey: 'madeBy',
       header: 'Employee',
       cell: ({ row: { original } }) => (
-        <span className="font-semibold">{original.madeBy}</span>
+        <span className="font-medium">{original.madeBy}</span>
       ),
     },
     {
@@ -206,7 +206,7 @@ const ExpenseClaimsTable: React.FC = () => {
         if (original.status?.toLowerCase() === 'rejected')
           color = 'text-red-700';
         return (
-          <span className={`text-sm font-bold ${color}`}>
+          <span className={`text-sm font-medium ${color}`}>
             {original.status?.charAt(0).toUpperCase() +
               original.status?.slice(1)}
           </span>
@@ -272,7 +272,7 @@ const ExpenseClaimsTable: React.FC = () => {
   return (
     <div className="bg-white p-6 ">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Expense Claims</h2>
+        <h2 className="text-xl font-medium text-gray-900">Expense Claims</h2>
         <span className="text-sm text-gray-500">
           {filteredData.length} of {mockData.length} claims
         </span>

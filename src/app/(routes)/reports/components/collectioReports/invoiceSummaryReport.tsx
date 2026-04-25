@@ -21,7 +21,7 @@ const InvoiceSummaryReport: React.FC<InvoiceSummaryReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Invoice Summary Report</h1>
+        <h1 className="text-2xl font-medium">Invoice Summary Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -35,7 +35,7 @@ const InvoiceSummaryReport: React.FC<InvoiceSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Invoice Amount</p>
-                <p className="text-xl font-bold">${kpis.totalInvoiceAmount.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalInvoiceAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -46,7 +46,7 @@ const InvoiceSummaryReport: React.FC<InvoiceSummaryReportProps> = ({
               <Receipt className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Amount Paid</p>
-                <p className="text-xl font-bold">${kpis.totalAmountPaid.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalAmountPaid.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -57,7 +57,7 @@ const InvoiceSummaryReport: React.FC<InvoiceSummaryReportProps> = ({
               <TrendingUp className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Outstanding Balance</p>
-                <p className="text-xl font-bold">${kpis.totalOutstandingBalance.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalOutstandingBalance.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -68,7 +68,7 @@ const InvoiceSummaryReport: React.FC<InvoiceSummaryReportProps> = ({
               <Calendar className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Number of Invoices</p>
-                <p className="text-xl font-bold">{kpis.numberOfInvoices}</p>
+                <p className="text-xl font-medium">{kpis.numberOfInvoices}</p>
               </div>
             </div>
           </CardBody>
@@ -79,7 +79,7 @@ const InvoiceSummaryReport: React.FC<InvoiceSummaryReportProps> = ({
               <CreditCard className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Paid Invoices</p>
-                <p className="text-xl font-bold">{kpis.percentagePaidInvoices}%</p>
+                <p className="text-xl font-medium">{kpis.percentagePaidInvoices}%</p>
               </div>
             </div>
           </CardBody>

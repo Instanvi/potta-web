@@ -128,7 +128,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
         {/* Basic Information Section */}
         <div className="space-y-6">
           <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Basic Information
             </h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -186,7 +186,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
         {/* Component Type Section */}
         <div className="space-y-6">
           <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Component Type
             </h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -253,7 +253,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
               <div className="border border-gray-200 p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="text-sm font-semibold  mb-2">
+                    <h4 className="text-sm font-medium  mb-2">
                       {category} Information
                     </h4>
                     <p className="text-sm mb-3">{selectedCategory.helpText}</p>
@@ -300,7 +300,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
         {/* Rate Configuration Section */}
         <div className="space-y-6">
           <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Rate Configuration
             </h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -506,7 +506,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
         {/* Tax Configuration Section */}
         <div className="space-y-6">
           <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900">
               Tax Configuration
             </h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -564,7 +564,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
             <button
               type="button"
               onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-              className="flex items-center text-lg font-semibold text-gray-900 hover:text-blue-600"
+              className="flex items-center text-lg font-medium text-gray-900 hover:text-blue-600"
             >
               <svg
                 className={`h-5 w-5 mr-2 transition-transform ${
@@ -650,7 +650,7 @@ const SliderBenefit: React.FC<SliderBenefitProps> = ({
         {/* Description Section */}
         <div className="space-y-4">
           <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Description</h3>
+            <h3 className="text-lg font-medium text-gray-900">Description</h3>
             <p className="text-sm text-gray-600 mt-1">
               Provide additional details about this benefit
             </p>

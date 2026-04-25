@@ -55,13 +55,13 @@ const PdfView = () => {
   return (
     <div className="flex min-h-full flex-col items-center justify-center overflow-y-auto w-full scroll bg-[#F2F2F2]">
       <div className="flex min-w-[45rem] justify-between w-full p-8">
-        <h3 className="text-xl font-semibold">Credit Note Preview</h3>
+        <h3 className="text-xl font-medium">Credit Note Preview</h3>
       </div>
       
       <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
         <div className="h-36 w-full flex items-center justify-between px-8 bg-blue-800">
           <div>
-            <p className="text-3xl font-semibold text-white">Credit Note</p>
+            <p className="text-3xl font-medium text-white">Credit Note</p>
             <p className="text-white mt-2">#{invoiceDetails?.invoiceNumber || 'New'}-CR</p>
           </div>
           <div className="text-right text-white">
@@ -77,7 +77,7 @@ const PdfView = () => {
         <div className="p-5 space-y-16 bg-white">
           <div className="mt-5 w-full flex space-x-5">
             <div className="flex w-[40%] space-x-2">
-              <h3 className="font-bold">From: </h3>
+              <h3 className="font-medium">From: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">
                 <p>ABC Company</p>
                 <p>hello@ABCcompany.com</p>
@@ -86,7 +86,7 @@ const PdfView = () => {
               </div>
             </div>
             <div className="flex space-x-2">
-              <h3 className="font-bold">To: </h3>
+              <h3 className="font-medium">To: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">
                 {customerLoading ? (
                   <p>Loading customer details...</p>
@@ -144,7 +144,7 @@ const PdfView = () => {
           
           {contextData.note && (
             <div className="mt-4">
-              <h3 className="font-bold">Notes:</h3>
+              <h3 className="font-medium">Notes:</h3>
               <p className="text-sm text-gray-600 mt-2 p-4 bg-gray-50 rounded-md">
                 {contextData.note}
               </p>

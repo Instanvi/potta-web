@@ -268,7 +268,7 @@ const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
       <div className="flex flex-col pr-1 gap-[6.5px] w-full">
         {label && (
           <div className="flex items-center gap-2">
-            <label className="text-gray-800 font-semibold">
+            <label className="text-gray-800 font-medium">
               {label}
               {required && <span className="text-red-500 ml-1">*</span>}
             </label>

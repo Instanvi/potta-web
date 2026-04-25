@@ -740,7 +740,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Sales Capacity - 2025
               </CardTitle>
             </CardHeader>
@@ -761,7 +761,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
 
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Revenue Scenarios
               </CardTitle>
             </CardHeader>
@@ -775,7 +775,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Revenue retention
               </CardTitle>
             </CardHeader>
@@ -798,7 +798,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
 
           <Card className="bg-white border-0">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">
+              <CardTitle className="text-lg font-medium text-gray-900">
                 Weighted Pipeline
               </CardTitle>
             </CardHeader>
@@ -853,7 +853,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
                   />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-medium text-gray-900">
                     {kpi.value}
                   </p>
                   <p
@@ -875,7 +875,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
         {/* Sales Capacity Table */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Sales Capacity - 2025
             </CardTitle>
           </CardHeader>
@@ -931,8 +931,8 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
                   ))}
                   {salesCapacityData.length > 0 && (
                     <tr className="border-t-2 border-gray-300 bg-gray-50">
-                      <td className="py-2 text-gray-900 font-bold">Total</td>
-                      <td className="py-2 text-right text-gray-900 font-bold">
+                      <td className="py-2 text-gray-900 font-medium">Total</td>
+                      <td className="py-2 text-right text-gray-900 font-medium">
                         {formatCurrency(
                           salesCapacityData.reduce(
                             (acc: number, item: any) =>
@@ -941,7 +941,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
                           )
                         )}
                       </td>
-                      <td className="py-2 text-right text-gray-900 font-bold">
+                      <td className="py-2 text-right text-gray-900 font-medium">
                         {formatCurrency(
                           salesCapacityData.reduce(
                             (acc: number, item: any) =>
@@ -950,7 +950,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
                           )
                         )}
                       </td>
-                      <td className="py-2 text-right text-gray-900 font-bold">
+                      <td className="py-2 text-right text-gray-900 font-medium">
                         {formatCurrency(
                           salesCapacityData.reduce(
                             (acc: number, item: any) =>
@@ -989,7 +989,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
         {/* Revenue Scenarios Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Revenue Scenarios
             </CardTitle>
           </CardHeader>
@@ -1015,7 +1015,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
         {/* Revenue Retention Table */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Revenue retention
             </CardTitle>
           </CardHeader>
@@ -1118,7 +1118,7 @@ const RevenueDashboard: React.FC<RevenueDashboardProps> = ({
         {/* Weighted Pipeline Chart */}
         <Card className="bg-white border-0">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">
+            <CardTitle className="text-lg font-medium text-gray-900">
               Weighted Pipeline
             </CardTitle>
           </CardHeader>

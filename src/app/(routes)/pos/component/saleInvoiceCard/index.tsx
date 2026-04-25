@@ -298,8 +298,10 @@ const SaleInvoiceCard = () => {
               key={category.id}
               onClick={() => handleActive(category.id)}
               className={`${
-                activeId === category.id ? 'bg-green-700' : 'bg-green-400'
-              } border py-2 text-base rounded-3xl px-4 hover:bg-green-700 text-white mx-2 min-w-fit whitespace-nowrap`}
+                activeId === category.id
+                  ? 'bg-[#0f6a2b] text-white'
+                  : 'bg-[#66e58f] text-black/85'
+              } rounded-full border border-black/5 px-3.5 py-1.5 text-sm font-normal hover:bg-[#0f6a2b] hover:text-white mx-2 min-w-fit whitespace-nowrap`}
             >
               {category.name}
             </button>
@@ -333,7 +335,7 @@ const SaleInvoiceCard = () => {
                       target.src = '/images/placeholder.png'; // Fallback image path
                     }}
                   />
-                  <p className=" text-gray-500 font-thin">{menuItem.name}</p>
+                  <p className=" text-gray-500 font-normal">{menuItem.name}</p>
                   {menuItem.stock === 0 && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 text-white">
                       Out of Stock

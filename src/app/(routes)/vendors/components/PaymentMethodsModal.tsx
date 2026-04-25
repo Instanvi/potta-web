@@ -336,7 +336,7 @@ const PaymentMethodsModal: React.FC<PaymentMethodsModalProps> = ({
             {/* Header */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-medium text-gray-900">
                   Payment Methods
                 </h2>
                 <p className="text-gray-600">
@@ -364,7 +364,7 @@ const PaymentMethodsModal: React.FC<PaymentMethodsModalProps> = ({
                   : 'opacity-0 max-h-0 overflow-hidden'
               }`}
             >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingMethod
                   ? 'Edit Payment Method'
                   : 'Add New Payment Method'}

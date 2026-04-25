@@ -127,7 +127,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
             <div className="border-b pb-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800">{data.name || 'Unnamed Voucher'}</h2>
+                  <h2 className="text-2xl font-medium text-gray-800">{data.name || 'Unnamed Voucher'}</h2>
                   <p className="text-sm text-gray-500 mt-1">ID: {data.id}</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -140,7 +140,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
 
             {/* Basic Information */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Basic Information</h3>
+              <h3 className="text-lg font-medium mb-4 text-gray-700">Basic Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Text 
                   name="Type" 
@@ -169,7 +169,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
 
             {/* Type-specific details */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              <h3 className="text-lg font-medium mb-4 text-gray-700">
                 {data.type ? `${data.type.charAt(0).toUpperCase() + data.type.slice(1)} Details` : 'Voucher Details'}
               </h3>
               {renderVoucherTypeDetails(data)}
@@ -177,7 +177,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
 
             {/* Validity Information */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Validity</h3>
+              <h3 className="text-lg font-medium mb-4 text-gray-700">Validity</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {data.programStartDate && (
                   <Text 
@@ -219,7 +219,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
 
             {/* Audience Information */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Audience</h3>
+              <h3 className="text-lg font-medium mb-4 text-gray-700">Audience</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {data.audienceSegment && (
                   <Text 
@@ -262,7 +262,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
             {/* Code Settings */}
             {data.codeSettings && (
               <div>
-                <h3 className="text-lg font-semibold mb-4 text-gray-700">Code Settings</h3>
+                <h3 className="text-lg font-medium mb-4 text-gray-700">Code Settings</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {data.codeSettings.prefix && (
                     <Text 

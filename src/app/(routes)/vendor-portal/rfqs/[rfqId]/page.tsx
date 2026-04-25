@@ -59,7 +59,7 @@ const VendorRFQPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto p-8">
           <div className="text-red-600 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          <h1 className="text-2xl font-medium text-gray-800 mb-2">
             Invalid RFQ Link
           </h1>
           <p className="text-gray-600">
@@ -67,7 +67,7 @@ const VendorRFQPage = () => {
             RFQ link.
           </p>
           <div className="mt-6 p-4 bg-gray-100 rounded-lg text-left">
-            <p className="text-sm text-gray-700 font-semibold mb-2">
+            <p className="text-sm text-gray-700 font-medium mb-2">
               Expected URL format:
             </p>
             <code className="text-xs text-gray-600 break-all">
@@ -97,7 +97,7 @@ const VendorRFQPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto p-8">
           <div className="text-red-600 text-6xl mb-4">❌</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          <h1 className="text-2xl font-medium text-gray-800 mb-2">
             RFQ Not Found
           </h1>
           <p className="text-gray-600 mb-4">

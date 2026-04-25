@@ -21,6 +21,10 @@ const ProductUploadStep: React.FC<ProductUploadStepProps> = ({
 
   const handleImageUpload = async () => {
     setUploadError(null);
+    if (!productId || productId === 'temp-id' || productId === 'temp') {
+      setUploadError('Missing product ID. Please create the product first.');
+      return;
+    }
     if (!selectedFiles.length) {
       setUploadError('Please select image(s) to upload.');
       return;
@@ -42,7 +46,7 @@ const ProductUploadStep: React.FC<ProductUploadStepProps> = ({
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
-      <h2 className="text-lg font-bold mb-4">Upload Product Images</h2>
+      <h2 className="text-lg font-medium mb-4">Upload Product Images</h2>
       <ImageUploader
         onFilesChange={setSelectedFiles}
         accept={{ 'image/*': ['.jpeg', '.jpg', '.png', '.gif'] }}

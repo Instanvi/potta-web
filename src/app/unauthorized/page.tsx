@@ -74,7 +74,7 @@ export default function UnauthorizedPage() {
           <p className="text-sm font-medium tracking-widest uppercase text-gray-400">
             Unauthorized
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-medium tracking-tight text-gray-900">
             {currentError.title}
           </h1>
           <p className="text-base text-gray-500 leading-relaxed max-w-sm mx-auto">

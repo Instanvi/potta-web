@@ -42,7 +42,7 @@ const SettingsPage = () => {
               <Layout className="h-4 w-4 text-slate-600" />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold text-slate-800">
+              <CardTitle className="text-lg font-medium text-slate-800">
                 Layout Preferences
               </CardTitle>
               <CardDescription className="text-sm text-slate-600">
@@ -209,7 +209,7 @@ const SettingsPage = () => {
               <Monitor className="h-4 w-4 text-slate-600" />
             </div>
             <div>
-              <CardTitle className="text-lg font-semibold text-slate-800">
+              <CardTitle className="text-lg font-medium text-slate-800">
                 Display Settings
               </CardTitle>
               <CardDescription className="text-sm text-slate-600">
@@ -256,7 +256,7 @@ const SettingsPage = () => {
       {/* Quick Actions */}
       <Card className="border border-slate-200">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-slate-800">
+          <CardTitle className="text-lg font-medium text-slate-800">
             Quick Actions
           </CardTitle>
           <CardDescription className="text-sm text-slate-600">

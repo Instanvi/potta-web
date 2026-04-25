@@ -16,7 +16,7 @@ const PurchaseOrderDetailsView: React.FC<PurchaseOrderDetailsViewProps> = ({
   return (
     <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
       <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-2xl font-medium text-gray-900 mb-2">
           Purchase Order Details
         </h3>
         <p className="text-gray-600">Review purchase order information</p>
@@ -43,7 +43,7 @@ const PurchaseOrderDetailsView: React.FC<PurchaseOrderDetailsViewProps> = ({
         <div className="space-y-6">
           {/* Current Status */}
           <div className="bg-white p-4 border border-gray-200 ">
-            <h4 className="font-semibold text-gray-900 mb-3">Current Status</h4>
+            <h4 className="font-medium text-gray-900 mb-3">Current Status</h4>
             <div className="flex items-center space-x-2">
               <span
                 className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full ${
@@ -66,7 +66,7 @@ const PurchaseOrderDetailsView: React.FC<PurchaseOrderDetailsViewProps> = ({
 
           {/* Purchase Order Summary */}
           <div className="bg-white p-4 border border-gray-200 ">
-            <h4 className="font-semibold text-gray-900 mb-3">Order Summary</h4>
+            <h4 className="font-medium text-gray-900 mb-3">Order Summary</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Order Number:</span>
@@ -113,7 +113,7 @@ const PurchaseOrderDetailsView: React.FC<PurchaseOrderDetailsViewProps> = ({
 
           {/* Vendor Information */}
           <div className="bg-white p-4 border border-gray-200 ">
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-medium text-gray-900 mb-3">
               Vendor Information
             </h4>
             <div className="space-y-2 text-sm">
@@ -160,7 +160,7 @@ const PurchaseOrderDetailsView: React.FC<PurchaseOrderDetailsViewProps> = ({
 
           {/* Payment Information */}
           <div className="bg-white p-4 border border-gray-200 ">
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-medium text-gray-900 mb-3">
               Payment Information
             </h4>
             <div className="space-y-2 text-sm">
@@ -201,7 +201,7 @@ const PurchaseOrderDetailsView: React.FC<PurchaseOrderDetailsViewProps> = ({
 
           {/* Status Timeline */}
           <div className="bg-white p-4 border border-gray-200 ">
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-medium text-gray-900 mb-3">
               Status Timeline
             </h4>
             <div className="space-y-3">

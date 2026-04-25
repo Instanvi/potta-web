@@ -70,7 +70,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   const ApprovalView = () => (
     <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
       <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-2xl font-medium text-gray-900 mb-2">
           Invoice Approval
         </h3>
         <p className="text-gray-600">Review and approve this invoice</p>
@@ -79,7 +79,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
       <div className="space-y-6">
         {/* Current Status */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">Current Status</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Current Status</h4>
           <div className="flex items-center space-x-2">
             <span
               className={`inline-flex items-center px-3 py-1 text-sm font-medium ${
@@ -99,7 +99,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
         {/* Invoice Summary */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">Invoice Summary</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Invoice Summary</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Invoice Number:</span>
@@ -135,7 +135,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
         {/* Approval Status */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">Approval Status</h4>
+          <h4 className="font-medium text-gray-900 mb-3">Approval Status</h4>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <User className="w-5 h-5 text-gray-400" />
@@ -170,7 +170,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
         {/* Approval Timeline */}
         <div className="bg-white p-4 ">
-          <h4 className="font-semibold text-gray-900 mb-3">
+          <h4 className="font-medium text-gray-900 mb-3">
             Approval Timeline
           </h4>
           <div className="space-y-3">
@@ -226,12 +226,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               {/* We'll need to create a custom PdfView component that accepts data as props */}
               <div className="flex min-h-full flex-col items-center justify-center overflow-y-auto w-full scroll bg-[#F2F2F2]">
                 <div className="flex min-w-[45rem] justify-between w-full p-8">
-                  <h3 className="text-xl font-semibold">Invoice Preview</h3>
+                  <h3 className="text-xl font-medium">Invoice Preview</h3>
                 </div>
                 <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
                   <div className="h-36 w-full flex items-center justify-between px-8 bg-green-700">
                     <div>
-                      <p className="text-3xl font-semibold text-white">
+                      <p className="text-3xl font-medium text-white">
                         {mockData.invoiceType}
                       </p>
                       <p className="text-white mt-2">
@@ -255,7 +255,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   <div className="p-5 space-y-16 bg-white">
                     <div className="mt-5 w-full flex space-x-5">
                       <div className="flex w-[40%] space-x-2">
-                        <h3 className="font-bold">From: </h3>
+                        <h3 className="font-medium">From: </h3>
                         <div className="space-y-2 text-sm text-gray-600 flex-col">
                           <p>Instanvi Sarl</p>
                           <p>hello@instanvi.com</p>
@@ -264,7 +264,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <h3 className="font-bold">To: </h3>
+                        <h3 className="font-medium">To: </h3>
                         <div className="space-y-2 text-sm text-gray-600 flex-col">
                           <p>{invoice.customerName}</p>
                           <p>{invoice.customerEmail}</p>
@@ -365,7 +365,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                           </div>
                         </div>
                         <hr className="my-4 border-t-2 border-gray-300" />
-                        <div className="flex justify-between font-bold">
+                        <div className="flex justify-between font-medium">
                           <div className="w-1/2">Total:</div>
                           <div className="w-1/2 text-right pr-20">
                             {invoice.currency} {invoice.amount.toFixed(2)}

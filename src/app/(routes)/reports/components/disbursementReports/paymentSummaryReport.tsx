@@ -19,7 +19,7 @@ const PaymentSummaryReport: React.FC<PaymentSummaryReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Payment Summary Report</h1>
+        <h1 className="text-2xl font-medium">Payment Summary Report</h1>
         <div className="space-x-2">
           <button className="inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium shadow-sm text-gray-700 bg-white hover:bg-gray-50">
             <Printer className="h-4 w-4 mr-2" />
@@ -56,7 +56,7 @@ const PaymentSummaryReport: React.FC<PaymentSummaryReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Total Payments</p>
-                <p className="text-xl font-bold">${kpis.totalPaymentsMade.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.totalPaymentsMade.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -67,7 +67,7 @@ const PaymentSummaryReport: React.FC<PaymentSummaryReportProps> = ({
               <TrendingUp className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Number of Payments</p>
-                <p className="text-xl font-bold">{kpis.numberOfPayments}</p>
+                <p className="text-xl font-medium">{kpis.numberOfPayments}</p>
               </div>
             </div>
           </CardBody>
@@ -78,7 +78,7 @@ const PaymentSummaryReport: React.FC<PaymentSummaryReportProps> = ({
               <Clock className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Common Method</p>
-                <p className="text-xl font-bold">{kpis.mostCommonPaymentMethod}</p>
+                <p className="text-xl font-medium">{kpis.mostCommonPaymentMethod}</p>
               </div>
             </div>
           </CardBody>
@@ -89,7 +89,7 @@ const PaymentSummaryReport: React.FC<PaymentSummaryReportProps> = ({
               <TrendingUp className="h-5 w-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-500">Largest Payment</p>
-                <p className="text-xl font-bold">${kpis.largestPayment.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.largestPayment.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -100,7 +100,7 @@ const PaymentSummaryReport: React.FC<PaymentSummaryReportProps> = ({
               <TrendingDown className="h-5 w-5 text-red-500" />
               <div>
                 <p className="text-sm text-gray-500">Outstanding</p>
-                <p className="text-xl font-bold">{kpis.outstandingPayments}</p>
+                <p className="text-xl font-medium">{kpis.outstandingPayments}</p>
               </div>
             </div>
           </CardBody>

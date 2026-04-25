@@ -33,7 +33,7 @@ function Boxes() {
       {paymentData.map((item) => (
         <div key={item.id} className="border p-6 bg-white">
           <div className="flex w-full justify-between items-center mb-2">
-            <p className={`font-semibold text-lg ${item.color}`}>
+            <p className={`font-medium text-lg ${item.color}`}>
               {item.title}
             </p>
             <span
@@ -42,7 +42,7 @@ function Boxes() {
               {item.percent}
             </span>
           </div>
-          <div className="mb-2 mt-5 text-3xl font-bold text-black text-center">
+          <div className="mb-2 mt-5 text-3xl font-medium text-black text-center">
             {item.amount}
           </div>
         </div>

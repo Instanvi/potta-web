@@ -24,7 +24,7 @@ export default function Method() {
 
     return (
         <fieldset>
-            <legend className="text-sm/6 font-semibold text-gray-900 mb-6">Method</legend>
+            <legend className="text-sm/6 font-medium text-gray-900 mb-6">Method</legend>
             <div className="space-y-2">
                 {options.map(({ id, label, defaultChecked }) => (
                     <div key={id} className="flex gap-3">

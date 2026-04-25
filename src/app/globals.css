@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Outfit: regular (400) for body/UI copy; medium/semibold only for heading hierarchy */
+@layer base {
+  html {
+    font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  h1 {
+    @apply font-semibold;
+  }
+
+  h2,
+  h3 {
+    @apply font-medium;
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply font-medium;
+  }
+}
+
 /* Print styles for cash flow reports */
 @media print {
   [class*="print:hidden"] {
@@ -37,12 +59,84 @@
 }
 
 body {
-  @apply font-normal antialiased;
-  background-color: #F8F9FA;
+  @apply text-base font-normal antialiased text-black;
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  background-color: #ffffff;
 }
 
 .side {
-  background: #f3fbfb;
+  background: #F9F9F9;
+}
+
+/* Sidebar alignment normalization across all section sidebars */
+.side .ps-sidebar-container {
+  background: #f9f9f9 !important;
+  border-right: none !important;
+}
+
+.side .ps-menu-root {
+  padding-inline: 0;
+}
+
+.side .ps-menu-button {
+  min-height: 44px;
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: visible;
+  color: #000000;
+  padding-inline: 10px !important;
+}
+
+/* Sidebar typography: base size, black text (active states override below) */
+.side .ps-menu-label,
+.side .ps-menu-label h3,
+.side .ps-menu-label span {
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0;
+  color: #000000 !important;
+}
+
+.side .ps-submenu-content .ps-menu-label,
+.side .ps-submenu-content .ps-menu-label h3,
+.side .ps-submenu-content .ps-menu-label span {
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+  font-weight: 400 !important;
+  color: #000000 !important;
+}
+
+.side .ps-menu-icon {
+  min-width: 24px !important;
+  width: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.side.ps-collapsed .ps-menu-button {
+  justify-content: center !important;
+  padding-inline: 0 !important;
+}
+
+.side.ps-collapsed .ps-menu-icon {
+  margin-right: 0 !important;
+}
+
+/* Collapsed: icon-only — labels were clipping under main content overlap */
+.side.ps-collapsed .ps-menu-label,
+.side.ps-collapsed .ps-menu-button > h3 {
+  display: none !important;
+}
+
+/* Collapsed: shrink top logo so it fits the narrow rail */
+.side.ps-collapsed .ps-menu-root > .ps-menu-item:first-child img {
+  margin-top: 0 !important;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
 }
 
 .css-1097eso {
@@ -295,20 +389,20 @@ body {
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-track {
-  background: #f3fbfb !important;
+  background: #F9F9F9 !important;
   border-radius: 3px !important;
 }
 
 /* Firefox */
 html {
-  scrollbar-color: #22c55e #f3fbfb !important;
+  scrollbar-color: #22c55e #F9F9F9 !important;
   scrollbar-width: thin !important;
 }
 
 /* Ensure all scrollable elements use the custom scrollbar */
 *:not(.scrollbar-hide) {
   scrollbar-width: thin !important;
-  scrollbar-color: #22c55e #f3fbfb !important;
+  scrollbar-color: #22c55e #F9F9F9 !important;
 }
 
 /* Additional specificity for webkit browsers */
@@ -328,7 +422,7 @@ html {
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-track {
-  background: #f3fbfb !important;
+  background: #F9F9F9 !important;
   border-radius: 3px !important;
 }
 .css-dip3t8 {

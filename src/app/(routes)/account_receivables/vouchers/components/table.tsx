@@ -18,32 +18,6 @@ import DeleteModal from './deleteModal';
 import ViewVoucherSlider from './viewVoucherSlider.tsx';
 import CustomSelect, { IOption } from '../../invoice/components/CustomSelect';
 
-// Define types based on the API response
-interface Invoice {
-  uuid: string;
-  invoiceId: string;
-  issuedDate: string;
-  dueDate: string;
-  invoiceType: string;
-  invoiceTotal: number;
-  status: string;
-  notes: string;
-  customer: {
-    firstName: string;
-    lastName: string;
-  };
-}
-
-interface ApiResponse {
-  data: Invoice[];
-  meta: {
-    itemsPerPage: number;
-    totalItems: number;
-    currentPage: number;
-    totalPages: number;
-  };
-}
-
 const VoucherTable = () => {
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -54,7 +28,6 @@ const VoucherTable = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const filter: Filter = {
     limit,
     page,
@@ -63,19 +36,6 @@ const VoucherTable = () => {
   };
 
   const { data, isLoading, error } = useGetAllVouchers(filter);
-
-  const getStatusStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'draft':
-        return 'text-gray-600';
-      case 'overdue':
-        return 'text-red-500';
-      case 'paid':
-        return 'text-green-500';
-      default:
-        return 'text-gray-600';
-    }
-  };
 
   const formatDate = (date: string) => {
     const today = new Date();
@@ -100,19 +60,19 @@ const VoucherTable = () => {
     {
       name: 'Code',
       selector: (row: any) => (
-        <div className="text-sm text-gray-600">{row.code}</div>
+        <div className="text-sm font-normal text-black">{row.code}</div>
       ),
     },
     {
       name: 'Type',
       selector: (row: any) => (
-        <div className="text-sm font-medium">{row.type}</div>
+        <div className="text-sm font-semibold text-black">{row.type}</div>
       ),
     },
     {
       name: 'Start Date',
       selector: (row: any) => (
-        <div className="text-sm text-gray-500">
+        <div className="text-sm font-normal text-black">
           {formatDate(row.scheduling?.programStartDate)}
         </div>
       ),
@@ -120,7 +80,7 @@ const VoucherTable = () => {
     {
       name: 'End Date',
       selector: (row: any) => (
-        <div className="text-sm">
+        <div className="text-sm font-normal text-black">
           {row.scheduling?.neverEnds == true
             ? 'NeverEnds'
             : formatDate(row.scheduling?.ProgramEndDate)}
@@ -130,21 +90,19 @@ const VoucherTable = () => {
 
     {
       name: 'Status',
-      selector: (row: any) => {
-        const status = 'Closed';
-        return (
-          <div className="border-r pr-4 flex justify-center">
-            <div className="flex items-center gap-3  w-full px-3 py-2 border border-green-500 bg-green-50 text-green-700">
-              <div className="flex items-center justify-center text-white bg-green-700 rounded-full size-4">
-                <Icon icon="material-symbols:check" width="20" height="20" />
-              </div>
-              {row.active == true ? 'Active' : 'Inactive'}
-            </div>
-          </div>
-        );
-      },
-      hasBorderLeft: true, // Left border for data cells
-      headerBorderLeft: true, // Left border for header cell
+      selector: (row: any) => (
+        <span
+          className={
+            row.active
+              ? 'text-sm font-semibold text-[#154406]'
+              : 'text-sm font-semibold text-black'
+          }
+        >
+          {row.active == true ? 'Active' : 'Inactive'}
+        </span>
+      ),
+      hasBorderLeft: true,
+      headerBorderLeft: true,
       width: '150px',
     },
     {
@@ -157,7 +115,7 @@ const VoucherTable = () => {
               setOpenViewModal(row.uuid);
               setIsViewOpen(true);
             },
-            className: 'hover:bg-gray-200',
+            className: 'hover:bg-black/5',
             icon: <i className="ri-eye-line" />,
           },
           {
@@ -166,7 +124,7 @@ const VoucherTable = () => {
               setOpenDeleteModal(row.uuid);
               setIsDeleteOpen(true);
             },
-            className: 'hover:bg-red-200 text-red-600',
+            className: 'hover:bg-red-100 text-red-600',
             icon: <i className="ri-delete-bin-line" />,
           },
         ];
@@ -185,61 +143,55 @@ const VoucherTable = () => {
   ];
   if (error) {
     return (
-      <div className={'w-full py-24 flex flex-col items-center justify-center'}>
+      <div
+        className={
+          'flex w-full flex-col items-center justify-center py-24 text-black'
+        }
+      >
         An Error Occured
       </div>
     );
   }
   return (
-    <div className="">
-      <div className="flex justify-between w-full">
-        <div className="mt-5 w-[50%] flex items-center space-x-2">
-          <div className="w-[65%]">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex w-full flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+          <div className="min-w-0 flex-1 sm:max-w-md">
             <Search />
           </div>
-
           <CustomSelect
             options={options}
             value={selectedValue}
             onChange={setSelectedValue}
-            placeholder="Choose an option"
+            placeholder="Filter: All"
           />
           <CustomSelect
             options={options}
             value={selectedValue}
             onChange={setSelectedValue}
-            placeholder="Choose an option"
+            placeholder="Date: All time"
           />
         </div>
-        <div className="w-[50%] flex justify-end">
-          <div className="flex mt-10 space-x-2">
-            <div>
-              {/*<Link href={'/invoicing/new_invoice'}>*/}
-              <Button
-                text={'Export'}
-                icon={<i className="ri-upload-2-line"></i>}
-                theme="lightBlue"
-                type={'button'}
-                color={true}
-              />
-              {/*</Link>*/}
-            </div>
-            <div>
-              <Link href={'/account_receivables/vouchers/new'}>
-                <Button
-                  text={'Create Voucher'}
-                  icon={<i className="ri-file-add-line"></i>}
-                  theme="default"
-                  type={'button'}
-                />
-              </Link>
-            </div>
-          </div>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          <Button
+            text={'Export'}
+            icon={<i className="ri-upload-2-line" />}
+            theme="outline"
+            type={'button'}
+            className="!border-[#154406] !bg-[#e8f5e9] !py-2.5 !text-[#154406]"
+          />
+          <Link href={'/account_receivables/vouchers/new'}>
+            <Button
+              text={'Create Voucher'}
+              icon={<i className="ri-file-add-line" />}
+              theme="default"
+              type={'button'}
+              className="!bg-[#154406]"
+            />
+          </Link>
         </div>
       </div>
       <MyTable
-        maxHeight="50vh"
-        minHeight="50vh"
         columns={columns}
         selectable={true}
         data={data?.data || []}
@@ -248,8 +200,12 @@ const VoucherTable = () => {
         paginationServer
         paginationTotalRows={data?.meta?.totalItems ?? 0}
         onChangePage={setPage}
-        onChangeRowsPerPage={setLimit}
-        expanded={false}
+        onChangeRowsPerPage={(n) => {
+          setLimit(n);
+          setPage(1);
+        }}
+        currentPage={page}
+        rowsPerPage={limit}
       />
 
       {openDeleteModal && (

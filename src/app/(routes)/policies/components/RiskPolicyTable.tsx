@@ -106,7 +106,7 @@ const RiskPolicyCard = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-gray-900 mb-2">
+            <CardTitle className="text-lg font-medium text-gray-900 mb-2">
               {policy.name}
             </CardTitle>
             <div className="flex items-center gap-2 mb-2">

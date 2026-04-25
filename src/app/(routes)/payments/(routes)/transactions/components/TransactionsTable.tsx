@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import CustomLoader from '@potta/components/loader';
 import useGetAllTransactions from '../hooks/useGetAllTransaction';
 import moment from 'moment';
@@ -15,9 +15,9 @@ import { svgIcons } from '@potta/components/svg_icons/IconsSvg';
 import TransactionSlider from './TransactionSlider';
 
 const statusColors = {
-  completed: 'text-green-600 font-semibold',
-  failed: 'text-red-600 font-semibold',
-  pending: 'text-yellow-600 font-semibold',
+  completed: 'text-green-600 font-medium',
+  failed: 'text-red-600 font-medium',
+  pending: 'text-yellow-600 font-medium',
 };
 
 const methodIcons = {
@@ -158,11 +158,12 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
   return (
     <>
-      <DataGrid
+      <DataTable
         data={filteredData}
-        column={columns}
-        loading={isLoading}
+        columns={columns}
+        isLoading={isLoading}
         progressComponent={<CustomLoader />}
+        withRowSelection
       />
       <TransactionSlider
         open={sliderOpen}

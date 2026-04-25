@@ -97,7 +97,7 @@ export function PaymentRequestDataTableWrapper({
         selector: (row: PaymentRequest) => row.madeBy,
         sortable: true,
         cell: (row: PaymentRequest) => (
-          <span className="font-semibold">{row.madeBy}</span>
+          <span className="font-medium">{row.madeBy}</span>
         ),
         minWidth: '120px',
       },

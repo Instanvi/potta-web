@@ -16,7 +16,7 @@ export function TerminalsCard({ count }: { count: number }) {
       <CardContent className='flex flex-col items-center justify-center pt-8'>
 
 
-        <div className="text-5xl font-bold">{count}</div>
+        <div className="text-5xl font-medium">{count}</div>
 
       </CardContent>
     </Card>

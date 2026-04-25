@@ -118,7 +118,7 @@ const TreasurySidebar: React.FC<TreasurySidebarProps> = ({
     <aside className="w-[200px] bg-white border-r flex flex-col py-8 pt-3 flex-shrink-0 max-h-screen overflow-y-auto">
       {/* Header */}
       {/* <div className="px-3 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-medium text-gray-900">
           {type === 'ar' ? 'Account Receivables' : 'Account Payables'}
         </h2>
         <p className="text-sm text-gray-500">
@@ -141,7 +141,7 @@ const TreasurySidebar: React.FC<TreasurySidebarProps> = ({
                 className={`flex items-center px-3 py-2 text-left transition-colors duration-200 text-gray-600 hover:bg-green-50 hover:text-green-900
                   ${
                     isActive
-                      ? 'bg-green-100 text-green-900 font-semibold border-l-4 border-l-green-600'
+                      ? 'bg-green-100 text-green-900 font-medium border-l-4 border-l-green-600'
                       : 'border-l-4 border-l-transparent'
                   }
                   rounded-none w-full`}

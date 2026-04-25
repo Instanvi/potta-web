@@ -111,7 +111,7 @@ const CreateScenarioModal: React.FC<CreateScenarioModalProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-medium text-gray-900">
             Create New Scenario
           </h2>
           <button

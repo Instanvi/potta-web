@@ -320,7 +320,7 @@ const Compensation: React.FC<CompensationProps> = ({
       </div>
 
       <div className="my-5">
-        <p className="text-xl font-bold">Paid Time off (PTO)</p>
+        <p className="text-xl font-medium">Paid Time off (PTO)</p>
         <div className="mt-5">
           {ptoLoading ? (
             <div>Loading PTO options...</div>
@@ -343,7 +343,7 @@ const Compensation: React.FC<CompensationProps> = ({
 
       {/* Time Tracking Section - Commented Out */}
       {/* <div className="mt-7">
-        <h4 className="text-xl mb-3 font-bold">Time Tracking</h4>
+        <h4 className="text-xl mb-3 font-medium">Time Tracking</h4>
         <p>
           Setup a tracking code for this team member, so they can clock in and
           out from the potta mobile app. Their time cards submissions are

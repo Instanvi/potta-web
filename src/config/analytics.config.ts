@@ -90,8 +90,8 @@ analyticsAxios.interceptors.response.use(
     // Handle specific error cases
     if (error.response?.status === 401 || error.response?.status === 403) {
       if (typeof window !== "undefined") {
-        import("next-auth/react").then(({ signOut }) => {
-          signOut({ callbackUrl: "/login" });
+        import("@/lib/auth-sign-out").then(({ signOutWithAuthApi }) => {
+          void signOutWithAuthApi({ callbackUrl: "/login" });
         });
       }
     } else if (error.response?.status === 404) {

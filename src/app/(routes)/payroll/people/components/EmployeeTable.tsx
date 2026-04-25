@@ -154,11 +154,11 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       cell: ({ row }: { row: { original: Employee } }) => (
         <div>
           {row.original.is_active ? (
-            <span className="px-2 py-1 inline-flex text-md leading-5 font-semibold rounded-full text-green-800">
+            <span className="px-2 py-1 inline-flex text-md leading-5 font-medium rounded-full text-green-800">
               Active
             </span>
           ) : (
-            <span className="px-2 py-1 inline-flex text-md leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+            <span className="px-2 py-1 inline-flex text-md leading-5 font-medium rounded-full bg-red-100 text-red-800">
               Inactive
             </span>
           )}

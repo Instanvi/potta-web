@@ -455,7 +455,7 @@ const AddBankAccountSlideover = ({
                 {/* Card Visual Preview */}
                 <div className="relative bg-gradient-to-tr from-blue-600 to-green-400 rounded-md shadow-lg p-6 mb-4 min-h-[180px] flex flex-col justify-between text-white">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold tracking-widest">
+                    <span className="text-lg font-medium tracking-widest">
                       {cardNumber || '•••• •••• •••• ••••'}
                     </span>
                     <span className="text-sm font-medium flex items-center gap-2">

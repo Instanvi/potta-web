@@ -39,7 +39,7 @@ const ProductEditStepperModal: React.FC<ProductEditStepperModalProps> = ({
           <div onClick={() => setActive('edit')}>
             <p
               className={`whitespace-nowrap ${
-                active === 'edit' && 'text-green-700 font-semibold'
+                active === 'edit' && 'text-green-700 font-medium'
               } cursor-pointer text-left`}
             >
               Edit Product
@@ -48,7 +48,7 @@ const ProductEditStepperModal: React.FC<ProductEditStepperModalProps> = ({
           <div onClick={() => setActive('upload')}>
             <p
               className={`whitespace-nowrap ${
-                active === 'upload' && 'text-green-700 font-semibold'
+                active === 'upload' && 'text-green-700 font-medium'
               } cursor-pointer text-left`}
             >
               Upload Images

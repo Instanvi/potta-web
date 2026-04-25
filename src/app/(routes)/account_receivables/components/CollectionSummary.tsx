@@ -19,7 +19,7 @@ const CollectionSummary: React.FC<CollectionSummaryProps> = ({
   return (
     <div className="bg-white p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 ">
+        <h2 className="text-xl font-medium text-gray-900 ">
           Collection Summary
         </h2>
         <div className="p-2 bg-green-100">
@@ -37,7 +37,7 @@ const CollectionSummary: React.FC<CollectionSummaryProps> = ({
               <p className="text-sm font-medium text-gray-600 ">
                 Total Collected
               </p>
-              <p className="text-lg font-semibold text-gray-900 ">
+              <p className="text-lg font-medium text-gray-900 ">
                 {formatCurrency(data.totalCollected)}
               </p>
             </div>
@@ -53,7 +53,7 @@ const CollectionSummary: React.FC<CollectionSummaryProps> = ({
               <p className="text-sm font-medium text-gray-600">
                 Total Invoices
               </p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {data.totalInvoices}
               </p>
             </div>
@@ -69,7 +69,7 @@ const CollectionSummary: React.FC<CollectionSummaryProps> = ({
               <p className="text-sm font-medium text-gray-600">
                 Average Invoice Value
               </p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {formatCurrency(data.averageInvoiceValue)}
               </p>
             </div>
@@ -85,7 +85,7 @@ const CollectionSummary: React.FC<CollectionSummaryProps> = ({
               <p className="text-sm font-medium text-gray-600">
                 Collection Rate
               </p>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-medium text-gray-900">
                 {data.collectionRate}%
               </p>
             </div>

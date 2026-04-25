@@ -34,7 +34,7 @@ const PLAccountTable: React.FC<PLAccountTableProps> = ({ data }) => {
           <tr
             className={`h-14 transition-colors duration-200 ${
               row.highlight
-                ? 'bg-green-50 font-bold border-t-2 border-green-400'
+                ? 'bg-green-50 font-medium border-t-2 border-green-400'
                 : level % 2 === 0
                 ? 'bg-white'
                 : 'bg-gray-50'
@@ -90,7 +90,7 @@ const PLAccountTable: React.FC<PLAccountTableProps> = ({ data }) => {
         </colgroup>
         <thead className="bg-green-50 h-16 border border-gray-200">
           <tr className="text-lg border-gray-200">
-            <th className="text-left font-semibold py-2 px-4 text-gray-800">
+            <th className="text-left font-medium py-2 px-4 text-gray-800">
               Description
             </th>
             <th className="text-right py-2 px-4 text-gray-800">

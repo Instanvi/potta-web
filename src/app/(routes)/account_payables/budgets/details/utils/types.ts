@@ -33,11 +33,19 @@ export interface PaymentRequest {
   ref: string; // Or maybe a number/ID? Displaying 'Today' suggests flexibility
   date: string; // e.g., '10/03/2024'
   madeBy: string;
+  madeTo?: string;
+  category?: string;
   merchant: string;
   amount: number;
   currency: string;
   type: string;
-  status: 'Approved' | 'Pending' | 'Rejected';
+  status:
+    | 'Approved'
+    | 'Pending'
+    | 'Rejected'
+    | 'approved'
+    | 'pending'
+    | 'rejected';
   memo: string;
   account: string;
   receiptFiles: any[];

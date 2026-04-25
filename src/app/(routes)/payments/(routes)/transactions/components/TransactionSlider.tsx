@@ -11,14 +11,14 @@ interface TransactionSliderProps {
 }
 
 const statusColors: Record<string, string> = {
-  completed: 'text-green-600 font-semibold',
-  failed: 'text-red-600 font-semibold',
-  pending: 'text-yellow-600 font-semibold',
+  completed: 'text-green-600 font-medium',
+  failed: 'text-red-600 font-medium',
+  pending: 'text-yellow-600 font-medium',
 };
-const labelClass = 'font-semibold text-gray-600';
+const labelClass = 'font-medium text-gray-600';
 const valueClass = 'text-gray-900';
 const sectionClass =
-  'text-base font-bold text-green-700 border-b pb-1 mb-3 mt-6 first:mt-0';
+  'text-base font-medium text-green-700 border-b pb-1 mb-3 mt-6 first:mt-0';
 
 const TransactionSlider: React.FC<TransactionSliderProps> = ({
   open,

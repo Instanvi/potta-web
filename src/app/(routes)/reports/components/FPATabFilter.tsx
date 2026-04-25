@@ -327,7 +327,7 @@ const FPATabFilter: React.FC<FPATabFilterProps> = ({
               }
               className={`px-6 py-4 cursor-pointer transition-all ${
                 activeTab === tab.id
-                  ? 'text-green-600 border-b-2 border-green-500 font-semibold'
+                  ? 'text-green-600 border-b-2 border-green-500 font-medium'
                   : 'text-gray-600'
               }`}
             >
@@ -358,7 +358,7 @@ const FPATabFilter: React.FC<FPATabFilterProps> = ({
                       onClick={() => setTimeCycleTab(tab)}
                       className={`px-6 py-3 cursor-pointer transition-all ${
                         timeCycleTab === tab
-                          ? 'text-green-600 border-b-2 border-green-500 font-semibold'
+                          ? 'text-green-600 border-b-2 border-green-500 font-medium'
                           : 'text-gray-600'
                       }`}
                     >

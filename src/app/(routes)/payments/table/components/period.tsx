@@ -8,7 +8,7 @@ const notificationMethods = [
 export default function Period() {
     return (
         <fieldset>
-            <legend className="text-sm/6 font-semibold text-gray-900">Period</legend>
+            <legend className="text-sm/6 font-medium text-gray-900">Period</legend>
             <div className="mt-6 space-y-2">
                 {notificationMethods.map((notificationMethod) => (
                     <div key={notificationMethod.id} className="flex items-center">

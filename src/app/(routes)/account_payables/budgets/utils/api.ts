@@ -2,6 +2,11 @@ import axios from 'config/axios.config';
 import { BudgetFilter } from '../hooks/useBudgets';
 
 export const budgetsApi = {
+  getCurrentUserId: () => {
+    if (typeof window === 'undefined') return '';
+    return localStorage.getItem('userId') || '';
+  },
+
   // Get all budgets with pagination and filtering
   getBudgets: async (filter: BudgetFilter) => {
     const queryParams = new URLSearchParams();

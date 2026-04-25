@@ -473,7 +473,7 @@ const Schedule: React.FC<ScheduleProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Pay Cycle Name
               </label>
-              <div className="p-4 border border-gray-300 rounded-xs font-bold bg-gray-50 text-gray-700">
+              <div className="p-4 border border-gray-300 rounded-xs font-medium bg-gray-50 text-gray-700">
                 {personData?.compensation_schedule || 'Not set'}
               </div>
             </div>

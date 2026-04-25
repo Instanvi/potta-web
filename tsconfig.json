@@ -27,22 +27,22 @@
         "./src/*"
       ],
       "@instanvi/core": [
-        "src/libs/core/src/index.ts"
+        "src/lib/instanvi/core/index.ts"
       ],
       "@instanvi/core/server": [
-        "src/libs/core/src/server.ts"
+        "src/lib/instanvi/core/server.ts"
       ],
       "@instanvi/ui-components": [
-        "src/libs/ui-components/src/index.ts"
+        "src/lib/instanvi/ui-components/index.ts"
       ],
       "@instanvi/ui-components/server": [
-        "src/libs/ui-components/src/server.ts"
+        "src/lib/instanvi/ui-components/server.ts"
       ],
       "@instanvi/utilities": [
-        "src/libs/utilities/src/index.ts"
+        "src/lib/instanvi/utilities/index.ts"
       ],
       "@instanvi/utilities/server": [
-        "src/libs/utilities/src/server.ts"
+        "src/lib/instanvi/utilities/server.ts"
       ]
     },
     "plugins": [

@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
 import './globals.css';
 import 'remixicon/fonts/remixicon.css';
 import 'react-accessible-accordion/dist/fancy-example.css';
 
 import { AppProviders } from '@potta/components/providers/AppProviders';
 
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 
-const jakarta = Plus_Jakarta_Sans({
+const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-jakarta',
+  variable: '--font-outfit',
+  display: 'swap',
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -23,6 +24,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Suspense } from 'react';
+
 export default function RootLayout({
   children,
 }: {
@@ -31,9 +34,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jakarta.variable} font-sans bg-[#F8F9FA] antialiased`}
+        className={`${outfit.variable} font-sans bg-[#F8F9FA] antialiased`}
       >
-        <AppProviders>{children}</AppProviders>
+        <Suspense fallback={null}>
+          <AppProviders>{children}</AppProviders>
+        </Suspense>
       </body>
     </html>
   );

@@ -80,15 +80,15 @@ const ProfitMarginCard: React.FC = () => (
         <div className="flex flex-row justify-between mt-2">
           <div>
             <div className="text-xs text-black">Current Margin</div>
-            <div className="text-lg font-bold text-black">34%</div>
+            <div className="text-lg font-medium text-black">34%</div>
           </div>
           <div>
             <div className="text-xs text-black">6-Month Avg</div>
-            <div className="text-lg font-bold text-black">30.7%</div>
+            <div className="text-lg font-medium text-black">30.7%</div>
           </div>
         </div>
         <div className="mt-3 text-xs flex items-center gap-1">
-          <span className="font-semibold text-black">Trend:</span>
+          <span className="font-medium text-black">Trend:</span>
           <span className="text-green-600">+2% since Jan</span>
         </div>
       </CardContent>

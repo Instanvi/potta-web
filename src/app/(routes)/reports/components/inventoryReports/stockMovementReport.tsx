@@ -20,7 +20,7 @@ const StockMovementReport: React.FC<StockMovementReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Stock Movement Report</h1>
+        <h1 className="text-2xl font-medium">Stock Movement Report</h1>
         <div className="space-x-2">
           <button className="inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium shadow-sm text-gray-700 bg-white hover:bg-gray-50">
             <Printer className="h-4 w-4 mr-2" />
@@ -54,25 +54,25 @@ const StockMovementReport: React.FC<StockMovementReportProps> = ({
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Total Units Received</p>
-            <p className="text-2xl font-bold">{kpis.totalReceived.toLocaleString()}</p>
+            <p className="text-2xl font-medium">{kpis.totalReceived.toLocaleString()}</p>
           </CardBody>
         </Card>
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Total Units Sold</p>
-            <p className="text-2xl font-bold">{kpis.totalSold.toLocaleString()}</p>
+            <p className="text-2xl font-medium">{kpis.totalSold.toLocaleString()}</p>
           </CardBody>
         </Card>
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Net Movement</p>
-            <p className="text-2xl font-bold">{kpis.netMovement.toLocaleString()}</p>
+            <p className="text-2xl font-medium">{kpis.netMovement.toLocaleString()}</p>
           </CardBody>
         </Card>
         <Card>
           <CardBody>
             <p className="text-sm text-gray-500">Highest Movement Item</p>
-            <p className="text-2xl font-bold">{kpis.highestMovementItem}</p>
+            <p className="text-2xl font-medium">{kpis.highestMovementItem}</p>
           </CardBody>
         </Card>
       </div>

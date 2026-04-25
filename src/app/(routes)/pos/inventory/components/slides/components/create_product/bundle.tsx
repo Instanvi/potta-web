@@ -193,7 +193,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
         <div className="space-y-6 p-6">
           {/* Basic Information */}
           <div className="bg-white rounded-lg p-6 border">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <h3 className="text-lg font-medium mb-4 flex items-center">
               <Package className="mr-2 h-5 w-5" />
               Basic Information
             </h3>
@@ -278,7 +278,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
 
           {/* Pricing */}
           <div className="bg-white rounded-lg p-6 border">
-            <h3 className="text-lg font-semibold mb-4">Pricing</h3>
+            <h3 className="text-lg font-medium mb-4">Pricing</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
@@ -322,7 +322,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
           {/* Bundle Components */}
           <div className="bg-white rounded-lg p-6 border">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Bundle Components</h3>
+              <h3 className="text-lg font-medium">Bundle Components</h3>
               <Button
                 type="button"
                 text="Add Component"
@@ -415,7 +415,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
 
             {components.length > 0 && (
               <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">
+                <h4 className="font-medium text-blue-800 mb-2">
                   Bundle Summary
                 </h4>
                 <p>

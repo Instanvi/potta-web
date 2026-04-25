@@ -117,7 +117,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         style={{ transform: 'translate3d(0, 0, 0)' }}
       >
         <div className="sticky top-0 bg-white p-4 border-b flex justify-between items-center z-10">
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl font-medium">
             {personId ? 'Edit Employee' : 'New Employee'}
           </h2>
           <button

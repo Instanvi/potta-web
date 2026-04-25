@@ -121,7 +121,7 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
           </div>
           <div className="w-full grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="" className="mb-3 text-gray-900 font-bold">
+              <label htmlFor="" className="mb-3 text-gray-900 font-medium">
                 Images
               </label>
               {signedImageUrls.length > 0 && (
@@ -165,7 +165,7 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
             data.components.length > 0 && (
               <div className="w-full mt-6">
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
                     {data.structure === 'ASSEMBLY'
                       ? 'Assembly Components'
                       : 'Group Items'}

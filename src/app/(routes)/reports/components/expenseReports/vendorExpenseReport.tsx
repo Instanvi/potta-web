@@ -19,7 +19,7 @@ const VendorExpenseReport: React.FC<VendorExpenseReportProps> = ({
     <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Expenses by Vendor Report</h1>
+        <h1 className="text-2xl font-medium">Expenses by Vendor Report</h1>
         <div className="text-sm text-gray-500">
           <p>Period: {reportPeriod.startDate} - {reportPeriod.endDate}</p>
         </div>
@@ -33,7 +33,7 @@ const VendorExpenseReport: React.FC<VendorExpenseReportProps> = ({
               <Building className="h-5 w-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-500">Highest Spending Vendor</p>
-                <p className="text-xl font-bold">{kpis.highestSpendingVendor}</p>
+                <p className="text-xl font-medium">{kpis.highestSpendingVendor}</p>
               </div>
             </div>
           </CardBody>
@@ -44,7 +44,7 @@ const VendorExpenseReport: React.FC<VendorExpenseReportProps> = ({
               <DollarSign className="h-5 w-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-500">Average Spend per Vendor</p>
-                <p className="text-xl font-bold">${kpis.averageSpendPerVendor.toLocaleString()}</p>
+                <p className="text-xl font-medium">${kpis.averageSpendPerVendor.toLocaleString()}</p>
               </div>
             </div>
           </CardBody>
@@ -55,7 +55,7 @@ const VendorExpenseReport: React.FC<VendorExpenseReportProps> = ({
               <Tag className="h-5 w-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-500">Most Common Category</p>
-                <p className="text-xl font-bold">{kpis.mostCommonExpenseCategory}</p>
+                <p className="text-xl font-medium">{kpis.mostCommonExpenseCategory}</p>
               </div>
             </div>
           </CardBody>
