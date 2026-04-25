@@ -1,27 +1,27 @@
-import axios, { AxiosError } from "axios";
-import { getSession } from "next-auth/react";
-import { API_URL } from "./env";
+import axios, { AxiosError } from 'axios';
+import { getSession } from 'next-auth/react';
+import { API_URL } from './env';
+import { auth } from '@/auth';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 });
 
 export const authClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_AUTH_API_URL!,
   headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
 apiClient.interceptors.request.use(
   async (config) => {
-    if (typeof window !== "undefined") {
-      const session = (await getSession()) as any;
+    if (typeof window !== 'undefined') {
+      const session = await auth();
       const token = session?.accessToken;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -34,7 +34,7 @@ apiClient.interceptors.request.use(
 
 authClient.interceptors.request.use(
   async (config) => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const session = (await getSession()) as any;
       if (session?.accessToken) {
         config.headers.Authorization = `Bearer ${session.accessToken}`;
@@ -46,19 +46,16 @@ authClient.interceptors.request.use(
 );
 
 function handleResponseError(error: AxiosError) {
-  if (typeof window === "undefined") return Promise.reject(error);
+  if (typeof window === 'undefined') return Promise.reject(error);
   return Promise.reject(error);
 }
 
-apiClient.interceptors.response.use(
-  (response) => {
-    if ([200, 201].includes(response.status)) {
-      return response.data || response;
-    }
-    return response.data;
-  },
-  handleResponseError
-);
+apiClient.interceptors.response.use((response) => {
+  if ([200, 201].includes(response.status)) {
+    return response.data || response;
+  }
+  return response.data;
+}, handleResponseError);
 
 authClient.interceptors.response.use(
   (response) => response.data,
@@ -68,7 +65,9 @@ authClient.interceptors.response.use(
 export const refreshTokenAPI = async (
   refresh_token: string
 ): Promise<{ access_token: string; refresh_token: string }> => {
-  const response = await apiClient.post(`/auth/refresh_token/`, { refresh_token });
+  const response = await apiClient.post(`/auth/refresh_token/`, {
+    refresh_token,
+  });
   return response as any;
 };
 
