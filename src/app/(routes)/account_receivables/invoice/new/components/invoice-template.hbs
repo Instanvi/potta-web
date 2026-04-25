@@ -1,0 +1,144 @@
+<div
+  style='font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; background: #fff; padding: 32px;'
+>
+  <div
+    style='display: flex; justify-content: space-between; align-items: center; background: #15803d; color: #fff; padding: 24px 32px; '
+  >
+    <div>
+      <h1 style='margin: 0; font-size: 2rem;'>{{invoiceType}}</h1>
+      <p style='margin: 8px 0 0 0;'>#{{invoiceNumber}}</p>
+    </div>
+    <div style='text-align: right;'>
+      <p><strong>Issue Date:</strong> {{formattedIssueDate}}</p>
+      <p><strong>Due Date:</strong> {{formattedDueDate}}</p>
+      <p><strong>Currency:</strong> {{currency}}</p>
+    </div>
+  </div>
+
+  <div style='display: flex; justify-content: space-between; margin-top: 32px;'>
+    <div>
+      <h3 style='margin-bottom: 8px;'>From:</h3>
+      <div style='color: #555; font-size: 0.95rem;'>
+        <p>{{companyName}}</p>
+        <p>{{companyEmail}}</p>
+        <p>{{companyAddress}}</p>
+        <p>{{companyPhone}}</p>
+      </div>
+    </div>
+    <div>
+      <h3 style='margin-bottom: 8px;'>To:</h3>
+      <div style='color: #555; font-size: 0.95rem;'>
+        <p>{{customerName}}</p>
+        <p>{{customerEmail}}</p>
+        <p>{{billingAddress}}</p>
+        <p>{{customerPhone}}</p>
+      </div>
+    </div>
+  </div>
+
+  {{#if shippingAddress}}
+    <div style='margin-top: 16px;'>
+      <h3>Shipping Address:</h3>
+      <p style='color: #555; font-size: 0.95rem;'>{{shippingAddress}}</p>
+    </div>
+  {{/if}}
+
+  <table style='width: 100%; margin-top: 32px; border-collapse: collapse;'>
+    <thead>
+      <tr style='background: #f3f4f6;'>
+        <th
+          style='padding: 8px; border-bottom: 2px solid #e5e7eb; text-align: left;'
+        >ID</th>
+        <th
+          style='padding: 8px; border-bottom: 2px solid #e5e7eb; text-align: left;'
+        >Item</th>
+        <th
+          style='padding: 8px; border-bottom: 2px solid #e5e7eb; text-align: left;'
+        >Qty</th>
+        <th
+          style='padding: 8px; border-bottom: 2px solid #e5e7eb; text-align: left;'
+        >Price</th>
+        <th
+          style='padding: 8px; border-bottom: 2px solid #e5e7eb; text-align: left;'
+        >Tax</th>
+        <th
+          style='padding: 8px; border-bottom: 2px solid #e5e7eb; text-align: left;'
+        >Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each tableData}}
+        <tr>
+          <td
+            style='padding: 8px; border-bottom: 1px solid #e5e7eb;'
+          >{{@index}}</td>
+          <td
+            style='padding: 8px; border-bottom: 1px solid #e5e7eb;'
+          >{{name}}</td>
+          <td
+            style='padding: 8px; border-bottom: 1px solid #e5e7eb;'
+          >{{qty}}</td>
+          <td
+            style='padding: 8px; border-bottom: 1px solid #e5e7eb;'
+          >{{currencySymbol}}{{price}}</td>
+          <td
+            style='padding: 8px; border-bottom: 1px solid #e5e7eb;'
+          >{{currencySymbol}}{{taxAmount}}</td>
+          <td
+            style='padding: 8px; border-bottom: 1px solid #e5e7eb;'
+          >{{currencySymbol}}{{totalWithTax}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div style='display: flex; justify-content: flex-end; margin-top: 32px;'>
+    <table style='width: 350px;'>
+      <tbody>
+        <tr>
+          <td style='padding: 8px 0;'>Sub Total:</td>
+          <td
+            style='padding: 8px 0; text-align: right;'
+          >{{currencySymbol}}{{subtotal}}</td>
+        </tr>
+        <tr>
+          <td style='padding: 8px 0;'>Tax ({{taxRate}}%):</td>
+          <td
+            style='padding: 8px 0; text-align: right;'
+          >{{currencySymbol}}{{totalTax}}</td>
+        </tr>
+        <tr style='font-weight: bold;'>
+          <td style='padding: 8px 0;'>Total:</td>
+          <td
+            style='padding: 8px 0; text-align: right;'
+          >{{currencySymbol}}{{total}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style='margin-top: 32px; color: #555; font-size: 0.95rem;'>
+    <p><strong>Payment Method:</strong> {{paymentMethod}}</p>
+    {{#if paymentReference}}
+      <p><strong>Payment Reference:</strong> {{paymentReference}}</p>
+    {{/if}}
+    {{#if paymentTerms}}
+      <p><strong>Payment Terms:</strong> {{paymentTerms}}</p>
+    {{/if}}
+    {{#if note}}
+      <p><strong>Notes:</strong> {{note}}</p>
+    {{/if}}
+  </div>
+
+  <!-- Pay Now Button and USSD Code -->
+  <div style='margin-top: 40px; display: flex; align-items: center; gap: 24px;'>
+    <a
+      href='{{payUrl}}'
+      style='background: #15803d; color: #fff; padding: 12px 32px; font-weight: bold; text-decoration: none; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(21,128,61,0.12);'
+    >
+      Pay Now
+    </a>
+    <span style='font-size: 1rem; color: #222;'>or Dial
+      <strong>#803*{{code}}#</strong></span>
+  </div>
+</div>

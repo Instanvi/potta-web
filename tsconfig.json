@@ -1,0 +1,73 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2015",
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@potta/*": [
+        "./src/*"
+      ],
+      "@instanvi/core": [
+        "src/lib/instanvi/core/index.ts"
+      ],
+      "@instanvi/core/server": [
+        "src/lib/instanvi/core/server.ts"
+      ],
+      "@instanvi/ui-components": [
+        "src/lib/instanvi/ui-components/index.ts"
+      ],
+      "@instanvi/ui-components/server": [
+        "src/lib/instanvi/ui-components/server.ts"
+      ],
+      "@instanvi/utilities": [
+        "src/lib/instanvi/utilities/index.ts"
+      ],
+      "@instanvi/utilities/server": [
+        "src/lib/instanvi/utilities/server.ts"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "jest.config.ts",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}

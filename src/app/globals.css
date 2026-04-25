@@ -1,0 +1,466 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Outfit: regular (400) for body/UI copy; medium/semibold only for heading hierarchy */
+@layer base {
+  html {
+    font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  h1 {
+    @apply font-semibold;
+  }
+
+  h2,
+  h3 {
+    @apply font-medium;
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply font-medium;
+  }
+}
+
+/* Print styles for cash flow reports */
+@media print {
+  [class*="print:hidden"] {
+    display: none !important;
+  }
+
+  [class*="print:p-4"] {
+    padding: 1rem !important;
+  }
+
+  [class*="print:space-y-4"] > * + * {
+    margin-top: 1rem !important;
+  }
+
+  body {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .bg-gradient-to-br,
+  .bg-green-50,
+  .bg-red-50,
+  .bg-blue-50 {
+    background: white !important;
+  }
+
+  .border-green-200,
+  .border-red-200,
+  .border-blue-200,
+  .border-gray-200 {
+    border: 1px solid #000 !important;
+  }
+}
+
+body {
+  @apply text-base font-normal antialiased text-black;
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  background-color: #ffffff;
+}
+
+.side {
+  background: #F9F9F9;
+}
+
+/* Sidebar alignment normalization across all section sidebars */
+.side .ps-sidebar-container {
+  background: #f9f9f9 !important;
+  border-right: none !important;
+}
+
+.side .ps-menu-root {
+  padding-inline: 0;
+}
+
+.side .ps-menu-button {
+  min-height: 44px;
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: visible;
+  color: #000000;
+  padding-inline: 10px !important;
+}
+
+/* Sidebar typography: base size, black text (active states override below) */
+.side .ps-menu-label,
+.side .ps-menu-label h3,
+.side .ps-menu-label span {
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0;
+  color: #000000 !important;
+}
+
+.side .ps-submenu-content .ps-menu-label,
+.side .ps-submenu-content .ps-menu-label h3,
+.side .ps-submenu-content .ps-menu-label span {
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+  font-weight: 400 !important;
+  color: #000000 !important;
+}
+
+.side .ps-menu-icon {
+  min-width: 24px !important;
+  width: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.side.ps-collapsed .ps-menu-button {
+  justify-content: center !important;
+  padding-inline: 0 !important;
+}
+
+.side.ps-collapsed .ps-menu-icon {
+  margin-right: 0 !important;
+}
+
+/* Collapsed: icon-only — labels were clipping under main content overlap */
+.side.ps-collapsed .ps-menu-label,
+.side.ps-collapsed .ps-menu-button > h3 {
+  display: none !important;
+}
+
+/* Collapsed: shrink top logo so it fits the narrow rail */
+.side.ps-collapsed .ps-menu-root > .ps-menu-item:first-child img {
+  margin-top: 0 !important;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
+}
+
+.css-1097eso {
+  width: 0px !important;
+  height: 0px !important;
+  background-color: transparent !important;
+  border-radius: 0% !important;
+  display: inline-block !important;
+  margin-right: 5px !important;
+  margin-bottom: 10px !important;
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ps-active {
+  background: #154406 !important;
+  color: white !important;
+}
+
+.active-parent {
+  background: #154406 !important;
+  color: white !important;
+}
+
+.active-parent:hover {
+  background: #154406 !important;
+}
+
+.active-parent .ps-menu-button:hover {
+  background: #154406 !important;
+}
+
+.ps-menu-button.active-parent:hover {
+  background: #154406 !important;
+}
+
+/* Hover effect for submenu items */
+.ps-submenu-content .ps-menu-button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+.ps-submenu-content .ps-menu-button:hover .ps-menu-label,
+.ps-submenu-content .ps-menu-button:hover h3 {
+  color: black !important;
+}
+
+/* No hover effect for active submenu items */
+.ps-submenu-content .ps-menu-button.ps-active:hover {
+  background: transparent !important;
+  color: white !important;
+}
+.arrow-left {
+  position: relative;
+  padding-left: 15px; /* Space for the arrow */
+}
+
+.css-1097eso::before {
+  content: '›' !important; /* Left-pointing arrow */
+  position: absolute !important; /* Positioning the arrow */
+  left: 0 !important; /* Align to the left */
+  top: 34% !important; /* Center vertically */
+  transform: translateY(-50%) !important; /* Adjust for vertical centering */
+  font-size: 30px !important; /* Adjust size as needed */
+}
+
+/* width */
+.scroll::-webkit-scrollbar,
+.css-dip3t8::-webkit-scrollbar {
+  width: 4px;
+  background-color: white;
+}
+
+/* Track */
+.scroll::-webkit-scrollbar-track,
+.css-dip3t8::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(245, 244, 244);
+  border-radius: 0px;
+}
+
+/* Handle */
+.scroll::-webkit-scrollbar-thumb,
+.css-dip3t8::-webkit-scrollbar-thumb {
+  background: rgb(243, 241, 241);
+  border-radius: 0px;
+}
+
+/* Handle on hover */
+.scroll::-webkit-scrollbar-thumb:hover,
+.css-dip3t8::-webkit-scrollbar-thumb {
+  background: #575555;
+  cursor: pointer;
+}
+
+/* TableStyles.css */
+.data-table-header {
+  background-color: #f0f0f0; /* Change to your desired background color */
+  font-size: 18px; /* Change to your desired font size */
+}
+
+.data-table-header th {
+  border-top: 0.5px solid #ccc;
+  border-left: 0.5px solid #ccc;
+  border-right: 0.5px solid #ccc;
+}
+
+.data-table-body td {
+  border: 0.5px solid #ccc; /* Add border to each data cell */
+}
+
+.gPypsk {
+  border-bottom: 0px solid #ccc !important;
+  border-left: 0px solid #ccc !important;
+}
+.border-x {
+  border-left-width: 0px !important;
+  border-right-width: 0px !important;
+}
+
+.is-focus {
+  border: 1px solid transparent !important;
+}
+
+.css-ewdv3l {
+  /* background: white !important; */
+  color: #575555 !important;
+}
+
+.accordion__button {
+  background-color: #fffefe !important;
+}
+.accordion {
+  border-left: 0px solid rgba(255, 255, 255, 1) !important;
+  border-right: 0px solid rgba(255, 255, 255, 1) !important;
+  border-radius: 0px !important;
+}
+
+/* From Uiverse.io by Shoh2008 */
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+}
+
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #000;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(0);
+  }
+}
+
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+[data-testid='ps-sidebar-backdrop-test-id'] {
+  display: none !important;
+  background-color: transparent !important;
+}
+
+/* Custom scrollbar for form builder */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #bdbdbd;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 transparent;
+}
+
+/* Custom green scrollbar for the whole application */
+:not(.scrollbar-hide)::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+:not(.scrollbar-hide)::-webkit-scrollbar-thumb {
+  background: #22c55e !important;
+  border-radius: 3px !important;
+  border: 1px solid #e6f9ed !important;
+}
+
+:not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
+  background: #16a34a !important;
+}
+
+:not(.scrollbar-hide)::-webkit-scrollbar-track {
+  background: #F9F9F9 !important;
+  border-radius: 3px !important;
+}
+
+/* Firefox */
+html {
+  scrollbar-color: #22c55e #F9F9F9 !important;
+  scrollbar-width: thin !important;
+}
+
+/* Ensure all scrollable elements use the custom scrollbar */
+*:not(.scrollbar-hide) {
+  scrollbar-width: thin !important;
+  scrollbar-color: #22c55e #F9F9F9 !important;
+}
+
+/* Additional specificity for webkit browsers */
+*:not(.scrollbar-hide)::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+*:not(.scrollbar-hide)::-webkit-scrollbar-thumb {
+  background: #22c55e !important;
+  border-radius: 3px !important;
+  border: 1px solid #e6f9ed !important;
+}
+
+*:not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
+  background: #16a34a !important;
+}
+
+*:not(.scrollbar-hide)::-webkit-scrollbar-track {
+  background: #F9F9F9 !important;
+  border-radius: 3px !important;
+}
+.css-dip3t8 {
+  background-color: #fff !important;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  /* IE and Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+  /* Safari and Chrome */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Global table height fix */
+.data-grid-container {
+  min-height: 400px;
+  height: calc(100vh - 200px);
+  max-height: calc(100vh - 200px);
+}
+
+/* Ensure tables take full available height */
+.data-grid-container .flex-1 {
+  flex: 1 1 0%;
+  min-height: 0;
+}
+
+/* Fix for table height calculation timing issues */
+.data-grid-container[data-height-calculated='false'] {
+  height: 400px;
+  transition: height 0.3s ease-in-out;
+}
+
+.data-grid-container[data-height-calculated='true'] {
+  transition: height 0.3s ease-in-out;
+}

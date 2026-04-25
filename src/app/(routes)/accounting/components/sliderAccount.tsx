@@ -1,0 +1,316 @@
+'use client';
+import React, { useState, useEffect } from 'react';
+import Input from '@potta/components/input';
+import Slider from '@potta/components/slideover';
+import SearchableSelect from '@potta/components/searchableSelect';
+import Button from '@potta/components/button';
+import { accountsApi } from '../utils/api';
+
+interface AccountNode {
+  uuid: string;
+  name: string;
+  code: string;
+  type: string;
+  initialBalance: number;
+  currentBalance: number;
+  children: AccountNode[];
+  isActive: boolean;
+  branchId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  organizationId?: string;
+  path?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedAt?: string | null;
+}
+
+interface SliderAccountProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  account: AccountNode | null; // This is the parent account when creating a child
+  onAccountSaved?: () => void;
+}
+
+interface AccountData {
+  name: string;
+  type: string;
+  initialBalance: number;
+  parentId: string | null;
+  organizationId: string;
+  branchId: string;
+  // currency: string;
+  code: string;
+}
+
+const SliderAccount: React.FC<SliderAccountProps> = ({
+  open,
+  setOpen,
+  account,
+  onAccountSaved,
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [accountsByType, setAccountsByType] = useState<AccountNode[]>([]);
+  const [parentAccount, setParentAccount] = useState<string | null>(null);
+  const [accountName, setAccountName] = useState('');
+  const [initialBalance, setInitialBalance] = useState(0);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
+
+  // Account type options
+  const accountTypeOptions = [
+    { value: 'Asset', label: 'Asset' },
+    { value: 'Liability', label: 'Liability' },
+    { value: 'Equity', label: 'Equity' },
+    { value: 'Revenue', label: 'Revenue' },
+    { value: 'Expense', label: 'Expense' },
+  ];
+
+  // State for account type
+  const [accountType, setAccountType] = useState(accountTypeOptions[0].value);
+
+  // Helper function to flatten the account hierarchy for parent selection
+  const flattenAccountHierarchy = (accounts: AccountNode[]): AccountNode[] => {
+    let result: AccountNode[] = [];
+
+    accounts.forEach((account) => {
+      result.push(account);
+      if (account.children && account.children.length > 0) {
+        result = [...result, ...flattenAccountHierarchy(account.children)];
+      }
+    });
+
+    return result;
+  };
+
+  // Reset hierarchy when account type changes
+  const handleAccountTypeChange = (value: string) => {
+    setAccountType(value);
+    setParentAccount(null);
+  };
+
+  // Fetch accounts filtered by account type for parent selection
+  useEffect(() => {
+    const fetchAccountsByType = async () => {
+      if (!open) return;
+
+      try {
+        setLoadingAccounts(true);
+        const response = await accountsApi.getByType(accountType, '');
+        const data = response.data || [];
+        setAccountsByType(data);
+
+        console.log('Fetched accounts by type:', {
+          type: accountType,
+          totalAccounts: data.length,
+        });
+      } catch (error) {
+        console.error('Error fetching accounts by type:', error);
+        setError('Failed to load accounts. Please try again.');
+      } finally {
+        setLoadingAccounts(false);
+      }
+    };
+
+    fetchAccountsByType();
+  }, [accountType, open]);
+
+  // Reset form when opening/closing
+  useEffect(() => {
+    if (open) {
+      if (account) {
+        // Creating child account mode - set parent automatically
+        setAccountName('');
+        setAccountType(account.type);
+        setInitialBalance(0);
+        setParentAccount(account.uuid); // Set the parent ID directly
+      } else {
+        // Create mode - fresh account
+        setAccountName('');
+        setAccountType(accountTypeOptions[0].value);
+        setInitialBalance(0);
+        setParentAccount(null);
+      }
+      setError(null);
+    }
+  }, [open, account]);
+
+  // Form validation
+  const validateForm = (): string | null => {
+    if (!accountName.trim()) {
+      return 'Account name is required';
+    }
+    return null;
+  };
+
+  // Handle form submission - include organizationId and branchId in payload
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const validationError = validateForm();
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      // Updated payload to include organizationId and branchId
+      const accountData: AccountData = {
+        name: accountName,
+        type: accountType,
+        initialBalance: initialBalance,
+        parentId: parentAccount || null,
+        organizationId: 'f7b1b3b0-0b1b-4b3b-8b1b-0b1b3b0b1b3c',
+        branchId: 'f7b1b3b0-0b1b-4b3b-8b1b-0b1b3b0b1b3b',
+        // currency: 'XAF', // Default currency
+        code: '', // Will be generated by backend
+      };
+
+      console.log('Sending account data:', accountData);
+
+      // Create the account - backend will handle code generation
+      await accountsApi.create(accountData);
+
+      setOpen(false);
+      if (onAccountSaved) {
+        onAccountSaved();
+      }
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to save account';
+      setError(errorMessage);
+      console.error('Error saving account:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate parent account options for selection
+  const generateParentOptions = () => {
+    const flattenedAccounts = flattenAccountHierarchy(accountsByType);
+
+    return flattenedAccounts.map((acc) => ({
+      value: acc.uuid,
+      label: `${acc.code} - ${acc.name}${acc.path ? ` (${acc.path})` : ''}`,
+    }));
+  };
+
+  return (
+    <Slider
+      open={open}
+      setOpen={setOpen}
+      edit={false}
+      title={
+        account
+          ? `Create Child Account under ${account.name}`
+          : 'Create Account'
+      }
+      buttonText="account"
+    >
+      <div className="my-14 min-w-[600px] relative">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+
+        <div className="mb-4">
+          {/* Account Type */}
+          <div className="mb-4">
+            <SearchableSelect
+              label="Account Type"
+              options={accountTypeOptions}
+              selectedValue={accountType}
+              onChange={handleAccountTypeChange}
+              placeholder="Select account type..."
+              required
+              isDisabled={account !== null}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {account
+                ? 'Account type is inherited from parent'
+                : 'Select the account type'}
+            </p>
+          </div>
+
+          {/* Show parent account info when creating child */}
+          {account && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200">
+              <p className="text-xs font-medium text-green-800 mb-1">
+                Creating child account under:
+              </p>
+              <div className="text-xs text-green-700">
+                <span className="font-medium">
+                  {account.code} - {account.name}
+                </span>
+                <br />
+                <span className="text-green-600">Type: {account.type}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Parent Account Selection - only show if not creating child */}
+          {!account && (
+            <div className="mb-4">
+              <SearchableSelect
+                label="Parent Account (Optional)"
+                options={[
+                  { value: '', label: 'Create as Top Level Account' },
+                  ...generateParentOptions(),
+                ]}
+                selectedValue={parentAccount || ''}
+                onChange={(value: string) => setParentAccount(value || null)}
+                placeholder="Select parent account..."
+                isDisabled={loadingAccounts}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {loadingAccounts
+                  ? 'Loading accounts...'
+                  : 'Leave empty to create a top-level account. Account code will be auto-generated.'}
+              </p>
+            </div>
+          )}
+
+          {/* Account Name */}
+          <div className="mb-4">
+            <Input
+              label="Account Name"
+              name="name"
+              placeholder="Enter Account Name"
+              type="text"
+              value={accountName}
+              onchange={(e) => setAccountName(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Initial Balance */}
+          <div className="mb-4">
+            <Input
+              label="Initial Balance"
+              name="initialBalance"
+              placeholder="Enter Initial Balance"
+              type="number"
+              value={initialBalance.toString()}
+              onchange={(e) =>
+                setInitialBalance(parseFloat(e.target.value) || 0)
+              }
+            />
+          </div>
+        </div>
+
+        <div className="fixed bottom-0 left-0 right-0 p-2 bg-white border-t border-gray-200 flex justify-end space-x-3">
+          <Button
+            type="submit"
+            text={isLoading ? 'Creating Account...' : 'Create Account'}
+            onClick={handleSubmit}
+            disabled={isLoading}
+          />
+        </div>
+      </div>
+    </Slider>
+  );
+};
+
+export default SliderAccount;

@@ -1,0 +1,294 @@
+import { ArrowUp, CalendarIcon } from 'lucide-react';
+import React, { FC, useState, useMemo, useCallback } from 'react';
+import { addDays, format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@potta/components/shadcn/popover';
+import { Calendar } from '@potta/components/shadcn/calendar';
+import useExpensesStats from '../_hooks/useExpensesStats';
+
+interface data {
+  name?: string;
+  percent?: number;
+  price?: string;
+}
+
+const periods = ['Yesterday', 'Today', 'This week', 'This Month', 'Custom'];
+
+// Helper function to get date range based on period
+const getDateRange = (period: string, customDate?: DateRange): DateRange => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  switch (period) {
+    case 'Yesterday':
+      return { from: yesterday, to: yesterday };
+    case 'Today':
+      return { from: today, to: today };
+    case 'This week':
+      return { from: startOfWeek, to: today };
+    case 'This Month':
+      return { from: startOfMonth, to: today };
+    case 'Custom':
+      return customDate || { from: today, to: today };
+    default:
+      return { from: today, to: today };
+  }
+};
+
+const ExpensesStatsBox: FC = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState(periods[0]);
+  const [customDate, setCustomDate] = useState<DateRange | undefined>();
+
+  // Memoize the date range calculation to prevent unnecessary re-renders
+  const calculatedDateRange = useMemo(() => {
+    return getDateRange(selectedPeriod, customDate);
+  }, [
+    selectedPeriod,
+    customDate?.from?.toDateString(),
+    customDate?.to?.toDateString(),
+  ]);
+
+  const { stats, isLoading, error } = useExpensesStats(calculatedDateRange);
+
+  // Memoize the date range formatting
+  const formatDateRange = useCallback(() => {
+    if (!customDate?.from) return '';
+    if (!customDate?.to) return format(customDate.from, 'PPP');
+    return `${format(customDate.from, 'PPP')} - ${format(
+      customDate.to,
+      'PPP'
+    )}`;
+  }, [customDate?.from?.toDateString(), customDate?.to?.toDateString()]);
+
+  // Memoize the custom button text
+  const getCustomButtonText = useCallback(() => {
+    if (selectedPeriod === 'Custom' && customDate?.from) {
+      // Show abbreviated date format on the button
+      if (!customDate.to) return format(customDate.from, 'MMM d, yyyy');
+      if (
+        customDate.from.getFullYear() === customDate.to.getFullYear() &&
+        customDate.from.getMonth() === customDate.to.getMonth()
+      ) {
+        // Same month and year
+        return `${format(customDate.from, 'MMM d')} - ${format(
+          customDate.to,
+          'd, yyyy'
+        )}`;
+      }
+      return `${format(customDate.from, 'MMM d')} - ${format(
+        customDate.to,
+        'MMM d, yyyy'
+      )}`;
+    }
+    return 'Custom';
+  }, [
+    selectedPeriod,
+    customDate?.from?.toDateString(),
+    customDate?.to?.toDateString(),
+  ]);
+
+  // Memoize the stats data to prevent unnecessary re-renders
+  const datas = useMemo(() => {
+    if (isLoading || error || !stats) {
+      return [
+        {
+          name: 'Overdue',
+          percent: 0,
+          price: 'XAF 0',
+        },
+        {
+          name: 'Upcoming',
+          percent: 0,
+          price: 'XAF 0',
+        },
+        {
+          name: 'Paid',
+          percent: 0,
+          price: 'XAF 0',
+        },
+        {
+          name: 'Pending',
+          percent: 0,
+          price: 'XAF 0',
+        },
+      ];
+    }
+
+    return [
+      {
+        name: 'Overdue',
+        percent: stats.overdue.percentage,
+        price: `XAF ${stats.overdue.amount.toLocaleString()}`,
+      },
+      {
+        name: 'Upcoming',
+        percent: stats.upcoming.percentage,
+        price: `XAF ${stats.upcoming.amount.toLocaleString()}`,
+      },
+      {
+        name: 'Paid',
+        percent: stats.paid.percentage,
+        price: `XAF ${stats.paid.amount.toLocaleString()}`,
+      },
+      {
+        name: 'Pending',
+        percent: stats.pending.percentage,
+        price: `XAF ${stats.pending.amount.toLocaleString()}`,
+      },
+    ];
+  }, [isLoading, error, stats]);
+
+  // Memoize the period change handler
+  const handlePeriodChange = useCallback((period: string) => {
+    setSelectedPeriod(period);
+    if (period !== 'Custom') {
+      setCustomDate(undefined);
+    }
+  }, []);
+
+  // Handle custom date selection
+  const handleCustomDateChange = useCallback(
+    (newDate: DateRange | undefined) => {
+      setCustomDate(newDate);
+    },
+    []
+  );
+
+  return (
+    <div className="space-y-14">
+      <div className="flex gap-2 mb-6 ml-3">
+        {periods.map((period) => {
+          if (period !== 'Custom') {
+            return (
+              <button
+                key={period}
+                onClick={() => handlePeriodChange(period)}
+                className={`px-4 py-2 flex rounded-full items-center text-sm font-medium transition-colors ${
+                  selectedPeriod === period
+                    ? 'bg-blue-900 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {period}
+              </button>
+            );
+          } else {
+            return (
+              <Popover key={period}>
+                <PopoverTrigger>
+                  <button
+                    onClick={() => handlePeriodChange(period)}
+                    className={`px-4 py-2 flex rounded-full items-center text-sm font-medium transition-colors ${
+                      selectedPeriod === period
+                        ? 'bg-blue-900 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {getCustomButtonText()}
+                    <CalendarIcon className="ml-2 h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto p-0 bg-white border border-gray-200 shadow-lg rounded-md"
+                  align="start"
+                >
+                  {/* Date range header */}
+                  <div className="p-3 border-b border-gray-200 bg-gray-50 rounded-t-md">
+                    <h3 className="font-medium text-center">
+                      {formatDateRange()}
+                    </h3>
+                  </div>
+                  <div className="p-3">
+                    <Calendar
+                      mode="range"
+                      defaultMonth={customDate?.from}
+                      selected={customDate}
+                      onSelect={handleCustomDateChange}
+                      numberOfMonths={2}
+                      className="bg-white"
+                    />
+                    <div className="flex justify-end mt-4">
+                      <button
+                        className="bg-blue-900 text-white px-4 py-2 rounded-md text-sm"
+                        onClick={() => {
+                          // Handle applying the date range
+                          console.log('Selected date range:', customDate);
+                        }}
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            );
+          }
+        })}
+      </div>
+      <div className="grid grid-cols-4 w-[95%]">
+        {isLoading ? (
+          // Loading state
+          Array.from({ length: 4 }).map((_, id) => (
+            <div key={id} className="w-fit h-36 p-5">
+              <div className="flex gap-1">
+                <div>
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-20"></div>
+                </div>
+                <div>
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-12"></div>
+                </div>
+              </div>
+              <div className="h-8 bg-gray-200 rounded animate-pulse w-24 mt-5"></div>
+            </div>
+          ))
+        ) : error ? (
+          // Error state
+          <div className="col-span-4 flex items-center justify-center h-36">
+            <div className="text-center">
+              <p className="text-red-500 text-sm">
+                Failed to load expenses statistics
+              </p>
+              <p className="text-gray-500 text-xs mt-1">
+                Please try again later
+              </p>
+            </div>
+          </div>
+        ) : (
+          // Data state
+          datas.map((item: data, id: number) => {
+            return (
+              <div key={id} className="w-fit h-36 p-5">
+                <div className="flex gap-1">
+                  <div>
+                    <p className="font-medium text-xl">{item.name}</p>
+                  </div>
+                  <div>
+                    <button className="text-md font-medium rounded-full px-2 py-0.5 flex items-center bg-green-50 text-green-600">
+                      <ArrowUp className="h-4 w-4 " />
+                      <p>{item.percent?.toFixed(1)}%</p>
+                    </button>
+                  </div>
+                </div>
+                <div className="h-1 w-full mt-5 text-4xl whitespace-nowrap">
+                  {item.price}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ExpensesStatsBox;

@@ -1,0 +1,12 @@
+.next
+node_modules
+npm-debug.log*
+.git
+.gitignore
+.vscode
+.idea
+.husky
+README.md
+build_log.txt
+.env*
+!.env.example

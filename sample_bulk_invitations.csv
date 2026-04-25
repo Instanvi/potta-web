@@ -1,0 +1,11 @@
+email,recipientName,role,temporaryPassword
+john.doe@example.com,John Doe,MEMBER,TempPass123
+jane.smith@example.com,Jane Smith,ADMIN,SecurePass456
+mike.johnson@example.com,Mike Johnson,EMPLOYEE,MyPass789
+sarah.wilson@example.com,Sarah Wilson,DEPARTMENT_ADMIN,AdminPass2024
+david.brown@example.com,David Brown,MEMBER,UserPass123
+lisa.garcia@example.com,Lisa Garcia,EMPLOYEE,EmpPass456
+robert.miller@example.com,Robert Miller,ADMIN,AdminPass789
+emily.davis@example.com,Emily Davis,MEMBER,MemberPass123
+james.rodriguez@example.com,James Rodriguez,EMPLOYEE,EmpPass2024
+amanda.martinez@example.com,Amanda Martinez,DEPARTMENT_ADMIN,DeptAdmin123

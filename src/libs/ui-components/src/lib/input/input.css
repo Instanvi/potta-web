@@ -1,0 +1,11 @@
+.input-error {
+  border: 1px solid #ff2b2b!important;
+}
+
+.ui-input:hover, .ui-input:focus-within{
+  border: 1px solid #44ca13!important;
+}
+
+.ui-input:focus-within .icon {
+  color: #237804!important;
+}
