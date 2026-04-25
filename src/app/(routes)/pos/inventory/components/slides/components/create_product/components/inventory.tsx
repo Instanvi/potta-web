@@ -1,7 +1,13 @@
 import Input from '@potta/components/input';
 import Select from '@potta/components/select';
 import React from 'react';
-import { Controller, UseFormRegister, Control, FieldErrors, FieldError } from 'react-hook-form';
+import {
+  Controller,
+  UseFormRegister,
+  Control,
+  FieldErrors,
+  FieldError,
+} from 'react-hook-form';
 
 interface Props {
   register: UseFormRegister<any>;
@@ -12,7 +18,7 @@ interface Props {
 const ProductMeasureEnum = [
   { value: 'Pieces', label: 'Pieces' },
   { value: 'Gallons', label: 'Gallons' },
-  { value: 'Others', label: 'Others' },
+  { value: 'Other', label: 'Other' },
 ];
 
 const Inventory: React.FC<Props> = ({ register, control, errors }) => {
