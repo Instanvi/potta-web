@@ -11,20 +11,21 @@ export const apiClient = axios.create({
   },
 });
 
+export const authApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL!;
+
 export const authClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_AUTH_API_URL!,
+  baseURL: authApiUrl,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-apiClient.interceptors.request.use(
+authClient.interceptors.request.use(
   async (config) => {
     if (typeof window !== 'undefined') {
-      const session = await auth();
-      const token = session?.accessToken;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      const session = await getSession();
+      if (session?.accessToken) {
+        config.headers.Authorization = `Bearer ${session.accessToken}`;
       }
     }
     return config;
@@ -32,10 +33,10 @@ apiClient.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-authClient.interceptors.request.use(
+apiClient.interceptors.request.use(
   async (config) => {
     if (typeof window !== 'undefined') {
-      const session = (await getSession()) as any;
+      const session = await getSession();
       if (session?.accessToken) {
         config.headers.Authorization = `Bearer ${session.accessToken}`;
       }
