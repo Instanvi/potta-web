@@ -1,6 +1,0 @@
-{
-  "buildCommand": "nx run potta:build",
-  "outputDirectory": "dist/apps/potta/.next",
-  "framework": "nextjs",
-  "installCommand": "npm install --legacy-peer-deps"
-}
