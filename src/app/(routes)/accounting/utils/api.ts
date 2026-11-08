@@ -1,6 +1,6 @@
 import axios from 'config/axios.config';
 import { AxiosResponse } from 'axios';
-import { accountPayload, accountUpdatePayload } from './validations';
+import { accountPayload } from './validations';
 
 //
 interface AccountsQueryParams {
@@ -91,18 +91,6 @@ export const accountsApi = {
   // Create a new OHADA-compliant account
   create: async (data: accountPayload) => {
     const result = await axios.post('/accounting/accounts', data);
-    return result.data;
-  },
-
-  // Update an existing account
-  update: async (accountId: string, data: accountUpdatePayload) => {
-    const result = await axios.put(`/accounting/accounts/${accountId}`, data);
-    return result.data;
-  },
-
-  // Delete an account
-  delete: async (accountId: string) => {
-    const result = await axios.delete(`/accounting/accounts/${accountId}`);
     return result.data;
   },
 
