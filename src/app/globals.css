@@ -12,25 +12,49 @@
   --radius: 0.25rem;
 }
 
-/* Outfit: regular (400) for body/UI copy; medium/semibold only for heading hierarchy */
+/* Inter (same as the hub): regular (400) for body/UI copy; medium/semibold only for hierarchy */
 @layer base {
   html {
-    font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-inter), 'Inter', ui-sans-serif, system-ui, sans-serif;
+    text-rendering: optimizeLegibility;
   }
 
   h1 {
-    @apply font-semibold;
+    @apply font-semibold tracking-tight;
   }
 
   h2,
   h3 {
-    @apply font-medium;
+    @apply font-medium tracking-tight;
   }
 
   h4,
   h5,
   h6 {
     @apply font-medium;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+  }
+
+  /* Tabular figures keep amounts aligned in tables and totals. */
+  table,
+  td,
+  th {
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    @apply font-medium;
+  }
+
+  /* Sonner sets its own system font stack on the toaster. */
+  [data-sonner-toaster][data-sonner-toaster] {
+    font-family: var(--font-inter), 'Inter', ui-sans-serif, system-ui, sans-serif;
   }
 }
 
@@ -70,7 +94,7 @@
 
 body {
   @apply text-base font-normal antialiased text-black;
-  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-inter), 'Inter', ui-sans-serif, system-ui, sans-serif;
   background-color: #ffffff;
 }
 
@@ -99,12 +123,12 @@ body {
   padding-inline: 10px !important;
 }
 
-/* Sidebar typography: base size, black text (active states override below) */
+/* Sidebar typography: 15px (body size), black text (active states override below) */
 .side .ps-menu-label,
 .side .ps-menu-label h3,
 .side .ps-menu-label span {
-  font-size: 1rem !important;
-  line-height: 1.35 !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.4 !important;
   font-weight: 400 !important;
   letter-spacing: 0;
   color: #000000 !important;
@@ -113,8 +137,8 @@ body {
 .side .ps-submenu-content .ps-menu-label,
 .side .ps-submenu-content .ps-menu-label h3,
 .side .ps-submenu-content .ps-menu-label span {
-  font-size: 1rem !important;
-  line-height: 1.35 !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.4 !important;
   font-weight: 400 !important;
   color: #000000 !important;
 }
@@ -253,8 +277,9 @@ body {
 
 /* TableStyles.css */
 .data-table-header {
-  background-color: #f0f0f0; /* Change to your desired background color */
-  font-size: 18px; /* Change to your desired font size */
+  background-color: #f0f0f0;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .data-table-header th {

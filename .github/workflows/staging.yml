@@ -14,7 +14,7 @@ name: CD Staging
 
 on:
   push:
-    branches: ["staging", "dev"]
+    branches: ["staging", "dev", "feat/pos-books-web"]
   workflow_dispatch:
 
 env:
