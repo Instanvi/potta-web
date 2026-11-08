@@ -2,52 +2,31 @@
 import Input from '@potta/components/input';
 import React, { useState, useContext, useEffect } from 'react';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { Filter, Product } from '../../utils/types';
+import { Filter } from '../../utils/types';
+import { isStockTracked, productToLine, type SaleLineItem } from '../../utils/sale';
+import { toast } from 'sonner';
 import useGetAllProducts from '../../hooks/useGetAllProducts';
 import Image from 'next/image';
 import PottaLoader from '@potta/components/pottaloader';
-import { documentsApi } from '../../inventory/_utils/api';
+import { productImageUrl } from '../../inventory/_utils/images';
 
-// LineItem interface as provided
-export type DiscountType = 'FlatRate' | 'Percentage' | 'PercentageWithCap';
+type LineItem = SaleLineItem & { stock?: number | null };
 
-export type LineItem = {
-  description: string;
-  quantity: number;
-  discountCap: number;
-  discountType: DiscountType;
-  unitPrice: number;
-  taxRate: number;
-  discountRate?: number;
-  productId: string;
-};
-
-// Convert API Product type to MenuItem type
-const convertProductToMenuItem = (product: Product): MenuItem => ({
-  id: product.uuid,
-  name: product.name,
-  image: product.images || '/images/placeholder.png',
-  tax: product.taxRate,
-  category:
-    typeof product.category === 'object' && product.category !== null
-      ? product.category.name
-      : product.category,
-  quantity: 0,
-  price: product.salesPrice,
-  sku: product.sku,
-  stock: product.inventoryLevel,
-});
+const categoryName = (category: unknown): string =>
+  typeof category === 'object' && category !== null
+    ? (category as { name: string }).name
+    : ((category as string) ?? 'Uncategorized');
 
 interface MenuItem {
   id: string;
   name: string;
   image: string;
   category: string;
-  quantity: number;
   price: number;
   sku?: string;
-  stock?: number;
-  tax: number;
+  /** null when the product is not stock-tracked (non-inventory, services). */
+  stock: number | null;
+  line: SaleLineItem;
 }
 
 interface Category {
@@ -61,9 +40,6 @@ const SaleInvoiceCard = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [barcodeInput, setBarcodeInput] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [imageUrls, setImageUrls] = useState<{ [productId: string]: string }>(
-    {}
-  );
 
   const context = useContext(ContextData);
 
@@ -79,56 +55,16 @@ const SaleInvoiceCard = () => {
   // Fetch products using the hook
   const { data: productData, isLoading, error } = useGetAllProducts(filter);
 
-  // Fetch signed URLs for product images
-  useEffect(() => {
-    const fetchSignedUrls = async () => {
-      if (!productData?.data) return;
-      // Collect all document IDs for products with images
-      const docIdMap: { [productId: string]: string } = {};
-      productData.data.forEach((product: any) => {
-        if (
-          Array.isArray(product.documents) &&
-          product.documents.length > 0 &&
-          product.documents[0]?.uuid
-        ) {
-          docIdMap[product.uuid] = product.documents[0].uuid;
-        }
-      });
-      const docIds = Object.values(docIdMap);
-      if (docIds.length === 0) return;
-      try {
-        const res = await documentsApi.bulkDownload(docIds);
-        // Map productId to signed URL
-        const urlMap: { [productId: string]: string } = {};
-        let i = 0;
-        for (const [productId, docId] of Object.entries(docIdMap)) {
-          urlMap[productId] = res.urls[i] || '';
-          i++;
-        }
-        setImageUrls(urlMap);
-      } catch (e) {
-        // ignore
-      }
-    };
-    fetchSignedUrls();
-  }, [productData?.data]);
-
-  // Convert API products to MenuItems
-  const menus =
-    productData?.data.map((product: any) => ({
+  const menus: MenuItem[] =
+    productData?.data.map((product) => ({
       id: product.uuid,
       name: product.name,
-      image:
-        imageUrls[product.uuid] || product.images || '/images/placeholder.png',
-      tax: product.taxRate,
-      category:
-        typeof product.category === 'object' && product.category !== null
-          ? product.category.name
-          : product.category,
-      quantity: 0,
-      price: product.salesPrice,
+      image: productImageUrl(product as any),
+      category: categoryName(product.category),
+      price: Number(product.salesPrice),
       sku: product.sku,
-      stock: product.inventoryLevel,
+      stock: isStockTracked(product) ? Number(product.inventoryLevel ?? 0) : null,
+      line: productToLine(product),
     })) || [];
 
   // Extract unique categories from products
@@ -136,22 +72,13 @@ const SaleInvoiceCard = () => {
     if (productData?.data) {
       const categories = Array.from(
         new Set(
-          productData.data.map((product) =>
-            typeof product.category === 'object' && product.category !== null
-              ? product.category.name
-              : product.category
-          )
+          productData.data.map((product) => categoryName(product.category))
         )
-      ).map((categoryName) => ({
-        id: categoryName,
-        name: categoryName,
+      ).map((name) => ({
+        id: name,
+        name,
       }));
-      setSelected(categories);
-
-      // Set first category as active if none selected
-      if (!activeId && categories.length > 0) {
-        setActiveId(categories[0].id);
-      }
+      setSelected([{ id: '', name: 'All' }, ...categories]);
     }
   }, [productData?.data]);
 
@@ -188,21 +115,11 @@ const SaleInvoiceCard = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  // Convert MenuItem to LineItem with the required fields
-  const convertToLineItem = (menuItem: MenuItem): LineItem => ({
-    description: menuItem.name,
-    quantity: 1,
-    discountCap: 0,
-    discountType: 'FlatRate',
-    unitPrice: menuItem.price,
-    taxRate: menuItem.tax,
-    discountRate: 0,
-    productId: menuItem.id,
-  });
+  const isOutOfStock = (item: MenuItem) => item.stock !== null && item.stock <= 0;
 
   const addItem = (itemToAdd: MenuItem) => {
-    if (itemToAdd.stock && itemToAdd.stock <= 0) {
-      // You could add a toast notification here for out of stock items
+    if (isOutOfStock(itemToAdd)) {
+      toast.error(`${itemToAdd.name} is out of stock`);
       return;
     }
 
@@ -212,7 +129,8 @@ const SaleInvoiceCard = () => {
       );
 
       if (existingItem) {
-        if (itemToAdd.stock && existingItem.quantity >= itemToAdd.stock) {
+        if (itemToAdd.stock !== null && existingItem.quantity >= itemToAdd.stock) {
+          toast.error(`Only ${itemToAdd.stock} ${itemToAdd.name} in stock`);
           return prevData;
         }
         return prevData.map((item) =>
@@ -222,8 +140,7 @@ const SaleInvoiceCard = () => {
         );
       }
 
-      // Convert to LineItem when adding new item
-      const lineItem = convertToLineItem(itemToAdd);
+      const lineItem: LineItem = { ...itemToAdd.line, stock: itemToAdd.stock };
 
       return prevData?.length > 0 ? [...prevData, lineItem] : [lineItem];
     });
@@ -240,11 +157,7 @@ const SaleInvoiceCard = () => {
   };
 
   // Filter menu items based on active category
-  const filteredMenus = menus.filter(
-    (item) =>
-      !activeId ||
-      item.category === selected.find((cat) => cat.id === activeId)?.name
-  );
+  const filteredMenus = menus.filter((item) => !activeId || item.category === activeId);
 
   if (error) {
     return (
@@ -319,9 +232,9 @@ const SaleInvoiceCard = () => {
               {filteredMenus.map((menuItem) => (
                 <div
                   key={menuItem.id}
-                  onClick={() => menuItem.stock > 0 && addItem(menuItem)}
+                  onClick={() => addItem(menuItem)}
                   className={`bg-white hover:border-green-100 hover:bg-green-300 hover:border cursor-pointer h-48 items-center flex flex-col justify-center relative max-w-48  ${
-                    menuItem.stock === 0 ? 'opacity-50' : ''
+                    isOutOfStock(menuItem) ? 'opacity-50' : ''
                   }`}
                 >
                   <img
@@ -336,13 +249,13 @@ const SaleInvoiceCard = () => {
                     }}
                   />
                   <p className=" text-gray-500 font-normal">{menuItem.name}</p>
-                  {menuItem.stock === 0 && (
+                  {isOutOfStock(menuItem) && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 text-white">
                       Out of Stock
                     </div>
                   )}
                   <div className=" text-lg font-medium text-gray-700">
-                    ${menuItem.price}
+                    {menuItem.price.toFixed(2)} XAF
                   </div>
                 </div>
               ))}

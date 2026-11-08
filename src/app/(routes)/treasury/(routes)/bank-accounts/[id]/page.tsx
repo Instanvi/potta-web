@@ -9,7 +9,7 @@ import Search from '@potta/components/search';
 import Select from '@potta/components/select';
 import BankAccountDetailsWideCard from '../components/BankAccountDetailsWideCard';
 import { useDeactivateBankAccount } from '../hooks/useDeactivateBankAccount';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ContextData } from '@potta/components/providers/DataProvider';
 
 const BankAccountDetailsPage = () => {

@@ -8,6 +8,7 @@ export const useDeleteSalesReceipt = () => {
     mutationFn: (receiptId: string) => salesApi.delete(receiptId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['get-all-sales-receipts'] });
+      queryClient.invalidateQueries({ queryKey: ['get-all-product'] });
     },
   });
 };

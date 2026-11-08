@@ -8,7 +8,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@potta/lib/utils';
 import { journalApi } from '../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { Journal, JournalLine } from '../utils/types';
 import CurrencyInput from '@potta/components/currencyInput';
 import { Button } from '@potta/components/shadcn/button';

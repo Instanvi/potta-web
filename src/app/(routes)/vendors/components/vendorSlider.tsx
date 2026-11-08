@@ -14,8 +14,7 @@ import { VendorPayload, vendorSchema } from '../utils/validations';
 import Notes from './note';
 import Tax from './tax';
 import useCreateVendor from '../hooks/useCreateVendor';
-import toast from 'react-hot-toast';
-import { vendorApi } from '../utils/api';
+import { toast } from 'sonner';
 
 const SliderVendor = () => {
   const [tabs, setTabs] = useState<string>('Address');
@@ -53,7 +52,6 @@ const SliderVendor = () => {
       industry: undefined,
       creditLimit: 0,
       notes: '',
-      initializeKYC: false,
     },
   });
 
@@ -98,22 +96,22 @@ const SliderVendor = () => {
   const mutation = useCreateVendor();
 
   const onSubmit = async (data: VendorPayload) => {
+    // The API names the field taxId and rejects empty optional strings.
+    const { taxID, industry, creditLimit, ...rest } = data;
+    const payload = {
+      ...Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== '' && v !== undefined && v !== null)),
+      ...(taxID ? { taxId: taxID } : {}),
+      ...(industry ? { industry } : {}),
+      ...(creditLimit ? { creditLimit: Number(creditLimit) } : {}),
+    } as VendorPayload;
     try {
-      // Create vendor
-      const { initializeKYC, ...vendorData } = data;
-      const vendor = await vendorApi.create(vendorData as any);
-
-      // Initialize KYC (optional)
-      if (initializeKYC) {
-        await vendorApi.kyc.initialize(vendor.uuid);
-      }
-
+      await mutation.mutateAsync(payload);
       toast.success('Vendor created successfully!');
       reset();
       setIsSliderOpen(false);
-    } catch (error) {
-      console.error('Failed to create vendor:', error);
-      toast.error('Failed to create vendor');
+    } catch (error: any) {
+      const message = error?.response?.data?.message;
+      toast.error(`Failed to create vendor${message ? `: ${Array.isArray(message) ? message.join(', ') : message}` : ''}`);
     }
   };
   return (
@@ -322,27 +320,6 @@ const SliderVendor = () => {
           </div>
         </div>
 
-        {/* KYC Initialization Option */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              id="initializeKYC"
-              {...register('initializeKYC')}
-              className="rounded border-gray-300"
-            />
-            <label
-              htmlFor="initializeKYC"
-              className="text-sm font-medium text-gray-700"
-            >
-              Initialize KYC Process (Optional)
-            </label>
-          </div>
-          <p className="text-xs text-gray-500 mt-1 ml-6">
-            This will start the KYC verification process for the vendor after
-            creation
-          </p>
-        </div>
         <div className="mt-5">
           <div className="flex w-fit bg-green-100  mt-7">
             <div

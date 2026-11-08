@@ -5,7 +5,7 @@ import ProductUploadStep from './ProductUploadStep';
 import ProductSelectionStep from './ProductSelectionStep';
 import Button from '@potta/components/button';
 import useCreateProduct from '../_hooks/useCreateProduct';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface ProductStepperModalProps {
   open: boolean;
@@ -221,7 +221,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
           <div className="w-full overflow-auto">
             {active === 'create' && (
               <CreateProductForm
-                productType="INVENTORY"
+                productType={productType === 'NON_INVENTORY' ? 'NON_INVENTORY' : 'INVENTORY'}
                 structure={getStructure()}
                 isNonInventory={getIsNonInventory()}
                 onProductCreated={handleProductCreated}

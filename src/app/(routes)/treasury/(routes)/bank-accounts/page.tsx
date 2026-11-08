@@ -6,7 +6,7 @@ import BankAccountsFilter from './components/filters';
 import CustomDeleteModal from './components/DeleteModal';
 import { useGetBankAccounts } from './hooks/useGetBankAccounts';
 import { useDeleteBankAccount } from './hooks/useDeleteBankAccount';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import RootLayout from '@potta/app/(routes)/layout';
 
@@ -43,7 +43,7 @@ const BankAccountsPage = () => {
         toast.success('Bank account deleted successfully!');
         setDeleteOpen(false);
         setDeleteId(null);
-        router.push('/bank-accounts');
+        router.push('/treasury/bank-accounts');
       },
       onError: (error) => {
         toast.error('Failed to delete bank account, please try again later.');

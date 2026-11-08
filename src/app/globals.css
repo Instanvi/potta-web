@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shared Instanvi tokens (same names as payroll-expense-frontend / pay). */
+:root {
+  --main-bg: #f7f7f8;
+  --brand: #237804;
+  --brand-hover: #1d6303;
+  --brand-light: #a0e86f;
+  --brand-subtle: #f1faf7;
+  --radius: 0.25rem;
+}
+
 /* Outfit: regular (400) for body/UI copy; medium/semibold only for heading hierarchy */
 @layer base {
   html {

@@ -48,7 +48,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <div className="w-full flex justify-between py-2 border-b border-gray-200">
                 <span className="font-medium text-gray-600">Subtotal</span>
                 <p className="font-medium text-lg text-gray-800">
-                  ${subtotal.toFixed(2)}
+                  {subtotal.toFixed(2)} XAF
                 </p>
               </div>
 
@@ -59,7 +59,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                     Item Discounts
                   </span>
                   <p className="font-medium text-red-500 text-lg">
-                    -${itemDiscounts.toFixed(2)}
+                    -{itemDiscounts.toFixed(2)} XAF
                   </p>
                 </div>
               )}
@@ -71,7 +71,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                     Coupon Discount
                   </span>
                   <p className="font-medium text-red-500 text-lg">
-                    -${discount.toFixed(2)}
+                    -{discount.toFixed(2)} XAF
                   </p>
                 </div>
               )}
@@ -83,7 +83,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                     Total Discount
                   </span>
                   <p className="font-medium text-red-500 text-lg">
-                    -${totalDiscount.toFixed(2)}
+                    -{totalDiscount.toFixed(2)} XAF
                   </p>
                 </div>
               )}
@@ -91,13 +91,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <div className="w-full flex justify-between py-2 border-b border-gray-200">
                 <span className="font-medium text-gray-600">Tax</span>
                 <p className="font-medium text-lg text-gray-800">
-                  ${tax.toFixed(2)}
+                  {tax.toFixed(2)} XAF
                 </p>
               </div>
               <div className="w-full flex justify-between py-3 bg-green-50 px-3">
                 <span className="font-medium text-gray-800">Total</span>
                 <p className="font-medium text-xl text-green-700">
-                  ${total.toFixed(2)}
+                  {total.toFixed(2)} XAF
                 </p>
               </div>
             </div>

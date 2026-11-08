@@ -4,7 +4,7 @@ export interface PermissionRecord {
 
 export interface Role {
   id: string;
-  name: string;
+  name?: string | null;
   permissions?: PermissionRecord;
 }
 
@@ -16,8 +16,6 @@ export interface User {
   image?: string | null;
   accessToken?: string;
   refreshToken?: string;
-  api_user?: string;
-  api_password?: string;
   organization?: Organization;
   hasOrganization?: boolean;
   role?: string;
@@ -28,6 +26,7 @@ export interface User {
   activeApp?: App | null;
   activeAppId?: string | null;
   permissions?: PermissionRecord;
+  organizationId?: string;
 }
 
 export interface Organization {
@@ -43,85 +42,88 @@ export interface Organization {
   website?: string;
   description?: string;
   country?: string;
+  slug?: string;
+  logo?: string | null;
 }
 
 export interface Hierarchy {
   assignmentId: string;
   assignmentType: string;
-  jobTitle: string;
+  jobTitle: string | null;
   isActive: boolean;
-  location?: {
+  location?: { id: string; name: string } | null;
+  location_id?: string;
+  organizationalStructure?: {
     id: string;
     name: string;
+    type?: string;
+    level?: number;
+    path?: string;
+  } | null;
+  geographicalUnit?: { id: string; name: string } | null;
+  subBusiness?: { id: string; name: string } | null;
+  treePosition?: {
+    accessControl?: {
+      organizationId: string;
+      locationId: string | null;
+      departmentId: string | null;
+      geographicalUnitId: string | null;
+      subBusinessId: string | null;
+    };
   };
-  location_id?: string;
-  organization_structure?: {
-    id: string;
-    department_name: string;
-    structure_type: string;
-    level: number;
-    path: string;
-  };
-  organizational_structure_id?: string;
-  geo_unit?: {
-    id: string;
-    name?: string;
-  };
-  geographical_unit_id?: string;
-  sub_business?: {
-    id: string;
-    name?: string;
-  };
-  sub_business_id?: string;
   [key: string]: unknown;
+}
+
+export interface OrganizationAssignment {
+  id: string;
+  assignmentType: string;
+  isActive: boolean;
+  location: { id: string; name: string } | null;
 }
 
 export interface App {
   id: string;
-  name: string;
+  name?: string;
   status?: string;
   api_key?: string;
-  environment?: 'PROD' | 'SANDBOX' | 'ADMIN';
+  environment?: string;
+  appId?: string;
+  slug?: string;
+  isDefault?: boolean;
+  config?: Record<string, unknown> | null;
 }
 
-export interface AuthSessionResponse {
-  session?: {
-    id: string;
-    token: string;
-    userId: string;
-    activeOrganizationId: string;
-    expiresAt: string;
-    createdAt: string;
-    updatedAt: string;
-    ipAddress?: string;
-    userAgent?: string;
-  };
+/** Slim POST /get-session (instanvi-auth-starter): identity + active org/app ids only. */
+export type GetSessionResponse = {
+  session: Record<string, unknown> | null;
   user: User;
-  organization?: Organization;
-  roles?: Role[];
-  hierarchy?: Hierarchy;
-  accessToken?: string;
-  access_token?: string;
-  token?: string;
-  apps?: App[];
-  activeApp?: App | null;
-  activeAppId?: string | null;
-}
+  organization: Organization | null;
+  activeOrganizationId: string | null;
+  activeAppId: string | null;
+};
 
-export interface SignInPayload {
-  email: string;
-  password?: string;
-  callbackUrl?: string;
-}
+export type SessionPermissionsResponse = {
+  roles: Role[];
+};
 
-export interface SignUpPayload {
-  email: string;
-  password?: string;
-  firstName?: string;
-  lastName?: string;
-}
+export type SessionHierarchyResponse = {
+  hierarchy: Hierarchy | null;
+  organizationAssignments: OrganizationAssignment[];
+};
 
-export interface VerifyEmailPayload {
-  token: string;
-}
-export type AuthResponse = AuthSessionResponse;
+export type SessionAppsResponse = {
+  apps: App[];
+  activeApp: App | null;
+  activeAppId: string | null;
+};
+
+export type AuthResponse = GetSessionResponse &
+  Partial<SessionPermissionsResponse> &
+  Partial<SessionHierarchyResponse> &
+  Partial<SessionAppsResponse> & {
+    accessToken?: string;
+    access_token?: string;
+    token?: string;
+  };
+
+export type AuthSessionResponse = AuthResponse;

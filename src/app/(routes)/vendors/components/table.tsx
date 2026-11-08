@@ -1,6 +1,6 @@
 'use client';
-import React, { FC, useState } from 'react';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import React, { ComponentProps, useState } from 'react';
+import { DataTable } from '@potta/components/ui/data-table';
 import {
   getCountryCallingCode,
   parsePhoneNumberFromString,
@@ -25,68 +25,8 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@potta/components/shadcn/badge';
-import { CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
-import KYCManagementModal from './KYCManagementModal';
-import PaymentMethodsModal from './PaymentMethodsModal';
-import { vendorApi } from '../utils/api';
-import toast from 'react-hot-toast';
-
-// KYC Button Component
-const KYCButton = ({
-  vendor,
-  onRefresh,
-}: {
-  vendor: any;
-  onRefresh: () => void;
-}) => {
-  const [isInitializing, setIsInitializing] = useState(false);
-
-  // Check if vendor has KYC initialized
-  const hasKYC = vendor.kyc && vendor.kyc.length > 0;
-
-  const handleKYC = async () => {
-    if (hasKYC) {
-      // This will be handled by the parent component
-      return 'open_modal';
-    } else {
-      // Initialize KYC directly for vendors without KYC
-      setIsInitializing(true);
-      try {
-        await vendorApi.kyc.initialize(vendor.uuid);
-        toast.success('KYC process initialized successfully!');
-        // Refresh the table data
-        onRefresh();
-      } catch (error) {
-        console.error('Failed to initialize KYC:', error);
-        toast.error('Failed to initialize KYC process');
-      } finally {
-        setIsInitializing(false);
-      }
-    }
-  };
-
-  return (
-    <button
-      onClick={handleKYC}
-      disabled={isInitializing}
-      className={`flex items-center space-x-2 text-blue-600 hover:text-blue-800 underline ${
-        isInitializing ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
-    >
-      {isInitializing ? (
-        <>
-          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-          <span>Initializing...</span>
-        </>
-      ) : (
-        <>
-          <i className="ri-shield-check-line"></i>
-          <span>{hasKYC ? 'Manage KYC' : 'Initialize KYC'}</span>
-        </>
-      )}
-    </button>
-  );
-};
+import { CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Can } from '@/components/auth/can';
 
 export const PhoneFlag = ({ phoneNumber }: { phoneNumber: string }) => {
   const phoneNumberObj = parsePhoneNumberFromString(phoneNumber);
@@ -121,21 +61,6 @@ const TableComponents = () => {
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [kycFilter, setKycFilter] = useState('all');
-
-  // KYC Modal states
-  const [kycModalOpen, setKycModalOpen] = useState(false);
-  const [selectedVendorForKyc, setSelectedVendorForKyc] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
-
-  // Payment Methods Modal states
-  const [paymentMethodsModalOpen, setPaymentMethodsModalOpen] = useState(false);
-  const [selectedVendorForPaymentMethods, setSelectedVendorForPaymentMethods] =
-    useState<{
-      id: string;
-      name: string;
-    } | null>(null);
 
   // Helper function to get status badge
   const getStatusBadge = (status: string) => {
@@ -173,35 +98,18 @@ const TableComponents = () => {
     );
   };
 
-  // Helper function to get KYC status badge
-  const getKYCStatusBadge = (
-    isKYCVerified: boolean,
-    hasKYCInitialized?: boolean
-  ) => {
-    if (isKYCVerified) {
-      return (
-        <Badge className="text-green-600 uppercase w-fit flex items-center gap-1">
-          <CheckCircle className="h-3 w-3" />
-          Verified
-        </Badge>
-      );
-    } else if (hasKYCInitialized === true) {
-      return (
-        <Badge className="text-yellow-600 uppercase w-fit flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          Pending
-        </Badge>
-      );
-    } else {
-      // Show "Not Initialized" for vendors without KYC
-      return (
-        <Badge className="text-gray-600 uppercase w-fit flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" />
-          Not Initialized
-        </Badge>
-      );
-    }
-  };
+  const getKYCStatusBadge = (isKYCVerified: boolean) =>
+    isKYCVerified ? (
+      <Badge className="text-green-600 uppercase w-fit flex items-center gap-1">
+        <CheckCircle className="h-3 w-3" />
+        Verified
+      </Badge>
+    ) : (
+      <Badge className="text-yellow-600 uppercase w-fit flex items-center gap-1">
+        <Clock className="h-3 w-3" />
+        Unverified
+      </Badge>
+    );
 
   const columns: ColumnDef<any>[] = [
     {
@@ -234,7 +142,7 @@ const TableComponents = () => {
       accessorKey: 'isKYCVerified',
       header: 'KYC Status',
       cell: ({ row: { original } }) =>
-        getKYCStatusBadge(original.isKYCVerified, original.hasKYCInitialized),
+        getKYCStatusBadge(original.isKYCVerified),
     },
     {
       accessorKey: 'industry',
@@ -252,42 +160,6 @@ const TableComponents = () => {
           {original.openingBalance !== null ? original.openingBalance : 'N/A'}
         </div>
       ),
-    },
-    {
-      id: 'kyc',
-      header: 'KYC Status',
-      cell: ({ row: { original } }) => {
-        const handleKYC = () => {
-          // Check if vendor has KYC initialized
-          const hasKYC = original.kyc && original.kyc.length > 0;
-
-          if (hasKYC) {
-            // Open modal for vendors with existing KYC
-            setSelectedVendorForKyc({
-              id: original.uuid,
-              name: original.name,
-            });
-            setKycModalOpen(true);
-          } else {
-            // Initialize KYC directly for vendors without KYC
-            handleInitializeKYC(original.uuid);
-          }
-        };
-
-        return (
-          <button
-            onClick={handleKYC}
-            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 underline"
-          >
-            <i className="ri-shield-check-line"></i>
-            <span>
-              {original.kyc && original.kyc.length > 0
-                ? 'Manage KYC'
-                : 'Initialize KYC'}
-            </span>
-          </button>
-        );
-      },
     },
     {
       id: 'actions',
@@ -311,41 +183,31 @@ const TableComponents = () => {
                 <i className="ri-eye-line mr-2"></i>
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setOpenUpdateModal(original.uuid);
-                  setVendorDetails(original);
-                  setIsEditOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                <i className="ri-edit-line mr-2"></i>
-                Edit Vendor
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelectedVendorForPaymentMethods({
-                    id: original.uuid,
-                    name: original.name,
-                  });
-                  setPaymentMethodsModalOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                <i className="ri-bank-card-line mr-2"></i>
-                Payment Methods
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setOpenDeleteModal(original.uuid);
-                  setIsDeleteOpen(true);
-                }}
-                className="cursor-pointer text-red-600"
-              >
-                <i className="ri-delete-bin-line mr-2"></i>
-                Delete Vendor
-              </DropdownMenuItem>
+              <Can resource="Vendor" action="update">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenUpdateModal(original.uuid);
+                    setVendorDetails(original);
+                    setIsEditOpen(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <i className="ri-edit-line mr-2"></i>
+                  Edit Vendor
+                </DropdownMenuItem>
+              </Can>
+              <Can resource="Vendor" action="remove">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenDeleteModal(original.uuid);
+                    setIsDeleteOpen(true);
+                  }}
+                  className="cursor-pointer text-red-600"
+                >
+                  <i className="ri-delete-bin-line mr-2"></i>
+                  Delete Vendor
+                </DropdownMenuItem>
+              </Can>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -378,51 +240,11 @@ const TableComponents = () => {
     refetch();
   };
 
-  // Function to handle KYC initialization
-  const handleInitializeKYC = async (vendorId: string) => {
-    // Show loading toast
-    const loadingToast = toast.loading('Initializing KYC...');
-
-    try {
-      await vendorApi.kyc.initialize(vendorId);
-      // Dismiss loading toast and show success
-      toast.dismiss(loadingToast);
-      toast.success('KYC process initialized successfully!');
-      // Refresh the table data
-      refetch();
-    } catch (error) {
-      console.error('Failed to initialize KYC:', error);
-      // Dismiss loading toast and show error
-      toast.dismiss(loadingToast);
-      toast.error('Failed to initialize KYC process');
-    }
-  };
-
   // Filter data based on search, status, and KYC
   const filteredData = useMemo(() => {
     if (!vendor?.data) return [];
 
     let filtered = vendor.data;
-
-    // Add computed hasKYCInitialized field based on new backend structure
-    // Backend now includes 'kyc' field when KYC exists, omits it when not initialized
-    //
-    // NEW BACKEND LOGIC:
-    // - hasKYCInitialized: true when vendor.kyc exists and has items
-    // - hasKYCInitialized: false when vendor.kyc is missing or empty
-    // - isKYCVerified: true when KYC is approved
-    // - isKYCVerified: false when KYC is pending or not verified
-    //
-    filtered = filtered.map((vendor: any) => {
-      // Determine KYC initialization status based on new backend structure
-      // Backend now includes 'kyc' field when KYC exists, omits it when not initialized
-      const hasKYCInitialized = vendor.kyc && vendor.kyc.length > 0;
-
-      return {
-        ...vendor,
-        hasKYCInitialized,
-      };
-    });
 
     // Filter by status
     if (statusFilter !== 'all') {
@@ -434,17 +256,8 @@ const TableComponents = () => {
     // Filter by KYC status
     if (kycFilter !== 'all') {
       filtered = filtered.filter((vendor: any) => {
-        if (kycFilter === 'verified') {
-          return vendor.isKYCVerified === true;
-        } else if (kycFilter === 'pending') {
-          // Show vendors that have KYC initialized but not yet verified
-          return (
-            vendor.isKYCVerified === false && vendor.hasKYCInitialized === true
-          );
-        } else if (kycFilter === 'not_initialized') {
-          // Show vendors that haven't started KYC process
-          return vendor.hasKYCInitialized === false;
-        }
+        if (kycFilter === 'verified') return vendor.isKYCVerified === true;
+        if (kycFilter === 'unverified') return vendor.isKYCVerified !== true;
         return true;
       });
     }
@@ -500,19 +313,26 @@ const TableComponents = () => {
         kycFilter={kycFilter}
         onKycFilterChange={setKycFilter}
       />
-      <DataGrid
+      <DataTable
         columns={columns}
         data={filteredData}
         isLoading={isLoading}
         showPagination={true}
         pageSize={limit}
         pageSizeOptions={[10, 20, 50, 100]}
-        manualPagination={!!vendor?.meta}
-        currentPage={page}
+        onRowClick={handleRowClick}
+        manualPagination
         pageCount={vendor?.meta?.totalPages || 1}
-        totalItems={vendor?.meta?.totalItems || filteredData.length}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+        totalRows={vendor?.meta?.totalItems || filteredData.length}
+        pagination={{ pageIndex: page - 1, pageSize: limit }}
+        onPaginationChange={(updater) => {
+          const next =
+            typeof updater === 'function'
+              ? updater({ pageIndex: page - 1, pageSize: limit })
+              : updater;
+          if (next.pageSize !== limit) handlePageSizeChange(next.pageSize);
+          else handlePageChange(next.pageIndex + 1);
+        }}
       />
       <DeleteModal
         vendorID={openDeleteModal || ''}
@@ -520,7 +340,7 @@ const TableComponents = () => {
         setOpen={setIsDeleteOpen}
       />
       <EditVendor
-        vendor={vendorDetails}
+        vendor={vendorDetails as ComponentProps<typeof EditVendor>['vendor']}
         vendorId={openUpdateModal || ''}
         open={isEditOpen}
         setOpen={setIsEditOpen}
@@ -530,26 +350,6 @@ const TableComponents = () => {
         open={isViewOpen}
         setOpen={setIsViewOpen}
         onVendorDataChange={handleRefreshVendors}
-      />
-      <KYCManagementModal
-        isOpen={kycModalOpen}
-        onClose={() => {
-          setKycModalOpen(false);
-          setSelectedVendorForKyc(null);
-        }}
-        vendorId={selectedVendorForKyc?.id || ''}
-        vendorName={selectedVendorForKyc?.name || ''}
-        onKYCStatusChange={handleRefreshVendors}
-      />
-      <PaymentMethodsModal
-        isOpen={paymentMethodsModalOpen}
-        onClose={() => {
-          setPaymentMethodsModalOpen(false);
-          setSelectedVendorForPaymentMethods(null);
-        }}
-        vendorId={selectedVendorForPaymentMethods?.id || ''}
-        vendorName={selectedVendorForPaymentMethods?.name || ''}
-        onPaymentMethodChange={handleRefreshVendors}
       />
     </div>
   );

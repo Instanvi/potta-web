@@ -2,7 +2,6 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
 import { User, AuthResponse } from './types/auth';
-import { log } from 'console';
 import axios from 'axios';
 
 export const { auth, signIn, signOut, handlers } = NextAuth({

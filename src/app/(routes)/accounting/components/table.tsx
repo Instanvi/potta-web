@@ -5,7 +5,6 @@ import {
   MoreVertical,
   Eye,
   Edit,
-  Trash2,
   BarChart3,
   Plus,
   FileDown,
@@ -22,6 +21,7 @@ import {
   DropdownMenuSeparator,
 } from '@potta/components/shadcn/dropdown';
 import Image from 'next/image';
+import { Can, useCan } from '@/components/auth/can';
 
 interface AccountNode {
   uuid: string;
@@ -43,6 +43,7 @@ interface AccountNode {
 }
 
 const TableAccount = () => {
+  const { canAccess } = useCan();
   const containerRef = useRef<HTMLDivElement>(null);
   const [availableHeight, setAvailableHeight] = useState(400);
   const [accounts, setAccounts] = useState<AccountNode[]>([]);
@@ -294,21 +295,6 @@ const TableAccount = () => {
     // Navigate to transactions page or open transactions modal
   };
 
-  // Delete account
-  const deleteAccount = async (accountId: string) => {
-    if (confirm('Are you sure you want to delete this account?')) {
-      try {
-        await accountsApi.delete(accountId);
-        // Refresh accounts list
-        const response = await accountsApi.getAll();
-        setAccounts(response);
-        setFilteredAccounts(response);
-      } catch (error) {
-        console.error('Error deleting account:', error);
-      }
-    }
-  };
-
   // Expand all rows
   const expandAllRows = () => {
     const allExpanded: Record<string, boolean> = {};
@@ -427,10 +413,12 @@ const TableAccount = () => {
                     <Eye className="mr-2 h-4 w-4" />
                     <span>View Details</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => createChildAccount(account)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    <span>Add Child Account</span>
-                  </DropdownMenuItem>
+                  {canAccess('Accounts', 'create') && (
+                    <DropdownMenuItem onClick={() => createChildAccount(account)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      <span>Add Child Account</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     onClick={() => viewAccountTransactions(account.uuid)}
                   >
@@ -441,13 +429,6 @@ const TableAccount = () => {
                   <DropdownMenuItem onClick={() => openAccountDetails(account)}>
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Edit</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => deleteAccount(account.uuid)}
-                    className="text-red-500 focus:text-red-500"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -501,17 +482,19 @@ const TableAccount = () => {
                 theme="lightBlue"
                 className="!text-black whitespace-nowrap"
               />
-              <Button
-                type="button"
-                text="Create Account"
-                icon={<i className="ri-file-add-line"></i>}
-                theme="default"
-                className="whitespace-nowrap"
-                onClick={() => {
-                  setSelectedAccount(null);
-                  setCreateDrawer(true);
-                }}
-              />
+              <Can resource="Accounts" action="create">
+                <Button
+                  type="button"
+                  text="Create Account"
+                  icon={<i className="ri-file-add-line"></i>}
+                  theme="default"
+                  className="whitespace-nowrap"
+                  onClick={() => {
+                    setSelectedAccount(null);
+                    setCreateDrawer(true);
+                  }}
+                />
+              </Can>
             </div>
           </div>
         </div>

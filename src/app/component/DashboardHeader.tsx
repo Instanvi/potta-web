@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { Calendar, Clock, BarChart3 } from 'lucide-react';
-import { inboxItems, notificationItems } from './data';
+import { Calendar, Clock } from 'lucide-react';
 
 export const DashboardHeader = () => {
   const { data: session } = useSession();
@@ -13,8 +12,6 @@ export const DashboardHeader = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const unreadTotal = inboxItems.filter(i => !i.read).length + notificationItems.filter(n => !n.read).length;
-  
   return (
     <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
       <div className="space-y-4">
@@ -46,10 +43,6 @@ export const DashboardHeader = () => {
                 minute: '2-digit',
               })}
             </span>
-          </div>
-          <div className="flex items-center gap-2.5 rounded-full border border-stone-200/80 bg-stone-50 px-3.5 py-2">
-            <BarChart3 className="h-5 w-5 shrink-0 text-black" />
-            <span className="text-black">{unreadTotal} pending tasks</span>
           </div>
         </div>
       </div>

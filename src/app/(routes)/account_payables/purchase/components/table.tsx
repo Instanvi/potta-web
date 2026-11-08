@@ -22,10 +22,12 @@ import Slider from '@potta/components/slideover';
 import PurchaseOrderPage from '../new/page';
 import PurchaseOrderViewModal from './PurchaseOrderViewModal';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { IOption } from '@potta/app/(routes)/policies/utils/types';
-import toast from 'react-hot-toast';
-import { useSearchVendors } from '@potta/app/(routes)/policy/hooks/policyHooks';
-import { PoliciesApi } from '@potta/app/(routes)/policy/utils/api';
+import useGetAllVendors from '../new/hooks/useGetAllVendors';
+import { toast } from 'sonner';
+interface IOption {
+  value: string;
+  label: string;
+}
 
 // Define types for purchase order
 interface PurchaseOrder {
@@ -73,11 +75,7 @@ const InvoiceTable = () => {
   const approveMutation = useApprovePurchaseOrder();
   const deleteMutation = useDeletePurchaseOrder();
 
-  // Get all vendors for the select dropdown - use a search term that will return all vendors
-  const { data: vendorsData, isLoading: vendorsLoading } =
-    useSearchVendors('tech');
-
-  console.log('Vendors data:', vendorsData);
+  const { data: vendorsData, isLoading: vendorsLoading } = useGetAllVendors({ page: 1, limit: 100 });
 
   // Search and filter handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,17 +202,12 @@ const InvoiceTable = () => {
     { value: 'DRAFT', label: 'Draft' },
   ];
 
-  // For now, let's use hardcoded vendor options to test if the dropdown works
   const vendorOptions: IOption[] = [
     { value: 'all', label: 'All Vendors' },
-    { value: 'Tech Supplies Cameroon', label: 'Tech Supplies Cameroon' },
-    { value: 'Home & Garden Pro', label: 'Home & Garden Pro' },
-    { value: 'Advanced Fashion', label: 'Advanced Fashion' },
-    { value: 'Office Solutions Cameroon', label: 'Office Solutions Cameroon' },
-    { value: 'Global Electronics SARL', label: 'Global Electronics SARL' },
+    ...((vendorsData?.data ?? []) as { name?: string }[])
+      .filter((v) => !!v.name)
+      .map((v) => ({ value: v.name as string, label: v.name as string })),
   ];
-
-  console.log('Vendor options:', vendorOptions);
 
   // Filter configuration for DynamicFilter
   const filterConfig = [

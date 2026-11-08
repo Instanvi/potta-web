@@ -1,7 +1,6 @@
-// ─── Potta App Permission Definitions ──────────────────────────────────────────
-// Source of truth for all HR / Finance / Employee resource/action permissions.
-// Used by the Can component for runtime authorization checks.
-// ────────────────────────────────────────────────────────────────────────────────
+// Resources and actions checked by potta-backend's @Permissions guards.
+// Mirrored in instanvi-auth-starter (src/roles/potta-permissions.catalog.ts) and in the
+// auth frontend role editor; keep the three in sync.
 
 export interface PermissionDefinition {
   resource: string;
@@ -9,362 +8,96 @@ export interface PermissionDefinition {
 }
 
 export const PottaAppPermissions: PermissionDefinition[] = [
+  { resource: 'Accounts', action: ['create', 'view', 'view-all', 'view-descendants', 'view-parent', 'view-tree'] },
   {
-    resource: "Employee",
+    resource: 'BankAccounts',
+    action: ['create', 'deactivate', 'get-current-balance', 'update', 'view', 'view-all'],
+  },
+  { resource: 'AuditLog', action: ['view'] },
+  { resource: 'Bill', action: ['approve', 'create', 'pay', 'reject', 'view', 'view-all'] },
+  { resource: 'Cashbook', action: ['create', 'remove', 'update', 'view'] },
+  { resource: 'CreditNote', action: ['add-invoice', 'approve', 'create', 'refund', 'remove', 'update', 'view'] },
+  { resource: 'Customer', action: ['create', 'remove', 'update', 'view', 'view-all'] },
+  { resource: 'Customers', action: ['view'] },
+  {
+    resource: 'GeneralLedger',
     action: [
-      "view",
-      "create",
-      "update",
-      "delete",
-      "view-pay-schedule",
-      "view-employment-status",
-      "view-compensation-type",
-      "view-full-name",
-      "create-benefit",
-      "create-paid-time-off",
-      "calculate-pay-schedule",
-      "deactivate-account",
+      'income-statement',
+      'view-account-balance',
+      'view-all',
+      'view-balance-sheet',
+      'view-period-balance',
+      'view-transactions',
     ],
   },
   {
-    resource: "Benefit",
+    resource: 'Invoice',
     action: [
-      "view",
-      "create",
-      "update",
-      "delete",
-      "view-benefit-account",
-      "create-benefit-account",
-      "update-benefit-account",
-      "delete-benefit-account",
-      "check-expired",
+      'add-line-item',
+      'approve',
+      'create',
+      'pay',
+      'reject',
+      'remove',
+      'remove-line-item',
+      'update',
+      'view',
+      'view-all',
+      'view-for-customer',
+    ],
+  },
+  { resource: 'Item', action: ['create', 'export', 'import-csv', 'read', 'remove', 'restock', 'update', 'view', 'view-all'] },
+  { resource: 'NotificationLog', action: ['view'] },
+  { resource: 'ItemCategory', action: ['create', 'delete', 'import-csv', 'update', 'view', 'view-all'] },
+  { resource: 'JournalEntries', action: ['create', 'delete', 'view', 'view-all'] },
+  {
+    resource: 'Ledger',
+    action: [
+      'view-balance-sheet',
+      'view-entries',
+      'view-income-statement',
+      'view-sub-ledger-balance',
+      'view-sub-ledger-transactions',
+      'view-sub-ledgers',
     ],
   },
   {
-    resource: "Deduction",
+    resource: 'PurchaseOrder',
     action: [
-      "create",
-      "view",
-      "delete",
-      "update-brackets",
-      "deactivate",
-      "calculate",
-      "is-applicable",
+      'add-line-item',
+      'approve',
+      'create',
+      'remove',
+      'remove-line-item',
+      'update',
+      'view',
+      'view-all',
+      'view-vendor-orders',
     ],
   },
-  {
-    resource: "EmployeeSpendRequest",
-    action: [
-      "view",
-      "view-all",
-      "view-pending",
-      "request",
-      "approve",
-      "update",
-      "reject",
-      "reconcile",
-    ],
-  },
-  {
-    resource: "PaidTimeOff",
-    action: [
-      "create",
-      "view",
-      "accrue",
-      "request-leave",
-      "reject-leave",
-      "approve-leave",
-      "assign-pto",
-      "reset-cycle",
-    ],
-  },
-  {
-    resource: "Payshedule",
-    action: [
-      "view",
-      "create",
-      "update",
-      "delete",
-      "calculate",
-      "is-due-today",
-      "get-description",
-    ],
-  },
-  {
-    resource: "PaySlip",
-    action: ["view", "create", "update", "mark-as-paid", "export", "delete"],
-  },
-  {
-    resource: "Shift",
-    action: [
-      "view",
-      "create",
-      "update",
-      "mark-as-paid",
-      "export",
-      "delete",
-      "assign",
-      "calculate-overtime",
-    ],
-  },
-  {
-    resource: "TimeSheet",
-    action: ["view", "create", "update", "approve-overtime", "reject-overtime"],
-  },
-  {
-    resource: "SpendPolicy",
-    action: ["view", "create", "create-workflow", "view-workflows", "delete"],
-  },
-  {
-    resource: "Reimbursement",
-    action: ["view", "submit", "approve", "pay", "delete"],
-  },
-  {
-    resource: "SpendProgram",
-    action: [
-      "view",
-      "view-all",
-      "create",
-      "update",
-      "delete",
-      "archive",
-      "fund",
-      "assign",
-      "view-stats",
-    ],
-  },
-  {
-    resource: "Vouchers",
-    action: [
-      "view",
-      "create",
-      "update",
-      "update-program",
-      "delete",
-      "apply",
-      "gift-card-balance",
-      "activate-gift-card",
-    ],
-  },
-  {
-    resource: "Accounts",
-    action: [
-      "view",
-      "view-all",
-      "view-tree",
-      "view-descendants",
-      "view-parent",
-      "create",
-    ],
-  },
-  {
-    resource: "Transactions",
-    action: [
-      "view",
-      "view-all",
-      "view-tree",
-      "view-status",
-      "view-descendants",
-      "view-parent",
-      "create",
-    ],
-  },
-  {
-    resource: "JournalEntries",
-    action: ["view", "view-all", "create"],
-  },
-  {
-    resource: "GeneralLedger",
-    action: [
-      "view",
-      "view-all",
-      "view-transactions",
-      "view-account-balance",
-      "view-period-balance",
-      "view-balance-sheet",
-      "income-statement",
-    ],
-  },
-  {
-    resource: "Ledger",
-    action: [
-      "view-entries",
-      "view-all",
-      "view-transactions",
-      "view-account-balance",
-      "view-period-balance",
-      "view-balance-sheet",
-      "view-income-statement",
-      "view-sub-ledgers",
-      "view-sub-ledger-transactions",
-      "view-sub-ledger-balance",
-    ],
-  },
-  {
-    resource: "Assets",
-    action: [
-      "create",
-      "update",
-      "view",
-      "depreciate",
-      "dispose",
-      "view-depreciation-schedule",
-      "transfer-location",
-      "restore",
-      "delete",
-    ],
-  },
-  {
-    resource: "BankAccounts",
-    action: [
-      "create",
-      "update",
-      "view-all",
-      "view",
-      "deactivate",
-      "get-current-balance",
-    ],
-  },
-  {
-    resource: "Budget",
-    action: [
-      "create",
-      "update",
-      "view-all",
-      "view",
-      "view-archived",
-      "view-account",
-      "fund",
-      "archived",
-      "delete",
-      "view-usage-stats",
-      "view-transactions",
-      "view-trends",
-    ],
-  },
-  {
-    resource: "Documents",
-    action: [
-      "upload",
-      "upload-bulk",
-      "upload-product-image",
-      "upload-product-bulk",
-      "view-all",
-      "view",
-      "download",
-    ],
-  },
-  {
-    resource: "Folder",
-    action: [
-      "create",
-      "view",
-      "delete",
-      "batch-delete",
-      "batch-move",
-      "batch-download",
-      "bulk-download",
-      "move-rename",
-      "preview",
-    ],
-  },
-  {
-    resource: "Bill",
-    action: ["create", "view", "view-all", "approve", "reject"],
-  },
-  {
-    resource: "CreditNote",
-    action: ["create", "view", "view-all", "add-invoice", "update", "remove"],
-  },
-  {
-    resource: "Invoice",
-    action: [
-      "create",
-      "view",
-      "view-all",
-      "view-for-customer",
-      "add-line-item",
-      "remove-line-item",
-      "update",
-      "remove",
-      "approve",
-    ],
-  },
-  {
-    resource: "PurchaseOrder",
-    action: [
-      "create",
-      "view",
-      "view-all",
-      "view-for-customer",
-      "add-line-item",
-      "remove-line-item",
-      "update",
-      "remove",
-      "approve",
-    ],
-  },
-  {
-    resource: "SalesReciept",
-    action: ["create", "view", "view-all", "update", "remove"],
-  },
-  {
-    resource: "Customer",
-    action: ["create", "view", "view-all", "update", "remove", "import-csv"],
-  },
-  {
-    resource: "ItemCategory",
-    action: ["create", "view", "view-all", "update", "remove", "import-csv"],
-  },
-  {
-    resource: "Item",
-    action: [
-      "create",
-      "view",
-      "view-all",
-      "update",
-      "remove",
-      "import-csv",
-      "restock",
-    ],
-  },
-  {
-    resource: "Tax",
-    action: [
-      "create",
-      "view",
-      "view-all",
-      "update",
-      "remove",
-      "import-csv",
-      "restock",
-    ],
-  },
-  {
-    resource: "Vendor",
-    action: [
-      "create",
-      "view",
-      "view-all",
-      "update",
-      "remove",
-      "import-csv",
-      "restock",
-    ],
-  },
+  { resource: 'SalesReciept', action: ['create', 'remove', 'view', 'view-all'] },
+  { resource: 'Tax', action: ['create', 'remove', 'update', 'view', 'view-all'] },
+  { resource: 'Transactions', action: ['create', 'view'] },
+  { resource: 'Vendor', action: ['create', 'remove', 'update', 'view', 'view-all'] },
+  { resource: 'Vendors', action: ['view'] },
+  { resource: 'Vouchers', action: ['activate-gift-card', 'create', 'delete', 'gift-card-balance', 'view'] },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+function allowedActions(permissions: Record<string, string[]> | null | undefined, resource: string): string[] {
+  if (!permissions) return [];
+  const direct = permissions[resource];
+  if (direct) return direct;
+  const key = Object.keys(permissions).find((k) => k.toLowerCase() === resource.toLowerCase());
+  return key ? permissions[key] : [];
+}
 
 export function hasPermission(
   permissions: Record<string, string[]> | null | undefined,
   resource: string,
   action: string,
 ): boolean {
-  if (!permissions) return false;
-  const allowed = permissions[resource];
-  if (!allowed) return false;
-  return allowed.includes(action);
+  const allowed = allowedActions(permissions, resource);
+  return allowed.includes(action) || allowed.includes('*');
 }
 
 export function hasAnyPermission(
@@ -372,8 +105,5 @@ export function hasAnyPermission(
   resource: string,
   actions: string[],
 ): boolean {
-  if (!permissions) return false;
-  const allowed = permissions[resource];
-  if (!allowed) return false;
-  return actions.some((a) => allowed.includes(a));
+  return actions.some((a) => hasPermission(permissions, resource, a));
 }

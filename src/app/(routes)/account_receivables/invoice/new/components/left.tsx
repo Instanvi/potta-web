@@ -10,7 +10,7 @@ import SliderCustomer from '@potta/app/(routes)/customers/components/customerSli
 import Select from '@potta/components/select';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import TextArea from '@potta/components/textArea';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { DateInput } from '@potta/components/customDatePicker';
 import { useRouter } from 'next/navigation';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';

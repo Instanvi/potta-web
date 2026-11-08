@@ -25,9 +25,14 @@ const AppLauncher: React.FC = () => {
     //   icon: AppLauncherIcons.home,
     // },
     {
-      value: 'account_payables',
-      label: 'AP',
-      icon: AppLauncherIcons.payables,
+      value: 'pos',
+      label: 'POS',
+      icon: AppLauncherIcons.pos,
+    },
+    {
+      value: 'accounting',
+      label: 'Books',
+      icon: AppLauncherIcons.accounting,
     },
     {
       value: 'account_receivables',
@@ -35,29 +40,14 @@ const AppLauncher: React.FC = () => {
       icon: AppLauncherIcons.receivables,
     },
     {
-      value: 'treasury',
+      value: 'account_payables',
+      label: 'AP',
+      icon: AppLauncherIcons.payables,
+    },
+    {
+      value: 'treasury/bank-accounts',
       label: 'Treasury',
       icon: AppLauncherIcons.treasury,
-    },
-    {
-      value: 'payroll',
-      label: 'Payroll',
-      icon: AppLauncherIcons.payroll,
-    },
-    {
-      value: 'pos',
-      label: 'Trade',
-      icon: AppLauncherIcons.pos,
-    },
-    {
-      value: 'accounting',
-      label: 'Accounting',
-      icon: AppLauncherIcons.accounting,
-    },
-    {
-      value: 'reports/dashboard',
-      label: 'FP & A',
-      icon: AppLauncherIcons.reports,
     },
     // {
     //   value: 'settings',
@@ -69,7 +59,7 @@ const AppLauncher: React.FC = () => {
   // Check if current path matches app path
   const isCurrentApp = (appValue: string) => {
     if (appValue === '' && pathname === '/') return true;
-    if (appValue !== '' && pathname.startsWith(`/${appValue}`)) return true;
+    if (appValue !== '' && pathname.split('/')[1] === appValue.split('/')[0]) return true;
     return false;
   };
 

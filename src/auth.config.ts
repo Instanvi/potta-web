@@ -10,7 +10,9 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const isPublic =
         nextUrl.pathname === "/login" ||
-        nextUrl.pathname.startsWith("/auth-callback");
+        nextUrl.pathname.startsWith("/auth-callback") ||
+        nextUrl.pathname.startsWith("/vendor-portal") ||
+        nextUrl.pathname === "/unauthorized";
       if (isPublic) return true;
       return isLoggedIn;
     },

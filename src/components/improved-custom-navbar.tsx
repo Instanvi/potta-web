@@ -3,8 +3,6 @@ import React, { useState, useContext } from 'react';
 import {
   ChevronDown,
   ChevronRight,
-  Inbox,
-  Bell,
   Settings,
   User,
   LogOut,
@@ -15,6 +13,7 @@ import { ContextData } from './providers/DataProvider';
 import { menuStructure } from './navbarLinks';
 import { useSession } from 'next-auth/react';
 import { signOutWithAuthApi } from '@/lib/auth-sign-out';
+import { NotificationBell } from './shell/notification-bell';
 
 
 export type MenuItem = {
@@ -313,22 +312,7 @@ const ImprovedCustomNavbar = () => {
 
       {/* Right side - Actions and User Menu */}
       <div className="flex items-center gap-3 ml-auto">
-        {/* Notifications */}
-        <button className="p-2.5 rounded-full transition-all duration-200 relative hover:bg-gray-50 group">
-          <Bell
-            size={20}
-            className="text-gray-600 group-hover:text-gray-800 transition-colors"
-          />
-          <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full animate-pulse"></span>
-        </button>
-
-        {/* Inbox */}
-        <button className="p-2.5 rounded-full transition-all duration-200 hover:bg-gray-50 group">
-          <Inbox
-            size={20}
-            className="text-gray-600 group-hover:text-gray-800 transition-colors"
-          />
-        </button>
+        <NotificationBell />
 
         {/* Divider */}
         <div className="w-px h-6 bg-gray-200 mx-1"></div>

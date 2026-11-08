@@ -9,43 +9,14 @@ export type Filter = {
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Enum Types
-export const PaymentMethods = ['Credit Card', 'Bank Transfer', 'ACH Transfer', 'Other'] as const;
-export type PaymentMethod = typeof PaymentMethods[number];
+import type { DiscountType, PaymentMethod, SaleLineItem, SalePayload } from './sale';
 
-export const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
-export type DiscountType = typeof DiscountTypes[number];
+export type { DiscountType, PaymentMethod } from './sale';
+export { DISCOUNT_TYPES as DiscountTypes, PAYMENT_METHOD_VALUES as PaymentMethods } from './sale';
 
-// Line Item Type
-export type LineItem = {
-  description: string;
-  quantity: number;
-  discountCap: number;
-  discountType: DiscountType;
-  unitPrice: number;
-  taxRate: number;
-  discountRate?: number;
-  productId: string;
-};
+export type LineItem = SaleLineItem;
 
-// Sales Receipt Type
-export type SalesReceipt = {
-  saleDate: string;
-  totalAmount: number;
-  paymentReference?: string;
-  notes?: string;
-  paymentMethod: PaymentMethod;
-  receiptNumber?: string;
-  discountAmount: number;
-  customerId: string;
-  salePerson: string;
-  lineItems: LineItem[];
-};
-
-// Optional: Type for unregistered customer sales
-export type UnregisteredSalesReceipt = Omit<SalesReceipt, 'customerId'> & {
-  customerId?: string;
-};
+export type SalesReceipt = SalePayload;
 
 // Response Types
 export type SalesReceiptResponse = {
@@ -97,11 +68,12 @@ export type Product = {
   inventoryLevel: number,
   salesPrice: number,
   taxable: boolean,
-  taxRate: number,
-  category: string,
-  images: null,
+  tax?: { uuid: string; name: string; rate: number | string; type?: string } | null,
+  type?: 'INVENTORY' | 'NON_INVENTORY' | null,
+  structure?: 'SIMPLE' | 'ASSEMBLY' | 'SIMPLEGROUPS' | null,
+  category: string | { uuid: string; name: string } | null,
+  images: string[] | null,
   status: string,
-
 }
 
 

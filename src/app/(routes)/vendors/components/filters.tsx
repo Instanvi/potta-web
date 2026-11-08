@@ -1,5 +1,6 @@
 'use client';
 import Button from '@potta/components/button';
+import { Can } from '@/components/auth/can';
 import React, { useState } from 'react';
 import SliderVendor from './vendorSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
@@ -45,8 +46,7 @@ const Filter: React.FC<FilterProps> = ({
       options: [
         { label: 'All KYC', value: 'all' },
         { label: 'Verified', value: 'verified' },
-        { label: 'Pending (KYC Started)', value: 'pending' },
-        { label: 'Not Initialized', value: 'not_initialized' },
+        { label: 'Unverified', value: 'unverified' },
       ],
       value: kycFilter,
       onChange: onKycFilterChange,
@@ -78,7 +78,9 @@ const Filter: React.FC<FilterProps> = ({
             type={'button'}
             color={true}
           />
-          <SliderVendor />
+          <Can resource="Vendor" action="create">
+            <SliderVendor />
+          </Can>
         </div>
       </div>
     </div>

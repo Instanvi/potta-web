@@ -13,7 +13,7 @@ import { CustomerPayload, customerSchema } from '../utils/validations';
 import Notes from './note';
 import Tax from './tax';
 import useCreateCustomer from '../hooks/useCreateCustomer';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { PhoneInput } from '@potta/components/phoneInput';
 // Import shadcn date picker components
 import { Calendar } from '@potta/components/shadcn/calendar';

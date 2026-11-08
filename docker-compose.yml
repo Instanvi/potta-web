@@ -1,10 +1,35 @@
-version: '3.8'
+# Dokploy Docker Compose (raw / webhook deploy) — image loaded by GitHub Actions CD.
+#
+# Potta web listens on 3000 (Dockerfile). Domains: service potta-web, port 3000 (https://potta.instanvi.com).
+# NEXT_PUBLIC_* are inlined at build time (CI build-args); the .env here only holds server-side values:
+#   AUTH_SECRET, AUTH_URL / NEXTAUTH_URL (https://potta.instanvi.com), AUTH_TRUST_HOST=true.
+# Required: dokploy-network (external).
+#
+# Advanced command (Dokploy prepends `docker`):
+#   compose -p potta-web -f docker-compose.yml up -d --force-recreate --remove-orphans
 
 services:
-  frontend:
-    image: ${IMAGE_REPO:-ghcr.io/instanvi/potta:latest}
-    restart: always
-    ports:
-      - "3004:3000"
+  potta-web:
+    image: potta-web:latest
+    pull_policy: never
+    restart: unless-stopped
+    expose:
+      - "3000"
     env_file:
-      - .env.local
+      - .env
+    environment:
+      HOSTNAME: "0.0.0.0"
+      NODE_ENV: production
+      PORT: "3000"
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  dokploy-network:
+    external: true

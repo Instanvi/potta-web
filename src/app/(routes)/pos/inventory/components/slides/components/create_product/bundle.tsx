@@ -9,7 +9,7 @@ import TextArea from '@potta/components/textArea';
 import Slider from '@potta/components/slideover';
 import { BundlePayload, bundleSchema } from '../../../../_utils/validation';
 import useCreateProduct from '../../../../_hooks/useCreateProduct';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Select from '@potta/components/select';
 import useGetAllProducts from '../../../../_hooks/useGetAllProducts';
 import useGetAllProductCategories from '../../../../_hooks/useGetAllProductCategories';
@@ -401,7 +401,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
                           </p>
                           <p>
                             <strong>Total Cost:</strong> $
-                            {((product.cost || 0) * component.quantity).toFixed(
+                            {(Number(product.cost || 0) * Number(component.quantity)).toFixed(
                               2
                             )}
                           </p>

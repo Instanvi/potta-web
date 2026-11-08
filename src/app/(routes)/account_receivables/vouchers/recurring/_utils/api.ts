@@ -27,14 +27,8 @@ export const invoiceApi = {
     const result = await axios.delete(`/invoice/${invoice_id}`);
     return result?.data;
   },
-  addLineItem: async (invoiceId: string, user_id: string, data: unknown) => {
-    const result = await axios.post(`/invoice/${invoiceId}/lineItem`, data, {
-      params: { user_id },
-    });
-    return result?.data;
-  },
-  testApi:async()=>{
-    const result = await axios.get('/invoice/test');
+  addLineItems: async (invoiceId: string, lineItems: unknown[]) => {
+    const result = await axios.post(`/invoice/${invoiceId}/lineItems`, lineItems);
     return result?.data;
   },
   removeLineItem: async (invoiceId: string, lineItemId: string) => {
@@ -43,8 +37,13 @@ export const invoiceApi = {
     );
     return result?.data;
   },
-  getAllCustomers: async (invoice_id: string): Promise<unknown> => {
-    const result = await axios.get('/invoice/customer/' + invoice_id);
+  getByCustomer: async (
+    customerId: string,
+    params: { page?: number; limit?: number } = {}
+  ) => {
+    const result = await axios.get(`/invoice/customer/${customerId}`, {
+      params,
+    });
     return result?.data;
   },
 };

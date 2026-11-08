@@ -9,6 +9,7 @@ import {
   ResizablePanelGroup,
 } from '@potta/components/resizable';
 import RootLayout from '../../../layout';
+import { DataProvider } from '@potta/components/providers/DataProvider';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -36,8 +37,10 @@ const NewSalesReciept = () => {
   // Determine if the preview button should be shown
   const shouldShowPreviewButton = !showPreview || leftPanelSize > 95;
 
+  // Own provider: this form keeps its state in `data`, which would otherwise clobber the till's cart.
   return (
     <RootLayout>
+      <DataProvider>
       <div className="max-h-[92.7vh] relative">
         {/* Preview toggle button with fade transition */}
         <div
@@ -102,6 +105,7 @@ const NewSalesReciept = () => {
           </ResizablePanelGroup>
         </div>
       </div>
+      </DataProvider>
     </RootLayout>
   );
 };

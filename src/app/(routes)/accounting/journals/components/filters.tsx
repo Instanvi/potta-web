@@ -1,8 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import Button from '@potta/components/button';
 import Search from '@potta/components/search';
-import { Plus } from 'lucide-react';
+import { Can } from '@/components/auth/can';
 import JournalSlider from './journalSlider';
 
 const Filter = () => {
@@ -16,7 +15,9 @@ const Filter = () => {
         </div>
       </div>
 
-      <JournalSlider open={isCreateOpen} setOpen={setIsCreateOpen} />
+      <Can resource="JournalEntries" action="create">
+        <JournalSlider open={isCreateOpen} setOpen={setIsCreateOpen} />
+      </Can>
     </div>
   );
 };

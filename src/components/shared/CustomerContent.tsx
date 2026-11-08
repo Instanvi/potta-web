@@ -2,7 +2,7 @@
 import React from 'react';
 import Boxes from '../../app/(routes)/customers/components/boxes';
 import TableComponents from '../../app/(routes)/customers/components/table';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { useContext } from 'react';
 

@@ -10,7 +10,7 @@ import SliderCustomer from '@potta/app/(routes)/customers/components/customerSli
 import Select from '@potta/components/select';
 import { Customer } from '../../../../customers/utils/types';
 import * as Yup from 'yup';
-import { toast } from 'react-hot-toast'; // Assuming you have a toast library
+import { toast } from 'sonner'; // Assuming you have a toast library
 import { useCreateSalesReceipt } from '../../hooks/useCreateReceipt';
 import { SalesReceiptPayload } from '../../../utils/validation';
 

@@ -1,69 +1,36 @@
-// src/app/dashboard/page.tsx (or your desired route)
 'use client';
-
-import * as React from 'react';
-
-import { PaymentRequestDataTableWrapper } from './components/table';
-import Filter from './components/filters';
-import RootLayout from '../../layout';
+import { Suspense, useContext } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { AccountPayablesTabs } from '@potta/components/shared/AccountPayablesTabs';
+import { Can } from '@/components/auth/can';
+import RootLayout from '../../layout';
+import { PageHeader } from '../../_shared/states';
+import { BillsTable } from './components/table';
 
-export default function DashboardPage() {
-  const [search, setSearch] = React.useState('');
-  const [status, setStatus] = React.useState('all');
-  const [paymentMethod, setPaymentMethod] = React.useState('all');
-  const context = React.useContext(ContextData);
+/** `?id=<bill uuid>` (used by notification links) opens that bill's details. */
+const BillsList = () => {
+  const searchParams = useSearchParams();
+  return <BillsTable initialBillId={searchParams.get('id')} />;
+};
 
-  const handleSearchClear = () => {
-    setSearch('');
-  };
-
+export default function BillsPage() {
+  const context = useContext(ContextData);
   return (
     <RootLayout>
-      <div
-        className={`${context?.layoutMode === 'sidebar' ? 'px-14' : 'px-5'}`}
-      >
-        <div className="">
-          <AccountPayablesTabs
-            className="mb-4"
-            tabs={[
-              {
-                label: 'Transaction',
-                value: 'transactions',
-                href: '/account_payables/transactions',
-                count: 52,
-              },
-              {
-                label: 'Bills',
-                value: 'bills',
-                href: '/account_payables/bills',
-                count: 16,
-              },
-              {
-                label: 'Reimbursements',
-                value: 'reimbursements',
-                href: '/account_payables/re-imbursements',
-                count: 16,
-              },
-              {
-                label: 'Terminals',
-                value: 'terminals',
-                href: '/payments/terminals',
-                count: 16,
-              },
-            ]}
-          />
-          <PaymentRequestDataTableWrapper
-            search={search}
-            status={status}
-            paymentMethod={paymentMethod}
-            onSearchChange={setSearch}
-            onSearchClear={handleSearchClear}
-            onStatusChange={setStatus}
-            onPaymentMethodChange={setPaymentMethod}
-          />
-        </div>
+      <div className={`${context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'} pr-5 py-6`}>
+        <PageHeader
+          title="Bills"
+          description="Vendor bills: approve to post the expense and payable, then record the payment."
+        />
+        <Can
+          resource="Bill"
+          action={['view', 'view-all']}
+          fallback={<p className="text-sm text-gray-500">You do not have permission to view bills.</p>}
+        >
+          <Suspense fallback={null}>
+            <BillsList />
+          </Suspense>
+        </Can>
       </div>
     </RootLayout>
   );

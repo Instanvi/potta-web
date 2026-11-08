@@ -1,8 +1,9 @@
 import React from 'react';
 import { mostUsedApps } from './data';
+import { GridItem } from './types';
 
 interface QuickActionItemProps {
-  item: typeof mostUsedApps[0];
+  item: GridItem;
 }
 
 const QuickActionItem = ({ item }: QuickActionItemProps) => {

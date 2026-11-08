@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import moment from 'moment';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { DataTable } from '@potta/components/ui/data-table';
 
 import { IFilter } from '../_utils/types';

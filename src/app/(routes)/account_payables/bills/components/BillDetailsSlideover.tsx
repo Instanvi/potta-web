@@ -1,249 +1,308 @@
 'use client';
-
+import React, { useState } from 'react';
 import Slider from '@potta/components/slideover';
-import useGetBill from '../new/hooks/useGetBill';
-import React from 'react';
-import ThreadPanel from '@potta/components/threads/ThreadPanel';
+import Button from '@potta/components/button';
+import RecordHistory from '@potta/components/shared/RecordHistory';
+import { Can } from '@/components/auth/can';
+import ConfirmModal from '../../../_shared/ConfirmModal';
+import { formatDate, formatDateTime } from '../../../_shared/format';
+import { ErrorState, LoadingState } from '../../../_shared/states';
+import { formatMoney } from '../../utils/format';
+import { useApproveBill, useBill } from '../hooks';
+import { Bill, billExpenseAccount, paymentMethodLabel } from '../utils/types';
+import BillStatusBadge from './BillStatusBadge';
+import PayBillModal from './PayBillModal';
+import RejectBillModal from './RejectBillModal';
 
 interface BillDetailsSlideoverProps {
   billId: string | null;
-  open: boolean;
-  setOpen: (v: boolean) => void;
+  onClose: () => void;
 }
 
 const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="font-medium text-gray-500 whitespace-nowrap text-sm">
-    {children}
+  <span className="whitespace-nowrap text-sm font-medium text-gray-500">{children}</span>
+);
+
+const Value: React.FC<{ children: React.ReactNode; highlight?: boolean }> = ({ children, highlight }) => (
+  <span className={`break-all text-gray-900 ${highlight ? 'text-lg font-medium text-green-700' : ''}`}>
+    {children ?? '—'}
   </span>
 );
 
-const Value: React.FC<{ children: React.ReactNode; highlight?: boolean }> = ({
-  children,
-  highlight,
-}) => (
-  <span
-    className={`text-gray-900 break-all ${
-      highlight ? 'font-medium text-lg text-green-700' : ''
-    }`}
-  >
-    {children}
-  </span>
+const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="mb-4 mt-2 text-xs font-medium uppercase tracking-wide text-gray-400">{children}</div>
 );
 
-const SectionHeader: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => (
-  <div className="uppercase tracking-wide text-xs font-medium text-gray-400 mb-4 mt-2">
-    {children}
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="flex items-center gap-2">
+    <Label>{label}:</Label>
+    <Value>{children}</Value>
   </div>
 );
 
-const BillDetailsSlideover: React.FC<BillDetailsSlideoverProps> = ({
-  billId,
-  open,
-  setOpen,
-}) => {
-  const { data, isLoading } = useGetBill(billId || '');
-  const bill: any = data || {};
-  const vendor = bill.vendor || {};
-  const address = vendor.address || {};
+type TimelineStep = { label: string; detail?: React.ReactNode; date?: string | null; tone: 'done' | 'danger' | 'pending' };
+
+const buildTimeline = (bill: Bill): TimelineStep[] => {
+  const steps: TimelineStep[] = [
+    {
+      label: 'Bill recorded',
+      detail: bill.vendorInvoiceNumber ? `Vendor invoice ${bill.vendorInvoiceNumber}` : undefined,
+      date: bill.createdAt ?? bill.issuedDate,
+      tone: 'done',
+    },
+  ];
+  if (bill.status === 'REJECTED') {
+    steps.push({
+      label: 'Rejected',
+      detail: bill.rejectionReason || 'No reason given',
+      date: bill.rejectedAt,
+      tone: 'danger',
+    });
+    return steps;
+  }
+  steps.push(
+    bill.approvedAt
+      ? {
+          label: 'Approved and posted',
+          detail: `Dr ${billExpenseAccount(bill)} expense / Cr vendor payable`,
+          date: bill.approvedAt,
+          tone: 'done',
+        }
+      : { label: 'Awaiting approval', tone: 'pending' }
+  );
+  if (bill.status === 'PAID') {
+    steps.push({
+      label: 'Paid',
+      detail: [paymentMethodLabel(bill.paymentMethod), bill.paymentReference].filter(Boolean).join(' · '),
+      tone: 'done',
+    });
+  } else if (bill.approvedAt) {
+    steps.push({
+      label: bill.status === 'OVERDUE' ? 'Payment overdue' : 'Awaiting payment',
+      detail: `Due ${formatDate(bill.dueDate)}`,
+      tone: bill.status === 'OVERDUE' ? 'danger' : 'pending',
+    });
+  }
+  return steps;
+};
+
+const TONE_DOT: Record<TimelineStep['tone'], string> = {
+  done: 'bg-green-600',
+  danger: 'bg-red-500',
+  pending: 'bg-gray-300',
+};
+
+const BillDetailsSlideover: React.FC<BillDetailsSlideoverProps> = ({ billId, onClose }) => {
+  const { data: bill, isLoading, error, refetch } = useBill(billId);
+  const approve = useApproveBill();
+  const [confirmApprove, setConfirmApprove] = useState(false);
+  const [toReject, setToReject] = useState<Bill | null>(null);
+  const [toPay, setToPay] = useState<Bill | null>(null);
+
+  const lines = bill?.lineItems ?? [];
+  const totals = lines.reduce(
+    (acc, l) => {
+      const gross = Number(l.quantity ?? 0) * Number(l.unitPrice ?? 0);
+      acc.subtotal += gross;
+      acc.discount += Number(l.discountAmount ?? 0);
+      return acc;
+    },
+    { subtotal: 0, discount: 0 }
+  );
+  const tax = Number(bill?.taxAmount ?? 0);
+  const total = Number(bill?.invoiceTotal ?? 0);
+  const canApproveOrReject = bill?.status === 'DRAFT' || bill?.status === 'ISSUED';
+  const canPay = bill?.status === 'APPROVED' || bill?.status === 'OVERDUE';
 
   return (
-    <Slider edit={false} title="Bill Details" open={open} setOpen={setOpen}>
+    <Slider
+      edit={false}
+      title="Bill Details"
+      open={!!billId}
+      setOpen={(value) => !value && onClose()}
+    >
       {isLoading ? (
-        <div className="p-8">Loading...</div>
-      ) : bill && bill.uuid ? (
-        <div className="w-full max-w-6xl py-4 px-2" style={{ minHeight: 400 }}>
-          <div className="flex flex-col md:flex-row gap-0">
-            {/* Left: Bill Summary */}
-            <div className="flex-1 min-w-[260px] pr-8 border-r border-gray-100">
-              <SectionHeader>Bill Summary</SectionHeader>
-              <div className="mb-6">
-                <div className="text-2xl font-extrabold text-gray-800 mb-1 flex items-center gap-2">
-                  Bill <span className="text-gray-400">#</span>
-                  {bill.invoiceNumber || bill.invoiceId}
-                </div>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-1 ${
-                    bill.status === 'Approved'
-                      ? 'bg-green-50 text-green-700'
-                      : bill.status === 'Rejected'
-                      ? 'bg-red-50 text-red-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  {bill.status}
-                </span>
+        <LoadingState label="Loading bill..." />
+      ) : error ? (
+        <div className="w-full max-w-6xl py-4">
+          <ErrorState error={error} onRetry={() => refetch()} />
+        </div>
+      ) : bill ? (
+        <div className="w-full max-w-6xl px-2 py-4">
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="mb-1 flex items-center gap-2 text-2xl font-semibold text-gray-800">
+                Bill <span className="text-gray-400">#</span>
+                {bill.code}
               </div>
+              <BillStatusBadge status={bill.status} />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {canApproveOrReject && (
+                <>
+                  <Can resource="Bill" action="reject">
+                    <Button text="Reject" type="button" theme="danger" onClick={() => setToReject(bill)} />
+                  </Can>
+                  <Can resource="Bill" action="approve">
+                    <Button
+                      text="Approve"
+                      type="button"
+                      icon={<i className="ri-check-line" />}
+                      onClick={() => setConfirmApprove(true)}
+                    />
+                  </Can>
+                </>
+              )}
+              {canPay && (
+                <Can resource="Bill" action="pay">
+                  <Button
+                    text="Record payment"
+                    type="button"
+                    icon={<i className="ri-bank-card-line" />}
+                    onClick={() => setToPay(bill)}
+                  />
+                </Can>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-0 md:flex-row">
+            <div className="min-w-[260px] flex-1 border-gray-100 pr-8 md:border-r">
+              <SectionHeader>Bill Summary</SectionHeader>
               <div className="space-y-4">
-                <div className="flex gap-2 items-center">
-                  <Label>Type:</Label>
-                  <Value>{bill.invoiceType}</Value>
-                </div>
-                <div className="flex gap-2 items-center">
+                <Field label="Vendor invoice no.">{bill.vendorInvoiceNumber || '—'}</Field>
+                <div className="flex items-center gap-2">
                   <Label>Amount:</Label>
-                  <Value highlight>
-                    {bill.currency} {bill.invoiceTotal}
-                  </Value>
+                  <Value highlight>{formatMoney(total, bill.currency)}</Value>
                 </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Issued Date:</Label>
-                  <Value>
-                    {bill.issuedDate
-                      ? new Date(bill.issuedDate).toLocaleDateString()
-                      : '-'}
-                  </Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Due Date:</Label>
-                  <Value>
-                    {bill.dueDate
-                      ? new Date(bill.dueDate).toLocaleDateString()
-                      : '-'}
-                  </Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Payment Method:</Label>
-                  <Value>{bill.paymentMethod}</Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Payment Reference:</Label>
-                  <Value>{bill.paymentReference}</Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Voucher Code:</Label>
-                  <Value>{bill.voucherCode}</Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Tax Rate:</Label>
-                  <Value>{bill.taxRate}%</Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Tax Amount:</Label>
-                  <Value>{bill.taxAmount}</Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Payment Terms:</Label>
-                  <Value>{bill.paymentTerms}</Value>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <Label>Notes:</Label>
-                  <Value>{bill.notes}</Value>
-                </div>
+                <Field label="Issued date">{formatDate(bill.issuedDate)}</Field>
+                <Field label="Due date">{formatDate(bill.dueDate)}</Field>
+                <Field label="Payment method">{paymentMethodLabel(bill.paymentMethod)}</Field>
+                <Field label="Payment reference">{bill.paymentReference || '—'}</Field>
+                <Field label="Expense account">{billExpenseAccount(bill)}</Field>
+                <Field label="Notes">{bill.notes || '—'}</Field>
               </div>
             </div>
 
-            {/* Right: Vendor Info + Address as two columns */}
-            <div className="flex-[1.5] min-w-[400px] pl-8 flex flex-row gap-8 bg-gray-50">
-              {/* Vendor Info */}
-              <div className="flex-1">
-                <SectionHeader>Vendor Information</SectionHeader>
-                <div className="space-y-4">
-                  <div className="flex gap-2 items-center">
-                    <Label>Name:</Label>
-                    <Value>{vendor.name}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Type:</Label>
-                    <Value>{vendor.type}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Email:</Label>
-                    <Value>{vendor.email}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Phone:</Label>
-                    <Value>{vendor.phone}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Contact Person:</Label>
-                    <Value>{vendor.contactPerson}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Classification:</Label>
-                    <Value>{vendor.classification}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Status:</Label>
-                    <Value>{vendor.status}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Website:</Label>
-                    <Value>{vendor.website}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Tax ID:</Label>
-                    <Value>{vendor.taxId}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Opening Balance:</Label>
-                    <Value>
-                      {vendor.openingBalance} {vendor.currency}
-                    </Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Account Details:</Label>
-                    <Value>{vendor.accountDetails}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Payment Terms:</Label>
-                    <Value>{vendor.paymentTerms}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Payment Method:</Label>
-                    <Value>{vendor.paymentMethod}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Credit Limit:</Label>
-                    <Value>{vendor.creditLimit}</Value>
-                  </div>
-                </div>
+            <div className="min-w-[300px] flex-1 bg-gray-50 p-6 md:ml-8">
+              <SectionHeader>Vendor Information</SectionHeader>
+              <div className="space-y-4">
+                <Field label="Name">{bill.vendor?.name || '—'}</Field>
+                <Field label="Email">{bill.vendor?.email || '—'}</Field>
+                <Field label="Phone">{bill.vendor?.phone || '—'}</Field>
               </div>
-              {/* Vendor Address */}
-              <div className="flex-1">
-                <SectionHeader>Vendor Address</SectionHeader>
-                <div className="space-y-4 mt-2">
-                  <div className="flex gap-2 items-center">
-                    <Label>Address:</Label>
-                    <Value>{address.address}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>City:</Label>
-                    <Value>{address.city}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>State:</Label>
-                    <Value>{address.state}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Country:</Label>
-                    <Value>{address.country}</Value>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <Label>Postal Code:</Label>
-                    <Value>{address.postalCode}</Value>
-                  </div>
+
+              <div className="mt-8">
+                <SectionHeader>Status timeline</SectionHeader>
+              </div>
+              <ol className="relative ml-1 border-l border-gray-200">
+                {buildTimeline(bill).map((step, i) => (
+                  <li key={i} className="mb-5 ml-4 last:mb-0">
+                    <span className={`absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full ${TONE_DOT[step.tone]}`} />
+                    <p
+                      className={`text-sm font-medium ${
+                        step.tone === 'danger' ? 'text-red-700' : step.tone === 'pending' ? 'text-gray-500' : 'text-gray-900'
+                      }`}
+                    >
+                      {step.label}
+                    </p>
+                    {step.detail && <p className="text-xs text-gray-500">{step.detail}</p>}
+                    {step.date && <p className="text-xs text-gray-400">{formatDateTime(step.date)}</p>}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <SectionHeader>Line items</SectionHeader>
+            {lines.length === 0 ? (
+              <p className="text-sm text-gray-500">This bill has no line items.</p>
+            ) : (
+              <div className="overflow-x-auto border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-left text-gray-500">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">Description</th>
+                      <th className="px-4 py-2 text-right font-medium">Qty</th>
+                      <th className="px-4 py-2 text-right font-medium">Unit price</th>
+                      <th className="px-4 py-2 text-right font-medium">Discount</th>
+                      <th className="px-4 py-2 text-right font-medium">Tax</th>
+                      <th className="px-4 py-2 text-right font-medium">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lines.map((line) => (
+                      <tr key={line.uuid} className="border-t border-gray-100">
+                        <td className="px-4 py-2">
+                          {line.description}
+                          {line.product?.name && (
+                            <span className="block text-xs text-gray-400">{line.product.name}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-right">{Number(line.quantity)}</td>
+                        <td className="px-4 py-2 text-right">{formatMoney(line.unitPrice, bill.currency)}</td>
+                        <td className="px-4 py-2 text-right">
+                          {Number(line.discountAmount ?? 0) > 0 ? formatMoney(line.discountAmount, bill.currency) : '—'}
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          {Number(line.taxRate ?? 0) > 0
+                            ? `${Number(line.taxRate)}% · ${formatMoney(line.taxAmount, bill.currency)}`
+                            : '—'}
+                        </td>
+                        <td className="px-4 py-2 text-right font-medium">
+                          {formatMoney(line.totalAmount, bill.currency)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="ml-auto mt-4 w-full max-w-xs space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Subtotal</span>
+                <span>{formatMoney(totals.subtotal, bill.currency)}</span>
+              </div>
+              {totals.discount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Discount</span>
+                  <span>−{formatMoney(totals.discount, bill.currency)}</span>
                 </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-500">VAT (445)</span>
+                <span>{formatMoney(tax, bill.currency)}</span>
+              </div>
+              <div className="flex justify-between border-t border-gray-200 pt-2 text-base font-medium">
+                <span>Total</span>
+                <span className="text-green-700">{formatMoney(total, bill.currency)}</span>
               </div>
             </div>
           </div>
 
-          {bill?.uuid && (
-            <div className="mt-6">
-              <ThreadPanel
-                entityType="INVOICE"
-                entityId={bill.uuid}
-                entityDisplayName={`Invoice #${
-                  bill.invoiceNumber || bill.invoiceId || bill.uuid
-                }`}
-                emptyStateMessage="No invoice discussions yet."
-              />
-            </div>
-          )}
+          <div className="mt-8 pb-8">
+            <SectionHeader>History</SectionHeader>
+            <RecordHistory entityType="bill" entityId={bill.uuid} />
+          </div>
+
+          <ConfirmModal
+            open={confirmApprove}
+            title={`Approve bill ${bill.code}`}
+            message={`Approving posts ${formatMoney(total, bill.currency)} to the books (Dr expense ${billExpenseAccount(
+              bill
+            )} + VAT 445 / Cr vendor payable). Continue?`}
+            confirmText="Approve"
+            isLoading={approve.isPending}
+            onClose={() => setConfirmApprove(false)}
+            onConfirm={() =>
+              approve.mutate({ id: bill.uuid }, { onSuccess: () => setConfirmApprove(false) })
+            }
+          />
+          <RejectBillModal bill={toReject} onClose={() => setToReject(null)} />
+          <PayBillModal bill={toPay} onClose={() => setToPay(null)} />
         </div>
-      ) : (
-        <div className="p-8">No details found.</div>
-      )}
+      ) : null}
     </Slider>
   );
 };

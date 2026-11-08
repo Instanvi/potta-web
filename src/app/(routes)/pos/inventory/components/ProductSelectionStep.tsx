@@ -3,7 +3,7 @@ import Button from '@potta/components/button';
 import Input from '@potta/components/input';
 import { useForm, Controller } from 'react-hook-form';
 import Select from '@potta/components/select';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import useGetAllProducts from '../../hooks/useGetAllProducts';
 
 interface ProductSelectionStepProps {

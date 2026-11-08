@@ -12,7 +12,7 @@ import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import { set } from 'react-hook-form';
 import TextArea from '@potta/components/textArea';
 
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
 
 // Define Option interface to match the one in SearchSelect component

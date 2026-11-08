@@ -1,4 +1,4 @@
-import axios from '../../../../../../config/axios.config';
+import axios from 'config/axios.config';
 import {
   PurchaseOrderFilter,
   CreatePurchaseOrderData,
@@ -28,16 +28,16 @@ export async function fetchPurchaseOrders(filter: PurchaseOrderFilter) {
   return response.data;
 }
 
-export async function createPurchaseOrder(
-  data: CreatePurchaseOrderData,
-  userId: string,
-  branchId: string
+export async function createPurchaseOrder(data: CreatePurchaseOrderData) {
+  const response = await axios.post('/purchase-order/create', data);
+  return response.data;
+}
+
+export async function updatePurchaseOrder(
+  purchaseOrderId: string,
+  data: Partial<CreatePurchaseOrderData>
 ) {
-  const response = await axios.post('/purchase-order', {
-    ...data,
-    userId,
-    branchId,
-  });
+  const response = await axios.put(`/purchase-order/${purchaseOrderId}`, data);
   return response.data;
 }
 
@@ -59,5 +59,32 @@ export async function getPurchaseOrderDetails(
   const response = await axios.get(
     `/purchase-order/details/${purchaseOrderId}`
   );
+  return response.data;
+}
+
+/** Backend accepts one line item per call (LineItemsDto). */
+export async function addPurchaseOrderLineItem(
+  purchaseOrderId: string,
+  lineItem: Record<string, unknown>
+) {
+  const response = await axios.post(
+    `/purchase-order/${purchaseOrderId}/lineItems`,
+    lineItem
+  );
+  return response.data;
+}
+
+export async function removePurchaseOrderLineItem(
+  purchaseOrderId: string,
+  lineItemId: string
+) {
+  const response = await axios.delete(
+    `/purchase-order/${purchaseOrderId}/lineItem/${lineItemId}`
+  );
+  return response.data;
+}
+
+export async function fetchVendorPurchaseOrders(vendorId: string) {
+  const response = await axios.get(`/purchase-order/vendor/${vendorId}`);
   return response.data;
 }

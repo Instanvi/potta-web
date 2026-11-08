@@ -11,12 +11,12 @@ import Button from '@potta/components/button';
 
 import { ContextData } from '@potta/components/providers/DataProvider';
 
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Text from '@potta/components/textDisplay';
 
 import useGetOneProduct from '../../../_hooks/useGetOneProduct';
 import MyDropzone from '@potta/components/dropzone';
-import { documentsApi } from '../../../_utils/api';
+import { productImageUrls } from '../../../_utils/images';
 
 interface ProductDetailsProps {
   productId: string;
@@ -34,8 +34,6 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
   // Local state as fallback if no controlled state is provided
   const [localOpen, setLocalOpen] = useState(false);
 
-  // State for signed image URLs
-  const [signedImageUrls, setSignedImageUrls] = useState<string[]>([]);
 
   // Determine which open state to use
   const isOpen = controlledOpen ?? localOpen;
@@ -47,30 +45,7 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
     }
   }, [productId, refetch, isOpen]);
 
-  // Fetch signed image URLs when data changes
-  useEffect(() => {
-    async function fetchSignedUrls() {
-      if (!data || !Array.isArray(data.documents)) {
-        setSignedImageUrls([]);
-        return;
-      }
-      const imageDocs = data.documents.filter(
-        (doc: any) => doc.mimeType && doc.mimeType.startsWith('image')
-      );
-      if (imageDocs.length === 0) {
-        setSignedImageUrls([]);
-        return;
-      }
-      const ids = imageDocs.map((doc: any) => doc.uuid);
-      try {
-        const res = await documentsApi.bulkDownload(ids);
-        setSignedImageUrls(res.urls || []);
-      } catch {
-        setSignedImageUrls([]);
-      }
-    }
-    fetchSignedUrls();
-  }, [data]);
+  const imageUrls = productImageUrls(data);
 
   return (
     <Slider
@@ -124,9 +99,9 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
               <label htmlFor="" className="mb-3 text-gray-900 font-medium">
                 Images
               </label>
-              {signedImageUrls.length > 0 && (
+              {imageUrls.length > 0 && (
                 <div className="mb-4 flex flex-wrap gap-2">
-                  {signedImageUrls.map((url, idx) => (
+                  {imageUrls.map((url, idx) => (
                     <img
                       key={idx}
                       src={url}

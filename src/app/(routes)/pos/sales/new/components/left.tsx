@@ -1,7 +1,8 @@
 'use client'; // For Next.js 13+ App Directory
 import Input from '@potta/components/input';
 import SearchSelect from '@potta/components/search-select';
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import DynamicTable from './newtableInvoice';
 import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
@@ -9,10 +10,17 @@ import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCus
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import Select from '@potta/components/select';
 import { Customer } from '../../../../customers/utils/types';
-import * as Yup from 'yup';
-import { toast } from 'react-hot-toast'; // Assuming you have a toast library
+import { toast } from 'sonner';
 import { useCreateSalesReceipt } from '../../hooks/useCreateReceipt';
 import { SalesReceiptPayload } from '../../../utils/validation';
+import {
+  PAYMENT_METHODS,
+  apiErrorMessage,
+  buildSalePayload,
+  productToLine,
+  type PaymentMethod,
+  type SaleLineItem,
+} from '../../../utils/sale';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -31,17 +39,6 @@ interface TableItem {
   id: number;
 }
 
-interface LineItemsDto {
-  description: string;
-  quantity: number;
-  discountCap: number;
-  discountType: 'FlatRate' | 'Percentage' | 'PercentageWithCap'; // Use literal types here
-  unitPrice: number;
-  taxRate: number;
-  discountRate: number;
-  productId: string;
-}
-
 // Add validation errors interface similar to invoice component
 interface ValidationErrors {
   saleDate?: string;
@@ -56,22 +53,11 @@ interface ValidationErrors {
   lineItems?: string;
 }
 
-// Define the SaleReceiptDto interface
-interface SaleReceiptDto {
-  saleDate: string;
-  totalAmount: number;
-  paymentReference?: string;
-  notes?: string;
-  paymentMethod: string;
-  receiptNumber: string;
-  discountAmount: number;
-  customerId: string;
-  salePerson: string;
-  lineItems: LineItemsDto[];
-}
+const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
 
 const Left = () => {
   const context = useContext(ContextData);
+  const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
     string | null
   >(null);
@@ -84,9 +70,9 @@ const Left = () => {
   const [invoice, setInvoice] = useState('Invoice');
   const [customerName, setCustomerName] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Option | null>(null);
-  const [invoiceNumber, setInvoiceNumber] = useState('0025');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
   const [paymentReference, setPaymentReference] = useState(''); // Added payment reference state
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('XAF');
   const [note, setNote] = useState('');
   const [isAddCustomerDrawer, setIsAddCustomerDrawer] = useState(false);
 
@@ -94,8 +80,6 @@ const Left = () => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [formSubmitted, setFormSubmitted] = useState(false);
 
-  // Use a ref to track if initial selection has been made
-  const initialSelectionMade = useRef(false);
 
   // Create customer options with proper typing
   const customerOptions: Option[] = customers.map((customer: Customer) => ({
@@ -105,37 +89,6 @@ const Left = () => {
       `Customer ${customer.customerId || customer.uuid.slice(0, 8)}`,
     value: customer.uuid,
   }));
-
-  // Set default customer only once when data first loads
-  useEffect(() => {
-    if (
-      customers.length > 0 &&
-      !customerName &&
-      !initialSelectionMade.current &&
-      !selectedCustomer
-    ) {
-      const firstCustomer = customers[0];
-      const firstOption = {
-        label:
-          firstCustomer.firstName ||
-          firstCustomer.lastName ||
-          `Customer ${
-            firstCustomer.customerId || firstCustomer.uuid.slice(0, 8)
-          }`,
-        value: firstCustomer.uuid,
-      };
-
-      initialSelectionMade.current = true;
-      setCustomerName(firstCustomer.uuid);
-      setSelectedCustomer(firstOption);
-      // Update context data - update both customerName and customerId for consistency
-      context?.setData((prevData: any) => ({
-        ...prevData,
-        customerName: firstCustomer.uuid,
-        customerId: firstCustomer.uuid,
-      }));
-    }
-  }, [customers, customerName, context, selectedCustomer]);
 
   // Monitor table data changes to clear line items error
   useEffect(() => {
@@ -213,11 +166,10 @@ const Left = () => {
 
     // Required field validation
     if (!date) newErrors.saleDate = 'Sale date is required';
-    if (!customerName) newErrors.customerId = 'Customer is required';
     if (!selectedPaymentMethod)
       newErrors.paymentMethod = 'Payment method is required';
-    if (!paymentReference)
-      newErrors.paymentReference = 'Payment reference is required'; // Added payment reference validation
+    if (selectedPaymentMethod === 'CREDIT' && !customerName)
+      newErrors.customerId = 'Select a customer for a sale on account';
 
     // Check if there are line items
     const tableData = context?.data?.table || [];
@@ -246,93 +198,37 @@ const Left = () => {
       return;
     }
 
-    // Get table data from context with type annotation
     const tableData: TableItem[] = context?.data?.table || [];
-
-    // Format line items according to LineItemsDto structure with proper typing
-    const lineItems: LineItemsDto[] = tableData.map((item: TableItem) => ({
-      description: item.name,
+    const items: SaleLineItem[] = tableData.map((item: TableItem) => ({
+      ...productToLine({ uuid: item.uuid, name: item.name, salesPrice: item.price }),
       quantity: item.qty,
-      discountCap: 0,
-      discountType: 'FlatRate', // Use the literal string without 'as const'
-      unitPrice: Number(item.price),
-      taxRate: item.tax,
-      discountRate: 0,
-      productId: item.uuid,
+      taxRate: Number(item.tax || 0),
     }));
 
-    // Calculate total amount with proper typing
-    const totalAmount = tableData.reduce((sum: number, item: TableItem) => {
-      const itemTotal = item.qty * item.price;
-      const itemTax = (itemTotal * item.tax) / 100;
-      return sum + itemTotal + itemTax;
-    }, 0);
-
-    // Map the internal payment method values to the exact string literals required by the schema
-    let paymentMethod:
-      | 'Credit Card'
-      | 'Bank Transfer'
-      | 'ACH Transfer'
-      | 'Other';
-
-    switch (selectedPaymentMethod) {
-      case 'creditCard':
-        paymentMethod = 'Credit Card';
-        break;
-      case 'bankTransfer':
-        paymentMethod = 'Bank Transfer';
-        break;
-      case 'achTransfer':
-        paymentMethod = 'ACH Transfer';
-        break;
-      default:
-        paymentMethod = 'Other';
-    }
-
-    // Create the sales receipt data using the SalesReceiptPayload type from your validation schema
-    const saleReceiptData: SalesReceiptPayload = {
-      saleDate: date,
-      totalAmount: totalAmount,
-      paymentReference: paymentReference,
+    const saleReceiptData: SalesReceiptPayload = buildSalePayload({
+      items,
+      paymentMethod: selectedPaymentMethod as PaymentMethod,
+      customerId: customerName || undefined,
+      reference: paymentReference,
       notes: note,
-      paymentMethod: paymentMethod,
-      receiptNumber: invoiceNumber,
-      discountAmount: 0, // Add default or actual value if available
-      customerId: customerName, // Using the customer UUID as customerId
-      salePerson: '532e5da0-204f-4417-95e0-f26a13c62e39', // Fixed sales person ID as required
-      lineItems: lineItems,
-    };
-
-    // Save to context
-    context?.setData((prevData: any) => ({
-      ...prevData,
-      saleReceipt: saleReceiptData,
-    }));
-
-    // Call the mutation to create the sales receipt
-    mutation.mutate(saleReceiptData, {
-      onSuccess: () => {
-        toast.success('Receipt created successfully');
-        // You can add navigation or other actions here after successful creation
-        // For example: router.push('/pos/sales');
-      },
-      onError: (error: any) => {
-        toast.error(
-          `Failed to create receipt: ${error.message || 'Unknown error'}`
-        );
-        console.error('Error creating sales receipt:', error);
-      },
+      receiptNumber: invoiceNumber.trim() || undefined,
+      saleDate: new Date(date).toISOString(),
     });
 
-    // Also log the raw data object if needed
-    console.log('Raw Sale Receipt Data:', saleReceiptData);
+    mutation.mutate(saleReceiptData, {
+      onSuccess: (receipt: any) => {
+        toast.success(`Receipt ${receipt?.receiptNumber ?? ''} saved`);
+        router.push('/pos/sales');
+      },
+      onError: (error: any) => {
+        toast.error(`Failed to save receipt: ${apiErrorMessage(error)}`);
+      },
+    });
   };
 
-  // Helper function to render required field marker
-  const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
 
   // Define the new payment methods
-  const paymentMethods = ['creditCard', 'bankTransfer', 'achTransfer', 'other'];
+  const paymentMethods = PAYMENT_METHODS;
 
   return (
     <div className="max-w-5xl min-w-5xl px-2 overflow-y-auto scroll bg-white  ">
@@ -398,8 +294,7 @@ const Left = () => {
           <div className="w-full">
             <span className="mb-3 text-lg text-gray-900 font-medium">
               Customer
-              <RequiredMark />
-            </span>
+                          </span>
             <SearchSelect
               label=""
               options={customerOptions}
@@ -427,7 +322,7 @@ const Left = () => {
                 }
               }}
               isLoading={customersLoading}
-              placeholder="Select a customer..."
+              placeholder="Walk-in customer (optional)"
               isClearable={true}
               isSearchable={true}
             />
@@ -467,10 +362,10 @@ const Left = () => {
         <div className="grid grid-cols-2 gap-4">
           {paymentMethods.map((option) => (
             <div
-              key={option}
-              onClick={() => handlePaymentMethodClick(option)}
+              key={option.value}
+              onClick={() => handlePaymentMethodClick(option.value)}
               className={`p-4 border cursor-pointer hover:border-green-500 hover:text-green-500 ${
-                selectedPaymentMethod === option
+                selectedPaymentMethod === option.value
                   ? 'border-green-500 text-green-500'
                   : errors.paymentMethod && formSubmitted
                   ? 'border-red-500'
@@ -480,20 +375,12 @@ const Left = () => {
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={selectedPaymentMethod === option}
-                  onChange={() => handlePaymentMethodClick(option)}
+                  checked={selectedPaymentMethod === option.value}
+                  onChange={() => handlePaymentMethodClick(option.value)}
                   className="mr-2 text-xl text-white accent-green-700"
                   name="paymentMethod"
                 />
-                <span>
-                  {option === 'creditCard'
-                    ? 'Credit Card'
-                    : option === 'bankTransfer'
-                    ? 'Bank Transfer'
-                    : option === 'achTransfer'
-                    ? 'ACH Transfer'
-                    : 'Other'}
-                </span>
+                <span>{option.label}</span>
               </div>
             </div>
           ))}
@@ -508,8 +395,7 @@ const Left = () => {
           label={
             <>
               Payment Reference
-              <RequiredMark />
-            </>
+                          </>
           }
           name="paymentReference"
           value={paymentReference}

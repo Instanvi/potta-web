@@ -1,7 +1,7 @@
 import { vendorApi } from './../utils/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { VendorPayload } from '../utils/validations';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const useCreateVendor = () => {
   const queryClient = useQueryClient();

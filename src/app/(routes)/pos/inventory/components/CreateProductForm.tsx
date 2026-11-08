@@ -8,10 +8,19 @@ import Checkbox from '@potta/components/checkbox';
 import TextArea from '@potta/components/textArea';
 import { ProductPayload, productSchema } from '../_utils/validation';
 import useCreateProduct from '../_hooks/useCreateProduct';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Inventory from './slides/components/create_product/components/inventory';
 import useGetAllProductCategories from '../_hooks/useGetAllProductCategories';
 import Select from '@potta/components/select';
+import { useTaxes } from '@potta/app/(routes)/accounting/taxes/hooks';
+import { apiErrorMessage } from '../../utils/sale';
+
+const UNIT_OF_MEASURE_OPTIONS = [
+  { label: 'Pieces', value: 'Pieces' },
+  { label: 'Litres', value: 'litres' },
+  { label: 'Gallons', value: 'Gallons' },
+  { label: 'Other', value: 'Other' },
+];
 
 interface CreateProductFormProps {
   productType?: 'INVENTORY' | 'NON_INVENTORY';
@@ -46,7 +55,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
     defaultValues: {
       name: '',
       description: '',
-      unitOfMeasure: '',
+      unitOfMeasure: 'Pieces',
       cost: 0,
       sku: '',
       inventoryLevel: isNonInventory ? 0 : 0,
@@ -67,7 +76,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
     reset({
       name: '',
       description: '',
-      unitOfMeasure: '',
+      unitOfMeasure: 'Pieces',
       cost: 0,
       sku: '',
       inventoryLevel: isNonInventory ? 0 : 0,
@@ -95,6 +104,12 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
       value: cat.uuid,
     })
   );
+
+  const { data: taxesData } = useTaxes({ page: 1, limit: 100 });
+  const taxOptions = (taxesData?.data || []).map((tax) => ({
+    label: tax.type === 'FIXED' ? `${tax.name} (${tax.flatRate} fixed)` : `${tax.name} (${Number(tax.rate ?? 0)}%)`,
+    value: tax.uuid,
+  }));
 
   const onSubmit = async (formData: ProductPayload) => {
     try {
@@ -124,8 +139,13 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
       }
 
       // Ensure the payload has the correct structure
+      const { categoryId, taxId, components, ...rest } = formData;
       const payload = {
-        ...formData,
+        ...rest,
+        ...(categoryId ? { categoryId } : {}),
+        ...(formData.taxable && taxId ? { taxId } : {}),
+        components: components ?? [],
+        unitOfMeasure: formData.unitOfMeasure || 'Pieces',
         type: productType,
         structure: structure,
         inventoryLevel: isNonInventory ? 0 : formData.inventoryLevel,
@@ -152,8 +172,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
           }
         },
         onError: (error) => {
-          console.error('Product creation error:', error);
-          toast.error('Failed to create product');
+          toast.error(`Failed to create product: ${apiErrorMessage(error)}`);
         },
       });
     } catch (error) {
@@ -224,14 +243,20 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         <div className="mt-5 grid grid-cols-2 gap-5">
           <div>
             <div className="mt-6">
-              <Input
-                type={'text'}
-                label={'Unit of Measure'}
-                placeholder="KG, LITERS, PIECES"
-                name={'unitOfMeasure'}
-                register={register}
-                errors={errors.unitOfMeasure}
-                required
+              <Controller
+                name="unitOfMeasure"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Unit of Measure"
+                    options={UNIT_OF_MEASURE_OPTIONS}
+                    selectedValue={field.value || 'Pieces'}
+                    onChange={field.onChange}
+                    bg="bg-white"
+                    name="unitOfMeasure"
+                    required
+                  />
+                )}
               />
             </div>
             <div className="mt-6">
@@ -247,13 +272,19 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
             </div>
             {taxable && (
               <div className="mt-4">
-                <Input
-                  type={'text'}
-                  label={'Tax ID'}
-                  placeholder="Enter Tax ID"
-                  name={'taxId'}
-                  register={register}
-                  errors={errors.taxId}
+                <Controller
+                  name="taxId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      label="Tax (VAT)"
+                      options={taxOptions}
+                      selectedValue={field.value || ''}
+                      onChange={field.onChange}
+                      bg="bg-white"
+                      name="taxId"
+                    />
+                  )}
                 />
               </div>
             )}

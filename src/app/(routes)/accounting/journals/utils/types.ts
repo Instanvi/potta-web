@@ -8,6 +8,8 @@ export interface JournalLine {
 
 export interface Journal {
   uuid: string;
+  number?: string;
+  referenceNumber?: string;
   type: string;
   date: string;
   description: string;

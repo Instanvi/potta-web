@@ -9,7 +9,8 @@ const useGetOneCustomer = (customer_id: string) => {
     queryFn: async () => {
       const response = await customerApi.getOne(customer_id);
       return response as unknown as Customer;
-    }
+    },
+    enabled: Boolean(customer_id),
   });
 };
 

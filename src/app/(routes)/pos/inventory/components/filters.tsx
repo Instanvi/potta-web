@@ -2,7 +2,7 @@
 import Button from '@potta/components/button';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import ProductStepperModal from './ProductStepperModal';
 import { CustomSheet } from '@potta/components/ui/sheet';
@@ -11,9 +11,13 @@ import RestockModal from './slides/components/restock';
 import { useInventory } from '../_utils/context';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import useImportProductsCsv from '../_hooks/useImportProductsCsv';
+import { CloudArrowUp } from '@phosphor-icons/react';
+import { Can } from '@/components/auth/can';
+import ImportToPayModal from './ImportToPayModal';
 
 const Filter = () => {
-  const { selectedProduct, filters, setFilters } = useInventory();
+  const { selectedProduct, selectedProducts, filters, setFilters } = useInventory();
+  const [isPayExportOpen, setIsPayExportOpen] = useState(false);
 
   const [selectedValue, setSelectedValue] = useState(filters.sort);
   const [searchValue, setSearchValue] = useState(filters.search);
@@ -170,6 +174,24 @@ const Filter = () => {
             onClick={handleOpenCsvPicker}
             disabled={isImportingCsv}
           />
+          <Can resource="Item" action="export">
+            <button
+              type="button"
+              className="flex items-center gap-2 border border-green-700 bg-white px-4 py-2.5 text-green-800 hover:bg-green-50"
+              onClick={() => setIsPayExportOpen(true)}
+              title={
+                selectedProducts.length
+                  ? `Import ${selectedProducts.length} selected product(s) to Pay`
+                  : 'Import all enabled products to Pay'
+              }
+            >
+              <CloudArrowUp size={18} />
+              Import to Pay
+              {selectedProducts.length ? (
+                <span className="bg-green-700 px-1.5 text-xs text-white">{selectedProducts.length}</span>
+              ) : null}
+            </button>
+          </Can>
           <button
             type="button"
             className="flex items-center gap-2 bg-[#005D1F] px-4 py-2.5 text-white hover:bg-green-900"
@@ -232,6 +254,11 @@ const Filter = () => {
           setIsStepperOpen(false);
           // Optionally refresh the product list
         }}
+      />
+      <ImportToPayModal
+        open={isPayExportOpen}
+        setOpen={setIsPayExportOpen}
+        selectedProducts={selectedProducts}
       />
       {typeof window !== 'undefined' &&
         createPortal(

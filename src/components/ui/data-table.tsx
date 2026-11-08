@@ -45,6 +45,8 @@ interface DataTableProps<TData> {
   onPaginationChange?: OnChangeFn<PaginationState>;
   /** Total rows on server (for pagination footer when manualPagination). */
   totalRows?: number;
+  /** Called with the selected rows whenever the selection changes. */
+  onSelectionChange?: (rows: TData[]) => void;
 }
 
 export function DataTable<TData>({
@@ -65,6 +67,7 @@ export function DataTable<TData>({
   pagination: controlledPagination,
   onPaginationChange: controlledOnPaginationChange,
   totalRows: serverTotalRows,
+  onSelectionChange,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -149,6 +152,13 @@ export function DataTable<TData>({
       },
     },
   });
+
+  const onSelectionChangeRef = React.useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
+  React.useEffect(() => {
+    onSelectionChangeRef.current?.(table.getSelectedRowModel().rows.map((r) => r.original));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection, data]);
 
   const tableLoading = isLoading || loading;
 

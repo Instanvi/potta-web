@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${outfit.variable} font-sans bg-[#F8F9FA] antialiased`}
+        className={`${outfit.variable} font-sans bg-[var(--main-bg)] antialiased`}
       >
         <Suspense fallback={null}>
           <AppProviders>{children}</AppProviders>

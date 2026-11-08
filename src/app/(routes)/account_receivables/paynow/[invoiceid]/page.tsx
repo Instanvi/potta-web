@@ -1,274 +1,148 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Button from '@potta/components/button';
-import { Tabs, TabsList, TabsTrigger } from '@potta/components/shadcn/tabs';
 import Input from '@potta/components/input';
+import Select from '@potta/components/select';
+import { ContextData } from '@potta/components/providers/DataProvider';
+import { Can } from '@/components/auth/can';
+import RootLayout from '../../../layout';
+import useGetOneInvoice from '../../invoice/_hooks/useGetOneInvoice';
+import usePayInvoice from '../../invoice/_hooks/usePayInvoice';
+import {
+  INVOICE_PAYMENT_METHODS,
+  InvoicePaymentMethod,
+} from '../../invoice/_utils/types';
 
-interface TableItem {
-  name: string;
-  qty: number;
-  price: number | string;
-  tax: number | string;
-  productId: string;
-  uuid: string;
-  id: number;
-}
+const PAYABLE_STATUSES = ['APPROVED', 'OVERDUE'];
 
-const getCurrencySymbol = (currencyCode: string): string => {
-  switch (currencyCode) {
-    case 'USD':
-      return '$';
-    case 'EUR':
-      return '€';
-    case 'GBP':
-      return '£';
-    case 'XAF':
-      return 'XAF';
-    default:
-      return currencyCode;
-  }
-};
-
-// Placeholder for real SVG icons
-const paymentProviders = [
-  {
-    key: 'mtn',
-    label: 'MTN Mobile Money',
-    // icon: <MtnIcon />,
-  },
-  {
-    key: 'orange',
-    label: 'Orange Money',
-    // icon: <OrangeIcon />,
-  },
-];
-
-const providerDetails = {
-  mtn: {
-    label: 'MTN Mobile Money',
-    icon: (
-      <img
-        src="https://www.monetbil.com/assets/img/mno/BJ_MTNMOBILEMONEY.png"
-        alt="MTN Mobile Money"
-        width={32}
-        height={32}
-        className="mr-2 rounded"
-      />
-    ),
-    ussd: '*126#',
-    instructions: (amount: number, code: string) => (
-      <>
-        <div className="mb-2 text-gray-700">
-          Dial <span className="font-mono font-medium">*126#</span> on your phone.
-        </div>
-      </>
-    ),
-  },
-  orange: {
-    label: 'Orange Money',
-    icon: (
-      <img
-        src="https://1000logos.net/wp-content/uploads/2021/02/Orange-Money-emblem.png"
-        alt="Orange Money"
-        width={32}
-        height={32}
-        className="mr-2 rounded"
-      />
-    ),
-    ussd: '#150*14#',
-    instructions: (amount: number, code: string) => (
-      <>
-        <div className="mb-2 text-gray-700">
-          Dial <span className="font-mono font-medium">#150*14#</span> on your
-          phone.
-        </div>
-      </>
-    ),
-  },
-};
+const methodLabel = (method: string) =>
+  method
+    .replace('ACH_TRANSAFER', 'ACH_TRANSFER')
+    .split('_')
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(' ');
 
 const PayNowPage = () => {
+  const context = useContext(ContextData);
   const params = useParams();
-  const invoiceId = params?.invoiceid as string;
-  const [invoice, setInvoice] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [paying, setPaying] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<
-    'mtn' | 'orange' | ''
-  >('');
-  const [payerNumber, setPayerNumber] = useState('');
-  const [waiting, setWaiting] = useState(false);
+  const invoiceId = (params?.invoiceid as string) || '';
+  const { data: invoice, isLoading, error } = useGetOneInvoice(invoiceId);
+  const payMutation = usePayInvoice(invoiceId);
+  const [paymentMethod, setPaymentMethod] =
+    useState<InvoicePaymentMethod>('CASH');
+  const [paymentReference, setPaymentReference] = useState('');
 
-  useEffect(() => {
-    // TODO: Replace with real API call
-    async function fetchInvoice() {
-      setLoading(true);
-      setError(null);
-      try {
-        // Simulate API call
-        setTimeout(() => {
-          setInvoice({
-            id: invoiceId,
-            invoiceType: 'Invoice',
-            invoiceNumber: '0025',
-            issueDate: '2024-07-01',
-            dueDate: '2024-07-10',
-            currency: 'XAF',
-            customer: {
-              name: 'John Doe',
-              email: 'john@example.com',
-              address: '123 Main St, City',
-              phone: '+237 600 000 000',
-            },
-            billingAddress: '123 Main St, City',
-            paymentReference: 'INV-0025',
-            taxRate: 7.5,
-            tableData: [
-              {
-                id: 1,
-                name: 'Product A',
-                qty: 2,
-                price: 10000,
-                tax: 7.5,
-                productId: 'p1',
-                uuid: 'u1',
-              },
-              {
-                id: 2,
-                name: 'Product B',
-                qty: 1,
-                price: 5000,
-                tax: 7.5,
-                productId: 'p2',
-                uuid: 'u2',
-              },
-            ],
-            note: 'Thank you for your business!',
-            status: 'unpaid',
-            payUrl: '#',
-            code: '123456',
-          });
-          setLoading(false);
-        }, 800);
-      } catch (e) {
-        setError('Failed to load invoice');
-        setLoading(false);
-      }
-    }
-    if (invoiceId) fetchInvoice();
-  }, [invoiceId]);
+  const total = Number(invoice?.invoiceTotal ?? 0);
+  const currency: string = invoice?.currency || '';
+  const status: string = invoice?.status || '';
+  const canPay = PAYABLE_STATUSES.includes(status);
+  const customerName = invoice?.customer
+    ? [invoice.customer.firstName, invoice.customer.lastName]
+        .filter(Boolean)
+        .join(' ') || invoice.customer.email
+    : '';
 
   const handlePay = () => {
-    setPaying(true);
-    setTimeout(() => {
-      setPaying(false);
-      setWaiting(true);
-      // alert('Payment processed! (simulate)');
-    }, 1200);
+    payMutation.mutate({
+      paymentMethod,
+      amount: total,
+      paymentReference: paymentReference.trim() || undefined,
+    });
   };
 
-  if (loading)
-    return <div className="p-10 text-center">Loading invoice...</div>;
-  if (error)
-    return <div className="p-10 text-center text-red-600">{error}</div>;
-  if (!invoice)
-    return <div className="p-10 text-center">Invoice not found.</div>;
-
-  const currencySymbol = getCurrencySymbol(invoice.currency);
-  const subtotal = invoice.tableData.reduce(
-    (sum: number, item: TableItem) =>
-      sum + Number(item.price) * Number(item.qty),
-    0
-  );
-  const totalTax = invoice.tableData.reduce(
-    (sum: number, item: TableItem) =>
-      sum + (Number(item.price) * Number(item.qty) * Number(item.tax)) / 100,
-    0
-  );
-  const total = subtotal + totalTax;
-
   return (
-    <div className="max-w-md mx-auto mt-5 bg-white border border-gray-200 p-8">
-      {/* Only show the amount and payment section */}
-      <div className="flex flex-col items-center gap-8">
-        <div className="text-gray-700 font-medium">Amount Due</div>
-        <div className="text-4xl font-extrabold text-green-700">
-          {currencySymbol}
-          {total.toLocaleString()} XAF
-        </div>
-        {/* Payment Section */}
-        <div className="w-full flex flex-col gap-8">
-          {waiting ? (
-            <div className="flex flex-col items-center justify-center h-full py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-6" />
-              <div className="text-xl font-medium text-green-700 mb-2">
-                Waiting for payment confirmation…
-              </div>
-              <div className="text-gray-600 text-center">
-                Once your payment is received, your invoice will be marked as
-                paid.
-              </div>
+    <RootLayout>
+      <div
+        className={`${
+          context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'
+        } pr-5 py-8`}
+      >
+        <div className="max-w-md mx-auto bg-white border border-gray-200 p-8">
+          {isLoading ? (
+            <div className="py-10 text-center text-gray-500">
+              Loading invoice...
+            </div>
+          ) : error || !invoice ? (
+            <div className="py-10 text-center text-red-600">
+              Invoice not found.
             </div>
           ) : (
-            <>
-              <h2 className="text-lg font-medium mb-2 text-gray-800">
-                Choose Payment Method
-              </h2>
-              <div className="w-full flex flex-col gap-3">
-                {Object.entries(providerDetails).map(([key, p]) => (
-                  <div
-                    key={key}
-                    className={`w-full flex items-center px-4 py-3 border cursor-pointer transition-colors rounded ${
-                      selectedProvider === key
-                        ? 'border-green-700 bg-green-50'
-                        : 'border-gray-300 bg-white'
-                    }`}
-                    onClick={() => setSelectedProvider(key as 'mtn' | 'orange')}
-                  >
-                    {p.icon}
-                    <span className="font-medium text-base">{p.label}</span>
-                    <span className="flex-1" />
-                    {selectedProvider === key && (
-                      <i className="ri-check-line text-green-700 text-xl" />
-                    )}
-                  </div>
-                ))}
-              </div>
-              {selectedProvider && (
-                <div className="mt-6">
-                  <Input
-                    type="tel"
-                    name="payerNumber"
-                    label="Your Mobile Money Number"
-                    placeholder="Enter your number"
-                    value={payerNumber}
-                    onchange={(e) => setPayerNumber(e.target.value)}
-                    inputClass="text-lg"
-                  />
-                  <div className="mt-4">
-                    {providerDetails[selectedProvider].instructions(
-                      total,
-                      invoice.code
-                    )}
-                  </div>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-gray-500 text-sm">
+                  Invoice {invoice.invoiceId || invoice.code || invoice.uuid}
+                  {customerName ? ` · ${customerName}` : ''}
                 </div>
+                <div className="text-gray-700 font-medium">Amount Due</div>
+                <div className="text-4xl font-extrabold text-green-700">
+                  {total.toLocaleString()} {currency}
+                </div>
+                <span className="text-xs uppercase tracking-wide px-2 py-0.5 border border-gray-300 text-gray-600">
+                  {status}
+                </span>
+              </div>
+
+              {status === 'PAID' ? (
+                <div className="text-center text-green-700 font-medium">
+                  This invoice has been paid.
+                </div>
+              ) : !canPay ? (
+                <div className="text-center text-gray-600 text-sm">
+                  Only approved or overdue invoices can be paid. Approve the
+                  invoice first.
+                </div>
+              ) : (
+                <Can resource="Invoice" action={['pay', 'update']}>
+                  <div className="flex flex-col gap-4">
+                    <Select
+                      label="Payment method"
+                      options={INVOICE_PAYMENT_METHODS.map((m) => ({
+                        value: m,
+                        label: methodLabel(m),
+                      }))}
+                      selectedValue={paymentMethod}
+                      onChange={(value: InvoicePaymentMethod) =>
+                        setPaymentMethod(value)
+                      }
+                      bg="bg-white"
+                    />
+                    <Input
+                      type="text"
+                      name="paymentReference"
+                      label="Payment reference (optional)"
+                      placeholder="e.g. mobile money transaction ID"
+                      value={paymentReference}
+                      onchange={(e) => setPaymentReference(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">
+                      This records a payment already collected for the full
+                      invoice total.
+                    </p>
+                    <Button
+                      onClick={handlePay}
+                      text={`Record payment of ${total.toLocaleString()} ${currency}`}
+                      type="button"
+                      isLoading={payMutation.isPending}
+                      disabled={payMutation.isPending}
+                      width="full"
+                    />
+                  </div>
+                </Can>
               )}
-              <Button
-                onClick={handlePay}
-                text={
-                  paying ? 'Processing…' : `Pay ${total.toLocaleString()} XAF`
-                }
-                type="submit"
-                className="w-fit mt-4"
-                disabled={paying || !selectedProvider || !payerNumber}
-              />
-            </>
+
+              <Link
+                href="/account_receivables/invoice"
+                className="text-center text-sm text-green-700 hover:underline"
+              >
+                Back to invoices
+              </Link>
+            </div>
           )}
         </div>
       </div>
-    </div>
+    </RootLayout>
   );
 };
 

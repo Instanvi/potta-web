@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { PurchaseOrderDetails, VendorInvoiceData } from '../types';
 import useCreateVendorInvoice from '../hooks/useCreateVendorInvoice';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Input from '@potta/components/input';
 import Button from '@potta/components/button';
 import { DateInput } from '@potta/components/customDatePicker';

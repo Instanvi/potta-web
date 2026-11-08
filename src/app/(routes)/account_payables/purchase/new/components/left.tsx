@@ -9,7 +9,7 @@ import useGetAllVendors from '@potta/app/(routes)/vendors/hooks/useGetAllVendors
 import Select from '@potta/components/select';
 import Checkbox from '@potta/components/checkbox';
 
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import TextArea from '@potta/components/textArea';
 import useCreatePurchaseOrder from '../hooks/useCreatePurchase';
 import { DateInput } from '@potta/components/customDatePicker';

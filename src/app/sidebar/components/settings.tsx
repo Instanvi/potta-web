@@ -1,20 +1,29 @@
 import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import { usePathname } from 'next/navigation';
-import { FileText, SquaresFour } from '@phosphor-icons/react';
+import { ClockCounterClockwise, SquaresFour } from '@phosphor-icons/react';
 import { ContextData } from '@potta/components/providers/DataProvider';
+import { useCan } from '@/components/auth/can';
+import { getRoutePermission } from '@/lib/route-permissions';
 import SidebarProfile from './SidebarProfile';
 import { SB_ICON, sbClass, sbWeight } from './sidebarPhosphor';
 
-const settingsRoutes = [
+const settingsRoutes: { value: string; label: string; Icon: typeof SquaresFour }[] = [
   { value: '', label: 'Config', Icon: SquaresFour },
-  { value: '/policies', label: 'Policies', Icon: FileText },
-] as const;
+  { value: '/audit-logs', label: 'Audit log', Icon: ClockCounterClockwise },
+];
 
 const SidebarsSettings = () => {
   const pathname = usePathname();
   const str = pathname.split('/');
   const context = useContext(ContextData);
+  const { canAccess } = useCan();
+  const visibleRoutes = settingsRoutes.filter((item) => {
+    const check = getRoutePermission(`/settings${item.value}`);
+    if (!check) return true;
+    const reqs = 'anyOf' in check ? check.anyOf : [check];
+    return reqs.some((req) => canAccess(req.resource, req.action));
+  });
 
   return (
     <Sidebar
@@ -37,7 +46,7 @@ const SidebarsSettings = () => {
         >
           {' '}
         </MenuItem>
-        {settingsRoutes.map((item, index) => {
+        {visibleRoutes.map((item, index) => {
           const IconComponent = item.Icon;
           const isActive =
             item.value === ''

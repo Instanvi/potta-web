@@ -16,7 +16,7 @@ import {
 import Notes from './note';
 import Tax from './tax';
 import useUpdateCustomer from '../hooks/useUpdateCustomer';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { PhoneInput } from '@potta/components/phoneInput';
 
 interface EditCustomerProps {

@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { SalesReceiptPayload } from "../utils/validation";
-import { salesApi } from "../utils/api";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { SalesReceiptPayload } from '../utils/validation';
+import { salesApi } from '../utils/api';
 
 export const useCreateSalesReceipt = () => {
   const queryClient = useQueryClient();
@@ -9,6 +9,8 @@ export const useCreateSalesReceipt = () => {
     mutationFn: (data: SalesReceiptPayload) => salesApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['get-all-sales-receipts'] });
+      // Stock levels changed.
+      queryClient.invalidateQueries({ queryKey: ['get-all-product'] });
     },
   });
 };

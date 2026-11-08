@@ -5,7 +5,7 @@ import VendorInvoiceForm from './components/VendorInvoiceForm';
 import { PurchaseOrderDetails } from './types';
 import PottaLoader from '@potta/components/pottaloader';
 import useGetVendorPurchaseOrder from './hooks/useGetVendorPurchaseOrder';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const VendorPortal = () => {
   const searchParams = useSearchParams();

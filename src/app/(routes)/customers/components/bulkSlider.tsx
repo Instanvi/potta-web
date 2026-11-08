@@ -4,7 +4,7 @@ import Input from '@potta/components/input';
 import Slider from '@potta/components/slideover';
 import Button from '@potta/components/button';
 import { useDropzone } from 'react-dropzone';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import {
   UploadCloud,
   FileText,

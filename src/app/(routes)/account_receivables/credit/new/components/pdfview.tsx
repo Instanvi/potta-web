@@ -3,7 +3,7 @@ import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCust
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext } from 'react';
-import useGetOneInvoice from '../hooks/useGetOneInvoice';
+import useGetOneInvoice from '../../../invoice/_hooks/useGetOneInvoice';
 
 interface Invoice {
   uuid: string;

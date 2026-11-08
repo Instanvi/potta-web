@@ -7,7 +7,7 @@ import {
   FieldPath,
   UnpackNestedValue,
 } from 'react-hook-form';
-import { toast, Toaster } from 'react-hot-toast';
+import { toast } from 'sonner';
 import VoucherTypeSelector, { VoucherType, TabType } from './components/left';
 import Policy from './components/policy.';
 import Audience from './components/audience';

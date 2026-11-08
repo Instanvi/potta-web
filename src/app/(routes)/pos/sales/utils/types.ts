@@ -9,38 +9,12 @@ export type Filters = {
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Enum Types
-export const PaymentMethods = ['Credit Card', 'Bank Transfer', 'ACH Transfer', 'Other'] as const;
-export type PaymentMethod = typeof PaymentMethods[number];
+import type { PaymentMethod } from '../../utils/sale';
+import type { SalesReceipt } from '../../utils/types';
 
-export const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
-export type DiscountType = typeof DiscountTypes[number];
-
-// Line Item Type
-export type LineItem = {
-  description: string;
-  quantity: number;
-  discountCap: number;
-  discountType: DiscountType;
-  unitPrice: number;
-  taxRate: number;
-  discountRate?: number;
-  productId: string;
-};
-
-// Sales Receipt Type
-export type SalesReceipt = {
-  saleDate: string;
-  totalAmount: number;
-  paymentReference?: string;
-  notes?: string;
-  paymentMethod: PaymentMethod;
-  receiptNumber?: string;
-  discountAmount: number;
-  customerId: string;
-  salePerson: string;
-  lineItems: LineItem[];
-};
+export type { DiscountType, PaymentMethod } from '../../utils/sale';
+export type { LineItem, SalesReceipt } from '../../utils/types';
+export { DiscountTypes, PaymentMethods } from '../../utils/types';
 
 
 // Optional: Type for unregistered customer sales

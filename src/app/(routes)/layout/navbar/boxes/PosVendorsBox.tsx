@@ -28,7 +28,7 @@ import {
 import { Calendar } from '@potta/components/shadcn/calendar';
 import { useQuery } from '@tanstack/react-query';
 import { vendorApi } from '@potta/app/(routes)/vendors/utils/api';
-import { pottaAnalyticsService } from '@potta/services/analyticsService';
+import { ledgerApi } from '@potta/app/(routes)/accounting/ledger/utils/api';
 
 interface VendorMetric {
   name: string;
@@ -93,36 +93,11 @@ const VendorsBox: FC = () => {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch vendor payment analytics (AP Balance)
-  const { data: apBalanceData, isLoading: apLoading } = useQuery({
-    queryKey: [
-      'ap-balance',
-      calculatedDateRange?.from?.toISOString(),
-      calculatedDateRange?.to?.toISOString(),
-    ],
-    queryFn: async () => {
-      const params: any = {
-        metrics: ['vendor_running_balance'],
-        dimensions: ['time'],
-        time_granularity: 'monthly',
-        use_mock_data: true,
-      };
-
-      // Add date filtering
-      if (calculatedDateRange?.from) {
-        params.start_date = calculatedDateRange.from.toISOString();
-      }
-      if (calculatedDateRange?.to) {
-        params.end_date = calculatedDateRange.to.toISOString();
-      }
-
-      return await pottaAnalyticsService.finance.getAnalytics(
-        'ap_balance',
-        params
-      );
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
+  // Accounts-payable aging from the books (GET /ledgers/sub-ledgers/AP)
+  const { data: apAging } = useQuery({
+    queryKey: ['ledgers', 'sub-ledgers', 'AP', calculatedDateRange?.to?.toISOString()],
+    queryFn: () => ledgerApi.agingReport('AP', calculatedDateRange?.to),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Calculate vendor metrics
@@ -170,19 +145,18 @@ const VendorsBox: FC = () => {
       ['ACTIVE', 'APPROVED'].includes(v.status)
     ).length;
 
-    // Calculate outstanding payments from AP balance analytics
-    // The API returns an array of monthly data, we need to sum all vendor_running_balance values
-    const outstandingPayments =
-      apBalanceData?.data?.reduce((total: number, item: any) => {
-        return total + (item.vendor_running_balance || 0);
-      }, 0) || 0;
-
-    // Calculate overdue payments (vendors with high balances and rejected status)
-    const overduePayments = vendors.reduce((total, vendor) => {
-      const balance = parseFloat(vendor.openingBalance || '0');
-      const isOverdue = vendor.status === 'REJECTED' && balance > 0;
-      return total + (isOverdue ? balance : 0);
-    }, 0);
+    // AP sub-ledger balances are debit - credit, so what we owe is the negated balance.
+    const aging = apAging ?? [];
+    const outstandingPayments = aging.reduce((total, row) => total - Number(row.currentBalance || 0), 0);
+    const overduePayments = aging.reduce(
+      (total, row) =>
+        total -
+        (Number(row.aging?.days30 || 0) +
+          Number(row.aging?.days60 || 0) +
+          Number(row.aging?.days90 || 0) +
+          Number(row.aging?.over90 || 0)),
+      0,
+    );
 
     return [
       {
@@ -222,7 +196,7 @@ const VendorsBox: FC = () => {
         bgColor: 'bg-green-50',
       },
     ];
-  }, [vendorsData, apBalanceData]);
+  }, [vendorsData, apAging]);
 
   // Format currency helper
   const formatCurrency = (amount: number) => {

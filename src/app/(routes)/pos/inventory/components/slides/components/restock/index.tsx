@@ -9,9 +9,8 @@ import Slider from '@potta/components/slideover';
 import SearchableSelect from '@potta/components/searchableSelect';
 import useGetAllProducts from '../../../../_hooks/useGetAllProducts';
 import useRestockProduct from '../../../../_hooks/useRestockProduct';
-import { ContextData } from '@potta/components/providers/DataProvider';
-import { useContext } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
+import { apiErrorMessage } from '@potta/app/(routes)/pos/utils/sale';
 import { Option } from '@potta/components/searchableSelect';
 
 const restockSchema = yup.object().shape({
@@ -38,7 +37,6 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { data: products } = useGetAllProducts({ limit: 100, page: 1 });
   const restockMutation = useRestockProduct();
-  const context = useContext(ContextData);
 
   const {
     control,
@@ -54,36 +52,20 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
   });
 
   const onSubmit = async (data: RestockFormData) => {
-    if (!selectedProduct) {
-      console.log('Missing required data:', {
-        selectedProduct,
-        userId: context?.users?.uuid || '73a5fc80-3de0-4f70-a35c-8bb93f07b1a1',
-      });
-      return;
-    }
+    if (!selectedProduct) return;
 
     try {
-      console.log('Submitting restock with data:', {
-        productId: selectedProduct.uuid,
-        quantity: data.quantity,
-        userId: context?.users?.uuid || '73a5fc80-3de0-4f70-a35c-8bb93f07b1a1',
-      });
-
       setIsSubmitting(true);
-      const result = await restockMutation.mutateAsync({
+      await restockMutation.mutateAsync({
         productId: selectedProduct.uuid,
-        quantity: data.quantity,
-        userId: context?.users?.uuid || '73a5fc80-3de0-4f70-a35c-8bb93f07b1a1',
+        quantity: Number(data.quantity),
       });
-
-      console.log('Restock successful:', result);
       toast.success('Product restocked successfully!');
       reset();
       setOpen(false);
       setSelectedProduct(null);
     } catch (error) {
-      console.error('Error restocking product:', error);
-      toast.error('Failed to restock product. Please try again.');
+      toast.error(`Failed to restock product: ${apiErrorMessage(error)}`);
     } finally {
       setIsSubmitting(false);
     }

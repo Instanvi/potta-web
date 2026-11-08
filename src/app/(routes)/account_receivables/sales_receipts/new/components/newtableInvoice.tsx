@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import SearchSelect, { Option } from '@potta/components/search-select'; // Import Option type
 import useGetAllProducts from '@potta/app/(routes)/pos/inventory/_hooks/useGetAllProducts';
+import { productTaxRate } from '@potta/app/(routes)/pos/utils/sale';
 
 interface Product {
   uuid: string;
@@ -59,15 +60,12 @@ export default function DynamicTable() {
     limit: 100,
   });
 
-  console.log('Products Loading:', productsLoading);
-  console.log('Products Data:', productsData);
-
   // Replace this line:
   const products: Product[] = (productsData?.data || []).map((product) => ({
     uuid: product.uuid,
     name: product.name,
-    price: product.salesPrice,
-    tax: product.taxRate,
+    price: Number(product.salesPrice),
+    tax: productTaxRate(product as { tax?: { rate?: number | string; type?: string } | null }),
     productId: product.productId,
   }));
 

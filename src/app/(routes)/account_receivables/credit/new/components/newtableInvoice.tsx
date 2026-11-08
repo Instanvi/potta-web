@@ -1,9 +1,7 @@
 import { useContext, useState } from 'react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import SearchSelect, { Option } from '@potta/components/search-select';
-// You'll need to create this hook
-import Input from '@potta/components/input';
-import useGetAllInvoices from '../hooks/useGetAllInvoices';
+import { useCustomerInvoices } from '../../_hooks';
 
 interface Invoice {
   uuid: string;
@@ -39,12 +37,8 @@ export default function CreditNoteForm() {
   const currency = context?.data?.currency || 'USD';
   const currencySymbol = getCurrencySymbol(currency);
 
-  // Fetch invoices - You'll need to implement this hook
-  const { data: invoicesData, isLoading: invoicesLoading } = useGetAllInvoices({
-    page: 1,
-    limit: 100,
-    customerId: context?.data?.customerName || '',
-  });
+  const { data: invoicesData, isLoading: invoicesLoading } =
+    useCustomerInvoices(context?.data?.customerName || '');
 
   const invoices: Invoice[] = invoicesData?.data || [];
 

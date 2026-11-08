@@ -7,6 +7,7 @@ import {
 } from '@potta/components/resizable';
 import { CheckCircle, XCircle, Clock, User } from 'lucide-react';
 import moment from 'moment';
+import RecordHistory from '@potta/components/shared/RecordHistory';
 
 interface LineItem {
   uuid: string;
@@ -440,6 +441,8 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
             )}
           </div>
         </div>
+
+        <RecordHistory entityType="invoice" entityId={invoice.uuid} />
       </div>
     </div>
   );

@@ -1,0 +1,14 @@
+---
+description: Potta web look and feel, toasts and confirmations (aligned with the other Instanvi apps)
+globs: "src/**/*.tsx"
+alwaysApply: false
+---
+
+# UI and feedback
+
+- Keep the existing Potta screens and components; extend them instead of introducing a new design system.
+- Brand: green `#237804` (`green-700`/`green-800` in Tailwind), lime accent `#A0E86F`, page background `var(--main-bg)`, radius `var(--radius)` (0.25rem). Font is Outfit; headings use `font-medium` (h1 may be `font-semibold`).
+- Feedback uses Sonner only: `import { toast } from 'sonner'` -> `toast.success`, `toast.error`, `toast.info`, `toast.loading`. Do not use `react-hot-toast` (removed) and do not mount extra `<Toaster />`; `AppProviders` mounts one.
+- Destructive actions (delete, void, deactivate, sign out) ask for confirmation in a modal. Never use `window.confirm` or `window.alert`.
+- Every list/detail view handles loading, empty and error states.
+- Amounts are XAF by default; format with `Intl.NumberFormat` and keep currency from the record when present.

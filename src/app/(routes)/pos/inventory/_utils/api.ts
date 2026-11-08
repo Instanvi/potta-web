@@ -1,56 +1,47 @@
 import axios from 'config/axios.config';
-import { isAxiosError } from 'axios';
 import { Filter, ProductResponse } from './types';
 import { ProductPayload } from './validation';
 
 export const productApi = {
   create: async (data: ProductPayload) => {
-    const result = await axios.post(`/item`, data);
+    const result = await axios.post(`/Item`, data);
     return result?.data;
   },
 
-  getAll: async (filter: Filter) => {
-    const result = await axios.get(`/item`, {
-      params: { ...filter },
+  getAll: async ({ sortBy, sortOrder, search, ...filter }: Filter): Promise<ProductResponse> => {
+    const result = await axios.get(`/Item`, {
+      params: {
+        ...filter,
+        ...(search?.trim() ? { search: search.trim() } : {}),
+        ...(sortBy ? { sortBy: `${sortBy}:${sortOrder ?? 'DESC'}` } : {}),
+      },
     });
-    console.log(result.data);
     return result.data;
   },
   getOne: async (product_id: string) => {
-    const result = await axios.get(`/item/${product_id}`);
+    const result = await axios.get(`/Item/${product_id}`);
     return result.data;
   },
   update: async (product_id: string, data: unknown) => {
-    const result = await axios.put(`/item/${product_id}`, data);
+    const result = await axios.put(`/Item/${product_id}`, data);
     return result?.data;
   },
   delete: async (product_id: string) => {
-    const result = await axios.delete(`/item/${product_id}`);
+    const result = await axios.delete(`/Item/${product_id}`);
     return result?.data;
   },
   restock: async (data: {
     productId: string;
     quantity: number;
-    userId: string;
+    cost?: number;
   }) => {
     const { productId: product_id, ...payload } = data;
-    const result = await axios.put(`/item/${product_id}/restock`, payload);
+    const result = await axios.put(`/Item/${product_id}/restock`, payload);
     return result?.data;
   },
-  uploadImage: async (file: File) => {
-    try {
-      // Create a simple FormData object with the file
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Send the request without setting any headers
-      const result = await axios.post('/files', formData);
-
-      return result?.data;
-    } catch (error) {
-      console.error('Error in uploadImage:', error);
-      throw error;
-    }
+  updateImages: async (product_id: string, images: string[]) => {
+    const result = await axios.put(`/Item/${product_id}`, { images });
+    return result?.data;
   },
   importCsv: async (params: { file?: File; s3Key?: string }) => {
     const formData = new FormData();
@@ -61,7 +52,7 @@ export const productApi = {
       formData.append('s3Key', params.s3Key);
     }
 
-    const result = await axios.post('/item/import-csv', formData, {
+    const result = await axios.post('/Item/import-csv', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return result?.data;
@@ -88,12 +79,5 @@ export const productCategoryApi = {
   delete: async (uuid: string) => {
     const result = await axios.delete(`/product-category/${uuid}`);
     return result?.data;
-  },
-};
-
-export const documentsApi = {
-  bulkDownload: async (ids: string[]) => {
-    const result = await axios.post('/documents/bulk-download', { ids });
-    return result.data;
   },
 };

@@ -1,19 +1,13 @@
 'use client';
 import React, { useContext } from 'react';
-import {
-  Inbox as InboxIcon,
-  Bell,
-} from 'lucide-react';
-
 import RootLayout from './(routes)/layout';
 import { ContextData } from '@potta/components/providers/DataProvider';
 
 // Refactored Components
 import { DashboardHeader } from './component/DashboardHeader';
 import { QuickActions } from './component/QuickActions';
-import { InboxFeed } from './component/InboxFeed';
-import { NotificationFeed } from './component/NotificationFeed';
 import { PortfolioGrid } from './component/PortfolioGrid';
+import { NotificationFeed } from './component/NotificationFeed';
 
 const WelcomePage = () => {
   const [mounted, setMounted] = React.useState(false);
@@ -46,15 +40,11 @@ const WelcomePage = () => {
           <QuickActions />
         </div>
 
-        {/* Feed Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-          <InboxFeed />
-          <NotificationFeed />
-        </div>
+        <NotificationFeed />
 
         {/* All Applications Section */}
         <section>
-          <h2 className="mb-4 px-1 text-lg text-black">All Applications</h2>
+          <h2 className="mb-4 px-1 text-lg text-black">Applications</h2>
           <PortfolioGrid />
         </section>
 

@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 import { cn } from '@potta/lib/utils';
 import { accountsApi } from '../../utils/api';
 import { journalApi } from '../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
