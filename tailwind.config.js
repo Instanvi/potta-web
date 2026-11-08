@@ -13,13 +13,27 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-outfit)', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
-      /* Only Outfit weights loaded: 400 / 500 / 600 — map heavier utilities to 600 */
+      /* Inter runs heavier than Outfit: keep 600 as the strongest weight in the UI. */
       fontWeight: {
         bold: '600',
         extrabold: '600',
         black: '600',
+      },
+      /*
+       * Inter reads larger than Outfit at the same size: 15px body (as the hub) and slightly
+       * tighter display sizes. Letter-spacing follows Inter's recommended tracking per size.
+       */
+      fontSize: {
+        xs: ['0.75rem', { lineHeight: '1.125rem' }],
+        sm: ['0.875rem', { lineHeight: '1.3125rem', letterSpacing: '-0.006em' }],
+        base: ['0.9375rem', { lineHeight: '1.5rem', letterSpacing: '-0.009em' }],
+        lg: ['1.0625rem', { lineHeight: '1.625rem', letterSpacing: '-0.012em' }],
+        xl: ['1.1875rem', { lineHeight: '1.75rem', letterSpacing: '-0.014em' }],
+        '2xl': ['1.375rem', { lineHeight: '1.875rem', letterSpacing: '-0.018em' }],
+        '3xl': ['1.75rem', { lineHeight: '2.25rem', letterSpacing: '-0.021em' }],
+        '4xl': ['2.125rem', { lineHeight: '2.5rem', letterSpacing: '-0.022em' }],
       },
       colors: {
         primary: {

@@ -5,13 +5,13 @@ import 'react-accessible-accordion/dist/fancy-example.css';
 
 import { AppProviders } from '@potta/components/providers/AppProviders';
 
-import { Outfit } from 'next/font/google';
+import { Inter } from 'next/font/google';
 
-const outfit = Outfit({
-  subsets: ['latin'],
-  variable: '--font-outfit',
+// Same family as the hub (instanvi-auth-frontend). Variable font: every weight 100–900 is available.
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-inter',
   display: 'swap',
-  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -32,10 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${outfit.variable} font-sans bg-[#F8F9FA] antialiased`}
-      >
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className="font-sans bg-[#F8F9FA] antialiased">
         <Suspense fallback={null}>
           <AppProviders>{children}</AppProviders>
         </Suspense>
