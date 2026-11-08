@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@potta/components/card
 import { useNotifications, useToggleNotificationRead } from '@/hooks/use-notifications';
 import { notificationBody, notificationHref, notificationTitle } from '@/services/notifications.service';
 import { notificationVisual } from '@/lib/notification-visual';
+import { Skeleton } from '@potta/components/ui/loaders';
 
 export const NotificationFeed = () => {
   const router = useRouter();
@@ -39,10 +40,10 @@ export const NotificationFeed = () => {
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-start space-x-3 px-6 py-4">
-                <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-stone-100" />
+                <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
                 <div className="flex-1 space-y-2 pt-1">
-                  <div className="h-3.5 w-1/3 animate-pulse bg-stone-100" />
-                  <div className="h-3 w-2/3 animate-pulse bg-stone-100" />
+                  <Skeleton className="h-3.5 w-1/3" />
+                  <Skeleton className="h-3 w-2/3" />
                 </div>
               </div>
             ))

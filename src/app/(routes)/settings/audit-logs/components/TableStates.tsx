@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { TableCell, TableRow } from '@potta/components/ui/table';
+import { Skeleton } from '@potta/components/ui/loaders';
 
 export function SkeletonRows({ columns, rows = 6 }: { columns: number; rows?: number }) {
   return (
@@ -10,7 +11,7 @@ export function SkeletonRows({ columns, rows = 6 }: { columns: number; rows?: nu
         <TableRow key={r} className="hover:bg-transparent">
           {Array.from({ length: columns }).map((__, c) => (
             <TableCell key={c}>
-              <div className="h-4 w-full animate-pulse bg-black/10" />
+              <Skeleton className={['h-3.5 w-3/4', 'h-3.5 w-1/2', 'h-3.5 w-2/3', 'h-3.5 w-5/12'][(r + c) % 4]} />
             </TableCell>
           ))}
         </TableRow>

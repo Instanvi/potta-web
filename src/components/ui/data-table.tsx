@@ -24,6 +24,7 @@ import {
 } from '@potta/components/ui/table';
 import { DataTablePagination } from '@potta/components/ui/data-table-pagination';
 import { cn } from '@potta/lib/utils';
+import { TableSkeleton } from '@potta/components/ui/loaders';
 
 interface DataTableProps<TData> {
   columns?: ColumnDef<TData>[];
@@ -166,18 +167,7 @@ export function DataTable<TData>({
     return (
       <div className="mt-5">
         {progressComponent || (
-          <div className="animate-pulse">
-            <div className="h-[40px] w-full border-b border-black/10 bg-[#ecf8f4]" />
-            <div className="space-y-3">
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="flex space-x-4 p-4">
-                  {resolvedColumns.map((_, colIndex) => (
-                    <div key={colIndex} className="h-4 w-full bg-black/10" />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <TableSkeleton rows={Math.min(pageSize || 8, 10)} columns={Math.min(Math.max(resolvedColumns.length, 3), 7)} />
         )}
       </div>
     );

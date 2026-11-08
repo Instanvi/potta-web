@@ -1,11 +1,7 @@
 import { ReactNode } from 'react';
+import { InlineLoader } from '@potta/components/ui/loaders';
 
-export const LoadingState = ({ label = 'Loading...' }: { label?: string }) => (
-  <div className="flex items-center justify-center gap-3 py-16 text-gray-500">
-    <div className="h-5 w-5 animate-spin rounded-full border-2 border-green-700 border-t-transparent" />
-    {label}
-  </div>
-);
+export const LoadingState = ({ label = 'Loading…' }: { label?: string }) => <InlineLoader label={label} />;
 
 export const EmptyState = ({
   title,

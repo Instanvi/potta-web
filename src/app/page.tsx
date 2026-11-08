@@ -8,6 +8,7 @@ import { DashboardHeader } from './component/DashboardHeader';
 import { QuickActions } from './component/QuickActions';
 import { PortfolioGrid } from './component/PortfolioGrid';
 import { NotificationFeed } from './component/NotificationFeed';
+import { HomeSkeleton } from './component/HomeSkeleton';
 
 const WelcomePage = () => {
   const [mounted, setMounted] = React.useState(false);
@@ -21,8 +22,8 @@ const WelcomePage = () => {
   if (!mounted) {
     return (
       <RootLayout>
-        <div className={`${context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-0'} min-h-full space-y-8 bg-white p-6 animate-pulse`}>
-           <div className="w-full h-32 bg-slate-50 rounded-lg"></div>
+        <div className={`${context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-0'} min-h-full bg-white p-6`}>
+          <HomeSkeleton />
         </div>
       </RootLayout>
     );
