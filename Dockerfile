@@ -5,8 +5,12 @@ FROM base AS deps
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-RUN npm ci
+# .npmrc sets legacy-peer-deps (some UI packages declare older React peers); the flag is repeated for clarity.
+COPY package.json package-lock.json* .npmrc ./
+RUN npm config set fetch-retries 5 \
+  && npm config set fetch-retry-mintimeout 20000 \
+  && npm config set fetch-retry-maxtimeout 120000 \
+  && npm ci --legacy-peer-deps
 
 # Rebuild the source code only when needed
 FROM base AS builder
