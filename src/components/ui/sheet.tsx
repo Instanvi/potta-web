@@ -28,10 +28,13 @@ SheetOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const sheetVariants = {
   right:
-    "inset-y-0 right-0 h-full w-full border-l bg-white sm:max-w-lg data-[state=open]:animate-in data-[state=closed]:animate-out",
+    "inset-y-0 right-0 h-full border-l bg-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right",
   left:
-    "inset-y-0 left-0 h-full w-full border-r bg-white sm:max-w-lg data-[state=open]:animate-in data-[state=closed]:animate-out",
+    "inset-y-0 left-0 h-full border-r bg-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left",
 };
+
+/** Every sheet is half the screen (full width on phones); applied last so callers' width classes can't override it. */
+const SHEET_WIDTH = "!w-full !max-w-full overflow-y-auto rounded-none sm:!w-1/2 sm:!max-w-[50vw]";
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
@@ -49,7 +52,8 @@ const SheetContent = React.forwardRef<
       className={cn(
         "fixed z-50 p-6 shadow-lg transition ease-in-out",
         sheetVariants[side],
-        className
+        className,
+        SHEET_WIDTH
       )}
       {...props}
     >

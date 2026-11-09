@@ -166,6 +166,7 @@ module.exports = {
   },
   darkMode: 'class',
   plugins: [
+    require('tailwindcss-animate'),
     heroui({
       layout: { radius: { small: '2px', medium: '3px', large: '4px' } },
     }),

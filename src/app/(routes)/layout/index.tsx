@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <div
             className={`flex min-h-0 min-w-0 flex-1 flex-col duration-500 ease-in-out ${
-              useSidebar ? (context?.toggle ? 'w-full pl-[72px]' : 'w-full pl-[200px]') : 'w-full'
+              useSidebar ? (context?.toggle ? 'w-full pl-14' : 'w-full pl-[264px]') : 'w-full'
             }`}
           >
             <div className="relative mx-0 flex min-h-0 min-w-0 flex-1 flex-col">

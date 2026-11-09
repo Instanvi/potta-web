@@ -2,8 +2,6 @@
 
 import React, { useContext } from 'react';
 import { usePathname } from 'next/navigation';
-import { User } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 import { ContextData } from '../../../../components/providers/DataProvider';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import { NotificationBell } from '@potta/components/shell/notification-bell';
@@ -23,7 +21,6 @@ const TITLE_OVERRIDES: { path: string; title: string }[] = [
 ];
 
 function getTitle(pathname: string): string {
-  if (pathname === '/') return 'Home';
   const override = TITLE_OVERRIDES.find((t) => pathname === t.path);
   if (override) return override.title;
   const module = getActiveModule(pathname);
@@ -32,20 +29,12 @@ function getTitle(pathname: string): string {
   return item ? `${item.title} · ${module.title}` : module.title;
 }
 
-/** Top bar (payroll dashboard-header): page title on the left, location, notifications and user on the right. */
+/** Top bar (payroll dashboard-header): page title on the left, location and notifications on the right. */
 export default function Navbar() {
-  const { data: session } = useSession();
   const pathname = usePathname();
   const context = useContext(ContextData);
 
   if (context?.layoutMode !== 'sidebar') return null;
-
-  const initials = session?.user?.name
-    ?.split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
 
   return (
     <nav className="sticky top-0 z-20 w-full border-b border-black/[0.06] bg-background">
@@ -55,12 +44,6 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <LocationSwitcher />
           <NotificationBell />
-          <div
-            className="ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-medium text-white"
-            title={session?.user?.email ?? undefined}
-          >
-            {initials || <User size={18} />}
-          </div>
         </div>
       </div>
     </nav>

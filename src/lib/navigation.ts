@@ -7,9 +7,11 @@ import {
   Books,
   ChartLineUp,
   ChartPieSlice,
+  ClockCounterClockwise,
   Coins,
   FileText,
   Gift,
+  GearSix,
   House,
   Invoice,
   Notebook,
@@ -19,7 +21,9 @@ import {
   Repeat,
   ShoppingCart,
   Storefront,
+  SquaresFour,
   Tray,
+  Tag,
   Users,
 } from '@phosphor-icons/react';
 
@@ -27,7 +31,7 @@ export interface NavItem {
   title: string;
   href: string;
   icon: Icon;
-  /** Payroll-expense SVG (APP_ICONS) shown on the home tiles; falls back to `icon`. */
+  /** Payroll-expense SVG (APP_ICONS) shown in the sidebar; falls back to `icon`. */
   appIcon?: string;
   /** Exact match only (module home links). */
   exact?: boolean;
@@ -36,9 +40,11 @@ export interface NavItem {
 export interface NavModule {
   id: string;
   title: string;
-  /** One line shown on the home control card. */
+  /** One line under the module title in the sidebar panel. */
   description: string;
   icon: Icon;
+  /** Rail position: modules first, utility modules (Settings) pinned to the bottom. */
+  placement?: 'top' | 'bottom';
   /** First path segment(s) that activate this module. */
   matchPrefixes: string[];
   items: NavItem[];
@@ -49,16 +55,26 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'pos',
     title: 'POS',
-    description: 'Ring up sales, manage stock and keep the desktop till in sync.',
+    description: 'Ring up sales, customers and the desktop till.',
     icon: Storefront,
     matchPrefixes: ['/pos'],
     items: [
       { title: 'Register', href: '/pos', icon: House, appIcon: APP_ICONS.shoppingCart, exact: true },
-      { title: 'Inventory', href: '/pos/inventory', icon: Package },
       { title: 'Sales', href: '/pos/sales', icon: ShoppingCart, appIcon: APP_ICONS.transactions },
       { title: 'Customers', href: '/pos/customers', icon: Users, appIcon: APP_ICONS.people },
       { title: 'Vendors', href: '/pos/vendors', icon: Storefront },
       { title: 'Desktop sync', href: '/pos/sync', icon: ArrowsClockwise },
+    ],
+  },
+  {
+    id: 'inventory',
+    title: 'Inventory',
+    description: 'Products from Pay, stock levels and categories.',
+    icon: Package,
+    matchPrefixes: ['/inventory', '/pos/inventory'],
+    items: [
+      { title: 'Products', href: '/inventory', icon: Package, exact: true },
+      { title: 'Categories', href: '/inventory/categories', icon: Tag },
     ],
   },
   {
@@ -111,6 +127,18 @@ export const NAV_MODULES: NavModule[] = [
     icon: Bank,
     matchPrefixes: ['/treasury'],
     items: [{ title: 'Bank accounts', href: '/treasury/bank-accounts', icon: Bank, appIcon: APP_ICONS.piggyBank }],
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    description: 'Organization configuration and the audit log.',
+    icon: GearSix,
+    placement: 'bottom',
+    matchPrefixes: ['/settings'],
+    items: [
+      { title: 'Config', href: '/settings', icon: SquaresFour, exact: true },
+      { title: 'Audit log', href: '/settings/audit-logs', icon: ClockCounterClockwise },
+    ],
   },
 ];
 

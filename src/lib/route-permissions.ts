@@ -25,6 +25,7 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
   { path: '/pos/sales', permission: { resource: 'SalesReciept', action: ['view', 'view-all'] } },
   { path: '/pos/sales/new', permission: { resource: 'SalesReciept', action: 'create' } },
   { path: '/pos/inventory', permission: { resource: 'Item', action: ['view', 'view-all'] } },
+  { path: '/inventory', permission: { resource: 'Item', action: ['view', 'view-all'] } },
   { path: '/pos/customers', permission: { resource: 'Customer', action: ['view', 'view-all'] } },
   { path: '/pos/vendors', permission: { resource: 'Vendor', action: ['view', 'view-all'] } },
   { path: '/pos/sync', permission: { resource: 'Transactions', action: 'view' } },

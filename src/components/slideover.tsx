@@ -1,6 +1,6 @@
 'use client';
 import { ReactNode, useState, FC, useEffect } from 'react';
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Button from './button';
 
@@ -179,13 +179,17 @@ const Slider: FC<props> = ({
         onClose={() => setOpen(false)}
         className="relative z-50 overflow-x-hidden"
       >
-        <div className="fixed inset-0" />
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-black/40 transition-opacity duration-300 data-[closed]:opacity-0"
+        />
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-x-0 top-0 flex max-h-full bg-gray-500 bg-opacity-75 transition-opacity justify-center">
+            {/* Every slide-over opens from the right at half the screen (full width on phones). */}
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex w-full sm:w-1/2">
               <DialogPanel
                 transition
-                className="pointer-events-auto border-b max-w-screen h-screen w-full transform transition duration-500 ease-in-out data-[closed]:-translate-y-full sm:duration-500"
+                className="pointer-events-auto h-screen w-full transform border-l border-black/[0.08] shadow-xl transition duration-300 ease-in-out data-[closed]:translate-x-full"
                 style={noPanelScroll ? { overflowY: 'visible' } : {}}
               >
                 <div
