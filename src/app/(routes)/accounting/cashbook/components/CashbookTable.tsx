@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { DataTable } from '@potta/components/ui/data-table';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
@@ -9,7 +9,7 @@ import Select from '@potta/components/select';
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { EmptyState, ErrorState, StatCard, StatusBadge } from '../../../_shared/states';
 import { useCashAccounts, useCashbookEntries, useDeleteCashbookEntry } from '../hooks';
 import { CashbookDirection, CashbookEntry, CashbookFilter } from '../utils/types';
 import CashbookEntrySheet from './CashbookEntrySheet';
@@ -62,15 +62,9 @@ const CashbookTable = () => {
       accessorKey: 'direction',
       header: 'Direction',
       cell: ({ row }) => (
-        <span
-          className={`px-2 py-0.5 text-xs font-medium border ${
-            row.original.direction === 'IN'
-              ? 'border-green-500 bg-green-50 text-green-700'
-              : 'border-red-300 bg-red-50 text-red-600'
-          }`}
-        >
+        <StatusBadge tone={row.original.direction === 'IN' ? 'success' : 'warning'}>
           {row.original.direction === 'IN' ? 'In' : 'Out'}
-        </span>
+        </StatusBadge>
       ),
     },
     { accessorKey: 'entryType', header: 'Type' },
@@ -103,7 +97,7 @@ const CashbookTable = () => {
       accessorKey: 'amount',
       header: 'Amount',
       cell: ({ row }) => (
-        <span className={row.original.direction === 'IN' ? 'text-green-700' : 'text-red-600'}>
+        <span className={`tabular-nums ${row.original.direction === 'IN' ? 'text-success' : 'text-destructive'}`}>
           {row.original.direction === 'IN' ? '+' : '−'}
           {formatAmount(row.original.amount, row.original.currency)}
         </span>
@@ -118,7 +112,7 @@ const CashbookTable = () => {
             <button
               type="button"
               title="Edit"
-              className="p-2 hover:bg-gray-100"
+              className="rounded-[2px] p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
               onClick={() => {
                 setEditing(row.original);
                 setSheetOpen(true);
@@ -131,7 +125,7 @@ const CashbookTable = () => {
             <button
               type="button"
               title="Delete"
-              className="p-2 text-red-600 hover:bg-red-50"
+              className="rounded-[2px] p-2 text-destructive hover:bg-destructive/10"
               onClick={() => setToDelete(row.original)}
             >
               <Trash2 className="h-4 w-4" />
@@ -143,8 +137,8 @@ const CashbookTable = () => {
   ];
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-40">
             <Input
@@ -204,7 +198,7 @@ const CashbookTable = () => {
           <Button
             text="New entry"
             type="button"
-            icon={<i className="ri-add-line" />}
+            icon={<Plus className="h-4 w-4" />}
             onClick={() => {
               setEditing(null);
               setSheetOpen(true);
@@ -213,19 +207,10 @@ const CashbookTable = () => {
         </Can>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Money in (shown)</p>
-          <p className="text-xl font-medium text-green-700">{formatAmount(totals.in)}</p>
-        </div>
-        <div className="border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Money out (shown)</p>
-          <p className="text-xl font-medium text-red-600">{formatAmount(totals.out)}</p>
-        </div>
-        <div className="border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Net</p>
-          <p className="text-xl font-medium">{formatAmount(totals.in - totals.out)}</p>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard label="Money in (shown)" value={formatAmount(totals.in)} tone="success" />
+        <StatCard label="Money out (shown)" value={formatAmount(totals.out)} tone="destructive" />
+        <StatCard label="Net" value={formatAmount(totals.in - totals.out)} />
       </div>
 
       {error ? (
@@ -246,7 +231,7 @@ const CashbookTable = () => {
             pageSizeOptions={[20]}
           />
           {data?.meta && data.meta.totalItems > rows.length && (
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Showing the latest {rows.length} of {data.meta.totalItems} entries. Narrow the
               date range to see older entries.
             </p>

@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import Input from '@potta/components/input';
 import { formatAmount, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState } from '../../../_shared/states';
+import { EmptyState, ErrorState, LoadingState, StatCard } from '../../../_shared/states';
 import { useAgingReport } from '../hooks';
 import { AgingRow, SubLedgerKind } from '../utils/api';
 import SubLedgerSheet from './SubLedgerSheet';
@@ -33,8 +33,8 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
   const partyLabel = type === 'AR' ? 'Customer' : 'Vendor';
 
   return (
-    <div>
-      <div className="w-44 mb-4">
+    <div className="flex flex-col gap-4">
+      <div className="w-44">
         <Input
           type="date"
           name="asOfDate"
@@ -54,51 +54,62 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
           description={`${partyLabel} balances appear here once invoices or purchases are posted.`}
         />
       ) : (
-        <div className="overflow-x-auto border border-gray-200">
+        <>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard label="Total outstanding" value={formatAmount(totals.balance)} />
+          <StatCard label="Current" value={formatAmount(totals.current)} />
+          <StatCard
+            label="Over 90 days"
+            value={formatAmount(totals.over90)}
+            tone={totals.over90 > 0 ? 'destructive' : 'default'}
+          />
+        </div>
+        <div className="overflow-x-auto rounded-[2px] border border-black/[0.08] bg-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-green-50 text-left">
-                <th className="px-4 py-3 font-medium">{partyLabel}</th>
+              <tr className="h-12 border-b border-black/10 bg-table-head text-left">
+                <th className="px-4 font-normal">{partyLabel}</th>
                 {BUCKETS.map((b) => (
-                  <th key={b.key} className="px-4 py-3 font-medium text-right">
+                  <th key={b.key} className="px-4 text-right font-normal">
                     {b.label}
                   </th>
                 ))}
-                <th className="px-4 py-3 font-medium text-right">Balance</th>
+                <th className="px-4 text-right font-normal">Balance</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr
                   key={r.referenceId}
-                  className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
+                  className="cursor-pointer border-b border-black/[0.06] transition-colors hover:bg-black/[0.02]"
                   onClick={() => setSelected(r)}
                 >
-                  <td className="px-4 py-3 font-medium">{r.referenceName || r.referenceId}</td>
+                  <td className="px-4 py-3">{r.referenceName || r.referenceId}</td>
                   {BUCKETS.map((b) => (
-                    <td key={b.key} className="px-4 py-3 text-right">
+                    <td key={b.key} className="px-4 py-3 text-right tabular-nums">
                       {formatAmount(r.aging?.[b.key])}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-right font-medium">
+                  <td className="px-4 py-3 text-right font-medium tabular-nums">
                     {formatAmount(r.currentBalance)}
                   </td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
-              <tr className="border-t-2 border-gray-300 font-medium">
+              <tr className="border-t border-black/10 bg-brand-subtle font-medium">
                 <td className="px-4 py-3">Total</td>
                 {BUCKETS.map((b) => (
-                  <td key={b.key} className="px-4 py-3 text-right">
+                  <td key={b.key} className="px-4 py-3 text-right tabular-nums">
                     {formatAmount(totals[b.key])}
                   </td>
                 ))}
-                <td className="px-4 py-3 text-right">{formatAmount(totals.balance)}</td>
+                <td className="px-4 py-3 text-right tabular-nums">{formatAmount(totals.balance)}</td>
               </tr>
             </tfoot>
           </table>
         </div>
+        </>
       )}
 
       <SubLedgerSheet type={type} row={selected} onClose={() => setSelected(null)} />

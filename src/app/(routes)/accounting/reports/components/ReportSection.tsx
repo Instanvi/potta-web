@@ -13,23 +13,23 @@ const ReportSection = ({ title, lines, total, totalLabel, hideZero }: Props) => 
     ([, value]) => !hideZero || Math.abs(Number(value)) >= 0.005
   );
   return (
-    <section className="mb-6">
-      <h3 className="bg-green-50 px-4 py-2 font-medium text-green-800">{title}</h3>
+    <section className="overflow-hidden border-b border-black/[0.06] last:border-b-0">
+      <h3 className="bg-brand-subtle px-4 py-2.5 text-sm font-normal text-foreground">{title}</h3>
       {entries.length === 0 ? (
-        <p className="px-4 py-3 text-sm text-gray-500">No balances</p>
+        <p className="px-4 py-3 text-sm text-muted-foreground">No balances</p>
       ) : (
         <table className="w-full text-sm">
           <tbody>
             {entries.map(([name, value]) => (
-              <tr key={name} className="border-b border-gray-100">
-                <td className="px-4 py-2 text-gray-700">{name}</td>
-                <td className="px-4 py-2 text-right tabular-nums">{formatAmount(value)}</td>
+              <tr key={name} className="border-b border-black/[0.06] hover:bg-black/[0.02]">
+                <td className="px-4 py-2.5 text-foreground">{name}</td>
+                <td className="px-4 py-2.5 text-right tabular-nums">{formatAmount(value)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-      <div className="flex justify-between border-t-2 border-gray-300 px-4 py-2 font-medium">
+      <div className="flex justify-between px-4 py-3 text-sm font-medium">
         <span>{totalLabel ?? `Total ${title.toLowerCase()}`}</span>
         <span className="tabular-nums">{formatAmount(total)}</span>
       </div>

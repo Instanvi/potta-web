@@ -15,16 +15,17 @@ type Props = {
   className?: string;
 };
 
+/* Variants follow instanvi-payroll-expense-fe components/ui/button.tsx. */
 const themes = {
-  default: 'bg-[#005D1F]',
-  lightBlue: 'bg-[#A0E86F]',
-  light: 'bg-green-500',
-  red: 'bg-red-500',
-  lightGreen: 'bg-[#237804]',
-  gray: 'bg-gray-300',
-  dark: 'bg-gray-900',
-  danger: 'bg-red-500',
-  outline: 'border border-green-600 text-green-600 bg-transparent !py-[5.5px]',
+  default: 'bg-primary hover:bg-brand-hover',
+  lightBlue: 'bg-secondary !text-secondary-foreground hover:bg-secondary/85',
+  light: 'bg-primary-500 hover:bg-primary',
+  red: 'bg-destructive hover:bg-destructive/90',
+  lightGreen: 'bg-primary hover:bg-brand-hover',
+  gray: 'bg-muted !text-foreground hover:bg-black/[0.08]',
+  dark: 'bg-gray-900 hover:bg-gray-800',
+  danger: 'bg-destructive hover:bg-destructive/90',
+  outline: 'border border-input !text-foreground bg-background hover:bg-accent !py-[11px]',
 };
 
 const Button = ({
@@ -45,13 +46,13 @@ const Button = ({
     <button
       type={type}
       disabled={disabled}
-      className={`whitespace-nowrap ${
+      className={`whitespace-nowrap rounded-[2px] text-sm font-medium transition-colors ${
         color ? 'text-black' : 'text-white'
       } items-center text-center gap-2 ${
         disabled ? 'cursor-not-allowed' : 'cursor-pointer'
       } ${width ? 'w-full text-center' : 'flex text-center justify-end'} ${
         theme ? themes[theme] : themes.default
-      } ${rounded && 'rounded-full'}  ${height ? 'py-1.5' : 'py-2.5'}  px-6 ${
+      } ${rounded ? '!rounded-full' : ''}  ${height ? 'py-1.5' : 'py-3'}  px-6 ${
         isLoading || disabled ? 'opacity-65' : 'opacity-100'
       } ${className}`}
       onClick={onClick}

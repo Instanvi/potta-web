@@ -1,13 +1,13 @@
 'use client';
 import { useRef, useState } from 'react';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { DataTable } from '@potta/components/ui/data-table';
 import Button from '@potta/components/button';
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { EmptyState, ErrorState, StatusBadge } from '../../../_shared/states';
 import { useDeleteTax, useImportTaxesCsv, useTaxes } from '../hooks';
 import { Tax } from '../utils/api';
 import TaxSheet from './TaxSheet';
@@ -56,15 +56,9 @@ const TaxTable = () => {
       accessorKey: 'isActive',
       header: 'Status',
       cell: ({ row }) => (
-        <span
-          className={`px-2 py-0.5 text-xs font-medium border ${
-            row.original.isActive
-              ? 'border-green-500 bg-green-50 text-green-700'
-              : 'border-gray-300 bg-gray-50 text-gray-600'
-          }`}
-        >
+        <StatusBadge tone={row.original.isActive ? 'success' : 'neutral'}>
           {row.original.isActive ? 'Active' : 'Inactive'}
-        </span>
+        </StatusBadge>
       ),
     },
     {
@@ -81,7 +75,7 @@ const TaxTable = () => {
             <button
               type="button"
               title="Edit"
-              className="p-2 hover:bg-gray-100"
+              className="rounded-[2px] p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
               onClick={() => {
                 setEditing(row.original);
                 setSheetOpen(true);
@@ -94,7 +88,7 @@ const TaxTable = () => {
             <button
               type="button"
               title="Delete"
-              className="p-2 text-red-600 hover:bg-red-50"
+              className="rounded-[2px] p-2 text-destructive hover:bg-destructive/10"
               onClick={() => setToDelete(row.original)}
             >
               <Trash2 className="h-4 w-4" />
@@ -106,8 +100,8 @@ const TaxTable = () => {
   ];
 
   return (
-    <div>
-      <div className="flex justify-end gap-2 mb-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end gap-3">
         <Can resource="Tax" action="create">
           <input
             ref={fileInput}
@@ -124,14 +118,14 @@ const TaxTable = () => {
             text="Import CSV"
             type="button"
             theme="outline"
-            icon={<i className="ri-upload-2-line" />}
+            icon={<Upload className="h-4 w-4" />}
             isLoading={importMutation.isPending}
             onClick={() => fileInput.current?.click()}
           />
           <Button
             text="New tax"
             type="button"
-            icon={<i className="ri-add-line" />}
+            icon={<Plus className="h-4 w-4" />}
             onClick={() => {
               setEditing(null);
               setSheetOpen(true);

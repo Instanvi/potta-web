@@ -1,9 +1,8 @@
 'use client';
-import { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import { useState } from 'react';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageHeader, Tabs } from '../../_shared/states';
+import { PageContainer, PageHeader, Tabs } from '../../_shared/states';
 import AgingTab from './components/AgingTab';
 import GeneralLedgerTab from './components/GeneralLedgerTab';
 
@@ -16,20 +15,15 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 const NoAccess = () => (
-  <p className="text-sm text-gray-500">You do not have permission to view this ledger.</p>
+  <p className="text-sm text-muted-foreground">You do not have permission to view this ledger.</p>
 );
 
 const LedgerPage = () => {
-  const context = useContext(ContextData);
   const [tab, setTab] = useState<Tab>('general');
 
   return (
     <RootLayout>
-      <div
-        className={`${
-          context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'
-        } pr-5 py-6`}
-      >
+      <PageContainer>
         <PageHeader
           title="Ledger"
           description="Posted entries and customer/vendor balances by age."
@@ -44,7 +38,7 @@ const LedgerPage = () => {
             <AgingTab key={tab} type={tab} />
           </Can>
         )}
-      </div>
+      </PageContainer>
     </RootLayout>
   );
 };

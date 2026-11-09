@@ -1,9 +1,8 @@
 'use client';
-import { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import { useState } from 'react';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageHeader, Tabs } from '../../_shared/states';
+import { PageContainer, PageHeader, Tabs } from '../../_shared/states';
 import BalanceSheetReport from './components/BalanceSheetReport';
 import IncomeStatementReport from './components/IncomeStatementReport';
 
@@ -15,31 +14,26 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 const NoAccess = () => (
-  <p className="text-sm text-gray-500">You do not have permission to view this report.</p>
+  <p className="text-sm text-muted-foreground">You do not have permission to view this report.</p>
 );
 
 const ReportsPage = () => {
-  const context = useContext(ContextData);
   const [tab, setTab] = useState<Tab>('balance-sheet');
   const [hideZero, setHideZero] = useState(true);
 
   return (
     <RootLayout>
-      <div
-        className={`${
-          context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'
-        } pr-5 py-6`}
-      >
+      <PageContainer>
         <PageHeader
           title="Financial reports"
           description="OHADA balance sheet and income statement from the general ledger."
           actions={
-            <label className="flex items-center gap-2 text-sm text-gray-600">
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <input
                 type="checkbox"
                 checked={hideZero}
                 onChange={(e) => setHideZero(e.target.checked)}
-                className="accent-green-700"
+                className="accent-primary"
               />
               Hide zero balances
             </label>
@@ -55,7 +49,7 @@ const ReportsPage = () => {
             <IncomeStatementReport hideZero={hideZero} />
           </Can>
         )}
-      </div>
+      </PageContainer>
     </RootLayout>
   );
 };

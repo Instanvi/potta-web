@@ -2,14 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Shared Instanvi tokens (same names as payroll-expense-frontend / pay). */
+/* Shared Instanvi tokens (same values as instanvi-payroll-expense-fe app/globals.css). */
 :root {
   --main-bg: #f7f7f8;
-  --brand: #237804;
-  --brand-hover: #1d6303;
-  --brand-light: #a0e86f;
+  --brand: #0b5d1e;
+  --brand-hover: #094c18;
+  --brand-light: #a3e46b;
+  --brand-light-foreground: #0b3d12;
   --brand-subtle: #f1faf7;
   --radius: 0.25rem;
+}
+
+@layer components {
+  /* Flat white panel used for every content block (payroll .dashboard-panel). */
+  .dashboard-panel {
+    @apply rounded-md border border-black/[0.06] bg-white;
+  }
 }
 
 /* Inter (same as the hub): regular (400) for body/UI copy; medium/semibold only for hierarchy */
@@ -20,7 +28,7 @@
   }
 
   h1 {
-    @apply font-semibold tracking-tight;
+    @apply font-medium tracking-tight;
   }
 
   h2,
@@ -49,7 +57,7 @@
   }
 
   th {
-    @apply font-medium;
+    @apply font-normal;
   }
 
   /* Sonner sets its own system font stack on the toaster. */
@@ -93,7 +101,7 @@
 }
 
 body {
-  @apply text-base font-normal antialiased text-black;
+  @apply text-base font-normal antialiased text-foreground;
   font-family: var(--font-inter), 'Inter', ui-sans-serif, system-ui, sans-serif;
   background-color: #ffffff;
 }
@@ -197,25 +205,25 @@ body {
 }
 
 .ps-active {
-  background: #154406 !important;
+  background: var(--brand) !important;
   color: white !important;
 }
 
 .active-parent {
-  background: #154406 !important;
+  background: var(--brand) !important;
   color: white !important;
 }
 
 .active-parent:hover {
-  background: #154406 !important;
+  background: var(--brand) !important;
 }
 
 .active-parent .ps-menu-button:hover {
-  background: #154406 !important;
+  background: var(--brand) !important;
 }
 
 .ps-menu-button.active-parent:hover {
-  background: #154406 !important;
+  background: var(--brand) !important;
 }
 
 /* Hover effect for submenu items */
@@ -414,13 +422,13 @@ body {
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-thumb {
-  background: #22c55e !important;
+  background: rgb(0 0 0 / 0.18) !important;
   border-radius: 3px !important;
-  border: 1px solid #e6f9ed !important;
+  border: none !important;
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
-  background: #16a34a !important;
+  background: rgb(0 0 0 / 0.3) !important;
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-track {
@@ -430,14 +438,14 @@ body {
 
 /* Firefox */
 html {
-  scrollbar-color: #22c55e #F9F9F9 !important;
+  scrollbar-color: rgb(0 0 0 / 0.18) transparent !important;
   scrollbar-width: thin !important;
 }
 
 /* Ensure all scrollable elements use the custom scrollbar */
 *:not(.scrollbar-hide) {
   scrollbar-width: thin !important;
-  scrollbar-color: #22c55e #F9F9F9 !important;
+  scrollbar-color: rgb(0 0 0 / 0.18) transparent !important;
 }
 
 /* Additional specificity for webkit browsers */
@@ -447,13 +455,13 @@ html {
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-thumb {
-  background: #22c55e !important;
+  background: rgb(0 0 0 / 0.18) !important;
   border-radius: 3px !important;
-  border: 1px solid #e6f9ed !important;
+  border: none !important;
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
-  background: #16a34a !important;
+  background: rgb(0 0 0 / 0.3) !important;
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-track {

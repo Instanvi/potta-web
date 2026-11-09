@@ -72,26 +72,26 @@ const JournalViewSlider: React.FC<JournalViewSliderProps> = ({
       <div className="relative overflow-hidden w-full max-w-6xl">
         <div className="space-y-6">
           {/* Header Information */}
-          <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+          <div className="dashboard-panel grid grid-cols-2 gap-4 p-4">
             <div>
-              <label className="block text-sm font-medium text-gray-500">
+              <label className="block text-sm font-medium text-muted-foreground">
                 Type
               </label>
-              <div className="mt-1 text-sm text-gray-900">{journal.type}</div>
+              <div className="mt-1 text-sm text-foreground">{journal.type}</div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500">
+              <label className="block text-sm font-medium text-muted-foreground">
                 Date
               </label>
-              <div className="mt-1 text-sm text-gray-900">
+              <div className="mt-1 text-sm text-foreground">
                 {format(new Date(journal.date), 'PPP')}
               </div>
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-500">
+              <label className="block text-sm font-medium text-muted-foreground">
                 Description
               </label>
-              <div className="mt-1 text-sm text-gray-900">
+              <div className="mt-1 text-sm text-foreground">
                 {journal.description}
               </div>
             </div>
@@ -100,7 +100,7 @@ const JournalViewSlider: React.FC<JournalViewSliderProps> = ({
           {/* Journal Lines */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-foreground">
                 Journal Lines
               </h3>
             </div>
@@ -109,30 +109,30 @@ const JournalViewSlider: React.FC<JournalViewSliderProps> = ({
               {journal.lines.map((line, index) => (
                 <div
                   key={line.uuid}
-                  className="p-4 border rounded-lg bg-white shadow-sm"
+                  className="dashboard-panel p-4"
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-500">
+                      <label className="block text-sm font-medium text-muted-foreground">
                         Account
                       </label>
-                      <div className="mt-1 text-sm text-gray-900">
+                      <div className="mt-1 text-sm text-foreground">
                         {line.account?.code} - {line.account?.name}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-500">
+                      <label className="block text-sm font-medium text-muted-foreground">
                         Description
                       </label>
-                      <div className="mt-1 text-sm text-gray-900">
+                      <div className="mt-1 text-sm text-foreground">
                         {line.description}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-500">
+                      <label className="block text-sm font-medium text-muted-foreground">
                         Debit
                       </label>
-                      <div className="mt-1 text-sm text-gray-900">
+                      <div className="mt-1 text-sm text-foreground">
                         {parseFloat(line.debit).toLocaleString('en-US', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
@@ -140,10 +140,10 @@ const JournalViewSlider: React.FC<JournalViewSliderProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-500">
+                      <label className="block text-sm font-medium text-muted-foreground">
                         Credit
                       </label>
-                      <div className="mt-1 text-sm text-gray-900">
+                      <div className="mt-1 text-sm text-foreground">
                         {parseFloat(line.credit).toLocaleString('en-US', {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
@@ -156,13 +156,13 @@ const JournalViewSlider: React.FC<JournalViewSliderProps> = ({
             </div>
 
             {/* Totals */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-6 rounded-[2px] bg-brand-subtle p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">
+                  <label className="block text-sm font-medium text-muted-foreground">
                     Total Debit
                   </label>
-                  <div className="mt-1 text-sm font-medium text-gray-900">
+                  <div className="mt-1 text-sm font-medium text-foreground">
                     {totalDebit.toLocaleString('en-US', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -170,10 +170,10 @@ const JournalViewSlider: React.FC<JournalViewSliderProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">
+                  <label className="block text-sm font-medium text-muted-foreground">
                     Total Credit
                   </label>
-                  <div className="mt-1 text-sm font-medium text-gray-900">
+                  <div className="mt-1 text-sm font-medium text-foreground">
                     {totalCredit.toLocaleString('en-US', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

@@ -25,6 +25,7 @@ import {
 import { DataTablePagination } from '@potta/components/ui/data-table-pagination';
 import { cn } from '@potta/lib/utils';
 import { TableSkeleton } from '@potta/components/ui/loaders';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface DataTableProps<TData> {
   columns?: ColumnDef<TData>[];
@@ -176,34 +177,32 @@ export function DataTable<TData>({
   return (
     <div
       className={cn(
-        'flex flex-col overflow-hidden border border-black/10 bg-white',
+        'flex flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-card',
         className
       )}
     >
       <Table>
-        <TableHeader className="bg-[#ecf8f4] [&_tr]:border-b [&_tr]:border-black/10">
+        <TableHeader className="bg-table-head [&_tr]:border-b [&_tr]:border-black/10">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border-0 hover:bg-transparent">
+            <TableRow key={headerGroup.id} className="border-0 hover:bg-table-head">
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   className={cn(
-                    'bg-[#ecf8f4] text-black',
+                    'h-12 bg-table-head px-4 text-sm font-normal text-foreground',
                     header.column.getCanSort() && 'cursor-pointer select-none'
                   )}
                   onClick={header.column.getToggleSortingHandler()}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                    {{
-                      asc: '🔼',
-                      desc: '🔽',
-                    }[header.column.getIsSorted() as string] ?? null}
+                    {header.column.getIsSorted() === 'asc' && <ChevronUp className="size-3.5 text-muted-foreground" />}
+                    {header.column.getIsSorted() === 'desc' && <ChevronDown className="size-3.5 text-muted-foreground" />}
                   </div>
                 </TableHead>
               ))}
@@ -217,13 +216,14 @@ export function DataTable<TData>({
                 key={row.id}
                 data-state={row.getIsSelected() ? 'selected' : undefined}
                 className={cn(
+                  'border-0 border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.02]',
                   onRowClick && 'cursor-pointer',
-                  row.getIsSelected() && 'bg-[#154406]/8'
+                  row.getIsSelected() && 'bg-brand-subtle hover:bg-brand-subtle'
                 )}
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="px-4 py-3 text-sm">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -233,7 +233,7 @@ export function DataTable<TData>({
             <TableRow>
               <TableCell
                 colSpan={resolvedColumns.length || 1}
-                className="h-24 text-center text-sm font-normal text-black"
+                className="h-32 text-center text-sm font-normal text-muted-foreground"
               >
                 No data found.
               </TableCell>

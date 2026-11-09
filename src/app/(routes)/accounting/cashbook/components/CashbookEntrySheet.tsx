@@ -123,12 +123,12 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
 
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{isEdit ? 'Edit cashbook entry' : 'New cashbook entry'}</SheetTitle>
         </SheetHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          <div className="flex">
+          <div className="flex gap-1 rounded-[2px] bg-brand-subtle p-1">
             {(['IN', 'OUT'] as CashbookDirection[]).map((d) => (
               <button
                 key={d}
@@ -138,12 +138,10 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
                   setValue('entryType', d === 'IN' ? 'RECEIPT' : 'PAYMENT');
                   setValue('category', '');
                 }}
-                className={`flex-1 py-2 text-sm font-medium border ${
+                className={`h-9 flex-1 rounded-[2px] text-sm font-medium transition-colors ${
                   direction === d
-                    ? d === 'IN'
-                      ? 'bg-green-700 border-green-700 text-white'
-                      : 'bg-red-600 border-red-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-600'
+                    ? 'bg-background text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-primary'
                 }`}
               >
                 {d === 'IN' ? 'Money in' : 'Money out'}

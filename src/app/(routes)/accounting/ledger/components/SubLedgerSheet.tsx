@@ -7,7 +7,7 @@ import {
 } from '@potta/components/ui/sheet';
 import { Can } from '@/components/auth/can';
 import { formatAmount, formatDate } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState } from '../../../_shared/states';
+import { EmptyState, ErrorState, LoadingState, StatCard } from '../../../_shared/states';
 import {
   useSubLedgerBalance,
   useSubLedgerIdForReference,
@@ -41,49 +41,44 @@ const Transactions = ({ type, row }: { type: SubLedgerKind; row: AgingRow }) => 
   const entries = tx.data ?? [];
   return (
     <div>
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="border border-gray-200 p-3">
-          <p className="text-xs text-gray-500">Current balance</p>
-          <p className="text-lg font-medium">
-            {formatAmount(balance.data?.currentBalance ?? row.currentBalance)}
-          </p>
-        </div>
-        <div className="border border-gray-200 p-3">
-          <p className="text-xs text-gray-500">Last transaction</p>
-          <p className="text-lg font-medium">
-            {formatDate(balance.data?.lastTransactionDate)}
-          </p>
-        </div>
+      <div className="mb-4 grid grid-cols-2 gap-4">
+        <StatCard
+          label="Current balance"
+          value={formatAmount(balance.data?.currentBalance ?? row.currentBalance)}
+        />
+        <StatCard label="Last transaction" value={formatDate(balance.data?.lastTransactionDate)} />
       </div>
       {entries.length === 0 ? (
         <EmptyState title="No transactions" />
       ) : (
+        <div className="overflow-hidden rounded-[2px] border border-black/[0.08]">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-green-50 text-left">
-              <th className="px-2 py-2 font-medium">Date</th>
-              <th className="px-2 py-2 font-medium">Description</th>
-              <th className="px-2 py-2 font-medium text-right">Debit</th>
-              <th className="px-2 py-2 font-medium text-right">Credit</th>
-              <th className="px-2 py-2 font-medium text-right">Balance</th>
+            <tr className="h-11 border-b border-black/10 bg-table-head text-left">
+              <th className="px-3 font-normal">Date</th>
+              <th className="px-3 font-normal">Description</th>
+              <th className="px-3 text-right font-normal">Debit</th>
+              <th className="px-3 text-right font-normal">Credit</th>
+              <th className="px-3 text-right font-normal">Balance</th>
             </tr>
           </thead>
           <tbody>
             {entries.map((e) => (
-              <tr key={e.uuid} className="border-b border-gray-100">
-                <td className="px-2 py-2 whitespace-nowrap">{formatDate(e.transactionDate)}</td>
-                <td className="px-2 py-2">{e.description || e.referenceNumber}</td>
-                <td className="px-2 py-2 text-right">
+              <tr key={e.uuid} className="border-b border-black/[0.06] last:border-b-0 hover:bg-black/[0.02]">
+                <td className="whitespace-nowrap px-3 py-2.5">{formatDate(e.transactionDate)}</td>
+                <td className="px-3 py-2.5">{e.description || e.referenceNumber}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums">
                   {Number(e.debitAmount) ? formatAmount(e.debitAmount) : ''}
                 </td>
-                <td className="px-2 py-2 text-right">
+                <td className="px-3 py-2.5 text-right tabular-nums">
                   {Number(e.creditAmount) ? formatAmount(e.creditAmount) : ''}
                 </td>
-                <td className="px-2 py-2 text-right">{formatAmount(e.runningBalance)}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums">{formatAmount(e.runningBalance)}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );
@@ -91,7 +86,7 @@ const Transactions = ({ type, row }: { type: SubLedgerKind; row: AgingRow }) => 
 
 const SubLedgerSheet = ({ type, row, onClose }: Props) => (
   <Sheet open={!!row} onOpenChange={(open) => !open && onClose()}>
-    <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+    <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-[min(100vw,720px)]">
       <SheetHeader>
         <SheetTitle>{row?.referenceName ?? 'Sub-ledger'}</SheetTitle>
       </SheetHeader>
@@ -101,7 +96,7 @@ const SubLedgerSheet = ({ type, row, onClose }: Props) => (
             resource="Ledger"
             action="view-sub-ledger-transactions"
             fallback={
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 You do not have permission to view sub-ledger transactions.
               </p>
             }

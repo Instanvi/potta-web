@@ -200,7 +200,7 @@ const Slider: FC<props> = ({
                       }`}
                     >
                       <div className="flex-1 flex gap-10 items-end">
-                        <DialogTitle className="text-xl !font-medium text-gray-900">
+                        <DialogTitle className="text-base !font-medium text-foreground sm:text-lg">
                           {title}
                         </DialogTitle>
                         {/* Tabs */}
@@ -211,9 +211,9 @@ const Slider: FC<props> = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-4  text-gray-500 duration-500 ease-in-out ${
+                                className={`px-4 text-muted-foreground duration-500 ease-in-out ${
                                   activeTab === tab.id &&
-                                  'border-b-2 border-[#154406] text-[#154406] font-medium'
+                                  'border-b-2 border-primary text-primary font-medium'
                                 } cursor-pointer flex items-center`}
                               >
                                 <p>{tab.label}</p>
@@ -227,7 +227,7 @@ const Slider: FC<props> = ({
                           <button
                             type="button"
                             onClick={() => setOpen(false)}
-                            className="relative rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            className="relative rounded-[2px] text-muted-foreground hover:text-foreground focus:outline-none focus:ring-[3px] focus:ring-ring/30"
                           >
                             <span className="absolute -inset-2.5" />
                             <span className="sr-only">Close panel</span>

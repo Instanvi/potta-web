@@ -19,14 +19,14 @@ const Search = ({
   className,
 }: SearchProps) => {
   return (
-    <div className={`relative bg-white flex items-center w-fit ${className || ''}`}>
-      <RiSearchLine className="absolute left-3 text-gray-400 text-lg pointer-events-none" />
+    <div className={`relative flex items-center bg-white ${className || 'w-fit'}`}>
+      <RiSearchLine className="pointer-events-none absolute left-3 text-lg text-muted-foreground" />
       <Input
         type="text"
         placeholder={placeholder || 'Search'}
         value={value}
         onChange={onChange}
-        className="pl-10 pr-10 h-11  border-gray-300 focus:ring-2 focus:ring-green-500 w-[450px]"
+        className={`h-11 pl-10 pr-10 ${className ? 'w-full' : 'w-full sm:w-[450px]'}`}
         aria-label={placeholder || 'Search'}
       />
       {value && onClear && (

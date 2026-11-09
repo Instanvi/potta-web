@@ -4,7 +4,7 @@ import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
 import Input from '@potta/components/input';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { EmptyState, ErrorState, StatCard } from '../../../_shared/states';
 import { useGeneralLedger } from '../hooks';
 import { GeneralLedgerEntry } from '../utils/types';
 
@@ -73,8 +73,8 @@ const GeneralLedgerTab = () => {
   };
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end gap-3 mb-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end gap-3">
         <div className="w-44">
           <Input
             type="date"
@@ -94,7 +94,7 @@ const GeneralLedgerTab = () => {
           />
         </div>
         {isFetching && !isLoading && (
-          <span className="text-sm text-gray-500 pb-3">Refreshing...</span>
+          <span className="pb-3 text-sm text-muted-foreground">Refreshing…</span>
         )}
       </div>
 
@@ -107,6 +107,11 @@ const GeneralLedgerTab = () => {
         />
       ) : (
         <>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard label="Entries in period" value={data?.meta?.totalItems ?? rows.length} />
+            <StatCard label="Debit (this page)" value={formatAmount(pageTotals.debit)} />
+            <StatCard label="Credit (this page)" value={formatAmount(pageTotals.credit)} />
+          </div>
           <DataTable
             columns={columns}
             data={rows}
@@ -120,15 +125,6 @@ const GeneralLedgerTab = () => {
             pageSize={pagination.pageSize}
             pageSizeOptions={[20, 50, 100]}
           />
-          <div className="flex justify-end gap-8 border-t border-gray-200 pt-3 mt-2 text-sm">
-            <span className="text-gray-500">Page totals</span>
-            <span>
-              Debit <strong>{formatAmount(pageTotals.debit)}</strong>
-            </span>
-            <span>
-              Credit <strong>{formatAmount(pageTotals.credit)}</strong>
-            </span>
-          </div>
         </>
       )}
     </div>

@@ -7,7 +7,7 @@ import {
   startOfYear,
   today,
 } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState } from '../../../_shared/states';
+import { EmptyState, ErrorState, LoadingState, StatCard } from '../../../_shared/states';
 import { useIncomeStatement } from '../hooks';
 import ReportSection from './ReportSection';
 
@@ -24,8 +24,8 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
     data && !Object.keys(data.incomes ?? {}).length && !Object.keys(data.expenses ?? {}).length;
 
   return (
-    <div>
-      <div className="flex flex-wrap gap-3 mb-6">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-3">
         <div className="w-44">
           <Input
             type="date"
@@ -46,7 +46,7 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
         </div>
       </div>
       {invalidRange ? (
-        <p className="text-sm text-red-600">The start date must be before the end date.</p>
+        <p className="text-sm text-destructive">The start date must be before the end date.</p>
       ) : isLoading ? (
         <LoadingState label="Generating income statement..." />
       ) : error ? (
@@ -57,8 +57,18 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
           description="Seed the chart of accounts and post transactions to see an income statement."
         />
       ) : (
-        <div className="max-w-3xl">
-          <p className="text-sm text-gray-500 mb-4">
+        <>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard label="Income" value={formatAmount(sum(data.incomes))} />
+          <StatCard label="Expenses" value={formatAmount(sum(data.expenses))} />
+          <StatCard
+            label={data.netProfitLoss >= 0 ? 'Net profit' : 'Net loss'}
+            value={formatAmount(data.netProfitLoss)}
+            tone={data.netProfitLoss >= 0 ? 'success' : 'destructive'}
+          />
+        </div>
+        <div className="dashboard-panel max-w-3xl overflow-hidden">
+          <p className="border-b border-black/[0.06] px-4 py-3 text-sm text-muted-foreground">
             {formatDate(startDate)} – {formatDate(endDate)}
           </p>
           <ReportSection
@@ -74,14 +84,15 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
             hideZero={hideZero}
           />
           <div
-            className={`flex justify-between px-4 py-3 font-medium ${
-              data.netProfitLoss >= 0 ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'
+            className={`flex justify-between border-t border-black/10 px-4 py-3 text-sm font-medium ${
+              data.netProfitLoss >= 0 ? 'bg-brand-subtle text-primary' : 'bg-destructive/5 text-destructive'
             }`}
           >
             <span>{data.netProfitLoss >= 0 ? 'Net profit' : 'Net loss'}</span>
             <span className="tabular-nums">{formatAmount(data.netProfitLoss)}</span>
           </div>
         </div>
+        </>
       )}
     </div>
   );

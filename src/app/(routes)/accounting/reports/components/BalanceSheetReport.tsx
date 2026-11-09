@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Input from '@potta/components/input';
 import { formatAmount, formatDate, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState } from '../../../_shared/states';
+import { EmptyState, ErrorState, LoadingState, StatCard, StatusBadge } from '../../../_shared/states';
 import { useBalanceSheet } from '../hooks';
 import ReportSection from './ReportSection';
 
@@ -20,8 +20,8 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
   const retainedEarnings = data ? data.totalEquity - sectionSum(data.equity) : 0;
 
   return (
-    <div>
-      <div className="w-44 mb-6">
+    <div className="flex flex-col gap-4">
+      <div className="w-44">
         <Input
           type="date"
           name="asOfDate"
@@ -40,18 +40,18 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
           description="Seed the chart of accounts and post transactions to see a balance sheet."
         />
       ) : (
-        <div className="max-w-3xl">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-500">As of {formatDate(asOfDate)}</p>
-            <span
-              className={`px-2 py-0.5 text-xs font-medium border ${
-                data.isBalanced
-                  ? 'border-green-500 bg-green-50 text-green-700'
-                  : 'border-red-300 bg-red-50 text-red-600'
-              }`}
-            >
+        <>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard label="Total assets" value={formatAmount(data.totalAssets)} />
+          <StatCard label="Total liabilities" value={formatAmount(data.totalLiabilities)} />
+          <StatCard label="Total equity" value={formatAmount(data.totalEquity)} />
+        </div>
+        <div className="dashboard-panel max-w-3xl overflow-hidden">
+          <div className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3">
+            <p className="text-sm text-muted-foreground">As of {formatDate(asOfDate)}</p>
+            <StatusBadge tone={data.isBalanced ? 'success' : 'danger'}>
               {data.isBalanced ? 'Balanced' : 'Out of balance'}
-            </span>
+            </StatusBadge>
           </div>
           <ReportSection
             title="Assets"
@@ -76,13 +76,14 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
             total={data.totalEquity}
             hideZero={hideZero}
           />
-          <div className="flex justify-between bg-gray-50 px-4 py-3 font-medium">
+          <div className="flex justify-between border-t border-black/10 bg-brand-subtle px-4 py-3 text-sm font-medium">
             <span>Total liabilities + equity</span>
             <span className="tabular-nums">
               {formatAmount(data.totalLiabilities + data.totalEquity)}
             </span>
           </div>
         </div>
+        </>
       )}
     </div>
   );

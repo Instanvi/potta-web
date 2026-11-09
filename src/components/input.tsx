@@ -54,7 +54,7 @@ const Input: React.FC<Props> = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <span className={`mb-3 text-gray-900 font-medium ${labelClass}`}>
+        <span className={`mb-3 text-sm font-medium text-foreground ${labelClass}`}>
           {label}
           {required && <span className=" text-red-500">*</span>}
         </span>
@@ -71,10 +71,9 @@ const Input: React.FC<Props> = ({
         placeholder={placeholder}
         className={`w-full ${inputClass} ${height ? 'py-1.5' : 'py-2.5'} ${
           errors
-            ? 'focus:ring-red-500 border-red-500'
-            : 'focus:ring-green-500 border-gray-200'
-        }   px-4 border border-gray-200 rounded-[0px] outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-   `}
+            ? 'border-destructive focus:ring-destructive/30'
+            : 'border-input focus:border-primary focus:ring-ring/30'
+        } mt-2 rounded-[2px] border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground/70 focus:outline-none focus:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60`}
       />
       {errors ? (
         <small className="col-span-2 text-red-500">

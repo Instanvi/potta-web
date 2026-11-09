@@ -1,26 +1,17 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
-import {
-  ChevronDown,
-  ChevronRight,
-  MoreVertical,
-  Eye,
-  Edit,
-  BarChart3,
-  Plus,
-  FileDown,
-} from 'lucide-react';
+import { ChevronDown, ChevronRight, MoreVertical, Plus, FileDown } from 'lucide-react';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import SliderAccount from './sliderAccount';
 import { accountsApi } from '../utils/api';
+import { ACCOUNT_TYPES } from '../utils/validations';
+import { StatCard, StatusBadge } from '../../_shared/states';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@potta/components/shadcn/dropdown';
-import Image from 'next/image';
 import { Can, useCan } from '@/components/auth/can';
 
 interface AccountNode {
@@ -60,37 +51,12 @@ const TableAccount = () => {
     {}
   );
 
-  // Define simplified colors for different hierarchy levels (using green, white, and gray)
   const getHierarchyColors = (level: number) => {
-    const colors = [
-      {
-        bg: 'bg-white hover:bg-gray-50',
-
-        border: 'border-l-4 border-green-500',
-        text: 'text-gray-800',
-        indicator: 'bg-green-500',
-      }, // Level 0
-      {
-        bg: 'bg-green-50 hover:bg-green-100',
-        border: 'border-l-4 border-green-400',
-        text: 'text-gray-800',
-        indicator: 'bg-green-400',
-      }, // Level 1
-      {
-        bg: 'bg-gray-50 hover:bg-gray-100',
-        border: 'border-l-4 border-green-300',
-        text: 'text-gray-800',
-        indicator: 'bg-green-300',
-      }, // Level 2
-      {
-        bg: 'bg-white hover:bg-gray-50',
-        border: 'border-l-4 border-green-200',
-        text: 'text-gray-800',
-        indicator: 'bg-green-200',
-      }, // Level 3+
-    ];
-
-    return colors[Math.min(level, 3)];
+    const indicators = ['bg-primary', 'bg-primary-400', 'bg-primary-300', 'bg-primary-200'];
+    return {
+      text: level === 0 ? 'font-medium text-foreground' : 'text-foreground',
+      indicator: indicators[Math.min(level, 3)],
+    };
   };
 
   useEffect(() => {
@@ -109,7 +75,7 @@ const TableAccount = () => {
             if (!balances[account.type]) {
               balances[account.type] = 0;
             }
-            balances[account.type] += account.currentBalance;
+            balances[account.type] += Number(account.currentBalance) || 0;
 
             if (account.children && account.children.length > 0) {
               calculateBalances(account.children);
@@ -126,8 +92,9 @@ const TableAccount = () => {
           initialExpandedState[account.uuid] = true;
         });
         setExpandedRows(initialExpandedState);
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
+      } catch {
+        setAccounts([]);
+        setFilteredAccounts([]);
       } finally {
         setIsLoading(false);
       }
@@ -268,31 +235,41 @@ const TableAccount = () => {
   };
 
   // Format currency value
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | string) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XAF',
       minimumFractionDigits: 0,
-    }).format(amount);
+    }).format(Number(amount) || 0);
   };
 
-  // Open account details drawer
-  const openAccountDetails = (account: AccountNode) => {
-    setSelectedAccount(account);
-    setCreateDrawer(true);
-  };
-
-  // Create child account
   const createChildAccount = (parentAccount: AccountNode) => {
-    // Set the selected account as the parent for the new account
     setSelectedAccount(parentAccount);
     setCreateDrawer(true);
   };
 
-  // View account transactions
-  const viewAccountTransactions = (accountId: string) => {
-    console.log(`View transactions for account: ${accountId}`);
-    // Navigate to transactions page or open transactions modal
+  const exportAccounts = () => {
+    const rows: string[][] = [['Code', 'Name', 'Type', 'Level', 'Initial balance', 'Current balance']];
+    const walk = (list: AccountNode[], level: number) =>
+      list.forEach((account) => {
+        rows.push([
+          account.code ?? '',
+          account.name,
+          account.type,
+          String(level),
+          String(Number(account.initialBalance) || 0),
+          String(Number(account.currentBalance) || 0),
+        ]);
+        if (account.children?.length) walk(account.children, level + 1);
+      });
+    walk(filteredAccounts, 0);
+    const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'chart-of-accounts.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   // Expand all rows
@@ -343,10 +320,8 @@ const TableAccount = () => {
 
       return (
         <React.Fragment key={account.uuid}>
-          <tr
-            className={`${hierarchyColors.bg} ${hierarchyColors.border} h-16 transition-colors duration-200`}
-          >
-            <td className="py-2 px-4 h-16 flex items-center truncate">
+          <tr className="h-12 border-b border-black/[0.06] transition-colors hover:bg-black/[0.02]">
+            <td className="flex h-12 items-center truncate px-4 py-2">
               <div
                 style={{ paddingLeft: `${level * 24}px` }}
                 className="flex items-center cursor-pointer w-full"
@@ -357,81 +332,56 @@ const TableAccount = () => {
                 }
               >
                 {/* Level indicator dot */}
-                <div
-                  className={`w-2 h-2 rounded-full ${hierarchyColors.indicator} mr-2`}
-                />
+                <div className={`mr-2 size-1.5 rounded-full ${hierarchyColors.indicator}`} />
 
                 {hasChildren ? (
                   isExpanded ? (
-                    <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <ChevronDown className="mr-2 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <ChevronRight className="mr-2 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                   )
                 ) : (
-                  <div className="w-6 mr-2"></div>
+                  <div className="mr-2 w-4"></div>
                 )}
-                <span
-                  className={`truncate font-medium ${hierarchyColors.text}`}
-                >
+                <span className={`truncate text-sm ${hierarchyColors.text}`}>
                   {account.code && (
-                    <span className="opacity-70">[{account.code}]</span>
-                  )}{' '}
+                    <span className="mr-1.5 tabular-nums text-muted-foreground">{account.code}</span>
+                  )}
                   {account.name}
-                </span>
-
-                {/* Show level badge for clarity */}
-                <span
-                  className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium bg-opacity-60 text-gray-600`}
-                >
-                  L{level}
                 </span>
               </div>
             </td>
-            <td className="py-2 px-4 truncate">
-              <span
-                className={`px-2 py-1 rounded-full font-medium  text-gray-800`}
-              >
-                {account.type}
-              </span>
+            <td className="truncate px-4 py-2">
+              <StatusBadge>
+                {account.type.charAt(0) + account.type.slice(1).toLowerCase()}
+              </StatusBadge>
             </td>
 
-            <td className="py-2 px-4 truncate">
+            <td className="truncate px-4 py-2 text-sm tabular-nums text-muted-foreground">
               {formatCurrency(account.initialBalance)}
             </td>
-            <td className="py-2 px-4 truncate font-medium">
+            <td className="truncate px-4 py-2 text-sm font-medium tabular-nums">
               {formatCurrency(account.currentBalance)}
             </td>
-            <td className="py-2 px-4 flex justify-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="hover:bg-gray-100 hover:bg-opacity-50 p-1 rounded-full">
-                    <MoreVertical className="h-4 w-4 text-gray-600" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => openAccountDetails(account)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    <span>View Details</span>
-                  </DropdownMenuItem>
-                  {canAccess('Accounts', 'create') && (
+            <td className="flex justify-center px-4 py-2">
+              {canAccess('Accounts', 'create') && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="rounded-[2px] p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => createChildAccount(account)}>
                       <Plus className="mr-2 h-4 w-4" />
-                      <span>Add Child Account</span>
+                      <span>Add child account</span>
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => viewAccountTransactions(account.uuid)}
-                  >
-                    <BarChart3 className="mr-2 h-4 w-4" />
-                    <span>Transactions</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => openAccountDetails(account)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    <span>Edit</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </td>
           </tr>
 
@@ -445,113 +395,105 @@ const TableAccount = () => {
   };
 
   return (
-    <div className="flex flex-col bg-white h-full" ref={containerRef}>
-      <div className="p-4 flex-shrink-0">
-        <div className="flex justify-between mb-4">
-          <div className="relative w-1/3">
-            <Search
-              value={searchTerm}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setSearchTerm(e.target.value)
-              }
-              placeholder="Search accounts by name, code or type..."
+    <div className="flex h-full flex-col gap-4" ref={containerRef}>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {ACCOUNT_TYPES.map((type) => (
+          <StatCard
+            key={type}
+            label={type.charAt(0) + type.slice(1).toLowerCase()}
+            value={isLoading ? '—' : formatCurrency(totalBalance[type] ?? 0)}
+          />
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Search
+          value={searchTerm}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+          onClear={() => setSearchTerm('')}
+          placeholder="Search accounts by name, code or type"
+          className="w-full sm:max-w-xs"
+        />
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <Button
+            type="button"
+            text="Expand all"
+            icon={<ChevronDown className="h-4 w-4" />}
+            theme="outline"
+            onClick={expandAllRows}
+          />
+          <Button
+            type="button"
+            text="Collapse all"
+            icon={<ChevronRight className="h-4 w-4" />}
+            theme="outline"
+            onClick={collapseAllRows}
+          />
+          <Button
+            type="button"
+            text="Export"
+            icon={<FileDown className="h-4 w-4" />}
+            theme="lightBlue"
+            onClick={exportAccounts}
+            disabled={filteredAccounts.length === 0}
+          />
+          <Can resource="Accounts" action="create">
+            <Button
+              type="button"
+              text="Create account"
+              icon={<Plus className="h-4 w-4" />}
+              theme="default"
+              onClick={() => {
+                setSelectedAccount(null);
+                setCreateDrawer(true);
+              }}
             />
-          </div>
-          <div className="w-1/2 flex items-center">
-            <div className="w-full flex justify-end space-x-3">
-              <Button
-                type="button"
-                text="Expand All"
-                icon={<ChevronDown className="h-4 w-4" />}
-                theme="lightBlue"
-                className="!text-black whitespace-nowrap"
-                onClick={expandAllRows}
-              />
-              <Button
-                type="button"
-                text="Collapse All"
-                icon={<ChevronRight className="h-4 w-4" />}
-                theme="lightBlue"
-                className="!text-black whitespace-nowrap"
-                onClick={collapseAllRows}
-              />
-              <Button
-                type="button"
-                text="Export"
-                icon={<FileDown className="h-4 w-4" />}
-                theme="lightBlue"
-                className="!text-black whitespace-nowrap"
-              />
-              <Can resource="Accounts" action="create">
-                <Button
-                  type="button"
-                  text="Create Account"
-                  icon={<i className="ri-file-add-line"></i>}
-                  theme="default"
-                  className="whitespace-nowrap"
-                  onClick={() => {
-                    setSelectedAccount(null);
-                    setCreateDrawer(true);
-                  }}
-                />
-              </Can>
-            </div>
-          </div>
+          </Can>
         </div>
       </div>
 
-      {/* Account Table */}
-      <div className="flex-1 flex flex-col overflow-hidden px-4 pb-4">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-card">
         <div className="flex-shrink-0">
           <table className="w-full table-fixed">
             <colgroup>
-              <col style={{ width: '30%' }} />
-              <col style={{ width: '15%' }} />
+              <col style={{ width: '36%' }} />
+              <col style={{ width: '14%' }} />
               <col style={{ width: '20%' }} />
               <col style={{ width: '20%' }} />
-              <col style={{ width: '15%' }} />
+              <col style={{ width: '10%' }} />
             </colgroup>
-            <thead className="bg-green-50 h-16 border border-gray-200">
-              <tr className="text-lg border-gray-200">
-                <th className="text-left font-medium py-2 px-4 text-gray-800">
-                  Account Name
-                </th>
-                <th className="text-left py-2 px-4 text-gray-800">Type</th>
-                <th className="text-left py-2 px-4 text-gray-800">
-                  Initial Balance
-                </th>
-                <th className="text-left py-2 px-4 text-gray-800">
-                  Current Balance
-                </th>
-                <th className="text-center py-2 px-4 text-gray-800">Actions</th>
+            <thead className="bg-table-head">
+              <tr className="h-12 border-b border-black/10">
+                <th className="px-4 text-left text-sm font-normal text-foreground">Account</th>
+                <th className="px-4 text-left text-sm font-normal text-foreground">Type</th>
+                <th className="px-4 text-left text-sm font-normal text-foreground">Initial balance</th>
+                <th className="px-4 text-left text-sm font-normal text-foreground">Current balance</th>
+                <th className="px-4 text-center text-sm font-normal text-foreground"></th>
               </tr>
             </thead>
           </table>
         </div>
 
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{ maxHeight: `${availableHeight}px` }}
-        >
+        <div className="flex-1 overflow-y-auto" style={{ maxHeight: `${availableHeight}px` }}>
           <table className="w-full table-fixed">
             <colgroup>
-              <col style={{ width: '30%' }} />
-              <col style={{ width: '15%' }} />
+              <col style={{ width: '36%' }} />
+              <col style={{ width: '14%' }} />
               <col style={{ width: '20%' }} />
               <col style={{ width: '20%' }} />
-              <col style={{ width: '15%' }} />
+              <col style={{ width: '10%' }} />
             </colgroup>
-            <tbody className="text-gray-700">
+            <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-500">
-                    Loading accounts...
+                  <td colSpan={5} className="h-32 text-center text-sm text-muted-foreground">
+                    Loading accounts…
                   </td>
                 </tr>
               ) : filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-500">
-                    No accounts found.
+                  <td colSpan={5} className="h-32 text-center text-sm text-muted-foreground">
+                    {searchTerm ? 'No accounts match your search.' : 'No accounts yet.'}
                   </td>
                 </tr>
               ) : (

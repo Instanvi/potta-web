@@ -56,16 +56,16 @@ const Select: React.FC<SelectProps> = ({
     <>
       {label && (
         <div
-          className={`text-gray-900 text-lg font-medium mb-[4px] ${labelClass}`}
+          className={`mb-[4px] text-sm font-medium text-foreground ${labelClass}`}
         >
           {label}
           {required && <span className=" text-red-500">*</span>}
         </div>
       )}
       <div
-        className={`relative  inline-block ${
-          border ? '' : 'border'
-        } w-full md:w-full ${SelectClass} ${error ? 'border-red-500' : ''}`}
+        className={`relative inline-block rounded-[2px] ${
+          border ? '' : 'border border-input'
+        } w-full md:w-full ${SelectClass} ${error ? 'border-destructive' : ''}`}
       >
         <div
           onClick={toggleDropdown}
@@ -76,7 +76,7 @@ const Select: React.FC<SelectProps> = ({
             error
               ? 'border-red-500 focus:ring-red-500 focus:border-red-500 focus:outline-none focus:ring-2'
               : !outline && !isDisabled
-              ? 'focus:ring-green-500 focus:border-green-500 focus:outline-none focus:ring-2'
+              ? 'focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-ring/30'
               : ''
           } w-full ${error ? 'border-2' : ''}`}
           aria-disabled={isDisabled}
@@ -104,7 +104,7 @@ const Select: React.FC<SelectProps> = ({
 
         {!isDisabled && (
           <ul
-            className={`absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 ${
+            className={`absolute z-50 mt-1 w-full rounded-[2px] border border-black/10 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${
               isOpen ? 'block' : 'hidden'
             }`}
           >
@@ -112,7 +112,7 @@ const Select: React.FC<SelectProps> = ({
               <li
                 key={option.value}
                 onClick={() => handleOptionClick(option.value)}
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                className="cursor-pointer px-3 py-2 text-sm text-foreground hover:bg-brand-subtle"
               >
                 {option.label}
               </li>
