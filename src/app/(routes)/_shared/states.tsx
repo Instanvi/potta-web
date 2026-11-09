@@ -9,6 +9,25 @@ export const PageContainer = ({ children, className }: { children: ReactNode; cl
   <div className={cn('min-h-full bg-main-bg p-4 md:p-5', className)}>{children}</div>
 );
 
+/**
+ * List page toolbar: search/filters on the left, actions (lime Export, green primary) on the right.
+ * Pass a DynamicFilter with className="p-0" as `children`.
+ */
+export const ListToolbar = ({
+  children,
+  actions,
+  className,
+}: {
+  children?: ReactNode;
+  actions?: ReactNode;
+  className?: string;
+}) => (
+  <div className={cn('mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between', className)}>
+    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">{children}</div>
+    {actions && <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">{actions}</div>}
+  </div>
+);
+
 /** White content block (payroll DashboardPanel). */
 export const Panel = ({ children, className }: { children: ReactNode; className?: string }) => (
   <div className={cn('dashboard-panel', className)}>{children}</div>
