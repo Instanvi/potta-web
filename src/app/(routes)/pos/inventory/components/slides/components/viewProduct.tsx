@@ -17,6 +17,7 @@ import Text from '@potta/components/textDisplay';
 import useGetOneProduct from '../../../_hooks/useGetOneProduct';
 import MyDropzone from '@potta/components/dropzone';
 import { productImageUrls } from '../../../_utils/images';
+import PayManagedNotice from '../../PayManagedNotice';
 
 interface ProductDetailsProps {
   productId: string;
@@ -74,6 +75,13 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
 
       {data && (
         <div className="relative h-screen place-items-center w-full max-w-4xl">
+          {data.payProductId && (
+            <PayManagedNotice
+              payProductId={data.payProductId}
+              lastSynced={data.lastSynced}
+              className="mb-4 w-full"
+            />
+          )}
           {/* Header */}
           <div className="w-full grid grid-cols-2 gap-3">
             <Text name="Name" value={data.name} height />

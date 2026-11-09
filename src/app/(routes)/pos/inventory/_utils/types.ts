@@ -34,6 +34,9 @@ export type Product = {
   structure?: 'SIMPLE' | 'ASSEMBLY' | 'SIMPLEGROUPS';
   reorderPoint?: number;
   components?: ProductComponent[];
+  /** payment-service product id; set when Pay owns this product. */
+  payProductId?: string | null;
+  lastSynced?: string | null;
 };
 
 export type ProductComponent = {

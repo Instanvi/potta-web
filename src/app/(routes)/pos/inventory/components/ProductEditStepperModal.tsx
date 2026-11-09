@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Slideover from '@potta/components/slideover';
 import EditProduct from './slides/components/update_product';
 import ProductUploadStep from './ProductUploadStep';
+import PayManagedNotice from './PayManagedNotice';
 
 interface ProductEditStepperModalProps {
   open: boolean;
@@ -30,6 +31,16 @@ const ProductEditStepperModal: React.FC<ProductEditStepperModalProps> = ({
     setOpen(false);
     if (onComplete) onComplete();
   };
+
+  if (product?.payProductId) {
+    return (
+      <Slideover open={open} setOpen={setOpen} edit={true} title={product.name ?? 'Product'}>
+        <div className="w-full max-w-3xl py-4">
+          <PayManagedNotice payProductId={product.payProductId} lastSynced={product.lastSynced} />
+        </div>
+      </Slideover>
+    );
+  }
 
   return (
     <Slideover open={open} setOpen={setOpen} edit={true} title="Edit Product">

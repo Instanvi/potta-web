@@ -17,6 +17,7 @@ import { productImageUrl, productImageUrls } from '../_utils/images';
 import { Can } from '@/components/auth/can';
 import Image from 'next/image';
 import ProductEditStepperModal from './ProductEditStepperModal';
+import { StatusBadge } from '../../../_shared/states';
 
 const InventoryTable = () => {
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
@@ -49,6 +50,11 @@ const InventoryTable = () => {
             />
           </div>
           <p className="mt-0.5">{original.name}</p>
+          {original.payProductId && (
+            <span title={`Managed in Pay · ${original.payProductId}`}>
+              <StatusBadge tone="success">Pay</StatusBadge>
+            </span>
+          )}
         </div>
       ),
     },
@@ -136,7 +142,7 @@ const InventoryTable = () => {
     {
       accessorKey: 'reorderPoint',
       header: 'Reorder Point',
-      cell: () => <div className="">355</div>,
+      cell: ({ row: { original } }) => <div>{original.reorderPoint ?? 0}</div>,
     },
     {
       accessorKey: 'actions',
@@ -170,20 +176,22 @@ const InventoryTable = () => {
                   setIsEditOpen(true);
                 }}
               >
-                <i className="ri-edit-line mr-2"></i> Edit
+                <i className="ri-edit-line mr-2"></i> {original.payProductId ? 'Managed in Pay' : 'Edit'}
               </DropdownMenuItem>
             </Can>
-            <Can resource="Item" action="remove">
-              <DropdownMenuItem
-                onClick={() => {
-                  setOpenDeleteModal(original.uuid);
-                  setIsDeleteOpen(true);
-                }}
-                className="text-red-600"
-              >
-                <i className="ri-delete-bin-line mr-2"></i> Delete
-              </DropdownMenuItem>
-            </Can>
+            {!original.payProductId && (
+              <Can resource="Item" action="remove">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenDeleteModal(original.uuid);
+                    setIsDeleteOpen(true);
+                  }}
+                  className="text-destructive"
+                >
+                  <i className="ri-delete-bin-line mr-2"></i> Delete
+                </DropdownMenuItem>
+              </Can>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
