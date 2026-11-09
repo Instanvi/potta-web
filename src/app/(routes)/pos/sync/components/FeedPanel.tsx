@@ -1,26 +1,34 @@
 'use client';
-import { Fragment, useState } from 'react';
-import Input from '@potta/components/input';
+import { useState } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@potta/components/ui/data-table';
+import { DateRangePicker } from '@potta/components/ui/date-picker';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@potta/components/ui/sheet';
 import { formatDateTime } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState } from '../../../_shared/states';
+import { EmptyState, ErrorState } from '../../../_shared/states';
 import { useFeed } from '../hooks';
-import { PosSyncKind } from '../utils/api';
-import { CursorPager, KindFilter, Mono, useCursorPager } from './shared';
+import { FeedItem, PosSyncKind } from '../utils/api';
+import { KindFilter, Mono, useCursorTable } from './shared';
 
 const LIMIT = 100;
 
 const FeedPanel = () => {
   const [kinds, setKinds] = useState<PosSyncKind[]>([]);
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const pager = useCursorPager();
-  const { data, isLoading, isFetching, error, refetch } = useFeed({
+  const [range, setRange] = useState<{ from?: string; to?: string }>({});
+  const [payloadItem, setPayloadItem] = useState<FeedItem | null>(null);
+  const pager = useCursorTable(LIMIT);
+  const { data, isLoading, error, refetch } = useFeed({
     cursor: pager.cursor,
-    limit: LIMIT,
+    limit: pager.limit,
     kinds: kinds.length ? kinds : undefined,
-    from: from ? `${from}T00:00:00.000Z` : undefined,
-    to: to ? `${to}T23:59:59.999Z` : undefined,
+    from: range.from ? `${range.from}T00:00:00.000Z` : undefined,
+    to: range.to ? `${range.to}T23:59:59.999Z` : undefined,
   });
   const items = data?.items ?? [];
 
@@ -29,105 +37,82 @@ const FeedPanel = () => {
     pager.reset();
   };
 
+  const columns: ColumnDef<FeedItem>[] = [
+    {
+      accessorKey: 'updatedAt',
+      header: 'Updated',
+      cell: ({ row }) => <span className="whitespace-nowrap">{formatDateTime(row.original.updatedAt)}</span>,
+    },
+    { accessorKey: 'kind', header: 'Kind' },
+    {
+      accessorKey: 'externalId',
+      header: 'External id',
+      cell: ({ row }) => <Mono>{row.original.externalId}</Mono>,
+    },
+    { accessorKey: 'op', header: 'Op' },
+    {
+      id: 'payload',
+      header: '',
+      enableSorting: false,
+      cell: ({ row }) =>
+        row.original.payload ? (
+          <button
+            type="button"
+            className="text-primary hover:underline"
+            onClick={() => setPayloadItem(row.original)}
+          >
+            Payload
+          </button>
+        ) : null,
+    },
+  ];
+
   return (
     <div>
-      <div className="flex flex-wrap items-end gap-3 mb-4">
+      <div className="mb-4 flex flex-wrap items-end gap-3">
         <KindFilter value={kinds} onChange={resetWith(setKinds)} />
-        <div className="w-44">
-          <Input
-            type="date"
-            name="from"
-            label="From"
-            value={from}
-            onchange={(e) => resetWith(setFrom)(e.target.value)}
-          />
-        </div>
-        <div className="w-44">
-          <Input
-            type="date"
-            name="to"
-            label="To"
-            value={to}
-            onchange={(e) => resetWith(setTo)(e.target.value)}
-          />
-        </div>
+        <DateRangePicker
+          label="Updated between"
+          className="w-72"
+          clearable
+          value={range}
+          onChange={resetWith(setRange)}
+        />
         {data?.highWatermark && (
-          <p className="pb-3 text-xs text-gray-500">
+          <p className="pb-3 text-xs text-muted-foreground">
             High watermark: {formatDateTime(data.highWatermark)}
           </p>
         )}
       </div>
-      {isLoading ? (
-        <LoadingState />
-      ) : error ? (
+      {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : items.length === 0 ? (
+      ) : !isLoading && items.length === 0 && pager.pageIndex === 0 ? (
         <EmptyState
           title="No changes"
           description="The feed lists catalog and document changes the desktop app will pull."
         />
       ) : (
-        <>
-          <div className="border border-gray-200">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-green-50 text-left">
-                  <th className="px-4 py-3 font-medium">Updated</th>
-                  <th className="px-4 py-3 font-medium">Kind</th>
-                  <th className="px-4 py-3 font-medium">External id</th>
-                  <th className="px-4 py-3 font-medium">Op</th>
-                  <th className="px-4 py-3 font-medium" />
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <Fragment key={item.eventId}>
-                    <tr className="border-t border-gray-100">
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        {formatDateTime(item.updatedAt)}
-                      </td>
-                      <td className="px-4 py-2">{item.kind}</td>
-                      <td className="px-4 py-2">
-                        <Mono>{item.externalId}</Mono>
-                      </td>
-                      <td className="px-4 py-2">{item.op}</td>
-                      <td className="px-4 py-2 text-right">
-                        {item.payload && (
-                          <button
-                            type="button"
-                            className="text-green-700 hover:underline"
-                            onClick={() =>
-                              setExpanded(expanded === item.eventId ? null : item.eventId)
-                            }
-                          >
-                            {expanded === item.eventId ? 'Hide payload' : 'Payload'}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                    {expanded === item.eventId && (
-                      <tr>
-                        <td colSpan={5} className="bg-gray-50 px-4 py-2">
-                          <pre className="max-h-64 overflow-auto text-xs">
-                            {JSON.stringify(item.payload, null, 2)}
-                          </pre>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <CursorPager
-            page={pager.page}
-            hasMore={!!data?.hasMore}
-            isFetching={isFetching}
-            onPrev={pager.prev}
-            onNext={() => pager.next(data?.nextCursor)}
-          />
-        </>
+        <DataTable
+          columns={columns}
+          data={items}
+          isLoading={isLoading}
+          withRowSelection={false}
+          {...pager.tableProps(data, items.length)}
+        />
       )}
+      <Sheet open={!!payloadItem} onOpenChange={(open) => !open && setPayloadItem(null)}>
+        <SheetContent side="right" className="flex h-full w-full flex-col p-0 sm:max-w-[560px]">
+          <SheetHeader className="border-b border-black/10 px-4 py-4">
+            <SheetTitle>Payload</SheetTitle>
+            <SheetDescription className="text-muted-foreground">
+              {payloadItem?.kind} · <Mono>{payloadItem?.externalId}</Mono>
+            </SheetDescription>
+          </SheetHeader>
+          <pre className="flex-1 overflow-auto bg-main-bg p-4 text-xs">
+            {JSON.stringify(payloadItem?.payload, null, 2)}
+          </pre>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

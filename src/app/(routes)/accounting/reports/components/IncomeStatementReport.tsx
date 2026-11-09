@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import Input from '@potta/components/input';
+import { DateRangePicker, parseDateValue } from '@potta/components/ui/date-picker';
 import {
   formatAmount,
   formatDate,
@@ -25,26 +25,16 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-3">
-        <div className="w-44">
-          <Input
-            type="date"
-            name="startDate"
-            label="From"
-            value={startDate}
-            onchange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className="w-44">
-          <Input
-            type="date"
-            name="endDate"
-            label="To"
-            value={endDate}
-            onchange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-      </div>
+      <DateRangePicker
+        id="incomeStatementPeriod"
+        label="Period"
+        className="w-72"
+        value={{ from: startDate, to: endDate }}
+        onChange={({ from, to }) => {
+          setStartDate(from || startOfYear());
+          setEndDate(to || today());
+        }}
+      />
       {invalidRange ? (
         <p className="text-sm text-destructive">The start date must be before the end date.</p>
       ) : isLoading ? (
@@ -69,7 +59,7 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
         </div>
         <div className="dashboard-panel max-w-3xl overflow-hidden">
           <p className="border-b border-black/[0.06] px-4 py-3 text-sm text-muted-foreground">
-            {formatDate(startDate)} – {formatDate(endDate)}
+            {formatDate(parseDateValue(startDate))} – {formatDate(parseDateValue(endDate))}
           </p>
           <ReportSection
             title="Income"

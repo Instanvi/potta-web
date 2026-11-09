@@ -11,6 +11,7 @@ import {
 } from '@potta/components/ui/sheet';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
+import { FormDatePicker } from '@potta/components/ui/date-picker';
 import Select from '@potta/components/select';
 import { today } from '../../../_shared/format';
 import {
@@ -195,13 +196,12 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input
-              type="date"
+            <FormDatePicker
+              control={control}
               name="transactionDate"
+              id="transactionDate"
               label="Date"
               required
-              register={register}
-              errors={errors.transactionDate}
             />
             <Controller
               name="entryType"

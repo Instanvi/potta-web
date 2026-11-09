@@ -2,13 +2,18 @@
 import React from 'react';
 import CustomerContent from '../../../../components/shared/CustomerContent';
 import RootLayout from '../../layout';
+import { PageContainer, PageHeader } from '../../_shared/states';
 
 const InvoiceCustomers = () => {
   return (
     <RootLayout>
-      <div className="w-full">
+      <PageContainer>
+        <PageHeader
+          title="Customers"
+          description="People and businesses you invoice: contact details, type and status."
+        />
         <CustomerContent />
-      </div>
+      </PageContainer>
     </RootLayout>
   );
 };

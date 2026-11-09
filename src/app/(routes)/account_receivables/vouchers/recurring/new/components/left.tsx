@@ -11,6 +11,7 @@ import Select from '@potta/components/select';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import { set } from 'react-hook-form';
 import TextArea from '@potta/components/textArea';
+import { DatePicker } from '@potta/components/ui/date-picker';
 
 import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
@@ -391,47 +392,26 @@ const Left = () => {
         </div>
 
         <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-          <Input
-            type="date"
-            label={
-              <>
-                Issued Date
-                <RequiredMark />
-              </>
-            }
+          <DatePicker
+            label="Issued Date"
+            required
             name="issueDate"
             value={issueDate}
-            onchange={(e) =>
-              handleInputChange(
-                'issueDate',
-                typeof e === 'string' ? e : e.target.value
-              )
-            }
+            onChange={(value) => handleInputChange('issueDate', value)}
             placeholder="Select issue date"
-            errors={
-              errors.issueDate ? { message: errors.issueDate } : undefined
-            }
+            error={errors.issueDate}
           />
         </div>
         <div className={`${errors.dueDate ? 'error-field' : ''}`}>
-          <Input
-            type="date"
-            label={
-              <>
-                Due Date
-                <RequiredMark />
-              </>
-            }
+          <DatePicker
+            label="Due Date"
+            required
             name="dueDate"
             value={dueDate}
-            onchange={(e) =>
-              handleInputChange(
-                'dueDate',
-                typeof e === 'string' ? e : e.target.value
-              )
-            }
+            min={issueDate || undefined}
+            onChange={(value) => handleInputChange('dueDate', value)}
             placeholder="Select due date"
-            errors={errors.dueDate ? { message: errors.dueDate } : undefined}
+            error={errors.dueDate}
           />
         </div>
       </div>
@@ -458,26 +438,14 @@ const Left = () => {
             )}
           </div>
           <div className={`${errors.startDate ? 'error-field' : ''}`}>
-            <Input
-              type="date"
-              label={
-                <>
-                  Start Date
-                  <RequiredMark />
-                </>
-              }
+            <DatePicker
+              label="Start Date"
+              required
               name="startDate"
               value={startDate}
-              onchange={(e) =>
-                handleInputChange(
-                  'startDate',
-                  typeof e === 'string' ? e : e.target.value
-                )
-              }
+              onChange={(value) => handleInputChange('startDate', value)}
               placeholder="Select start date"
-              errors={
-                errors.startDate ? { message: errors.startDate } : undefined
-              }
+              error={errors.startDate}
             />
           </div>
         </div>
@@ -507,26 +475,15 @@ const Left = () => {
 
           {isEndDateOption ? (
             <div className={`${errors.endDate ? 'error-field' : ''}`}>
-              <Input
-                type="date"
-                label={
-                  <>
-                    End Date
-                    <RequiredMark />
-                  </>
-                }
+              <DatePicker
+                label="End Date"
+                required
                 name="endDate"
                 value={endDate}
-                onchange={(e) =>
-                  handleInputChange(
-                    'endDate',
-                    typeof e === 'string' ? e : e.target.value
-                  )
-                }
+                min={startDate || undefined}
+                onChange={(value) => handleInputChange('endDate', value)}
                 placeholder="Select end date"
-                errors={
-                  errors.endDate ? { message: errors.endDate } : undefined
-                }
+                error={errors.endDate}
               />
             </div>
           ) : (

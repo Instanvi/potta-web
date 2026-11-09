@@ -8,6 +8,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import Select from '@potta/components/select';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import { Can } from '@/components/auth/can';
 
@@ -188,26 +189,14 @@ const Left = () => {
           />
         </div>
         <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-          <Input
-            type="date"
-            label={
-              <>
-                Issue Date
-                <RequiredMark />
-              </>
-            }
+          <DatePicker
+            label="Issue Date"
+            required
             name="issueDate"
             value={issueDate}
-            onchange={(e) =>
-              handleInputChange(
-                'issueDate',
-                typeof e === 'string' ? e : e.target.value
-              )
-            }
+            onChange={(value) => handleInputChange('issueDate', value)}
             placeholder="Select issue date"
-            errors={
-              errors.issueDate ? { message: errors.issueDate } : undefined
-            }
+            error={errors.issueDate}
           />
         </div>
       </div>

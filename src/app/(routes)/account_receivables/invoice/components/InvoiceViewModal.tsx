@@ -460,8 +460,8 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={50} minSize={50}>
             {/* Left Panel - Invoice PDF View */}
-            <div className="w-full h-full bg-[#F2F2F2] overflow-y-auto">
-              <div className="flex min-h-full flex-col items-center overflow-y-auto p-10 w-full scroll bg-[#F2F2F2] try">
+            <div className="w-full h-full bg-main-bg overflow-y-auto">
+              <div className="flex min-h-full flex-col items-center overflow-y-auto p-10 w-full scroll bg-main-bg try">
                 <div className=" flex-1 min-h-full bg-white space-y-8  min-w-[45rem] w-full mb-10">
                   <div className="h-36 w-full flex items-center justify-between px-8 bg-green-700">
                     <div>

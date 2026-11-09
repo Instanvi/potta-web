@@ -8,16 +8,9 @@ interface Props {
 }
 
 const InvoiceLayout: FC<Props> = ({ children }) => {
-  //   console.log = () => {};
   return (
     <NextUiProvider>
-      <RootLayout>
-        <div className="w-full ">
-          <div className=" w-full overflow-hidden  relative  p-0 ">
-            {children}
-          </div>
-        </div>
-      </RootLayout>
+      <RootLayout>{children}</RootLayout>
     </NextUiProvider>
   );
 };

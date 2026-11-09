@@ -5,6 +5,7 @@ export type Filter = {
   sortBy?: 'updatedAt' | 'createdAt';
   sortOrder?: 'ASC' | 'DESC';
   search?: string;
+  productType?: 'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS';
 };
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

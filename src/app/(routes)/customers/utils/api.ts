@@ -8,8 +8,11 @@ export const customerApi = {
     return result?.data;
   },
   getAll: async (filter: Record<string, any> = {}) => {
-    const queryParams = new URLSearchParams(filter).toString();
-    const result = await axios.post(`/customer/filter?${queryParams}`);
+    const queryParams = new URLSearchParams();
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') queryParams.append(key, String(value));
+    });
+    const result = await axios.post(`/customer/filter?${queryParams.toString()}`);
     return result.data;
   },
   getOne: async (customer_id: string) => {

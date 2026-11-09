@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FormProvider,
   useForm,
@@ -14,7 +14,6 @@ import Audience from './components/audience';
 import Scheduling from './components/scheduling';
 import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks'; // Import the hook
-import { ContextData } from '../../../../../components/providers/DataProvider';
 import { Loader2 } from 'lucide-react';
 
 // Define a new type that includes all possible tab values
@@ -134,7 +133,6 @@ const commonFields: Array<keyof FormData> = [
 ];
 
 export default function NewVoucherPage() {
-  const context = useContext(ContextData);
   const [activeTab, setActiveTab] = useState<AllTabTypes>('VoucherType');
   const [voucherType, setVoucherType] = useState<VoucherType>('ROYALTY_POINTS');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -466,11 +464,7 @@ export default function NewVoucherPage() {
   const tabs: TabType[] = ['Code', 'Policy', 'Audience', 'Scheduling'];
 
   return (
-    <div
-      className={`${
-        context?.layoutMode === 'sidebar' ? 'px-8' : 'px-5'
-      } h-[92.7vh] overflow-y-auto flex`}
-    >
+    <div className="flex h-[92.7vh] overflow-y-auto p-4 md:p-5">
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="flex w-full">
           {/* Sidebar Navigation - Fixed width */}

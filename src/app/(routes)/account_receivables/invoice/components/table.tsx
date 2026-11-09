@@ -4,6 +4,15 @@ import { ColumnDef } from '@tanstack/react-table';
 import moment from 'moment';
 import { toast } from 'sonner';
 import { DataTable } from '@potta/components/ui/data-table';
+import { DateRangePicker } from '@potta/components/ui/date-picker';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { ErrorState, ListToolbar } from '../../../_shared/states';
+
+const startOfLocalDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+const endOfLocalDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
 import { IFilter } from '../_utils/types';
 import {
@@ -75,14 +84,23 @@ interface Invoice {
 }
 
 const InvoiceTable = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
   const [searchValue, setSearchValue] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt:DESC');
   const [isOpen, setIsOpen] = useState(false);
 
   // Use shared filter context
-  const { dateRange, statusFilter, setStatusFilter } = useInvoiceFilter();
+  const { dateRange, setDateRange, statusFilter, setStatusFilter } =
+    useInvoiceFilter();
+  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
+  const issuedFrom = dateRange?.from
+    ? startOfLocalDay(dateRange.from).toISOString()
+    : undefined;
+  const issuedTo = dateRange?.from
+    ? endOfLocalDay(dateRange.to ?? dateRange.from).toISOString()
+    : undefined;
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [statusFilter, debouncedSearch, issuedFrom, issuedTo],
+  });
 
   // Modal states
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -97,9 +115,13 @@ const InvoiceTable = () => {
     page,
     sortOrder: 'DESC',
     sortBy: 'createdAt',
+    status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
+    search: debouncedSearch || undefined,
+    issuedFrom,
+    issuedTo,
   };
 
-  const { data, isLoading, error } = useGetAllInvoice(filter);
+  const { data, isLoading, error, refetch } = useGetAllInvoice(filter);
   const approveInvoiceMutation = useApproveInvoice();
 
   // Cleanup modal states when component unmounts
@@ -114,76 +136,15 @@ const InvoiceTable = () => {
     };
   }, []);
 
-  // Filter data based on search, status, and date range
-  const filteredData = useMemo(() => {
-    if (!data?.data) return [];
-
-    // Filter to show only regular invoices (not proforma invoices)
-    let filtered = data.data.filter(
-      (invoice: Invoice) => invoice.invoiceType !== 'PROFORMA_INVOICE'
-    );
-
-    // Filter by status
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(
-        (invoice: Invoice) =>
-          invoice.status.toLowerCase() === statusFilter.toLowerCase()
-      );
-    }
-
-    // Filter by date range (from context)
-    if (dateRange?.from && dateRange?.to) {
-      filtered = filtered.filter((invoice: Invoice) => {
-        const invoiceDate = new Date(invoice.issuedDate);
-
-        // Create date objects for comparison (ignore time)
-        const invoiceDateOnly = new Date(
-          invoiceDate.getFullYear(),
-          invoiceDate.getMonth(),
-          invoiceDate.getDate()
-        );
-        const fromDateOnly = new Date(
-          dateRange.from!.getFullYear(),
-          dateRange.from!.getMonth(),
-          dateRange.from!.getDate()
-        );
-        const toDateOnly = new Date(
-          dateRange.to!.getFullYear(),
-          dateRange.to!.getMonth(),
-          dateRange.to!.getDate()
-        );
-
-        console.log('Table filtering invoice:', {
-          invoiceId: invoice.invoiceId,
-          issuedDate: invoice.issuedDate,
-          invoiceDateOnly: invoiceDateOnly.toISOString(),
-          fromDateOnly: fromDateOnly.toISOString(),
-          toDateOnly: toDateOnly.toISOString(),
-          isInRange:
-            invoiceDateOnly >= fromDateOnly && invoiceDateOnly <= toDateOnly,
-        });
-
-        return invoiceDateOnly >= fromDateOnly && invoiceDateOnly <= toDateOnly;
-      });
-    }
-
-    // Filter by search value
-    if (searchValue) {
-      const searchLower = searchValue.toLowerCase();
-      filtered = filtered.filter(
-        (invoice: Invoice) =>
-          invoice.invoiceId.toLowerCase().includes(searchLower) ||
-          (invoice.code && invoice.code.toLowerCase().includes(searchLower)) ||
-          invoice.notes.toLowerCase().includes(searchLower) ||
-          (invoice.customer &&
-            `${invoice.customer.firstName} ${invoice.customer.lastName}`
-              .toLowerCase()
-              .includes(searchLower))
-      );
-    }
-
-    return filtered;
-  }, [data?.data, statusFilter, dateRange, searchValue]);
+  // /invoice/filter's where body is equality-only and already forces invoiceType,
+  // so proformas can only be hidden from the loaded page.
+  const filteredData = useMemo(
+    () =>
+      (data?.data ?? []).filter(
+        (invoice: Invoice) => invoice.invoiceType !== 'PROFORMA_INVOICE'
+      ),
+    [data?.data]
+  );
 
   const getStatusInfo = (status: string, dueDate?: string) => {
     const statusUpper = status.toUpperCase();
@@ -250,13 +211,13 @@ const InvoiceTable = () => {
         return {
           status: 'Paid',
           icon: <CheckCircle className="h-4 w-4" />,
-          className: 'bg-green-50 text-green-700 border-green-500',
+          className: 'bg-brand-subtle text-primary border-primary/40',
         };
       case 'APPROVED':
         return {
           status: 'Approved',
           icon: <CheckCircle className="h-4 w-4" />,
-          className: 'bg-green-50 text-green-700 border-green-500',
+          className: 'bg-brand-subtle text-primary border-primary/40',
         };
       case 'REJECTED':
         return {
@@ -539,47 +500,61 @@ const InvoiceTable = () => {
   ];
 
   return (
-    <div className="">
-      <div className="flex justify-between items-center w-full">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search invoices by customer, ID, or title..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
+    <>
+      <ListToolbar
+        actions={
+          <>
+            <Button
+              text={'Export'}
+              icon={<i className="ri-upload-2-line"></i>}
+              theme="lightBlue"
+              type={'button'}
+            />
+            <Button
+              text={'Create Invoice'}
+              icon={<i className="ri-file-add-line"></i>}
+              theme="default"
+              type={'button'}
+              onClick={() => {
+                setIsOpen(true);
+              }}
+            />
+          </>
+        }
+      >
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onSearchClear={handleSearchClear}
+          searchPlaceholder="Search invoices by customer, ID, or title..."
+          filters={filterConfig}
+          className="p-0"
+        />
+        <DateRangePicker
+          valueType="date"
+          className="w-auto min-w-[240px]"
+          placeholder="Issued: all dates"
+          clearable
+          value={dateRange ?? {}}
+          onChange={(range) =>
+            setDateRange(
+              range.from ? { from: range.from, to: range.to } : undefined
+            )
+          }
+        />
+      </ListToolbar>
 
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4">
-          <Button
-            text={'Export'}
-            icon={<i className="ri-upload-2-line"></i>}
-            theme="lightBlue"
-            type={'button'}
-            color={true}
-          />
-          <Button
-            text={'Create Invoice'}
-            icon={<i className="ri-file-add-line"></i>}
-            theme="default"
-            type={'button'}
-            onClick={() => {
-              setIsOpen(true);
-            }}
-          />
-        </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        isLoading={isLoading}
-        withRowSelection
-      />
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          isLoading={isLoading}
+          withRowSelection
+          {...tableProps(data?.meta, data?.data?.length)}
+        />
+      )}
 
       {/* Modals */}
       <ModalInvoice isOpen={isOpen} setIsOpen={setIsOpen} />
@@ -611,7 +586,7 @@ const InvoiceTable = () => {
         setOpen={setEditModalOpen}
         invoice={invoiceToEdit}
       />
-    </div>
+    </>
   );
 };
 

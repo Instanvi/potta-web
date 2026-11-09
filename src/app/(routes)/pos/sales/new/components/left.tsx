@@ -11,6 +11,7 @@ import SliderCustomer from '@potta/app/(routes)/customers/components/customerSli
 import Select from '@potta/components/select';
 import { Customer } from '../../../../customers/utils/types';
 import { toast } from 'sonner';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { useCreateSalesReceipt } from '../../hooks/useCreateReceipt';
 import { SalesReceiptPayload } from '../../../utils/validation';
 import {
@@ -231,7 +232,7 @@ const Left = () => {
   const paymentMethods = PAYMENT_METHODS;
 
   return (
-    <div className="max-w-5xl min-w-5xl px-2 overflow-y-auto scroll bg-white  ">
+    <div className="max-w-5xl min-w-5xl overflow-y-auto scroll bg-white px-2">
       <div className="w-full grid grid-cols-4 gap-4">
         <div>
           <Select
@@ -247,24 +248,14 @@ const Left = () => {
           />
         </div>
         <div className={`${errors.saleDate ? 'error-field' : ''}`}>
-          <Input
-            type="date"
-            label={
-              <>
-                Sale Date
-                <RequiredMark />
-              </>
-            }
+          <DatePicker
+            label="Sale Date"
+            required
             name="saleDate"
             value={date}
-            onchange={(e) =>
-              handleInputChange(
-                'saleDate',
-                typeof e === 'string' ? e : e.target.value
-              )
-            }
+            onChange={(value) => handleInputChange('saleDate', value)}
             placeholder="Select sale date"
-            errors={errors.saleDate ? { message: errors.saleDate } : undefined}
+            error={errors.saleDate}
           />
         </div>
         <div className={`${errors.receiptNumber ? 'error-field' : ''}`}>
@@ -334,7 +325,7 @@ const Left = () => {
             <button
               type="button"
               onClick={() => setIsAddCustomerDrawer(true)}
-              className="flex items-center justify-center text-white bg-green-700 rounded-full size-10"
+              className="flex items-center justify-center text-primary-foreground bg-primary rounded-full size-10"
             >
               <i className="ri-add-line text-2xl"></i>
             </button>
@@ -364,9 +355,9 @@ const Left = () => {
             <div
               key={option.value}
               onClick={() => handlePaymentMethodClick(option.value)}
-              className={`p-4 border cursor-pointer hover:border-green-500 hover:text-green-500 ${
+              className={`p-4 border cursor-pointer hover:border-primary hover:text-primary ${
                 selectedPaymentMethod === option.value
-                  ? 'border-green-500 text-green-500'
+                  ? 'border-primary text-primary'
                   : errors.paymentMethod && formSubmitted
                   ? 'border-red-500'
                   : 'border-gray-300'
@@ -377,7 +368,7 @@ const Left = () => {
                   type="checkbox"
                   checked={selectedPaymentMethod === option.value}
                   onChange={() => handlePaymentMethodClick(option.value)}
-                  className="mr-2 text-xl text-white accent-green-700"
+                  className="mr-2 text-xl text-white accent-primary"
                   name="paymentMethod"
                 />
                 <span>{option.label}</span>
@@ -415,7 +406,7 @@ const Left = () => {
       <textarea
         value={note}
         onChange={(e) => handleInputChange('notes', e.target.value)}
-        className="h-36 border p-2 w-full outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+        className="h-36 border p-2 w-full outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
    "
       ></textarea>
       {errors.notes && (

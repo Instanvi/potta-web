@@ -245,7 +245,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                   opacity: showPreview ? 1 : 0,
                 }}
               >
-                <div className="h-[92.7vh] overflow-y-auto bg-[#F2F2F2]">
+                <div className="h-[92.7vh] overflow-y-auto bg-main-bg">
                   {/* Only render PdfView when preview is showing for performance */}
                   {showPreview && <PdfView />}
                 </div>

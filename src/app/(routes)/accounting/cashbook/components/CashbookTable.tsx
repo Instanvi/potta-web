@@ -3,8 +3,10 @@ import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { DataTable } from '@potta/components/ui/data-table';
+import { useServerPagination } from '@/hooks/use-server-pagination';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
+import { DateRangePicker } from '@potta/components/ui/date-picker';
 import Select from '@potta/components/select';
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
@@ -22,7 +24,15 @@ const CashbookTable = () => {
   const [cashAccountId, setCashAccountId] = useState('');
   const [reference, setReference] = useState('');
 
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [startDate, endDate, direction, cashAccountId, reference],
+  });
+
   const filter: CashbookFilter = {
+    page,
+    limit,
+    sortBy: 'transactionDate:DESC',
     startDate: startDate || undefined,
     endDate: endDate ? `${endDate}T23:59:59.999Z` : undefined,
     direction: direction || undefined,
@@ -140,24 +150,17 @@ const CashbookTable = () => {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-wrap items-end gap-3">
-          <div className="w-40">
-            <Input
-              type="date"
-              name="startDate"
-              label="From"
-              value={startDate}
-              onchange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div className="w-40">
-            <Input
-              type="date"
-              name="endDate"
-              label="To"
-              value={endDate}
-              onchange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
+          <DateRangePicker
+            id="cashbookPeriod"
+            label="Period"
+            className="w-72"
+            clearable
+            value={{ from: startDate, to: endDate }}
+            onChange={({ from, to }) => {
+              setStartDate(from ?? '');
+              setEndDate(to ?? '');
+            }}
+          />
           <div className="w-40">
             <Select
               label="Direction"
@@ -208,8 +211,8 @@ const CashbookTable = () => {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Money in (shown)" value={formatAmount(totals.in)} tone="success" />
-        <StatCard label="Money out (shown)" value={formatAmount(totals.out)} tone="destructive" />
+        <StatCard label="Money in (this page)" value={formatAmount(totals.in)} tone="success" />
+        <StatCard label="Money out (this page)" value={formatAmount(totals.out)} tone="destructive" />
         <StatCard label="Net" value={formatAmount(totals.in - totals.out)} />
       </div>
 
@@ -227,15 +230,9 @@ const CashbookTable = () => {
             data={rows}
             isLoading={isLoading}
             withRowSelection={false}
-            pageSize={20}
-            pageSizeOptions={[20]}
+            pageSizeOptions={[20, 50, 100]}
+            {...tableProps(data?.meta, rows.length)}
           />
-          {data?.meta && data.meta.totalItems > rows.length && (
-            <p className="text-xs text-muted-foreground">
-              Showing the latest {rows.length} of {data.meta.totalItems} entries. Narrow the
-              date range to see older entries.
-            </p>
-          )}
         </>
       )}
 

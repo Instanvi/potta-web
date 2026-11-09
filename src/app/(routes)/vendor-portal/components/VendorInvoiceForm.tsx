@@ -5,7 +5,7 @@ import useCreateVendorInvoice from '../hooks/useCreateVendorInvoice';
 import { toast } from 'sonner';
 import Input from '@potta/components/input';
 import Button from '@potta/components/button';
-import { DateInput } from '@potta/components/customDatePicker';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import TextArea from '@potta/components/textArea';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import {
@@ -250,31 +250,27 @@ const VendorInvoiceForm: React.FC<VendorInvoiceFormProps> = ({
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Invoice Date
-                      </label>
-                      <DateInput
-                        name="invoiceDate"
-                        value={invoiceDate}
-                        onChange={(date) => date && setInvoiceDate(date)}
-                        placeholder="Select invoice date"
-                        disabled={true}
-                      />
-                    </div>
+                    <DatePicker
+                      id="invoiceDate"
+                      name="invoiceDate"
+                      label="Invoice Date"
+                      valueType="date"
+                      value={invoiceDate}
+                      onChange={(date) => date && setInvoiceDate(date)}
+                      placeholder="Select invoice date"
+                      disabled
+                    />
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Due Date
-                      </label>
-                      <DateInput
-                        name="dueDate"
-                        value={dueDate}
-                        onChange={(date) => date && setDueDate(date)}
-                        placeholder="Select due date"
-                        disabled={true}
-                      />
-                    </div>
+                    <DatePicker
+                      id="dueDate"
+                      name="dueDate"
+                      label="Due Date"
+                      valueType="date"
+                      value={dueDate}
+                      onChange={(date) => date && setDueDate(date)}
+                      placeholder="Select due date"
+                      disabled
+                    />
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -341,7 +337,7 @@ const VendorInvoiceForm: React.FC<VendorInvoiceFormProps> = ({
                     <h3 className="text-lg font-medium text-gray-900 mb-4">
                       Line Items
                     </h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="rounded-[2px] border border-black/[0.08] bg-card p-4">
                       <div className="space-y-3">
                         {lineItems.map((item, index) => (
                           <div
@@ -373,7 +369,7 @@ const VendorInvoiceForm: React.FC<VendorInvoiceFormProps> = ({
                   </div>
 
                   {/* Totals */}
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="rounded-[2px] border border-black/[0.08] bg-card p-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span>Subtotal:</span>
@@ -451,7 +447,7 @@ const VendorInvoiceForm: React.FC<VendorInvoiceFormProps> = ({
               opacity: showPreview ? 1 : 0,
             }}
           >
-            <div className="h-[92.7vh] bg-[#F2F2F2] overflow-hidden">
+            <div className="h-[92.7vh] bg-main-bg overflow-hidden">
               {showPreview && (
                 <VendorInvoicePdfView
                   invoiceData={{

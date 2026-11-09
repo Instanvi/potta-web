@@ -75,7 +75,7 @@ const PdfView = () => {
   const total = subtotal + totalTax;
 
   return (
-    <div className="flex  flex-col items-center justify-center overflow-y-auto w-full bg-[#F2F2F2]">
+    <div className="flex  flex-col items-center justify-center overflow-y-auto w-full bg-main-bg">
       <div className="flex min-w-[30rem] justify-between w-full p-8">
         <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>

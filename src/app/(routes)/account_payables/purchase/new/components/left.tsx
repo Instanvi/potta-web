@@ -12,7 +12,7 @@ import Checkbox from '@potta/components/checkbox';
 import { toast } from 'sonner';
 import TextArea from '@potta/components/textArea';
 import useCreatePurchaseOrder from '../hooks/useCreatePurchase';
-import { DateInput } from '@potta/components/customDatePicker';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { useRouter } from 'next/navigation';
 import {
   validatePurchaseOrderForm,
@@ -373,24 +373,26 @@ const Left = () => {
         <div className="  ">
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className={`${errors.orderDate ? 'error-field' : ''}`}>
-              <DateInput
+              <DatePicker
+                valueType="date"
                 label={'Order Date'}
                 name="orderDate"
-                value={orderDate ? new Date(orderDate) : undefined}
+                value={orderDate ? new Date(orderDate) : null}
                 onChange={(date) =>
                   handleInputChange('orderDate', date ? date.toISOString() : '')
                 }
                 placeholder="Select order date"
                 required
-                errors={errors.orderDate as any}
+                error={errors.orderDate}
               />
             </div>
 
             <div className={`${errors.requiredDate ? 'error-field' : ''}`}>
-              <DateInput
+              <DatePicker
+                valueType="date"
                 label={'Due Date'}
                 name="requiredDate"
-                value={requiredDate ? new Date(requiredDate) : undefined}
+                value={requiredDate ? new Date(requiredDate) : null}
                 onChange={(date) =>
                   handleInputChange(
                     'requiredDate',
@@ -399,7 +401,8 @@ const Left = () => {
                 }
                 placeholder="Select required date"
                 required
-                errors={errors.requiredDate as any}
+                min={orderDate ? new Date(orderDate) : undefined}
+                error={errors.requiredDate}
               />
             </div>
           </div>

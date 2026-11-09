@@ -12,9 +12,12 @@ export type {
 };
 
 export async function fetchPurchaseOrders(filter: PurchaseOrderFilter) {
+  const where: Record<string, unknown> = {};
+  if (filter.status) where.status = filter.status;
+  if (filter.vendorId) where.salePerson = { uuid: filter.vendorId };
   const response = await axios.post(
     '/purchase-order/filter',
-    {},
+    where,
     {
       params: {
         page: filter.page,

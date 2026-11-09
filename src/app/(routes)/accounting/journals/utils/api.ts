@@ -1,10 +1,25 @@
 import axios from 'config/axios.config';
-import { CreateJournalPayload, Journal } from './types';
+import { CreateJournalPayload, Journal, JournalFilter, JournalResponse } from './types';
 
 export const journalApi = {
-  getAll: async (): Promise<Journal[]> => {
-    const result = await axios.get('/accounting/journal-entries');
-    return Array.isArray(result.data) ? result.data : result.data?.data ?? [];
+  getAll: async ({ page = 1, limit = 20, search }: JournalFilter = {}): Promise<JournalResponse> => {
+    const params: Record<string, string | number> = { page, limit, sortBy: 'date:DESC' };
+    if (search?.trim()) params.search = search.trim();
+    const result = await axios.get('/accounting/journal-entries', { params });
+    if (Array.isArray(result.data)) {
+      return {
+        data: result.data,
+        meta: {
+          itemsPerPage: result.data.length,
+          totalItems: result.data.length,
+          currentPage: 1,
+          totalPages: 1,
+          sortBy: [['date', 'DESC']],
+        },
+        links: { current: '' },
+      };
+    }
+    return result.data as JournalResponse;
   },
 
   getOne: async (journalId: string) => {
@@ -25,5 +40,5 @@ export const journalApi = {
 
 export const journalKeys = {
   all: ['get-all-journals'] as const,
-  list: () => ['get-all-journals', 'entries'] as const,
+  list: (filter: JournalFilter = {}) => ['get-all-journals', 'entries', filter] as const,
 };

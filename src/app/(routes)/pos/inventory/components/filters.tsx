@@ -12,6 +12,7 @@ import DynamicFilter from '@potta/components/dynamic-filter';
 import useImportFromPay from '../_hooks/useImportFromPay';
 import { PayImportResult } from '../_utils/payImportApi';
 import { Can } from '@/components/auth/can';
+import { ListToolbar } from '../../../_shared/states';
 
 const summarize = (r: PayImportResult) =>
   [
@@ -111,42 +112,43 @@ const Filter = () => {
 
   return (
     <>
-      <div className="flex w-full items-center justify-between gap-3 overflow-visible">
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search inventory..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
-
-        <div className="relative flex items-center gap-3">
-          <Can resource="Item" action="restock">
-            <Button
-              type="button"
-              text="Restock"
-              icon={<SquareStack className="h-4 w-4" />}
-              theme="outline"
-              onClick={() => setIsRestockOpen(true)}
-              disabled={!selectedProduct}
-            />
-          </Can>
-          <Can resource="Item" action="create">
-            <Button
-              type="button"
-              text={importFromPay.isPending ? 'Syncing…' : 'Sync from Pay'}
-              icon={<ArrowsClockwise size={16} className={importFromPay.isPending ? 'animate-spin' : ''} />}
-              theme="default"
-              onClick={handleSyncFromPay}
-              disabled={importFromPay.isPending}
-            />
-          </Can>
-        </div>
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <ListToolbar
+        className="mb-2"
+        actions={
+          <>
+            <Can resource="Item" action="restock">
+              <Button
+                type="button"
+                text="Restock"
+                icon={<SquareStack className="h-4 w-4" />}
+                theme="outline"
+                onClick={() => setIsRestockOpen(true)}
+                disabled={!selectedProduct}
+              />
+            </Can>
+            <Can resource="Item" action="create">
+              <Button
+                type="button"
+                text={importFromPay.isPending ? 'Syncing…' : 'Sync from Pay'}
+                icon={<ArrowsClockwise size={16} className={importFromPay.isPending ? 'animate-spin' : ''} />}
+                theme="default"
+                onClick={handleSyncFromPay}
+                disabled={importFromPay.isPending}
+              />
+            </Can>
+          </>
+        }
+      >
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onSearchClear={handleSearchClear}
+          searchPlaceholder="Search inventory..."
+          filters={filterConfig}
+          className="p-0"
+        />
+      </ListToolbar>
+      <p className="mb-4 text-xs text-muted-foreground">
         Products are managed in Pay. Create or edit them there, then use Sync from Pay.
       </p>
 

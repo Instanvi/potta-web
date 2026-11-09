@@ -9,6 +9,7 @@ import Input from '@potta/components/input';
 import Select from '@potta/components/select';
 import SearchableSelect from '@potta/components/searchableSelect';
 import TextArea from '@potta/components/textArea';
+import { FormDatePicker } from '@potta/components/ui/date-picker';
 import { apiErrorMessage, formatDate, today, toDateInput } from '../../../../_shared/format';
 import { usePurchaseOrderOptions, useVendorOptions } from '../../../hooks';
 import { apLookupsApi } from '../../../utils/api';
@@ -63,6 +64,7 @@ const BillForm = () => {
   const vendorId = useWatch({ control, name: 'vendorId' });
   const purchaseOrderId = useWatch({ control, name: 'purchaseOrderId' });
   const currency = useWatch({ control, name: 'currency' });
+  const issueDate = useWatch({ control, name: 'issueDate' });
   const lines = useWatch({ control, name: 'lineItems' }) ?? [];
   const expenseAccountCode = useWatch({ control, name: 'expenseAccountCode' });
   const { data: purchaseOrders = [], isFetching: ordersLoading } = usePurchaseOrderOptions(vendorId || undefined);
@@ -195,7 +197,7 @@ const BillForm = () => {
                       type="button"
                       disabled={copyingLines}
                       onClick={copyLinesFromOrder}
-                      className="mt-1 text-sm font-medium text-green-700 hover:text-green-800 disabled:opacity-50"
+                      className="mt-1 text-sm font-medium text-primary hover:underline disabled:opacity-50"
                     >
                       {copyingLines ? 'Copying lines...' : 'Copy line items from this order'}
                     </button>
@@ -214,22 +216,8 @@ const BillForm = () => {
               register={register}
               errors={errors.vendorInvoiceNumber}
             />
-            <Input
-              type="date"
-              name="issueDate"
-              label="Issue date"
-              required
-              register={register}
-              errors={errors.issueDate}
-            />
-            <Input
-              type="date"
-              name="dueDate"
-              label="Due date"
-              required
-              register={register}
-              errors={errors.dueDate}
-            />
+            <FormDatePicker control={control} name="issueDate" label="Issue date" required />
+            <FormDatePicker control={control} name="dueDate" label="Due date" required min={issueDate} />
             <Controller
               control={control}
               name="currency"
@@ -308,7 +296,7 @@ const BillForm = () => {
               </div>
               <div className="flex justify-between border-t border-gray-200 pt-3 text-base font-medium">
                 <span>Total</span>
-                <span className="text-green-700">{formatMoney(summary.total, currency)}</span>
+                <span className="text-primary">{formatMoney(summary.total, currency)}</span>
               </div>
             </div>
             <p className="mt-4 text-xs text-gray-500">

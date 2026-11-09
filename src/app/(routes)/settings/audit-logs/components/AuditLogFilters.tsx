@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@potta/components/shadcn/select';
+import { DateRangePicker } from '@potta/components/ui/date-picker';
 import { AUDIT_ENTITY_TYPES } from '../utils/format';
 
 export interface AuditFilterState {
@@ -34,9 +35,9 @@ const ALL = '__all__';
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <label className="flex min-w-0 flex-col gap-1">
-      <span className="text-xs font-medium text-gray-600">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       {children}
-      {hint ? <span className="text-[11px] text-gray-500">{hint}</span> : null}
+      {hint ? <span className="text-[11px] text-muted-foreground">{hint}</span> : null}
     </label>
   );
 }
@@ -52,7 +53,7 @@ export default function AuditLogFilters({
   const dirty = Object.values(value).some(Boolean);
 
   return (
-    <div className="grid grid-cols-1 gap-3 border border-black/10 bg-white p-4 md:grid-cols-2 xl:grid-cols-[180px_1fr_1fr_150px_150px_auto] xl:items-start">
+    <div className="dashboard-panel grid grid-cols-1 gap-3 p-4 md:grid-cols-2 xl:grid-cols-[180px_1fr_1fr_260px_auto] xl:items-start">
       <Field label="Record type">
         <Select value={value.entityType || ALL} onValueChange={(v) => set({ entityType: v === ALL ? '' : v })}>
           <SelectTrigger className="h-10 py-2">
@@ -87,30 +88,21 @@ export default function AuditLogFilters({
           onChange={(e) => set({ actor: e.target.value })}
         />
       </Field>
-      <Field label="From">
-        <Input
-          type="date"
-          className="h-10 py-2"
-          value={value.from}
-          max={value.to || undefined}
-          onChange={(e) => set({ from: e.target.value })}
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="text-xs font-medium text-muted-foreground">Date range</span>
+        <DateRangePicker
+          placeholder="Any date"
+          clearable
+          value={{ from: value.from, to: value.to }}
+          onChange={({ from, to }) => set({ from: from ?? '', to: to ?? '' })}
         />
-      </Field>
-      <Field label="To">
-        <Input
-          type="date"
-          className="h-10 py-2"
-          value={value.to}
-          min={value.from || undefined}
-          onChange={(e) => set({ to: e.target.value })}
-        />
-      </Field>
+      </div>
       <div className="flex items-end xl:h-full">
         <button
           type="button"
           disabled={!dirty}
           onClick={() => onChange(EMPTY_AUDIT_FILTERS)}
-          className="flex h-10 items-center gap-1.5 border border-black/15 bg-white px-3 text-sm text-black hover:bg-gray-50 disabled:opacity-40 xl:mt-5"
+          className="flex h-10 items-center gap-1.5 rounded-[2px] border border-input bg-background px-3 text-sm text-foreground hover:bg-accent disabled:opacity-40 xl:mt-5"
         >
           <X size={14} />
           Reset

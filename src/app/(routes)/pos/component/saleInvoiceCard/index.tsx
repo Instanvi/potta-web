@@ -1,16 +1,17 @@
 'use client';
-import Input from '@potta/components/input';
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useMemo, useRef } from 'react';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { Filter } from '../../utils/types';
+import { Product } from '../../utils/types';
+import { posApi } from '../../utils/api';
 import { isStockTracked, productToLine, type SaleLineItem } from '../../utils/sale';
 import { toast } from 'sonner';
-import useGetAllProducts from '../../hooks/useGetAllProducts';
-import Image from 'next/image';
 import PottaLoader from '@potta/components/pottaloader';
 import { productImageUrl } from '../../inventory/_utils/images';
 
 type LineItem = SaleLineItem & { stock?: number | null };
+
+const PAGE_SIZE = 50;
 
 const categoryName = (category: unknown): string =>
   typeof category === 'object' && category !== null
@@ -29,6 +30,17 @@ interface MenuItem {
   line: SaleLineItem;
 }
 
+const toMenuItem = (product: Product): MenuItem => ({
+  id: product.uuid,
+  name: product.name,
+  image: productImageUrl(product as any),
+  category: categoryName(product.category),
+  price: Number(product.salesPrice),
+  sku: product.sku,
+  stock: isStockTracked(product) ? Number(product.inventoryLevel ?? 0) : null,
+  line: productToLine(product),
+});
+
 interface Category {
   id: string;
   name: string;
@@ -39,61 +51,101 @@ const SaleInvoiceCard = () => {
   const [activeId, setActiveId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [barcodeInput, setBarcodeInput] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const barcodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingLookup = useRef<string | null>(null);
 
   const context = useContext(ContextData);
 
-  // Setup filter for API
-  const filter: Filter = {
-    limit: 50, // Adjust based on your needs
-    page: currentPage,
-    search: searchTerm,
-    sortBy: 'updatedAt',
-    sortOrder: 'DESC',
-  };
+  const {
+    data: productPages,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['get-all-product', 'pos-grid', searchTerm],
+    queryFn: ({ pageParam }) =>
+      posApi.getAll({
+        limit: PAGE_SIZE,
+        page: pageParam,
+        search: searchTerm,
+        sortBy: 'updatedAt',
+        sortOrder: 'DESC',
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last?.meta && last.meta.currentPage < last.meta.totalPages ? last.meta.currentPage + 1 : undefined,
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: false,
+  });
 
-  // Fetch products using the hook
-  const { data: productData, isLoading, error } = useGetAllProducts(filter);
-
-  const menus: MenuItem[] =
-    productData?.data.map((product) => ({
-      id: product.uuid,
-      name: product.name,
-      image: productImageUrl(product as any),
-      category: categoryName(product.category),
-      price: Number(product.salesPrice),
-      sku: product.sku,
-      stock: isStockTracked(product) ? Number(product.inventoryLevel ?? 0) : null,
-      line: productToLine(product),
-    })) || [];
+  const products = useMemo(() => productPages?.pages.flatMap((p) => p?.data ?? []) ?? [], [productPages]);
+  const menus: MenuItem[] = products.map(toMenuItem);
 
   // Extract unique categories from products
   useEffect(() => {
-    if (productData?.data) {
-      const categories = Array.from(
-        new Set(
-          productData.data.map((product) => categoryName(product.category))
-        )
-      ).map((name) => ({
-        id: name,
-        name,
-      }));
-      setSelected([{ id: '', name: 'All' }, ...categories]);
+    const categories = Array.from(new Set(products.map((product) => categoryName(product.category)))).map(
+      (name) => ({ id: name, name })
+    );
+    setSelected([{ id: '', name: 'All' }, ...categories]);
+  }, [products]);
+
+  useEffect(
+    () => () => {
+      if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
+    },
+    []
+  );
+
+  /** Codes not in the loaded pages are looked up on the server by sku. */
+  const lookupBarcode = async (code: string, notifyMissing: boolean) => {
+    if (pendingLookup.current === code) return;
+    pendingLookup.current = code;
+    try {
+      const res = await posApi.getAll({ page: 1, limit: 5, search: code });
+      const product = res?.data?.find((p) => p.sku === code);
+      if (product) {
+        addItem(toMenuItem(product));
+        setBarcodeInput((current) => (current === code ? '' : current));
+      } else if (notifyMissing) {
+        toast.error(`No product with code ${code}`);
+      }
+    } catch {
+      if (notifyMissing) toast.error('Could not look up that code. Please try again.');
+    } finally {
+      pendingLookup.current = null;
     }
-  }, [productData?.data]);
+  };
+
+  const matchLoaded = (code: string) => {
+    const item = menus.find((item) => item.sku === code);
+    if (item) {
+      addItem(item);
+      setBarcodeInput('');
+    }
+    return !!item;
+  };
 
   // Handle barcode scanner input
   const handleBarcodeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setBarcodeInput(value);
+    if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
 
-    if (value.length >= 8) {
-      const item = menus.find((item) => item.sku === value);
-      if (item) {
-        addItem(item);
-        setBarcodeInput('');
-      }
+    const code = value.trim();
+    if (code.length >= 8 && !matchLoaded(code)) {
+      barcodeTimer.current = setTimeout(() => lookupBarcode(code, false), 300);
     }
+  };
+
+  const handleBarcodeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
+    const code = barcodeInput.trim();
+    if (code && !matchLoaded(code)) lookupBarcode(code, true);
   };
 
   // Handle keyboard shortcuts
@@ -153,7 +205,6 @@ const SaleInvoiceCard = () => {
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
   };
 
   // Filter menu items based on active category
@@ -196,6 +247,7 @@ const SaleInvoiceCard = () => {
             name="barcode"
             value={barcodeInput}
             onChange={handleBarcodeInput}
+            onKeyDown={handleBarcodeKeyDown}
             autoComplete="off"
             className={`w-full py-2 px-4 border border-gray-200 rounded-[2px] outline-none mt-2 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500
    `}
@@ -259,6 +311,18 @@ const SaleInvoiceCard = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {!isLoading && hasNextPage && (
+            <div className="flex justify-center py-4">
+              <button
+                type="button"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="h-9 rounded-[2px] border border-input bg-background px-4 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-60"
+              >
+                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+              </button>
             </div>
           )}
           {filteredMenus.length === 0 && searchTerm !== '' && !isLoading && (

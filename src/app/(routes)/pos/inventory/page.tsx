@@ -5,51 +5,26 @@ import Filter from './components/filters';
 import InventoryTable from './components/table';
 import { InventoryProvider } from './_utils/context';
 import CategoryManager from './components/CategoryManager';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import { PageContainer, PageHeader, Tabs } from '../../_shared/states';
+
+type InventoryTab = 'inventory' | 'category';
+
+const TABS: { id: InventoryTab; label: string }[] = [
+  { id: 'inventory', label: 'Inventory' },
+  { id: 'category', label: 'Category' },
+];
+
 const Files = () => {
-  const [activeTab, setActiveTab] = useState<'inventory' | 'category'>(
-    'inventory'
-  );
-  const context = React.useContext(ContextData);
+  const [activeTab, setActiveTab] = useState<InventoryTab>('inventory');
   return (
     <InventoryProvider>
       <RootLayout>
-        <div
-          className={`${
-            context?.layoutMode === 'sidebar' ? 'pl-16 !mt-4' : 'pl-5 !mt-4'
-          } pr-5 w-full mt-10 overflow-visible`}
-        >
-          {/* Tabs */}
-          <div className="w-[30%] flex mb-6">
-            <div
-              onClick={() => setActiveTab('inventory')}
-              className={`flex h-12 w-full cursor-pointer items-center justify-center bg-[#F3FBFB] ${
-                activeTab === 'inventory' && 'border-b-2 border-[#154406]'
-              }`}
-            >
-              <p
-                className={`text-base font-normal ${
-                  activeTab === 'inventory' ? 'text-[#154406]' : 'text-black/70'
-                }`}
-              >
-                Inventory
-              </p>
-            </div>
-            <div
-              onClick={() => setActiveTab('category')}
-              className={`flex h-12 w-full cursor-pointer items-center justify-center bg-[#F3FBFB] ${
-                activeTab === 'category' && 'border-b-2 border-[#154406]'
-              }`}
-            >
-              <p
-                className={`text-base font-normal ${
-                  activeTab === 'category' ? 'text-[#154406]' : 'text-black/70'
-                }`}
-              >
-                Category
-              </p>
-            </div>
-          </div>
+        <PageContainer>
+          <PageHeader
+            title="Inventory"
+            description="Products synced from Pay, their stock levels and product categories."
+          />
+          <Tabs tabs={TABS} value={activeTab} onChange={setActiveTab} />
           {activeTab === 'inventory' ? (
             <>
               <Filter />
@@ -58,7 +33,7 @@ const Files = () => {
           ) : (
             <CategoryManager />
           )}
-        </div>
+        </PageContainer>
       </RootLayout>
     </InventoryProvider>
   );

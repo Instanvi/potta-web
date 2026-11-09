@@ -2,9 +2,11 @@
 export type Filters = {
   limit: number;
   page: number;
-  sortBy?: 'updatedAt' | 'createdAt';
+  sortBy?: 'updatedAt' | 'createdAt' | 'saleDate' | 'totalAmount';
   sortOrder?: 'ASC' | 'DESC';
   search?: string;
+  /** nestjs-paginate range on saleDate, e.g. "$btw:2026-11-01T00:00:00.000Z,2026-11-09T23:59:59.999Z". */
+  'filter.saleDate'?: string;
 };
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -1,4 +1,6 @@
 import React from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import type { ProductCategory } from '../_utils/types';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
 import Button from '@potta/components/button';
 import {
@@ -17,6 +19,7 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import Input from '@potta/components/input';
 import { useProductCategoryManager } from '../_hooks/useProductCategoryManager';
+import { ListToolbar } from '../../../_shared/states';
 
 const CategoryManager = () => {
   const {
@@ -29,6 +32,7 @@ const CategoryManager = () => {
     setDeleteId,
     data,
     isLoading,
+    tableProps,
     register,
     handleSubmit,
     setValue,
@@ -48,7 +52,7 @@ const CategoryManager = () => {
     reset();
   };
 
-  const columns = [
+  const columns: ColumnDef<ProductCategory>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -66,7 +70,7 @@ const CategoryManager = () => {
         new Date(original.createdAt).toLocaleDateString(),
     },
     {
-      accessorKey: 'actions',
+      id: 'actions',
       header: 'Actions',
       cell: ({ row: { original } }) => (
         <DropdownMenu>
@@ -81,7 +85,7 @@ const CategoryManager = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setDeleteId(original.uuid)}
-              className="text-red-600"
+              className="text-destructive"
             >
               <i className="ri-delete-bin-line mr-2"></i> Delete
             </DropdownMenuItem>
@@ -92,15 +96,17 @@ const CategoryManager = () => {
   ];
 
   return (
-    <div className="py-10 w-full">
-      <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-medium">Product Categories</h2>
-        <Button text={'Add Category'} type="button" onClick={handleOpenModal} />
-      </div>
+    <div className="w-full">
+      <ListToolbar
+        actions={<Button text="Add Category" theme="default" type="button" onClick={handleOpenModal} />}
+      >
+        <p className="text-sm text-muted-foreground">Group products into categories for reporting and the POS grid.</p>
+      </ListToolbar>
       <DataGrid
         columns={columns}
         data={data?.data || []}
         isLoading={isLoading}
+        {...tableProps(data?.meta, data?.data?.length)}
       />
       <Sheet
         open={modalOpen}

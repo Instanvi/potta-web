@@ -3,8 +3,14 @@ import { ColumnDef } from "@tanstack/react-table";
 export type IFilter = {
   limit: number;
   page: number;
-  sortOrder: string,
-    sortBy: string
+  sortOrder?: 'ASC' | 'DESC';
+  sortBy?: 'createdAt' | 'updatedAt' | 'issuedDate' | 'dueDate' | 'invoiceTotal';
+  /** Exact InvoiceStatus (e.g. 'PAID'); sent in the filter body. */
+  status?: string;
+  search?: string;
+  /** Inclusive ISO bounds for `filter.issuedDate=$btw:from,to`. */
+  issuedFrom?: string;
+  issuedTo?: string;
 };
 
   export type IColumnDef<TData, TValue = unknown> = ColumnDef<TData, TValue> & {

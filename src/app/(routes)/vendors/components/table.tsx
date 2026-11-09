@@ -14,7 +14,6 @@ import ViewVendorSlider from './viewVendorSlider.tsx';
 import EditVendor from './updateVendorSlider';
 import DeleteModal from './deleteModal';
 import { VendorFilter } from '../utils/types';
-import { useMemo } from 'react';
 
 import { UpdateVendorPayload, updateVendorSchema } from '../utils/validations';
 import {
@@ -27,6 +26,9 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@potta/components/shadcn/badge';
 import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Can } from '@/components/auth/can';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { ErrorState } from '../../_shared/states';
 
 export const PhoneFlag = ({ phoneNumber }: { phoneNumber: string }) => {
   const phoneNumberObj = parsePhoneNumberFromString(phoneNumber);
@@ -215,95 +217,33 @@ const TableComponents = () => {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [statusFilter, kycFilter, debouncedSearch],
+  });
 
-  // Build filter with search
   const filter: VendorFilter = {
     page,
     limit,
-    search: searchValue || undefined,
+    search: debouncedSearch || undefined,
+    status: statusFilter === 'all' ? undefined : statusFilter,
+    isKYCVerified: kycFilter === 'all' ? undefined : kycFilter === 'verified',
   };
   const { data: vendor, isLoading, error, refetch } = useGetAllVendors(filter);
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1); // Reset to first page when page size changes
-  };
 
   // Function to refresh vendor data
   const handleRefreshVendors = () => {
     refetch();
   };
 
-  // Filter data based on search, status, and KYC
-  const filteredData = useMemo(() => {
-    if (!vendor?.data) return [];
-
-    let filtered = vendor.data;
-
-    // Filter by status
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(
-        (vendor: any) => vendor.status === statusFilter
-      );
-    }
-
-    // Filter by KYC status
-    if (kycFilter !== 'all') {
-      filtered = filtered.filter((vendor: any) => {
-        if (kycFilter === 'verified') return vendor.isKYCVerified === true;
-        if (kycFilter === 'unverified') return vendor.isKYCVerified !== true;
-        return true;
-      });
-    }
-
-    // Filter by search value
-    if (searchValue) {
-      const searchLower = searchValue.toLowerCase();
-      filtered = filtered.filter(
-        (vendor: any) =>
-          vendor.name.toLowerCase().includes(searchLower) ||
-          (vendor.email && vendor.email.toLowerCase().includes(searchLower)) ||
-          (vendor.phone && vendor.phone.toLowerCase().includes(searchLower)) ||
-          (vendor.industry &&
-            vendor.industry.toLowerCase().includes(searchLower))
-      );
-    }
-
-    return filtered;
-  }, [vendor?.data, statusFilter, kycFilter, searchValue]);
-
   const handleRowClick = (row: any) => {
     setOpenViewModal(row.uuid);
     setIsViewOpen(true);
   };
 
-  if (error)
-    return (
-      <div className="mt-10">
-        <Filter
-          searchValue={searchValue}
-          onSearchChange={(e) => setSearchValue(e.target.value)}
-          onSearchClear={() => setSearchValue('')}
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          kycFilter={kycFilter}
-          onKycFilterChange={setKycFilter}
-        />
-        <div className="min-h-60 items-center flex justify-center">
-          <p className="text-red-600 text-center">
-            Error fetching vendors: {error.message}
-          </p>
-        </div>
-      </div>
-    );
   return (
-    <div className="mt-10">
+    <div>
       <Filter
         searchValue={searchValue}
         onSearchChange={(e) => setSearchValue(e.target.value)}
@@ -313,27 +253,18 @@ const TableComponents = () => {
         kycFilter={kycFilter}
         onKycFilterChange={setKycFilter}
       />
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        isLoading={isLoading}
-        showPagination={true}
-        pageSize={limit}
-        pageSizeOptions={[10, 20, 50, 100]}
-        onRowClick={handleRowClick}
-        manualPagination
-        pageCount={vendor?.meta?.totalPages || 1}
-        totalRows={vendor?.meta?.totalItems || filteredData.length}
-        pagination={{ pageIndex: page - 1, pageSize: limit }}
-        onPaginationChange={(updater) => {
-          const next =
-            typeof updater === 'function'
-              ? updater({ pageIndex: page - 1, pageSize: limit })
-              : updater;
-          if (next.pageSize !== limit) handlePageSizeChange(next.pageSize);
-          else handlePageChange(next.pageIndex + 1);
-        }}
-      />
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={vendor?.data ?? []}
+          isLoading={isLoading}
+          pageSizeOptions={[10, 20, 50, 100]}
+          onRowClick={handleRowClick}
+          {...tableProps(vendor?.meta, vendor?.data?.length)}
+        />
+      )}
       <DeleteModal
         vendorID={openDeleteModal || ''}
         open={isDeleteOpen}

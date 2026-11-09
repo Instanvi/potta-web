@@ -11,12 +11,11 @@ import Select from '@potta/components/select';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import TextArea from '@potta/components/textArea';
 import { toast } from 'sonner';
-import { DateInput } from '@potta/components/customDatePicker';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { useRouter } from 'next/navigation';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
 import useUpdateInvoice from '../../_hooks/useUpdateInvoice';
 import SearchableSelect from '@potta/components/searchableSelect';
-import { format } from 'date-fns';
 import Checkbox from '@potta/components/checkbox';
 import {
   validateInvoiceForm,
@@ -632,35 +631,26 @@ const Left = ({
             />
           </div>
           <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-            <DateInput
+            <DatePicker
               label="Issued Date"
               name="issueDate"
-              value={issueDate ? new Date(issueDate) : undefined}
-              onChange={(date) =>
-                handleInputChange(
-                  'issueDate',
-                  date ? format(date, 'yyyy-MM-dd') : ''
-                )
-              }
+              value={issueDate}
+              onChange={(value) => handleInputChange('issueDate', value)}
               placeholder="Select issue date"
               required
-              errors={errors.issueDate as any}
+              error={errors.issueDate}
             />
           </div>
           <div className={`${errors.dueDate ? 'error-field' : ''}`}>
-            <DateInput
+            <DatePicker
               label="Due Date"
               name="dueDate"
-              value={dueDate ? new Date(dueDate) : undefined}
-              onChange={(date) =>
-                handleInputChange(
-                  'dueDate',
-                  date ? format(date, 'yyyy-MM-dd') : ''
-                )
-              }
+              value={dueDate}
+              min={issueDate || undefined}
+              onChange={(value) => handleInputChange('dueDate', value)}
               placeholder="Select due date"
               required
-              errors={errors.dueDate as any}
+              error={errors.dueDate}
             />
           </div>
         </div>

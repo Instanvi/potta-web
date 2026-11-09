@@ -1,13 +1,13 @@
 'use client';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
 import Select from '@potta/components/select';
-import { ContextData } from '@potta/components/providers/DataProvider';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../../layout';
+import { PageContainer, PageHeader } from '../../../_shared/states';
 import useGetOneInvoice from '../../invoice/_hooks/useGetOneInvoice';
 import usePayInvoice from '../../invoice/_hooks/usePayInvoice';
 import {
@@ -25,7 +25,6 @@ const methodLabel = (method: string) =>
     .join(' ');
 
 const PayNowPage = () => {
-  const context = useContext(ContextData);
   const params = useParams();
   const invoiceId = (params?.invoiceid as string) || '';
   const { data: invoice, isLoading, error } = useGetOneInvoice(invoiceId);
@@ -54,18 +53,18 @@ const PayNowPage = () => {
 
   return (
     <RootLayout>
-      <div
-        className={`${
-          context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'
-        } pr-5 py-8`}
-      >
-        <div className="max-w-md mx-auto bg-white border border-gray-200 p-8">
+      <PageContainer>
+        <PageHeader
+          title="Record invoice payment"
+          description="Record a payment already collected for an approved or overdue invoice."
+        />
+        <div className="dashboard-panel mx-auto max-w-md p-8">
           {isLoading ? (
-            <div className="py-10 text-center text-gray-500">
+            <div className="py-10 text-center text-muted-foreground">
               Loading invoice...
             </div>
           ) : error || !invoice ? (
-            <div className="py-10 text-center text-red-600">
+            <div className="py-10 text-center text-destructive">
               Invoice not found.
             </div>
           ) : (
@@ -76,7 +75,7 @@ const PayNowPage = () => {
                   {customerName ? ` · ${customerName}` : ''}
                 </div>
                 <div className="text-gray-700 font-medium">Amount Due</div>
-                <div className="text-4xl font-extrabold text-green-700">
+                <div className="text-4xl font-semibold tabular-nums text-primary">
                   {total.toLocaleString()} {currency}
                 </div>
                 <span className="text-xs uppercase tracking-wide px-2 py-0.5 border border-gray-300 text-gray-600">
@@ -85,7 +84,7 @@ const PayNowPage = () => {
               </div>
 
               {status === 'PAID' ? (
-                <div className="text-center text-green-700 font-medium">
+                <div className="text-center font-medium text-primary">
                   This invoice has been paid.
                 </div>
               ) : !canPay ? (
@@ -134,14 +133,14 @@ const PayNowPage = () => {
 
               <Link
                 href="/account_receivables/invoice"
-                className="text-center text-sm text-green-700 hover:underline"
+                className="text-center text-sm text-primary hover:underline"
               >
                 Back to invoices
               </Link>
             </div>
           )}
         </div>
-      </div>
+      </PageContainer>
     </RootLayout>
   );
 };

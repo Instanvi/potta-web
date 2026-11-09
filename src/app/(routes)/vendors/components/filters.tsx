@@ -4,6 +4,7 @@ import { Can } from '@/components/auth/can';
 import React, { useState } from 'react';
 import SliderVendor from './vendorSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
+import { ListToolbar } from '../../_shared/states';
 
 interface FilterProps {
   searchValue: string;
@@ -55,22 +56,9 @@ const Filter: React.FC<FilterProps> = ({
   ];
 
   return (
-    <div className="w-full mb-4">
-      <div className="flex justify-between items-center w-full">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={onSearchChange}
-            onSearchClear={onSearchClear}
-            searchPlaceholder="Search vendors by name, email, or phone..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4">
+    <ListToolbar
+      actions={
+        <>
           <Button
             text={'Export'}
             icon={<img src="/images/export.svg" />}
@@ -81,9 +69,18 @@ const Filter: React.FC<FilterProps> = ({
           <Can resource="Vendor" action="create">
             <SliderVendor />
           </Can>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DynamicFilter
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        onSearchClear={onSearchClear}
+        searchPlaceholder="Search vendors by name, email, or phone..."
+        filters={filterConfig}
+        className="p-0"
+      />
+    </ListToolbar>
   );
 };
 

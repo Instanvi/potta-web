@@ -37,9 +37,13 @@ export const vendorApi = {
       filter.searchBy.forEach((field) => queryParams.append('searchBy', field));
     }
 
+    const where: Record<string, unknown> = {};
+    if (filter.status) where.status = filter.status;
+    if (typeof filter.isKYCVerified === 'boolean') where.isKYCVerified = filter.isKYCVerified;
+
     const result = await axios.post(
       `/vendor/filter?${queryParams.toString()}`,
-      {}
+      where
     );
     return result.data;
   },

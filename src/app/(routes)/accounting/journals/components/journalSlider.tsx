@@ -4,19 +4,11 @@ import Input from '@potta/components/input';
 import Slider from '@potta/components/slideover';
 import SearchableSelect from '@potta/components/searchableSelect';
 import Button from '@potta/components/button';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, Resolver } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Calendar } from '@potta/components/shadcn/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@potta/components/shadcn/popover';
-import { Button as ShadcnButton } from '@potta/components/shadcn/button';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@potta/lib/utils';
+import { FormDatePicker } from '@potta/components/ui/date-picker';
+import { toDateInput } from '../../../_shared/format';
 import { accountsApi } from '../../utils/api';
 import { journalApi } from '../utils/api';
 import { toast } from 'sonner';
@@ -105,7 +97,7 @@ const JournalSlider: React.FC<JournalSliderProps> = ({
     setValue,
     watch,
   } = useForm<JournalPayload>({
-    resolver: yupResolver(journalSchema),
+    resolver: yupResolver(journalSchema) as unknown as Resolver<JournalPayload>,
     defaultValues: {
       type: 'SALE',
       date: new Date(),
@@ -242,7 +234,7 @@ const JournalSlider: React.FC<JournalSliderProps> = ({
       const data = watch();
       const payload: CreateJournalPayload = {
         type: data.type,
-        date: new Date(data.date).toISOString(),
+        date: `${toDateInput(new Date(data.date))}T00:00:00.000Z`,
         description: data.description,
         ...(data.sourceDocumentType ? { sourceDocumentType: data.sourceDocumentType } : {}),
         lines: lines.map((line, index) => {
@@ -311,43 +303,14 @@ const JournalSlider: React.FC<JournalSliderProps> = ({
                 )}
               </div>
 
-              <div>
-                <Controller
-                  name="date"
-                  control={control}
-                  render={({ field }) => (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <ShadcnButton
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </ShadcnButton>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                />
-                {errors.date && (
-                  <small className="text-destructive">{errors.date.message}</small>
-                )}
-              </div>
+              <FormDatePicker
+                control={control}
+                name="date"
+                id="journalDate"
+                label="Date"
+                valueType="date"
+                required
+              />
 
               <div>
                 <Input

@@ -2,9 +2,14 @@
 export type Filters = {
   limit: number;
   page: number;
-  sortBy?: 'updatedAt' | 'createdAt';
+  sortBy?: 'updatedAt' | 'createdAt' | 'saleDate' | 'totalAmount';
   sortOrder?: 'ASC' | 'DESC';
   search?: string;
+  /** Exact PaymentMethod (e.g. 'CASH'); sent in the filter body. */
+  paymentMethod?: string;
+  /** Inclusive ISO bounds for `filter.saleDate=$btw:from,to`. */
+  saleFrom?: string;
+  saleTo?: string;
 };
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

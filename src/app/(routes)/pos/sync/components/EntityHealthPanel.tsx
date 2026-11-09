@@ -1,67 +1,87 @@
 'use client';
-import { ReactNode } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import Button from '@potta/components/button';
-import { EmptyState, ErrorState, LoadingState } from '../../../_shared/states';
+import { DataTable } from '@potta/components/ui/data-table';
+import { EmptyState, ErrorState, LoadingState, Panel, StatusBadge } from '../../../_shared/states';
 import { useEntityHealth } from '../hooks';
+import { EntityHealthResponse } from '../utils/api';
 import { Mono } from './shared';
 
-const Section = ({
+type Row<K extends keyof EntityHealthResponse> = EntityHealthResponse[K][number];
+
+const Section = <T,>({
   title,
   description,
-  count,
-  headers,
+  columns,
   rows,
 }: {
   title: string;
   description: string;
-  count: number;
-  headers: string[];
-  rows: ReactNode[][];
+  columns: ColumnDef<T>[];
+  rows: T[];
 }) => (
-  <section className="border border-gray-200">
-    <div className="flex items-center justify-between bg-gray-50 px-4 py-3">
+  <Panel className="overflow-hidden">
+    <div className="flex items-center justify-between gap-3 px-4 py-3">
       <div>
         <h3 className="font-medium">{title}</h3>
-        <p className="text-xs text-gray-500">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       </div>
-      <span
-        className={`px-2 py-0.5 text-xs font-medium border ${
-          count === 0
-            ? 'border-green-500 bg-green-50 text-green-700'
-            : 'border-yellow-300 bg-yellow-50 text-yellow-700'
-        }`}
-      >
-        {count === 0 ? 'Healthy' : `${count} issue${count === 1 ? '' : 's'}`}
-      </span>
+      <StatusBadge tone={rows.length === 0 ? 'success' : 'warning'}>
+        {rows.length === 0 ? 'Healthy' : `${rows.length} issue${rows.length === 1 ? '' : 's'}`}
+      </StatusBadge>
     </div>
-    {count > 0 && (
-      <div className="max-h-80 overflow-y-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-gray-500">
-              {headers.map((h) => (
-                <th key={h} className="px-4 py-2 font-medium">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((cells, i) => (
-              <tr key={i} className="border-t border-gray-100">
-                {cells.map((c, j) => (
-                  <td key={j} className="px-4 py-2 align-top">
-                    {c}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    {rows.length > 0 && (
+      <DataTable
+        className="rounded-none border-x-0 border-b-0"
+        columns={columns}
+        data={rows}
+        withRowSelection={false}
+        pageSize={10}
+        pageSizeOptions={[10, 20, 50, 100]}
+      />
     )}
-  </section>
+  </Panel>
 );
+
+const unmappedColumns: ColumnDef<Row<'unmapped_native'>>[] = [
+  { accessorKey: 'kind', header: 'Kind' },
+  { accessorKey: 'potta_id', header: 'Potta id', cell: ({ row }) => <Mono>{row.original.potta_id}</Mono> },
+  { accessorKey: 'business_key', header: 'Business key', cell: ({ row }) => row.original.business_key ?? '—' },
+];
+
+const orphanColumns: ColumnDef<Row<'orphan_cross_refs'>>[] = [
+  {
+    accessorKey: 'from_kind',
+    header: 'From',
+    cell: ({ row }) => (
+      <span>
+        {row.original.from_kind} <Mono>{row.original.from_external_id}</Mono>
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'to_kind',
+    header: 'To',
+    cell: ({ row }) => (
+      <span>
+        {row.original.to_kind} <Mono>{row.original.to_external_id}</Mono>
+      </span>
+    ),
+  },
+  { accessorKey: 'relation', header: 'Relation' },
+];
+
+const staleColumns: ColumnDef<Row<'stale_mappings'>>[] = [
+  { accessorKey: 'kind', header: 'Kind' },
+  { accessorKey: 'external_id', header: 'External id', cell: ({ row }) => <Mono>{row.original.external_id}</Mono> },
+  { accessorKey: 'potta_id', header: 'Potta id', cell: ({ row }) => <Mono>{row.original.potta_id}</Mono> },
+];
+
+const duplicateColumns: ColumnDef<Row<'duplicate_business_keys'>>[] = [
+  { accessorKey: 'kind', header: 'Kind' },
+  { accessorKey: 'business_key', header: 'Business key' },
+  { accessorKey: 'count', header: 'Count' },
+];
 
 const EntityHealthPanel = () => {
   const { data, isLoading, isFetching, error, refetch } = useEntityHealth();
@@ -84,46 +104,26 @@ const EntityHealthPanel = () => {
       <Section
         title="Unmapped native records"
         description="Potta records with no desktop mapping (e.g. created on the web)."
-        count={data.unmapped_native.length}
-        headers={['Kind', 'Potta id', 'Business key']}
-        rows={data.unmapped_native.map((r) => [
-          r.kind,
-          <Mono key="id">{r.potta_id}</Mono>,
-          r.business_key ?? '—',
-        ])}
+        columns={unmappedColumns}
+        rows={data.unmapped_native}
       />
       <Section
         title="Orphan cross-references"
         description="Desktop references pointing to records that were never synced."
-        count={data.orphan_cross_refs.length}
-        headers={['From', 'To', 'Relation']}
-        rows={data.orphan_cross_refs.map((r) => [
-          <span key="from">
-            {r.from_kind} <Mono>{r.from_external_id}</Mono>
-          </span>,
-          <span key="to">
-            {r.to_kind} <Mono>{r.to_external_id}</Mono>
-          </span>,
-          r.relation,
-        ])}
+        columns={orphanColumns}
+        rows={data.orphan_cross_refs}
       />
       <Section
         title="Stale mappings"
         description="Mappings whose Potta record no longer exists."
-        count={data.stale_mappings.length}
-        headers={['Kind', 'External id', 'Potta id']}
-        rows={data.stale_mappings.map((r) => [
-          r.kind,
-          <Mono key="ext">{r.external_id}</Mono>,
-          <Mono key="id">{r.potta_id}</Mono>,
-        ])}
+        columns={staleColumns}
+        rows={data.stale_mappings}
       />
       <Section
         title="Duplicate business keys"
         description="Several records share the same business key (e.g. SKU)."
-        count={data.duplicate_business_keys.length}
-        headers={['Kind', 'Business key', 'Count']}
-        rows={data.duplicate_business_keys.map((r) => [r.kind, r.business_key, r.count])}
+        columns={duplicateColumns}
+        rows={data.duplicate_business_keys}
       />
     </div>
   );

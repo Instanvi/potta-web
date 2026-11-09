@@ -52,7 +52,7 @@ const NewSalesReciept = () => {
         >
           <button
             onClick={togglePreview}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center "
+            className="flex items-center rounded-[2px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover"
           >
             <i
               className={`${
@@ -71,11 +71,7 @@ const NewSalesReciept = () => {
               defaultSize={showPreview ? 50 : 100}
               style={{ transition: 'flex-basis 300ms ease-in-out' }}
             >
-              <div
-                className={`py-8 pl-14 h-[92.7vh] flex justify-center ${
-                  showPreview ? 'pl-5' : 'pl-14'
-                }`}
-              >
+              <div className="flex h-[92.7vh] justify-center p-4 md:p-5">
                 <Left />
               </div>
             </ResizablePanel>
@@ -97,7 +93,7 @@ const NewSalesReciept = () => {
                 opacity: showPreview ? 1 : 0,
               }}
             >
-              <div className="h-[92.7vh] bg-[#F2F2F2] overflow-hidden">
+              <div className="h-[92.7vh] overflow-hidden bg-main-bg">
                 {/* Only render PdfView when preview is showing for performance */}
                 {showPreview && <PdfView />}
               </div>

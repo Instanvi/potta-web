@@ -1,5 +1,10 @@
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { vouchersApi } from '../_utils/api';
 import { Filter } from '../_utils/types';
@@ -18,8 +23,9 @@ export const useCreateVoucher = () => {
 
 export const useGetAllVouchers = (filter: Filter) => {
     return useQuery({
-        queryKey: ['get-all-vouchers', filter.page, filter.limit],
+        queryKey: ['get-all-vouchers', filter],
         queryFn: () => vouchersApi.getAll(filter),
+        placeholderData: keepPreviousData,
       });
 };
 

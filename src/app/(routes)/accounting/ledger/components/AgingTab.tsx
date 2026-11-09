@@ -1,6 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
-import Input from '@potta/components/input';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@potta/components/ui/data-table';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatAmount, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, LoadingState, StatCard } from '../../../_shared/states';
 import { useAgingReport } from '../hooks';
@@ -15,11 +17,15 @@ const BUCKETS: { key: keyof AgingRow['aging']; label: string }[] = [
   { key: 'over90', label: '90+ days' },
 ];
 
+const Amount = ({ value, strong }: { value: unknown; strong?: boolean }) => (
+  <div className={`w-full text-right tabular-nums${strong ? ' font-medium' : ''}`}>{formatAmount(value)}</div>
+);
+
 const AgingTab = ({ type }: { type: SubLedgerKind }) => {
   const [asOfDate, setAsOfDate] = useState(today());
   const [selected, setSelected] = useState<AgingRow | null>(null);
   const { data, isLoading, error, refetch } = useAgingReport(type, asOfDate);
-  const rows = data ?? [];
+  const rows = useMemo(() => data ?? [], [data]);
 
   const totals = useMemo(() => {
     const t = { current: 0, days30: 0, days60: 0, days90: 0, over90: 0, balance: 0 };
@@ -32,17 +38,35 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
 
   const partyLabel = type === 'AR' ? 'Customer' : 'Vendor';
 
+  const columns: ColumnDef<AgingRow>[] = [
+    {
+      id: 'party',
+      header: partyLabel,
+      accessorFn: (r) => r.referenceName || r.referenceId,
+    },
+    ...BUCKETS.map<ColumnDef<AgingRow>>((b) => ({
+      id: b.key,
+      header: () => <div className="w-full text-right">{b.label}</div>,
+      accessorFn: (r) => Number(r.aging?.[b.key] ?? 0),
+      cell: ({ row }) => <Amount value={row.original.aging?.[b.key]} />,
+    })),
+    {
+      id: 'balance',
+      header: () => <div className="w-full text-right">Balance</div>,
+      accessorFn: (r) => Number(r.currentBalance ?? 0),
+      cell: ({ row }) => <Amount value={row.original.currentBalance} strong />,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-44">
-        <Input
-          type="date"
-          name="asOfDate"
-          label="As of"
-          value={asOfDate}
-          onchange={(e) => setAsOfDate(e.target.value)}
-        />
-      </div>
+      <DatePicker
+        id="agingAsOf"
+        label="As of"
+        className="w-52"
+        value={asOfDate}
+        onChange={(value) => setAsOfDate(value || today())}
+      />
 
       {isLoading ? (
         <LoadingState />
@@ -55,60 +79,35 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
         />
       ) : (
         <>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard label="Total outstanding" value={formatAmount(totals.balance)} />
-          <StatCard label="Current" value={formatAmount(totals.current)} />
-          <StatCard
-            label="Over 90 days"
-            value={formatAmount(totals.over90)}
-            tone={totals.over90 > 0 ? 'destructive' : 'default'}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard label="Total outstanding" value={formatAmount(totals.balance)} />
+            <StatCard label="Current" value={formatAmount(totals.current)} />
+            <StatCard
+              label="Over 90 days"
+              value={formatAmount(totals.over90)}
+              tone={totals.over90 > 0 ? 'destructive' : 'default'}
+            />
+          </div>
+          <DataTable
+            columns={columns}
+            data={rows}
+            withRowSelection={false}
+            pageSize={20}
+            pageSizeOptions={[10, 20, 50, 100]}
+            onRowClick={setSelected}
           />
-        </div>
-        <div className="overflow-x-auto rounded-[2px] border border-black/[0.08] bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="h-12 border-b border-black/10 bg-table-head text-left">
-                <th className="px-4 font-normal">{partyLabel}</th>
-                {BUCKETS.map((b) => (
-                  <th key={b.key} className="px-4 text-right font-normal">
-                    {b.label}
-                  </th>
-                ))}
-                <th className="px-4 text-right font-normal">Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.referenceId}
-                  className="cursor-pointer border-b border-black/[0.06] transition-colors hover:bg-black/[0.02]"
-                  onClick={() => setSelected(r)}
-                >
-                  <td className="px-4 py-3">{r.referenceName || r.referenceId}</td>
-                  {BUCKETS.map((b) => (
-                    <td key={b.key} className="px-4 py-3 text-right tabular-nums">
-                      {formatAmount(r.aging?.[b.key])}
-                    </td>
-                  ))}
-                  <td className="px-4 py-3 text-right font-medium tabular-nums">
-                    {formatAmount(r.currentBalance)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t border-black/10 bg-brand-subtle font-medium">
-                <td className="px-4 py-3">Total</td>
-                {BUCKETS.map((b) => (
-                  <td key={b.key} className="px-4 py-3 text-right tabular-nums">
-                    {formatAmount(totals[b.key])}
-                  </td>
-                ))}
-                <td className="px-4 py-3 text-right tabular-nums">{formatAmount(totals.balance)}</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-[2px] border border-black/[0.08] bg-brand-subtle px-4 py-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
+            {BUCKETS.map((b) => (
+              <div key={b.key} className="flex flex-col">
+                <span className="text-muted-foreground">{b.label}</span>
+                <span className="font-medium tabular-nums">{formatAmount(totals[b.key])}</span>
+              </div>
+            ))}
+            <div className="flex flex-col">
+              <span className="text-muted-foreground">Total balance</span>
+              <span className="font-semibold tabular-nums">{formatAmount(totals.balance)}</span>
+            </div>
+          </div>
         </>
       )}
 

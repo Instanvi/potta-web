@@ -3,15 +3,15 @@ import { FormEvent, useState } from 'react';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
 import { formatDateTime } from '../../../_shared/format';
-import { ErrorState, LoadingState } from '../../../_shared/states';
+import { ErrorState, LoadingState, Panel, StatusBadge } from '../../../_shared/states';
 import { useSyncRequest } from '../hooks';
 import { Mono } from './shared';
 
-const STATUS_STYLES: Record<string, string> = {
-  PENDING: 'border-yellow-300 bg-yellow-50 text-yellow-700',
-  SUCCEEDED: 'border-green-500 bg-green-50 text-green-700',
-  FAILED: 'border-red-300 bg-red-50 text-red-600',
-};
+const STATUS_TONES = {
+  PENDING: 'warning',
+  SUCCEEDED: 'success',
+  FAILED: 'danger',
+} as const;
 
 const RequestLookupPanel = () => {
   const [draft, setDraft] = useState('');
@@ -45,7 +45,7 @@ const RequestLookupPanel = () => {
       </form>
 
       {!requestId ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Paste the request id the desktop app logged for a push to see its status and result.
         </p>
       ) : isLoading ? (
@@ -54,30 +54,24 @@ const RequestLookupPanel = () => {
         <ErrorState error={error} />
       ) : data ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 border border-gray-200 p-4 text-sm">
-            <span className="text-gray-500">Status</span>
+          <Panel className="grid grid-cols-2 items-center gap-x-6 gap-y-2 p-4 text-sm">
+            <span className="text-muted-foreground">Status</span>
             <span>
-              <span
-                className={`px-2 py-0.5 text-xs font-medium border ${
-                  STATUS_STYLES[data.status] ?? STATUS_STYLES.PENDING
-                }`}
-              >
-                {data.status}
-              </span>
+              <StatusBadge tone={STATUS_TONES[data.status] ?? 'warning'}>{data.status}</StatusBadge>
             </span>
-            <span className="text-gray-500">Endpoint</span>
+            <span className="text-muted-foreground">Endpoint</span>
             <Mono>{data.endpoint}</Mono>
-            <span className="text-gray-500">Idempotency key</span>
+            <span className="text-muted-foreground">Idempotency key</span>
             <Mono>{data.idempotencyKey}</Mono>
-            <span className="text-gray-500">Created</span>
+            <span className="text-muted-foreground">Created</span>
             <span>{formatDateTime(data.createdAt)}</span>
-            <span className="text-gray-500">Updated</span>
+            <span className="text-muted-foreground">Updated</span>
             <span>{formatDateTime(data.updatedAt)}</span>
-          </div>
+          </Panel>
           {data.error && (
             <div>
-              <p className="mb-1 text-sm font-medium text-red-700">Error</p>
-              <pre className="max-h-72 overflow-auto bg-red-50 p-3 text-xs">
+              <p className="mb-1 text-sm font-medium text-destructive">Error</p>
+              <pre className="max-h-72 overflow-auto bg-destructive/5 p-3 text-xs">
                 {JSON.stringify(data.error, null, 2)}
               </pre>
             </div>
@@ -85,7 +79,7 @@ const RequestLookupPanel = () => {
           {data.response && (
             <div>
               <p className="mb-1 text-sm font-medium">Response</p>
-              <pre className="max-h-96 overflow-auto bg-gray-50 p-3 text-xs">
+              <pre className="max-h-96 overflow-auto bg-background p-3 text-xs">
                 {JSON.stringify(data.response, null, 2)}
               </pre>
             </div>

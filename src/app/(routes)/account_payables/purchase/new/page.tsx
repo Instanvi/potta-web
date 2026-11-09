@@ -1,5 +1,5 @@
 'use client';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 
@@ -8,13 +8,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import RootLayout from '../../../layout';
-import { ContextData } from '@potta/components/providers/DataProvider';
 
 const NewInvoice = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [leftPanelSize, setLeftPanelSize] = useState(100);
-  const context = useContext(ContextData);
   // Toggle preview
   const togglePreview = () => {
     setShowPreview(!showPreview);
@@ -49,7 +46,7 @@ const NewInvoice = () => {
       >
         <button
           onClick={togglePreview}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center "
+          className="bg-primary hover:bg-primary/90 text-white px-4 py-2 flex items-center"
         >
           <i
             className={`${
@@ -68,7 +65,7 @@ const NewInvoice = () => {
             defaultSize={showPreview ? 50 : 100}
             style={{ transition: 'flex-basis 300ms ease-in-out' }}
           >
-            <div className={`${!showPreview ? 'pl-16' : ''} pb-8 h-[92.7vh] overflow-y-auto flex justify-center`}>
+            <div className="p-4 md:p-5 pb-8 h-[92.7vh] overflow-y-auto flex justify-center">
               <Left />
             </div>
           </ResizablePanel>
@@ -90,7 +87,7 @@ const NewInvoice = () => {
               opacity: showPreview ? 1 : 0,
             }}
           >
-            <div className="h-[92.7vh] overflow-y-auto bg-[#F2F2F2]">
+            <div className="h-[92.7vh] overflow-y-auto bg-main-bg">
               {/* Only render PdfView when preview is showing for performance */}
               {showPreview && <PdfView />}
             </div>

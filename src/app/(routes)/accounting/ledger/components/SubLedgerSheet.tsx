@@ -1,4 +1,7 @@
 'use client';
+import React from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@potta/components/ui/data-table';
 import {
   Sheet,
   SheetContent,
@@ -14,6 +17,40 @@ import {
   useSubLedgerTransactions,
 } from '../hooks';
 import { AgingRow, SubLedgerKind } from '../utils/api';
+import { SubLedgerEntry } from '../utils/types';
+
+const right = (value: React.ReactNode) => <div className="w-full text-right tabular-nums">{value}</div>;
+
+const columns: ColumnDef<SubLedgerEntry>[] = [
+  {
+    accessorKey: 'transactionDate',
+    header: 'Date',
+    cell: ({ row }) => <span className="whitespace-nowrap">{formatDate(row.original.transactionDate)}</span>,
+  },
+  {
+    id: 'description',
+    header: 'Description',
+    accessorFn: (e) => e.description || e.referenceNumber,
+  },
+  {
+    id: 'debit',
+    header: () => right('Debit'),
+    accessorFn: (e) => Number(e.debitAmount ?? 0),
+    cell: ({ row }) => right(Number(row.original.debitAmount) ? formatAmount(row.original.debitAmount) : ''),
+  },
+  {
+    id: 'credit',
+    header: () => right('Credit'),
+    accessorFn: (e) => Number(e.creditAmount ?? 0),
+    cell: ({ row }) => right(Number(row.original.creditAmount) ? formatAmount(row.original.creditAmount) : ''),
+  },
+  {
+    id: 'balance',
+    header: () => right('Balance'),
+    accessorFn: (e) => Number(e.runningBalance ?? 0),
+    cell: ({ row }) => right(formatAmount(row.original.runningBalance)),
+  },
+];
 
 interface Props {
   type: SubLedgerKind;
@@ -51,34 +88,7 @@ const Transactions = ({ type, row }: { type: SubLedgerKind; row: AgingRow }) => 
       {entries.length === 0 ? (
         <EmptyState title="No transactions" />
       ) : (
-        <div className="overflow-hidden rounded-[2px] border border-black/[0.08]">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="h-11 border-b border-black/10 bg-table-head text-left">
-              <th className="px-3 font-normal">Date</th>
-              <th className="px-3 font-normal">Description</th>
-              <th className="px-3 text-right font-normal">Debit</th>
-              <th className="px-3 text-right font-normal">Credit</th>
-              <th className="px-3 text-right font-normal">Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entries.map((e) => (
-              <tr key={e.uuid} className="border-b border-black/[0.06] last:border-b-0 hover:bg-black/[0.02]">
-                <td className="whitespace-nowrap px-3 py-2.5">{formatDate(e.transactionDate)}</td>
-                <td className="px-3 py-2.5">{e.description || e.referenceNumber}</td>
-                <td className="px-3 py-2.5 text-right tabular-nums">
-                  {Number(e.debitAmount) ? formatAmount(e.debitAmount) : ''}
-                </td>
-                <td className="px-3 py-2.5 text-right tabular-nums">
-                  {Number(e.creditAmount) ? formatAmount(e.creditAmount) : ''}
-                </td>
-                <td className="px-3 py-2.5 text-right tabular-nums">{formatAmount(e.runningBalance)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
+        <DataTable columns={columns} data={entries} withRowSelection={false} pageSize={10} />
       )}
     </div>
   );

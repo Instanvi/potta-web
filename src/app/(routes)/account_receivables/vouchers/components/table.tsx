@@ -1,118 +1,127 @@
 'use client';
-import React, { useState } from 'react';
-import MyTable from '@potta/components/table';
-
-import { Filter } from '../_utils/types';
+import React, { useEffect, useState } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import Link from 'next/link';
+import { DataTable } from '@potta/components/ui/data-table';
 import TableActionPopover, {
   PopoverAction,
 } from '@potta/components/tableActionsPopover';
-import { MoreVertical } from 'lucide-react';
-
-import Search from '@potta/components/search';
+import DynamicFilter from '@potta/components/dynamic-filter';
 import Button from '@potta/components/button';
-import ModalInvoice from './modal';
-import { Icon } from '@iconify/react';
-import Link from 'next/link';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { ErrorState, ListToolbar } from '../../../_shared/states';
+import { Filter } from '../_utils/types';
 import { useGetAllVouchers } from '../_hooks/hooks';
 import DeleteModal from './deleteModal';
 import ViewVoucherSlider from './viewVoucherSlider.tsx';
-import CustomSelect, { IOption } from '../../invoice/components/CustomSelect';
+
+const useDebounced = <T,>(value: T, delay = 300) => {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+};
+
+const formatDate = (date?: string) => {
+  if (!date) return '—';
+  const today = new Date();
+  const inputDate = new Date(date);
+
+  if (
+    today.getDate() === inputDate.getDate() &&
+    today.getMonth() === inputDate.getMonth() &&
+    today.getFullYear() === inputDate.getFullYear()
+  ) {
+    return 'Today';
+  }
+  return inputDate.toLocaleDateString();
+};
 
 const VoucherTable = () => {
   const [openPopover, setOpenPopover] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState<string | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
-
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const search = useDebounced(searchValue.trim());
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [search],
+  });
+
   const filter: Filter = {
     limit,
     page,
     sortOrder: 'DESC',
     sortBy: 'createdAt',
+    search: search || undefined,
   };
 
-  const { data, isLoading, error } = useGetAllVouchers(filter);
+  const { data, isLoading, error, refetch } = useGetAllVouchers(filter);
+  const rows = data?.data ?? [];
 
-  const formatDate = (date: string) => {
-    const today = new Date();
-    const inputDate = new Date(date);
-
-    if (
-      today.getDate() === inputDate.getDate() &&
-      today.getMonth() === inputDate.getMonth() &&
-      today.getFullYear() === inputDate.getFullYear()
-    ) {
-      return 'Today';
-    }
-    return inputDate.toLocaleDateString();
-  };
-  const options: IOption[] = [
-    { value: 'option1', label: 'Option 1' },
-    { value: 'option2', label: 'Option 2' },
-    { value: 'option3', label: 'Option 3' },
-  ];
-
-  const columns = [
+  const columns: ColumnDef<any>[] = [
     {
-      name: 'Code',
-      selector: (row: any) => (
-        <div className="text-sm font-normal text-black">{row.code}</div>
+      accessorKey: 'code',
+      header: 'Code',
+      cell: ({ row: { original } }) => (
+        <div className="text-sm text-foreground">{original.code}</div>
       ),
     },
     {
-      name: 'Type',
-      selector: (row: any) => (
-        <div className="text-sm font-semibold text-black">{row.type}</div>
+      accessorKey: 'type',
+      header: 'Type',
+      cell: ({ row: { original } }) => (
+        <div className="text-sm font-medium text-foreground">{original.type}</div>
       ),
     },
     {
-      name: 'Start Date',
-      selector: (row: any) => (
-        <div className="text-sm font-normal text-black">
-          {formatDate(row.scheduling?.programStartDate)}
+      id: 'startDate',
+      header: 'Start Date',
+      cell: ({ row: { original } }) => (
+        <div className="text-sm text-foreground">
+          {formatDate(original.scheduling?.programStartDate)}
         </div>
       ),
     },
     {
-      name: 'End Date',
-      selector: (row: any) => (
-        <div className="text-sm font-normal text-black">
-          {row.scheduling?.neverEnds == true
+      id: 'endDate',
+      header: 'End Date',
+      cell: ({ row: { original } }) => (
+        <div className="text-sm text-foreground">
+          {original.scheduling?.neverEnds == true
             ? 'NeverEnds'
-            : formatDate(row.scheduling?.ProgramEndDate)}
+            : formatDate(original.scheduling?.ProgramEndDate)}
         </div>
       ),
     },
-
     {
-      name: 'Status',
-      selector: (row: any) => (
+      accessorKey: 'active',
+      header: 'Status',
+      cell: ({ row: { original } }) => (
         <span
           className={
-            row.active
-              ? 'text-sm font-semibold text-[#154406]'
-              : 'text-sm font-semibold text-black'
+            original.active
+              ? 'text-sm font-medium text-primary'
+              : 'text-sm font-medium text-muted-foreground'
           }
         >
-          {row.active == true ? 'Active' : 'Inactive'}
+          {original.active == true ? 'Active' : 'Inactive'}
         </span>
       ),
-      hasBorderLeft: true,
-      headerBorderLeft: true,
-      width: '150px',
     },
     {
-      name: '',
-      selector: (row: any) => {
+      id: 'actions',
+      header: '',
+      cell: ({ row: { original } }) => {
         const actions: PopoverAction[] = [
           {
             label: 'View',
             onClick: () => {
-              setOpenViewModal(row.uuid);
+              setOpenViewModal(original.uuid);
               setIsViewOpen(true);
             },
             className: 'hover:bg-black/5',
@@ -121,7 +130,7 @@ const VoucherTable = () => {
           {
             label: 'Delete',
             onClick: () => {
-              setOpenDeleteModal(row.uuid);
+              setOpenDeleteModal(original.uuid);
               setIsDeleteOpen(true);
             },
             className: 'hover:bg-red-100 text-red-600',
@@ -132,81 +141,57 @@ const VoucherTable = () => {
         return (
           <TableActionPopover
             actions={actions}
-            rowUuid={row.uuid}
+            rowUuid={original.uuid}
             openPopover={openPopover}
             setOpenPopover={setOpenPopover}
           />
         );
       },
-      width: '50px',
     },
   ];
-  if (error) {
-    return (
-      <div
-        className={
-          'flex w-full flex-col items-center justify-center py-24 text-black'
+
+  return (
+    <>
+      <ListToolbar
+        actions={
+          <>
+            <Button
+              text={'Export'}
+              icon={<i className="ri-upload-2-line" />}
+              theme="lightBlue"
+              type={'button'}
+            />
+            <Link href={'/account_receivables/vouchers/new'}>
+              <Button
+                text={'Create Voucher'}
+                icon={<i className="ri-file-add-line" />}
+                theme="default"
+                type={'button'}
+              />
+            </Link>
+          </>
         }
       >
-        An Error Occured
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex w-full flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-          <div className="min-w-0 flex-1 sm:max-w-md">
-            <Search />
-          </div>
-          <CustomSelect
-            options={options}
-            value={selectedValue}
-            onChange={setSelectedValue}
-            placeholder="Filter: All"
-          />
-          <CustomSelect
-            options={options}
-            value={selectedValue}
-            onChange={setSelectedValue}
-            placeholder="Date: All time"
-          />
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-          <Button
-            text={'Export'}
-            icon={<i className="ri-upload-2-line" />}
-            theme="outline"
-            type={'button'}
-            className="!border-[#154406] !bg-[#e8f5e9] !py-2.5 !text-[#154406]"
-          />
-          <Link href={'/account_receivables/vouchers/new'}>
-            <Button
-              text={'Create Voucher'}
-              icon={<i className="ri-file-add-line" />}
-              theme="default"
-              type={'button'}
-              className="!bg-[#154406]"
-            />
-          </Link>
-        </div>
-      </div>
-      <MyTable
-        columns={columns}
-        selectable={true}
-        data={data?.data || []}
-        pagination
-        pending={isLoading}
-        paginationServer
-        paginationTotalRows={data?.meta?.totalItems ?? 0}
-        onChangePage={setPage}
-        onChangeRowsPerPage={(n) => {
-          setLimit(n);
-          setPage(1);
-        }}
-        currentPage={page}
-        rowsPerPage={limit}
-      />
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={(e) => setSearchValue(e.target.value)}
+          onSearchClear={() => setSearchValue('')}
+          searchPlaceholder="Search vouchers by code..."
+          filters={[]}
+          className="p-0"
+        />
+      </ListToolbar>
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={rows}
+          isLoading={isLoading}
+          withRowSelection
+          {...tableProps(data?.meta, rows.length)}
+        />
+      )}
 
       {openDeleteModal && (
         <DeleteModal
@@ -222,7 +207,7 @@ const VoucherTable = () => {
           setOpen={setIsViewOpen}
         />
       )}
-    </div>
+    </>
   );
 };
 

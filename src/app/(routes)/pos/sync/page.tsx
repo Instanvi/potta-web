@@ -1,9 +1,8 @@
 'use client';
-import { useContext, useState } from 'react';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import { useState } from 'react';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageHeader, Tabs } from '../../_shared/states';
+import { PageContainer, PageHeader, Tabs } from '../../_shared/states';
 import EntityHealthPanel from './components/EntityHealthPanel';
 import FeedPanel from './components/FeedPanel';
 import MappingsPanel from './components/MappingsPanel';
@@ -21,16 +20,11 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 const PosSyncPage = () => {
-  const context = useContext(ContextData);
   const [tab, setTab] = useState<Tab>('reconcile');
 
   return (
     <RootLayout>
-      <div
-        className={`${
-          context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'
-        } pr-5 py-6 h-full overflow-y-auto`}
-      >
+      <PageContainer>
         <PageHeader
           title="Desktop sync"
           description="Monitor what the Potta POS desktop app has pushed and what it will pull."
@@ -39,7 +33,7 @@ const PosSyncPage = () => {
           resource="Transactions"
           action="view"
           fallback={
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               You do not have permission to view POS sync diagnostics.
             </p>
           }
@@ -51,7 +45,7 @@ const PosSyncPage = () => {
           {tab === 'feed' && <FeedPanel />}
           {tab === 'requests' && <RequestLookupPanel />}
         </Can>
-      </div>
+      </PageContainer>
     </RootLayout>
   );
 };

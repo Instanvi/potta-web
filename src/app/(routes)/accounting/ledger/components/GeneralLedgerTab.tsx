@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
-import Input from '@potta/components/input';
+import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, StatCard } from '../../../_shared/states';
 import { useGeneralLedger } from '../hooks';
@@ -67,32 +67,23 @@ const GeneralLedgerTab = () => {
     { accessorKey: 'sourceModule', header: 'Source' },
   ];
 
-  const changeDate = (setter: (v: string) => void) => (value: string) => {
-    setter(value);
+  const changeRange = ({ from, to }: DateRangeValue) => {
+    setStartDate(from ?? '');
+    setEndDate(to ?? '');
     setPagination((p) => ({ ...p, pageIndex: 0 }));
   };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
-        <div className="w-44">
-          <Input
-            type="date"
-            name="startDate"
-            label="From"
-            value={startDate}
-            onchange={(e) => changeDate(setStartDate)(e.target.value)}
-          />
-        </div>
-        <div className="w-44">
-          <Input
-            type="date"
-            name="endDate"
-            label="To"
-            value={endDate}
-            onchange={(e) => changeDate(setEndDate)(e.target.value)}
-          />
-        </div>
+        <DateRangePicker
+          id="ledgerPeriod"
+          label="Period"
+          className="w-72"
+          clearable
+          value={{ from: startDate, to: endDate }}
+          onChange={changeRange}
+        />
         {isFetching && !isLoading && (
           <span className="pb-3 text-sm text-muted-foreground">Refreshing…</span>
         )}

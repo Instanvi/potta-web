@@ -8,6 +8,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import Select from '@potta/components/select';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { Customer } from '../../../../customers/utils/types';
 import * as Yup from 'yup';
 import { toast } from 'sonner'; // Assuming you have a toast library
@@ -351,24 +352,14 @@ const Left = () => {
           />
         </div>
         <div className={`${errors.saleDate ? 'error-field' : ''}`}>
-          <Input
-            type="date"
-            label={
-              <>
-                Sale Date
-                <RequiredMark />
-              </>
-            }
+          <DatePicker
+            label="Sale Date"
+            required
             name="saleDate"
             value={date}
-            onchange={(e) =>
-              handleInputChange(
-                'saleDate',
-                typeof e === 'string' ? e : e.target.value
-              )
-            }
+            onChange={(value) => handleInputChange('saleDate', value)}
             placeholder="Select sale date"
-            errors={errors.saleDate ? { message: errors.saleDate } : undefined}
+            error={errors.saleDate}
           />
         </div>
         <div className={`${errors.receiptNumber ? 'error-field' : ''}`}>

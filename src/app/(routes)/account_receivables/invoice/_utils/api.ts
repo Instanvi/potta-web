@@ -7,11 +7,27 @@ export const invoiceApi = {
     const result = await axios.post(`/invoice/create`, data);
     return result?.data;
   },
-  getAll: async (filter: IFilter) => {
-    const data = {};
-    const result = await axios.post('/invoice/filter', data, {
-      params: { ...filter },
-    });
+  getAll: async ({
+    page,
+    limit,
+    sortBy = 'createdAt',
+    sortOrder = 'DESC',
+    status,
+    search,
+    issuedFrom,
+    issuedTo,
+  }: IFilter) => {
+    const body = status ? { status } : {};
+    const params: Record<string, string | number> = {
+      page,
+      limit,
+      sortBy: `${sortBy}:${sortOrder}`,
+    };
+    if (search) params.search = search;
+    if (issuedFrom && issuedTo) {
+      params['filter.issuedDate'] = `$btw:${issuedFrom},${issuedTo}`;
+    }
+    const result = await axios.post('/invoice/filter', body, { params });
     return result?.data;
   },
   getOne: async (invoice_id: string) => {

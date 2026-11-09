@@ -14,7 +14,12 @@ import {
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate } from '../../../_shared/format';
-import { EmptyState, ErrorState, PageHeader } from '../../../_shared/states';
+import {
+  EmptyState,
+  ErrorState,
+  ListToolbar,
+  PageHeader,
+} from '../../../_shared/states';
 import {
   useApproveCreditNote,
   useCreditNotes,
@@ -158,33 +163,37 @@ const CreditNotesView = () => {
   const rows = data?.data ?? [];
 
   return (
-    <div>
+    <>
       <PageHeader
         title="Credit notes"
         description="Credits issued to customers against invoices."
+      />
+      <ListToolbar
         actions={
           <Can resource="CreditNote" action="create">
             <Link href="/account_receivables/credit/new">
               <Button
                 text="New credit note"
                 type="button"
+                theme="default"
                 icon={<i className="ri-file-add-line" />}
               />
             </Link>
           </Can>
         }
-      />
-      <div className="mb-4 w-56">
-        <Select
-          options={STATUS_OPTIONS}
-          selectedValue={status}
-          onChange={(v: string) => {
-            setStatus(v);
-            setPagination((p) => ({ ...p, pageIndex: 0 }));
-          }}
-          bg="bg-white"
-        />
-      </div>
+      >
+        <div className="w-56">
+          <Select
+            options={STATUS_OPTIONS}
+            selectedValue={status}
+            onChange={(v: string) => {
+              setStatus(v);
+              setPagination((p) => ({ ...p, pageIndex: 0 }));
+            }}
+            bg="bg-white"
+          />
+        </div>
+      </ListToolbar>
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
@@ -241,7 +250,7 @@ const CreditNotesView = () => {
           })
         }
       />
-    </div>
+    </>
   );
 };
 

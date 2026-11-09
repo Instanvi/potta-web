@@ -4,6 +4,9 @@ export type VendorFilter = {
   sortBy?: string | string[];
   search?: string;
   searchBy?: string[];
+  /** Sent in the request body; the backend uses it as the `where` clause. */
+  status?: string;
+  isKYCVerified?: boolean;
 };
 
 export type Vendor = {

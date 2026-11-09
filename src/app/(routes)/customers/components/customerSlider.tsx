@@ -15,17 +15,7 @@ import Tax from './tax';
 import useCreateCustomer from '../hooks/useCreateCustomer';
 import { toast } from 'sonner';
 import { PhoneInput } from '@potta/components/phoneInput';
-// Import shadcn date picker components
-import { Calendar } from '@potta/components/shadcn/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@potta/components/shadcn/popover';
-import { Button as ShadcnButton } from '@potta/components/shadcn/button';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@potta/lib/utils';
+import { FormDatePicker } from '@potta/components/ui/date-picker';
 
 interface CustomerCreateProps {
   open?: boolean; // Optional controlled open state
@@ -242,48 +232,17 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
         </div>
         {/* Date of Birth Field */}
         <div className="w-full mb-5">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Date of Birth
-            </label>
-            <Controller
-              control={control}
-              name="date_of_birth"
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <ShadcnButton
-                      variant="outline"
-                      className={cn(
-                        'w-1/2 py-5  justify-start text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? (
-                        format(field.value, 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </ShadcnButton>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
-            {errors.date_of_birth && (
-              <small className="text-red-500">
-                {errors.date_of_birth.message}
-              </small>
-            )}
-          </div>
+          <FormDatePicker
+            control={control}
+            name="date_of_birth"
+            valueType="date"
+            label="Date of Birth"
+            required
+            placeholder="Pick a date"
+            fromYear={1920}
+            max={new Date()}
+            className="w-1/2"
+          />
         </div>
         <hr />
         <div className="mt-2">

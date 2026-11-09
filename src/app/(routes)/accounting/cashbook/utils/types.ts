@@ -77,6 +77,9 @@ export interface CashbookFilter {
   startDate?: string;
   endDate?: string;
   reference?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
 }
 
 /** Mirrors potta-backend CreateCashbookEntryDto. */

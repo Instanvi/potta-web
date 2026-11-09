@@ -11,9 +11,10 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { MoreVertical } from 'lucide-react';
 
-import Search from '@potta/components/search';
-
 import Button from '@potta/components/button';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { ErrorState, ListToolbar } from '../../../_shared/states';
 
 import useGetAllPurchaseOrders from '../hooks/useGetAllPurchaseOrders';
 import useApprovePurchaseOrder from '../hooks/useApprovePurchaseOrder';
@@ -53,8 +54,6 @@ interface ApiResponse {
 }
 
 const InvoiceTable = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [vendorFilter, setVendorFilter] = useState<string>('all');
@@ -65,13 +64,22 @@ const InvoiceTable = () => {
   >(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [statusFilter, vendorFilter, debouncedSearch],
+  });
+
   const filter = {
     limit,
     page,
     sortBy: ['createdAt:DESC'],
+    status: statusFilter === 'all' ? undefined : statusFilter,
+    vendorId: vendorFilter === 'all' ? undefined : vendorFilter,
+    search: debouncedSearch || undefined,
   };
 
-  const { data, isLoading, error } = useGetAllPurchaseOrders(filter);
+  const { data, isLoading, error, refetch } = useGetAllPurchaseOrders(filter);
   const approveMutation = useApprovePurchaseOrder();
   const deleteMutation = useDeletePurchaseOrder();
 
@@ -192,21 +200,19 @@ const InvoiceTable = () => {
     );
   };
 
-  // Create dynamic filter options
+  // Only the backend PurchaseOrderStatus enum values; others fail the enum cast server-side.
   const statusOptions: IOption[] = [
     { value: 'all', label: 'All Status' },
     { value: 'PENDING', label: 'Pending' },
     { value: 'APPROVED', label: 'Approved' },
     { value: 'SHIPPED', label: 'Shipped' },
-    { value: 'REJECTED', label: 'Rejected' },
-    { value: 'DRAFT', label: 'Draft' },
   ];
 
   const vendorOptions: IOption[] = [
     { value: 'all', label: 'All Vendors' },
-    ...((vendorsData?.data ?? []) as { name?: string }[])
-      .filter((v) => !!v.name)
-      .map((v) => ({ value: v.name as string, label: v.name as string })),
+    ...((vendorsData?.data ?? []) as { uuid?: string; name?: string }[])
+      .filter((v) => !!v.uuid && !!v.name)
+      .map((v) => ({ value: v.uuid as string, label: v.name as string })),
   ];
 
   // Filter configuration for DynamicFilter
@@ -229,34 +235,6 @@ const InvoiceTable = () => {
     },
   ];
 
-  // Filter data based on selected filters and search
-  const filteredData = React.useMemo(() => {
-    if (!data?.data) return [];
-
-    return data.data.filter((purchaseOrder: PurchaseOrder) => {
-      // Status filter
-      const statusMatch =
-        statusFilter === 'all' || purchaseOrder.status === statusFilter;
-
-      // Vendor filter
-      const vendorMatch =
-        vendorFilter === 'all' ||
-        purchaseOrder.salePerson?.name === vendorFilter;
-
-      // Search filter (frontend only)
-      const searchMatch =
-        !searchValue ||
-        purchaseOrder.orderNumber
-          .toLowerCase()
-          .includes(searchValue.toLowerCase()) ||
-        purchaseOrder.salePerson?.name
-          .toLowerCase()
-          .includes(searchValue.toLowerCase());
-
-      return statusMatch && vendorMatch && searchMatch;
-    });
-  }, [data?.data, statusFilter, vendorFilter, searchValue]);
-
   const columns: ColumnDef<PurchaseOrder>[] = [
     {
       accessorKey: 'orderNumber',
@@ -276,7 +254,7 @@ const InvoiceTable = () => {
       accessorKey: 'orderDate',
       header: 'Order Date',
       cell: ({ row }) => (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           {formatDate(row.original.orderDate)}
         </div>
       ),
@@ -285,7 +263,7 @@ const InvoiceTable = () => {
       accessorKey: 'requiredDate',
       header: 'Required Date',
       cell: ({ row }) => (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           {formatDate(row.original.requiredDate)}
         </div>
       ),
@@ -365,75 +343,48 @@ const InvoiceTable = () => {
     },
   ];
 
-  if (error) {
-    return (
-      <div className="mt-10">
-        <div className="flex justify-between items-center w-full mb-4">
-          <div className="flex-1">
-            <DynamicFilter
-              searchValue={searchValue}
-              onSearchChange={handleSearchChange}
-              onSearchClear={handleSearchClear}
-              searchPlaceholder="Search purchase orders..."
-              filters={filterConfig}
-              className="p-0 bg-transparent"
-            />
-          </div>
-          <div className="flex items-center space-x-2 ml-4">
+  return (
+    <div ref={containerRef}>
+      <ListToolbar
+        actions={
+          <>
             <Button
-              text={'Create PurchaseOrder'}
+              text={'Export'}
+              icon={<i className="ri-upload-2-line"></i>}
+              theme="lightBlue"
+              type={'button'}
+              color={true}
+            />
+            <Button
+              text={'Create Purchase Order'}
               icon={<i className="ri-file-add-line"></i>}
               theme="default"
               type={'button'}
               onClick={() => setIsOpen(true)}
             />
-          </div>
-        </div>
-        <div className="min-h-60 items-center flex justify-center">
-          <p className="text-red-600  text-center">
-            An Error occured while fetching purchase orders please try again
-            later
-          </p>
-        </div>
-      </div>
-    );
-  }
+          </>
+        }
+      >
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onSearchClear={handleSearchClear}
+          searchPlaceholder="Search by order number, vendor or notes..."
+          filters={filterConfig}
+          className="p-0"
+        />
+      </ListToolbar>
 
-  return (
-    <div className="" ref={containerRef}>
-      <div className="flex justify-between items-center w-full mb-4">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search purchase orders by order number or vendor..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4">
-          <Button
-            text={'Export'}
-            icon={<i className="ri-upload-2-line"></i>}
-            theme="lightBlue"
-            type={'button'}
-            color={true}
-          />
-          <Button
-            text={'Create PurchaseOrder'}
-            icon={<i className="ri-file-add-line"></i>}
-            theme="default"
-            type={'button'}
-            onClick={() => setIsOpen(true)}
-          />
-        </div>
-      </div>
-
-      <DataGrid data={filteredData} columns={columns} loading={isLoading} />
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataGrid
+          data={(data?.data ?? []) as PurchaseOrder[]}
+          columns={columns}
+          loading={isLoading}
+          {...tableProps(data?.meta, data?.data?.length)}
+        />
+      )}
 
       {/* Create Purchase Order Modal */}
       <Slider

@@ -2,15 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Check, X, CalendarIcon, ChevronDown, AlertCircle } from 'lucide-react';
-import { format, isAfter, isBefore, parse, isValid } from 'date-fns';
-import { Calendar } from '@potta/components/shadcn/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@potta/components/shadcn/popover';
-import { Button } from '@potta/components/shadcn/button';
+import { Check, X, ChevronDown, AlertCircle } from 'lucide-react';
+import { isAfter, parse, isValid } from 'date-fns';
+import { DatePicker, parseDateValue } from '@potta/components/ui/date-picker';
 import { cn } from '@potta/lib/utils';
 
 interface SchedulingProps {
@@ -338,90 +332,47 @@ const Scheduling: React.FC<SchedulingProps> = () => {
         {/* Program Start and End Date */}
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Program Starts Datetime <span className="text-red-500">*</span>
-            </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start text-left font-normal border border-gray-300',
-                    !startDate && 'text-gray-500',
-                    hasError('scheduling.programStartDate') && 'border-red-500'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate
-                    ? format(new Date(startDate), 'PPP')
-                    : 'Select start date'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate ? new Date(startDate) : undefined}
-                  onSelect={(date) =>
-                    setValue(
-                      'scheduling.programStartDate',
-                      date ? date.toISOString() : ''
-                    )
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            {hasError('scheduling.programStartDate') && (
-              <p className="mt-1 text-sm text-red-500 flex items-center">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                {getErrorMessage('scheduling.programStartDate')}
-              </p>
-            )}
+            <DatePicker
+              valueType="date"
+              label="Program Starts Datetime"
+              required
+              placeholder="Select start date"
+              value={parseDateValue(startDate) ?? null}
+              onChange={(date) =>
+                setValue(
+                  'scheduling.programStartDate',
+                  date ? date.toISOString() : ''
+                )
+              }
+              error={
+                hasError('scheduling.programStartDate')
+                  ? getErrorMessage('scheduling.programStartDate')
+                  : undefined
+              }
+            />
           </div>
           <div className="flex items-start space-x-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Program Ends Datetime {!programNeverEnds && <span className="text-red-500">*</span>}
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal border border-gray-300',
-                      !endDate && 'text-gray-500',
-                      programNeverEnds && 'opacity-50 cursor-not-allowed',
-                      hasError('scheduling.programEndDate') && 'border-red-500'
-                    )}
-                    disabled={programNeverEnds}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate && !programNeverEnds
-                      ? format(new Date(endDate), 'PPP')
-                      : programNeverEnds ? 'Never' : 'Select end date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate ? new Date(endDate) : undefined}
-                    onSelect={(date) =>
-                      setValue(
-                        'scheduling.programEndDate',
-                        date ? date.toISOString() : ''
-                      )
-                    }
-                    initialFocus
-                    disabled={programNeverEnds}
-                  />
-                </PopoverContent>
-              </Popover>
-              {hasError('scheduling.programEndDate') && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  {getErrorMessage('scheduling.programEndDate')}
-                </p>
-              )}
+              <DatePicker
+                valueType="date"
+                label="Program Ends Datetime"
+                required={!programNeverEnds}
+                disabled={programNeverEnds}
+                placeholder={programNeverEnds ? 'Never' : 'Select end date'}
+                min={parseDateValue(startDate) ?? null}
+                value={programNeverEnds ? null : parseDateValue(endDate) ?? null}
+                onChange={(date) =>
+                  setValue(
+                    'scheduling.programEndDate',
+                    date ? date.toISOString() : ''
+                  )
+                }
+                error={
+                  hasError('scheduling.programEndDate')
+                    ? getErrorMessage('scheduling.programEndDate')
+                    : undefined
+                }
+              />
             </div>
           </div>
             <div className="flex items-center ">

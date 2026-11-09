@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import MyTable from '@potta/components/table';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { MoreVertical } from 'lucide-react';
 import {
   DropdownMenu,
@@ -9,6 +9,8 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import moment from 'moment';
 import { accountsApi } from '@potta/app/(routes)/accounting/utils/api';
+import { DataTable } from '@potta/components/ui/data-table';
+import { ErrorState } from '../../../../_shared/states';
 
 interface BankAccountTableProps {
   ledgerAccountId: string;
@@ -40,91 +42,85 @@ const BankAccountTable: React.FC<BankAccountTableProps> = ({
       .finally(() => setLoading(false));
   }, [ledgerAccountId]);
 
-  // Filtering logic
-  let filteredData = transactions;
-  if (search) {
-    const s = search.toLowerCase();
-    filteredData = filteredData.filter(
-      (row: any) =>
-        (row.description && row.description.toLowerCase().includes(s)) ||
-        (row.referenceNumber && row.referenceNumber.toLowerCase().includes(s))
-    );
-  }
-  if (status && status !== 'all') {
-    filteredData = filteredData.filter(
-      (row: any) => (row.status || '').toLowerCase() === status.toLowerCase()
-    );
-  }
-  if (dateRange && dateRange !== 'All Time') {
-    const now = moment();
-    filteredData = filteredData.filter((row: any) => {
-      const date = moment(row.transactionDate || row.date);
-      if (dateRange === 'Yesterday')
-        return date.isSame(now.clone().subtract(1, 'day'), 'day');
-      if (dateRange === 'Last 7 Days')
-        return date.isAfter(now.clone().subtract(7, 'days'));
-      if (dateRange === 'Last 30 Days')
-        return date.isAfter(now.clone().subtract(30, 'days'));
-      return true;
-    });
-  }
+  const filteredData = useMemo(() => {
+    let rows = transactions;
+    if (search) {
+      const s = search.toLowerCase();
+      rows = rows.filter(
+        (row: any) =>
+          (row.description && row.description.toLowerCase().includes(s)) ||
+          (row.referenceNumber && row.referenceNumber.toLowerCase().includes(s))
+      );
+    }
+    if (status && status !== 'all') {
+      rows = rows.filter(
+        (row: any) => (row.status || '').toLowerCase() === status.toLowerCase()
+      );
+    }
+    if (dateRange && dateRange !== 'All Time') {
+      const now = moment();
+      rows = rows.filter((row: any) => {
+        const date = moment(row.transactionDate || row.date);
+        if (dateRange === 'Yesterday')
+          return date.isSame(now.clone().subtract(1, 'day'), 'day');
+        if (dateRange === 'Last 7 Days')
+          return date.isAfter(now.clone().subtract(7, 'days'));
+        if (dateRange === 'Last 30 Days')
+          return date.isAfter(now.clone().subtract(30, 'days'));
+        return true;
+      });
+    }
+    return rows;
+  }, [transactions, search, status, dateRange]);
 
-  const columns = [
+  const columns: ColumnDef<any>[] = [
     {
-      name: 'Date',
-      selector: (row: any) =>
-        moment(row.transactionDate || row.date).format('ll, LT'),
-      sortable: true,
-      minWidth: '120px',
+      id: 'date',
+      header: 'Date',
+      accessorFn: (row) => row.transactionDate || row.date,
+      cell: ({ row: { original } }) =>
+        moment(original.transactionDate || original.date).format('ll, LT'),
     },
     {
-      name: 'Description',
-      selector: (row: any) => row.description,
-      sortable: true,
-      minWidth: '200px',
+      accessorKey: 'description',
+      header: 'Description',
     },
     {
-      name: 'Withdrawals',
-      selector: (row: any) => row.withdrawals || row.debit,
-      sortable: true,
-      minWidth: '120px',
-      cell: (row: any) =>
-        row.withdrawals || row.debit ? (
-          <span className="text-red-600 font-medium">
-            {row.withdrawals || row.debit}
-          </span>
+      id: 'withdrawals',
+      header: 'Withdrawals',
+      accessorFn: (row) => row.withdrawals || row.debit,
+      cell: ({ getValue }) =>
+        getValue() ? (
+          <span className="font-medium text-destructive">{getValue() as React.ReactNode}</span>
         ) : (
           ''
         ),
     },
     {
-      name: 'Deposit',
-      selector: (row: any) => row.deposit || row.credit,
-      sortable: true,
-      minWidth: '120px',
-      cell: (row: any) =>
-        row.deposit || row.credit ? (
-          <span className="text-green-600 font-medium">
-            {row.deposit || row.credit}
-          </span>
+      id: 'deposit',
+      header: 'Deposit',
+      accessorFn: (row) => row.deposit || row.credit,
+      cell: ({ getValue }) =>
+        getValue() ? (
+          <span className="font-medium text-success">{getValue() as React.ReactNode}</span>
         ) : (
           ''
         ),
     },
     {
-      name: 'Balance',
-      selector: (row: any) => row.balance,
-      sortable: true,
-      minWidth: '120px',
-      cell: (row: any) => <span className="font-medium">{row.balance}</span>,
+      accessorKey: 'balance',
+      header: 'Balance',
+      cell: ({ row: { original } }) => <span className="font-medium">{original.balance}</span>,
     },
     {
-      name: '',
-      selector: (row: any) => (
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      cell: () => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="hover:bg-gray-100 hover:bg-opacity-50 outline-none p-1 rounded-full">
-              <MoreVertical className="h-4 w-4 text-gray-600" />
+            <button className="rounded-full p-1 outline-none hover:bg-accent">
+              <MoreVertical className="h-4 w-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
@@ -134,26 +130,19 @@ const BankAccountTable: React.FC<BankAccountTableProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-      sortable: false,
     },
   ];
 
+  if (error) return <ErrorState error={new Error(error)} />;
+
   return (
-    <div className="mt-10">
-      {loading ? (
-        <div>Loading transactions...</div>
-      ) : error ? (
-        <div className="text-red-500">{error}</div>
-      ) : (
-        <MyTable
-          columns={columns}
-          data={filteredData}
-          ExpandableComponent={null}
-          expanded={false}
-          pagination={Array.isArray(filteredData) && filteredData.length > 9}
-        />
-      )}
-    </div>
+    <DataTable
+      columns={columns}
+      data={filteredData}
+      isLoading={loading}
+      pageSize={20}
+      pageSizeOptions={[10, 20, 50, 100]}
+    />
   );
 };
 

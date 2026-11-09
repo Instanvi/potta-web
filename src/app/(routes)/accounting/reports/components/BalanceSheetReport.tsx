@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import Input from '@potta/components/input';
+import { DatePicker, parseDateValue } from '@potta/components/ui/date-picker';
 import { formatAmount, formatDate, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, LoadingState, StatCard, StatusBadge } from '../../../_shared/states';
 import { useBalanceSheet } from '../hooks';
@@ -21,15 +21,13 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-44">
-        <Input
-          type="date"
-          name="asOfDate"
-          label="As of"
-          value={asOfDate}
-          onchange={(e) => setAsOfDate(e.target.value)}
-        />
-      </div>
+      <DatePicker
+        id="balanceSheetAsOf"
+        label="As of"
+        className="w-52"
+        value={asOfDate}
+        onChange={(value) => setAsOfDate(value || today())}
+      />
       {isLoading ? (
         <LoadingState label="Generating balance sheet..." />
       ) : error ? (
@@ -48,7 +46,7 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
         </div>
         <div className="dashboard-panel max-w-3xl overflow-hidden">
           <div className="flex items-center justify-between border-b border-black/[0.06] px-4 py-3">
-            <p className="text-sm text-muted-foreground">As of {formatDate(asOfDate)}</p>
+            <p className="text-sm text-muted-foreground">As of {formatDate(parseDateValue(asOfDate))}</p>
             <StatusBadge tone={data.isBalanced ? 'success' : 'danger'}>
               {data.isBalanced ? 'Balanced' : 'Out of balance'}
             </StatusBadge>

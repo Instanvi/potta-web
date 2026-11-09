@@ -1,30 +1,18 @@
 'use client';
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
-import {
-  getCountryCallingCode,
-  parsePhoneNumberFromString,
-} from 'libphonenumber-js';
-import Flag from 'react-world-flags';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
-import {
-  PopoverTrigger,
-  PopoverContent,
-  Popover,
-  Button,
-} from '@nextui-org/react';
 import Filter from './filters';
 import useGetAllCustomers from '../hooks/useGetAllCustomers';
 import ViewCustomerSlider from './viewCustomerSlider.tsx';
-import CustomPopover from '@potta/components/popover';
 import EditCustomer from './updateCustomerSlider';
 import DeleteModal from './deleteModal';
 import { CustomerFilter } from '../utils/types';
-import { log } from 'console';
-import {
-  UpdateCustomerPayload,
-  updateCustomerSchema,
-} from '../utils/validations';
+import { UpdateCustomerPayload } from '../utils/validations';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { ErrorState } from '../../_shared/states';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -183,56 +171,43 @@ const TableComponents = () => {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [debouncedSearch],
+  });
 
-  const filter: CustomerFilter = { page, limit };
-  const { data: customer, isLoading, error } = useGetAllCustomers(filter);
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+  const filter: CustomerFilter = {
+    page,
+    limit,
+    search: debouncedSearch || undefined,
   };
-
-  const handlePageSizeChange = (newPageSize: number) => {
-    setLimit(newPageSize);
-    setPage(1); // Reset to first page when page size changes
-  };
+  const { data: customer, isLoading, error, refetch } = useGetAllCustomers(filter);
 
   const handleRowClick = (row: any) => {
     setOpenViewModal(row.uuid);
     setIsViewOpen(true);
   };
 
-  if (error)
-    return (
-      <div className="mt-10">
-        <Filter />
-        <div className="min-h-60 items-center flex justify-center">
-          <p className="text-red-600  text-center">
-            An Error occured while fetching customers please try again later
-          </p>
-        </div>
-      </div>
-    );
-
   return (
-    <div className="mt-10">
-      <Filter />
-      <DataGrid
-        columns={columns}
-        data={customer?.data || []}
-        isLoading={isLoading}
-        onRowClick={handleRowClick}
-        manualPagination={!!customer?.meta}
-        currentPage={page}
-        pageSize={limit}
-        pageCount={customer?.meta?.totalPages || 1}
-        totalItems={customer?.meta?.totalItems || customer?.data?.length || 0}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-        showPagination={true}
-        pageSizeOptions={[10, 20, 50, 100]}
+    <div>
+      <Filter
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
       />
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataGrid
+          columns={columns}
+          data={customer?.data ?? []}
+          isLoading={isLoading}
+          onRowClick={handleRowClick}
+          pageSizeOptions={[10, 20, 50, 100]}
+          {...tableProps(customer?.meta, customer?.data?.length)}
+        />
+      )}
       {openDeleteModal && (
         <DeleteModal
           customerID={openDeleteModal}

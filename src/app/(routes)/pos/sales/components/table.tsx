@@ -17,6 +17,26 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+
+
+/** saleDate range for a date preset, as a nestjs-paginate $btw filter (local days). */
+const saleDateFilter = (range: string): string | undefined => {
+  if (range === 'all') return undefined;
+  const now = new Date();
+  const day = (offset: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+  const endOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+  const bounds: Record<string, [Date, Date]> = {
+    today: [day(0), endOf(day(0))],
+    yesterday: [day(-1), endOf(day(-1))],
+    this_week: [day(-now.getDay()), endOf(day(0))],
+    this_month: [new Date(now.getFullYear(), now.getMonth(), 1), endOf(day(0))],
+  };
+  const b = bounds[range];
+  return b ? `$btw:${b[0].toISOString()},${b[1].toISOString()}` : undefined;
+};
 
 // Updated type to match the actual response structure
 type ResponseSalesReceipt = {
@@ -80,24 +100,27 @@ const SaleTable = () => {
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt:DESC');
+  const search = useDebouncedValue(searchValue.trim(), 300);
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [sortBy, search, dateFilter],
+  });
+  const [sortColumn, sortOrder] = sortBy.split(':') as [Filters['sortBy'], Filters['sortOrder']];
 
-  // Set up filter state with pagination
+  const saleDate = saleDateFilter(dateFilter);
   const filter: Filters = {
     limit,
     page,
-    sortOrder: 'ASC',
-    sortBy: 'createdAt',
+    sortBy: sortColumn,
+    sortOrder,
+    ...(search ? { search } : {}),
+    ...(saleDate ? { 'filter.saleDate': saleDate } : {}),
   };
 
-  // Fetch receipts data using the hook
-  const { data, isLoading, error } = useGetAllSalesReceipts(filter);
+  const { data, isLoading, error, refetch } = useGetAllSalesReceipts(filter);
 
   const handleRowClick = (row: ResponseSalesReceipt) => {
     setOpenViewModal(row.uuid);
@@ -113,19 +136,6 @@ const SaleTable = () => {
   };
 
   const filterConfig = [
-    {
-      key: 'status',
-      label: 'Status',
-      options: [
-        { label: 'All Status', value: 'all' },
-        { label: 'Pending', value: 'pending' },
-        { label: 'Paid', value: 'paid' },
-        { label: 'Completed', value: 'completed' },
-      ],
-      value: statusFilter,
-      onChange: setStatusFilter,
-      selectClassName: 'min-w-[120px]',
-    },
     {
       key: 'date',
       label: 'Date',
@@ -146,9 +156,9 @@ const SaleTable = () => {
       options: [
         { label: 'Newest First', value: 'createdAt:DESC' },
         { label: 'Oldest First', value: 'createdAt:ASC' },
-        { label: 'Sale Date', value: 'saleDate:DESC' },
-        { label: 'Amount High to Low', value: 'totalAmount:DESC' },
-        { label: 'Amount Low to High', value: 'totalAmount:ASC' },
+        { label: 'Recently Updated', value: 'updatedAt:DESC' },
+        { label: 'Sale date (newest)', value: 'saleDate:DESC' },
+        { label: 'Amount (highest)', value: 'totalAmount:DESC' },
       ],
       value: sortBy,
       onChange: setSortBy,
@@ -218,19 +228,12 @@ const SaleTable = () => {
     {
       id: 'resolution',
       header: 'Resolution',
-      cell: () => {
-        const status = 'Closed';
-        return (
-          <div className="border-r pr-4 flex justify-center">
-            <div className="flex items-center gap-3  w-full px-3 py-2 border border-green-500 bg-green-50 text-green-700">
-              <div className="flex items-center justify-center text-white bg-green-700 rounded-full size-4">
-                <Icon icon="material-symbols:check" width="20" height="20" />
-              </div>
-              {status}
-            </div>
-          </div>
-        );
-      },
+      cell: () => (
+        <StatusBadge tone="success">
+          <Icon icon="material-symbols:check" width="14" height="14" />
+          Closed
+        </StatusBadge>
+      ),
     },
     {
       id: 'actions',
@@ -261,7 +264,7 @@ const SaleTable = () => {
                   setReceiptDetails(original);
                   setIsDeleteOpen(true);
                 }}
-                className="cursor-pointer text-red-600"
+                className="cursor-pointer text-destructive"
               >
                 <i className="ri-delete-bin-line mr-2"></i>
                 Delete
@@ -273,70 +276,52 @@ const SaleTable = () => {
     },
   ];
 
-  // Error handling
-  if (error) {
-    return (
-      <div className="mt-4">
+  const receiptsData: ResponseSalesReceipt[] = data?.data || [];
+
+  return (
+    <div>
+      <ListToolbar
+        actions={
+          <>
+            <Button
+              text={'Export'}
+              icon={<img src="/images/export.svg" />}
+              theme="lightBlue"
+              type={'button'}
+              color={true}
+            />
+            <Link href={'/pos/sales/new'}>
+              <Button
+                text={'Create Sale'}
+                icon={<i className="ri-file-add-line"></i>}
+                theme="default"
+                type={'button'}
+              />
+            </Link>
+          </>
+        }
+      >
         <DynamicFilter
           searchValue={searchValue}
           onSearchChange={handleSearchChange}
           onSearchClear={handleSearchClear}
           searchPlaceholder="Search receipts by customer, ID, or memo..."
           filters={filterConfig}
-        />  
-        <div className="min-h-60 items-center flex justify-center">
-          <p className="text-red-600 text-center">
-            An error occurred while fetching receipts. Please try again later.
-          </p>
-        </div>
-      </div>
-    );
-  }
+          className="p-0"
+        />
+      </ListToolbar>
 
-  // Use the fetched data or an empty array if data is not available
-  const receiptsData = data?.data || [];
-
-  return (
-    <div className="">
-      <div className="flex justify-between items-center w-full">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search receipts by customer, ID, or memo..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4">
-          <Button
-            text={'Export'}
-            icon={<img src="/images/export.svg" />}
-            theme="lightBlue"
-            type={'button'}
-            color={true}
-          />
-          <Link href={'/pos/sales/new'}>
-            <Button
-              text={'Create Sale'}
-              icon={<i className="ri-file-add-line"></i>}
-              theme="default"
-              type={'button'}
-            />
-          </Link>
-        </div>
-      </div>
-
-      <DataGrid
-        columns={columns}
-        data={receiptsData}
-        onRowClick={handleRowClick}
-        isLoading={isLoading}
-      />
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataGrid
+          columns={columns}
+          data={receiptsData}
+          onRowClick={handleRowClick}
+          isLoading={isLoading}
+          {...tableProps(data?.meta, receiptsData.length)}
+        />
+      )}
 
       {/* Add your modal components here when implemented */}
 

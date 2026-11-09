@@ -1,9 +1,10 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, Trash2 } from 'lucide-react';
 import { DataTable } from '@potta/components/ui/data-table';
 import { Can } from '@/components/auth/can';
+import { useServerPagination } from '@/hooks/use-server-pagination';
 import { formatAmount, formatDate } from '../../../_shared/format';
 import { EmptyState, ErrorState } from '../../../_shared/states';
 import useGetJournalEntries from '../hooks/useGetJournalEntries';
@@ -14,29 +15,23 @@ import JournalViewSlider from './journalViewSlider';
 const sumLines = (journal: Journal, key: 'debit' | 'credit') =>
   (journal.lines ?? []).reduce((sum, line) => sum + Number(line[key] ?? 0), 0);
 
-const matchesSearch = (journal: Journal, term: string) =>
-  [journal.number, journal.referenceNumber, journal.type, journal.description, journal.sourceDocumentType]
-    .filter(Boolean)
-    .some((value) => String(value).toLowerCase().includes(term));
+const useDebounced = <T,>(value: T, delay = 300) => {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+};
 
 const JournalEntriesTable = ({ search = '' }: { search?: string }) => {
-  const { data, isLoading, error, refetch } = useGetJournalEntries();
+  const term = useDebounced(search.trim());
+  const { page, limit, tableProps } = useServerPagination({ pageSize: 20, resetOn: [term] });
+  const { data, isLoading, error, refetch } = useGetJournalEntries({ page, limit, search: term });
   const [viewId, setViewId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const allRows = useMemo(
-    () =>
-      [...(data ?? [])].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      ),
-    [data]
-  );
-
-  const term = search.trim().toLowerCase();
-  const rows = useMemo(
-    () => (term ? allRows.filter((journal) => matchesSearch(journal, term)) : allRows),
-    [allRows, term]
-  );
+  const rows = data?.data ?? [];
 
   const columns: ColumnDef<Journal>[] = [
     {
@@ -101,9 +96,9 @@ const JournalEntriesTable = ({ search = '' }: { search?: string }) => {
   ];
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
-  if (!isLoading && rows.length === 0)
+  if (!isLoading && rows.length === 0 && page === 1)
     return term ? (
-      <EmptyState title="No matching entries" description={`Nothing matches "${search.trim()}".`} />
+      <EmptyState title="No matching entries" description={`Nothing matches "${term}".`} />
     ) : (
       <EmptyState
         title="No journal entries"
@@ -119,6 +114,7 @@ const JournalEntriesTable = ({ search = '' }: { search?: string }) => {
         isLoading={isLoading}
         withRowSelection={false}
         onRowClick={(row) => setViewId(row.uuid)}
+        {...tableProps(data?.meta, rows.length)}
       />
       <JournalViewSlider
         journalId={viewId ?? undefined}

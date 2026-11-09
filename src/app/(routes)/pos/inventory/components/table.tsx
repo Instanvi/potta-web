@@ -18,6 +18,7 @@ import { Can } from '@/components/auth/can';
 import Image from 'next/image';
 import ProductEditStepperModal from './ProductEditStepperModal';
 import { StatusBadge } from '../../../_shared/states';
+import { useServerPagination } from '@/hooks/use-server-pagination';
 
 const InventoryTable = () => {
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
@@ -198,9 +199,15 @@ const InventoryTable = () => {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const { filters } = useInventory();
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [filters.search, filters.productType, filters.sort],
+  });
+  const [sortBy, sortOrder] = (filters.sort || 'createdAt:ASC').split(':') as [
+    Filter['sortBy'],
+    Filter['sortOrder'],
+  ];
 
   const filter: Filter = {
     page,
@@ -210,27 +217,21 @@ const InventoryTable = () => {
       filters.productType !== 'ALL'
         ? (filters.productType as Filter['productType'])
         : undefined,
-    sort: filters.sort,
+    sortBy,
+    sortOrder,
   };
-  const { data, isLoading, error, refetch } = useGetAllProducts(filter);
+  const { data, isLoading, refetch } = useGetAllProducts(filter);
   const rows = React.useMemo(() => data?.data || [], [data]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-  const handlePerRowsChange = (newLimit: number, newPage: number) => {
-    setLimit(newLimit);
-    setPage(newPage); // Reset page when changing rows per page
-  };
   return (
-    <div className="mt-10">
-      <div></div>
+    <div>
       <DataTable
         columns={columns}
         data={rows}
         isLoading={isLoading}
         onRowClick={handleRowClick}
         onSelectionChange={(selected) => setSelectedProducts(selected as Product[])}
+        {...tableProps(data?.meta, rows.length)}
       />
       {openDeleteModal && (
         <DeleteModal

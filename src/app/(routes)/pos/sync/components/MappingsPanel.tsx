@@ -2,12 +2,12 @@
 import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
-import Input from '@potta/components/input';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatDateTime } from '../../../_shared/format';
 import { EmptyState, ErrorState } from '../../../_shared/states';
 import { useMappings } from '../hooks';
 import { MappingItem, PosSyncKind } from '../utils/api';
-import { CursorPager, KindFilter, Mono, useCursorPager } from './shared';
+import { KindFilter, Mono, useCursorTable } from './shared';
 
 const LIMIT = 50;
 
@@ -39,10 +39,10 @@ const columns: ColumnDef<MappingItem>[] = [
 const MappingsPanel = () => {
   const [kinds, setKinds] = useState<PosSyncKind[]>([]);
   const [since, setSince] = useState('');
-  const pager = useCursorPager();
-  const { data, isLoading, isFetching, error, refetch } = useMappings({
+  const pager = useCursorTable(LIMIT);
+  const { data, isLoading, error, refetch } = useMappings({
     cursor: pager.cursor,
-    limit: LIMIT,
+    limit: pager.limit,
     kinds: kinds.length ? kinds : undefined,
     since: since || undefined,
   });
@@ -50,7 +50,7 @@ const MappingsPanel = () => {
 
   return (
     <div>
-      <div className="flex flex-wrap items-end gap-3 mb-4">
+      <div className="mb-4 flex flex-wrap items-end gap-3">
         <KindFilter
           value={kinds}
           onChange={(k) => {
@@ -58,44 +58,33 @@ const MappingsPanel = () => {
             pager.reset();
           }}
         />
-        <div className="w-48">
-          <Input
-            type="date"
-            name="since"
-            label="Updated since"
-            value={since}
-            onchange={(e) => {
-              setSince(e.target.value);
-              pager.reset();
-            }}
-          />
-        </div>
+        <DatePicker
+          label="Updated since"
+          name="since"
+          className="w-52"
+          clearable
+          value={since}
+          onChange={(value) => {
+            setSince(value);
+            pager.reset();
+          }}
+        />
       </div>
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
+      ) : !isLoading && rows.length === 0 && pager.pageIndex === 0 ? (
         <EmptyState
           title="No mappings"
           description="Mappings are created when the POS desktop app pushes records."
         />
       ) : (
-        <>
-          <DataTable
-            columns={columns}
-            data={rows}
-            isLoading={isLoading}
-            withRowSelection={false}
-            showPagination={false}
-            pageSize={LIMIT}
-          />
-          <CursorPager
-            page={pager.page}
-            hasMore={!!data?.has_more}
-            isFetching={isFetching && !isLoading}
-            onPrev={pager.prev}
-            onNext={() => pager.next(data?.next_cursor)}
-          />
-        </>
+        <DataTable
+          columns={columns}
+          data={rows}
+          isLoading={isLoading}
+          withRowSelection={false}
+          {...pager.tableProps({ nextCursor: data?.next_cursor, hasMore: data?.has_more }, rows.length)}
+        />
       )}
     </div>
   );
