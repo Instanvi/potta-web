@@ -2,69 +2,42 @@
 import React from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { ArrowRight, GearSix, type Icon } from '@phosphor-icons/react';
+import { ClockCounterClockwise, GearSix, type Icon } from '@phosphor-icons/react';
 import RootLayout from './(routes)/layout';
 import { PageContainer } from './(routes)/_shared/states';
 import { HomeSkeleton } from './component/HomeSkeleton';
-import { NAV_MODULES } from '@/lib/navigation';
+import { AppIcon } from '@/components/app-icon';
+import { NAV_MODULES, type NavItem } from '@/lib/navigation';
 import { useCanOpenRoute } from '@/lib/use-can-open-route';
 
-interface ControlCard {
+interface HomeSection {
   id: string;
   title: string;
-  description: string;
-  icon: Icon;
-  href: string;
-  links: { title: string; href: string }[];
+  items: Pick<NavItem, 'title' | 'href' | 'icon' | 'appIcon'>[];
 }
 
-const SETTINGS_CARD: ControlCard = {
+const SETTINGS_SECTION: HomeSection = {
   id: 'settings',
   title: 'Settings',
-  description: 'Organization configuration, locations and the audit log.',
-  icon: GearSix,
-  href: '/settings',
-  links: [
-    { title: 'Config', href: '/settings' },
-    { title: 'Audit log', href: '/settings/audit-logs' },
+  items: [
+    { title: 'Config', href: '/settings', icon: GearSix },
+    { title: 'Audit log', href: '/settings/audit-logs', icon: ClockCounterClockwise },
   ],
 };
 
-const MAX_LINKS = 4;
-
-const ControlCardView = ({ card }: { card: ControlCard }) => {
-  const CardIcon = card.icon;
+/** Square launcher tile: icon centered over its label (payroll-expense action tile look). */
+const HomeTile = ({ item }: { item: HomeSection['items'][number] }) => {
+  const PhosphorIcon: Icon = item.icon;
   return (
-    <div className="dashboard-panel group flex flex-col gap-4 p-5 transition-colors hover:border-primary/30 hover:bg-brand-subtle/40">
-      <Link href={card.href} className="flex items-start gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-[2px] bg-muted text-primary">
-          <CardIcon size={24} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center justify-between gap-2">
-            <span className="text-base font-medium text-foreground">{card.title}</span>
-            <ArrowRight
-              size={16}
-              className="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-            />
-          </span>
-          <span className="mt-0.5 block text-sm text-muted-foreground">{card.description}</span>
-        </span>
-      </Link>
-      {card.links.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {card.links.slice(0, MAX_LINKS).map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="inline-flex h-7 items-center rounded-[2px] border border-black/[0.08] bg-background px-2 text-xs font-medium text-foreground hover:border-primary/40 hover:text-primary"
-            >
-              {link.title}
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+    <Link
+      href={item.href}
+      className="dashboard-panel group flex aspect-square flex-col items-center justify-center gap-2.5 p-3 text-center transition-colors hover:border-primary/30 hover:bg-brand-subtle/40"
+    >
+      <span className="flex size-11 items-center justify-center rounded-[2px] bg-muted text-primary transition-colors group-hover:bg-brand-subtle">
+        {item.appIcon ? <AppIcon src={item.appIcon} className="size-5" /> : <PhosphorIcon size={22} />}
+      </span>
+      <span className="line-clamp-2 text-xs font-medium leading-tight text-foreground">{item.title}</span>
+    </Link>
   );
 };
 
@@ -77,20 +50,14 @@ const HomePage = () => {
     setMounted(true);
   }, []);
 
-  const cards: ControlCard[] = [
-    ...NAV_MODULES.map((module) => {
-      const links = module.items.filter((item) => canOpen(item.href));
-      return {
-        id: module.id,
-        title: module.title,
-        description: module.description,
-        icon: module.icon,
-        href: links[0]?.href ?? module.items[0].href,
-        links: links.map(({ title, href }) => ({ title, href })),
-      };
-    }).filter((card) => card.links.length > 0),
-    ...(canOpen(SETTINGS_CARD.href) ? [SETTINGS_CARD] : []),
-  ];
+  const sections: HomeSection[] = [
+    ...NAV_MODULES.map((module) => ({
+      id: module.id,
+      title: module.title,
+      items: module.items.filter((item) => canOpen(item.href)),
+    })),
+    { ...SETTINGS_SECTION, items: SETTINGS_SECTION.items.filter((item) => canOpen(item.href)) },
+  ].filter((section) => section.items.length > 0);
 
   const firstName = session?.user?.name?.split(' ')[0];
 
@@ -100,23 +67,30 @@ const HomePage = () => {
         {!mounted ? (
           <HomeSkeleton />
         ) : (
-          <div className="flex flex-col gap-5">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
             <div>
               <h2 className="text-lg font-medium text-foreground">
                 {firstName ? `Welcome back, ${firstName}` : 'Welcome to Potta'}
               </h2>
               <p className="mt-0.5 text-sm text-muted-foreground">Where do you want to go?</p>
             </div>
-            {cards.length === 0 ? (
+            {sections.length === 0 ? (
               <div className="dashboard-panel px-6 py-16 text-center text-sm text-muted-foreground">
                 You don&apos;t have access to any module yet. Ask an administrator for permissions.
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {cards.map((card) => (
-                  <ControlCardView key={card.id} card={card} />
-                ))}
-              </div>
+              sections.map((section) => (
+                <section key={section.id} className="flex flex-col gap-2.5">
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {section.title}
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7">
+                    {section.items.map((item) => (
+                      <HomeTile key={item.href} item={item} />
+                    ))}
+                  </div>
+                </section>
+              ))
             )}
           </div>
         )}

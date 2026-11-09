@@ -1,4 +1,5 @@
 import type { Icon } from '@phosphor-icons/react';
+import { APP_ICONS } from '@/components/app-icon';
 import {
   ArrowsClockwise,
   Bank,
@@ -26,6 +27,8 @@ export interface NavItem {
   title: string;
   href: string;
   icon: Icon;
+  /** Payroll-expense SVG (APP_ICONS) shown on the home tiles; falls back to `icon`. */
+  appIcon?: string;
   /** Exact match only (module home links). */
   exact?: boolean;
 }
@@ -50,10 +53,10 @@ export const NAV_MODULES: NavModule[] = [
     icon: Storefront,
     matchPrefixes: ['/pos'],
     items: [
-      { title: 'Register', href: '/pos', icon: House, exact: true },
+      { title: 'Register', href: '/pos', icon: House, appIcon: APP_ICONS.shoppingCart, exact: true },
       { title: 'Inventory', href: '/pos/inventory', icon: Package },
-      { title: 'Sales', href: '/pos/sales', icon: ShoppingCart },
-      { title: 'Customers', href: '/pos/customers', icon: Users },
+      { title: 'Sales', href: '/pos/sales', icon: ShoppingCart, appIcon: APP_ICONS.transactions },
+      { title: 'Customers', href: '/pos/customers', icon: Users, appIcon: APP_ICONS.people },
       { title: 'Vendors', href: '/pos/vendors', icon: Storefront },
       { title: 'Desktop sync', href: '/pos/sync', icon: ArrowsClockwise },
     ],
@@ -65,12 +68,12 @@ export const NAV_MODULES: NavModule[] = [
     icon: Books,
     matchPrefixes: ['/accounting'],
     items: [
-      { title: 'Accounts', href: '/accounting', icon: Books, exact: true },
+      { title: 'Accounts', href: '/accounting', icon: Books, appIcon: APP_ICONS.budget, exact: true },
       { title: 'Journals', href: '/accounting/journals', icon: Notebook },
       { title: 'Ledger', href: '/accounting/ledger', icon: BookOpen },
-      { title: 'Reports', href: '/accounting/reports', icon: ChartLineUp },
-      { title: 'Cashbook', href: '/accounting/cashbook', icon: Coins },
-      { title: 'Taxes', href: '/accounting/taxes', icon: Percent },
+      { title: 'Reports', href: '/accounting/reports', icon: ChartLineUp, appIcon: APP_ICONS.report },
+      { title: 'Cashbook', href: '/accounting/cashbook', icon: Coins, appIcon: APP_ICONS.money },
+      { title: 'Taxes', href: '/accounting/taxes', icon: Percent, appIcon: APP_ICONS.taxes },
     ],
   },
   {
@@ -80,13 +83,13 @@ export const NAV_MODULES: NavModule[] = [
     icon: FileText,
     matchPrefixes: ['/account_receivables', '/customers'],
     items: [
-      { title: 'Dashboard', href: '/account_receivables', icon: ChartPieSlice, exact: true },
+      { title: 'Dashboard', href: '/account_receivables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
       { title: 'Invoices', href: '/account_receivables/invoice', icon: FileText },
-      { title: 'Recurring', href: '/account_receivables/recurring', icon: Repeat },
+      { title: 'Recurring', href: '/account_receivables/recurring', icon: Repeat, appIcon: APP_ICONS.clock },
       { title: 'Sales receipts', href: '/account_receivables/sales_receipts', icon: Receipt },
-      { title: 'Credit notes', href: '/account_receivables/credit', icon: Tray },
+      { title: 'Credit notes', href: '/account_receivables/credit', icon: Tray, appIcon: APP_ICONS.reimbursement },
       { title: 'Vouchers', href: '/account_receivables/vouchers', icon: Gift },
-      { title: 'Customers', href: '/account_receivables/customers', icon: Users },
+      { title: 'Customers', href: '/account_receivables/customers', icon: Users, appIcon: APP_ICONS.people },
     ],
   },
   {
@@ -96,8 +99,8 @@ export const NAV_MODULES: NavModule[] = [
     icon: Invoice,
     matchPrefixes: ['/account_payables', '/vendors'],
     items: [
-      { title: 'Bills', href: '/account_payables/bills', icon: Invoice },
-      { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart },
+      { title: 'Bills', href: '/account_payables/bills', icon: Invoice, appIcon: APP_ICONS.bills },
+      { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart, appIcon: APP_ICONS.shoppingCart },
       { title: 'Vendors', href: '/account_payables/vendors', icon: Storefront },
     ],
   },
@@ -107,7 +110,7 @@ export const NAV_MODULES: NavModule[] = [
     description: 'Bank accounts and their balances.',
     icon: Bank,
     matchPrefixes: ['/treasury'],
-    items: [{ title: 'Bank accounts', href: '/treasury/bank-accounts', icon: Bank }],
+    items: [{ title: 'Bank accounts', href: '/treasury/bank-accounts', icon: Bank, appIcon: APP_ICONS.piggyBank }],
   },
 ];
 

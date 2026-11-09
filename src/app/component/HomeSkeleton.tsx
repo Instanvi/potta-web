@@ -1,29 +1,26 @@
 import { Skeleton } from '@potta/components/ui/loaders';
 
-/** Placeholder with the home screen's layout: greeting and control cards. */
+/** Placeholder with the home screen's layout: greeting and sections of icon tiles. */
 export function HomeSkeleton() {
   return (
-    <div aria-busy="true" className="flex flex-col gap-5">
+    <div aria-busy="true" className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="space-y-2">
         <Skeleton className="h-6 w-64" />
-        <Skeleton className="h-4 w-96 max-w-full" />
+        <Skeleton className="h-4 w-48" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="dashboard-panel flex flex-col gap-4 p-5">
-            <div className="flex items-center gap-3">
-              <Skeleton className="size-12 rounded-[2px]" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-            <Skeleton className="h-3.5 w-full" />
-            <div className="flex gap-2">
-              <Skeleton className="h-7 w-20 rounded-[2px]" />
-              <Skeleton className="h-7 w-20 rounded-[2px]" />
-              <Skeleton className="h-7 w-20 rounded-[2px]" />
-            </div>
+      {[6, 6, 4].map((count, s) => (
+        <div key={s} className="flex flex-col gap-2.5">
+          <Skeleton className="h-3 w-20" />
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7">
+            {Array.from({ length: count }).map((_, i) => (
+              <div key={i} className="dashboard-panel flex aspect-square flex-col items-center justify-center gap-2.5 p-3">
+                <Skeleton className="size-11 rounded-[2px]" />
+                <Skeleton className="h-3 w-14" />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
