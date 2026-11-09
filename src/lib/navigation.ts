@@ -15,7 +15,6 @@ import {
   Package,
   Percent,
   Receipt,
-  ReceiptX,
   Repeat,
   ShoppingCart,
   Storefront,
@@ -34,6 +33,9 @@ export interface NavItem {
 export interface NavModule {
   id: string;
   title: string;
+  /** One line shown on the home control card. */
+  description: string;
+  icon: Icon;
   /** First path segment(s) that activate this module. */
   matchPrefixes: string[];
   items: NavItem[];
@@ -44,6 +46,8 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'pos',
     title: 'POS',
+    description: 'Ring up sales, manage stock and keep the desktop till in sync.',
+    icon: Storefront,
     matchPrefixes: ['/pos'],
     items: [
       { title: 'Register', href: '/pos', icon: House, exact: true },
@@ -57,6 +61,8 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'books',
     title: 'Books',
+    description: 'Chart of accounts, journals, ledger, cashbook and financial reports.',
+    icon: Books,
     matchPrefixes: ['/accounting'],
     items: [
       { title: 'Accounts', href: '/accounting', icon: Books, exact: true },
@@ -70,6 +76,8 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'ar',
     title: 'Account Receivables',
+    description: 'Invoice customers, issue receipts and credit notes, track what is owed.',
+    icon: FileText,
     matchPrefixes: ['/account_receivables', '/customers'],
     items: [
       { title: 'Dashboard', href: '/account_receivables', icon: ChartPieSlice, exact: true },
@@ -84,18 +92,20 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'ap',
     title: 'Account Payables',
+    description: 'Record vendor bills and purchase orders, approve and pay them.',
+    icon: Invoice,
     matchPrefixes: ['/account_payables', '/vendors'],
     items: [
-      { title: 'Dashboard', href: '/account_payables', icon: ChartPieSlice, exact: true },
       { title: 'Bills', href: '/account_payables/bills', icon: Invoice },
       { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart },
-      { title: 'Vendor credit notes', href: '/account_payables/credit-notes', icon: ReceiptX },
       { title: 'Vendors', href: '/account_payables/vendors', icon: Storefront },
     ],
   },
   {
     id: 'treasury',
     title: 'Treasury',
+    description: 'Bank accounts and their balances.',
+    icon: Bank,
     matchPrefixes: ['/treasury'],
     items: [{ title: 'Bank accounts', href: '/treasury/bank-accounts', icon: Bank }],
   },

@@ -2,11 +2,8 @@ import { useContext } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import { usePathname } from 'next/navigation';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { useCan } from '@/components/auth/can';
-import { getRoutePermission, satisfiesPermission } from '@/lib/route-permissions';
 import { isNavActive, type NavModule } from '@/lib/navigation';
-import { useAuthContextStore } from '@/store/use-auth-context-store';
-import { hasAdminRole } from '@/lib/org-admin';
+import { useCanOpenRoute } from '@/lib/use-can-open-route';
 import SidebarProfile from './SidebarProfile';
 import { SB_ICON, sbClass, sbWeight } from './sidebarPhosphor';
 
@@ -14,16 +11,9 @@ import { SB_ICON, sbClass, sbWeight } from './sidebarPhosphor';
 const ModuleSidebar = ({ module }: { module: NavModule }) => {
   const pathname = usePathname();
   const context = useContext(ContextData);
-  const { user } = useCan();
-  const permissions = useAuthContextStore((s) => s.permissions);
-  const roleNames = useAuthContextStore((s) => s.roleNames);
-  const isAdmin = hasAdminRole(user?.role, roleNames);
+  const canOpen = useCanOpenRoute();
 
-  const items = module.items.filter((item) => {
-    if (isAdmin) return true;
-    const check = getRoutePermission(item.href);
-    return !check || satisfiesPermission(permissions, check);
-  });
+  const items = module.items.filter((item) => canOpen(item.href));
 
   return (
     <Sidebar

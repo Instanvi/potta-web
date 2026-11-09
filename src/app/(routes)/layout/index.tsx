@@ -4,7 +4,6 @@ import Sidebars from '@potta/app/sidebar';
 import Navbar from './navbar';
 import { useContext } from 'react';
 import { ContextData } from '../../../components/providers/DataProvider';
-import { INSTANVI_APPS, SUPER_APP_URL } from '@/lib/constants/apps';
 import React from 'react';
 
 export const dynamic = 'force-dynamic';
@@ -35,29 +34,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-white">{children}</main>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Right rail: links to the other Instanvi apps */}
-      <div className="flex h-screen w-14 shrink-0 flex-col items-center border-l border-slate-100 bg-white">
-        <div className="flex w-full flex-col items-center gap-0.5 pt-12">
-          <a
-            href={SUPER_APP_URL}
-            title="Instanvi"
-            className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-slate-100"
-          >
-            <img src="/icons/instanvi.svg" alt="Instanvi" width={20} height={20} className="shrink-0" />
-          </a>
-          {INSTANVI_APPS.map((app) => (
-            <a
-              key={app.id}
-              href={app.url}
-              title={app.name}
-              className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-slate-100"
-            >
-              <img src={app.logo} alt={app.name} width={20} height={20} className="shrink-0" />
-            </a>
-          ))}
         </div>
       </div>
     </div>
