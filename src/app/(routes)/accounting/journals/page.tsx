@@ -1,18 +1,23 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import RootLayout from '../../layout';
+import { PageContainer, PageHeader } from '../../_shared/states';
 import TableComponents from './components/table';
 import Filter from './components/filters';
 
 const JournalsPage = () => {
+  const [search, setSearch] = useState('');
+
   return (
     <RootLayout>
-      <div className="pl-10 pr-5">
-        <div className="p-6">
-          <Filter />
-          <TableComponents />
-        </div>
-      </div>
+      <PageContainer>
+        <PageHeader
+          title="Journals"
+          description="Every posted journal entry, from sales, purchases and manual journals."
+        />
+        <Filter search={search} onSearchChange={setSearch} />
+        <TableComponents search={search} />
+      </PageContainer>
     </RootLayout>
   );
 };

@@ -1,5 +1,5 @@
 import axios from 'config/axios.config';
-import { Journal } from './types';
+import { CreateJournalPayload, Journal } from './types';
 
 export const journalApi = {
   getAll: async (): Promise<Journal[]> => {
@@ -12,7 +12,7 @@ export const journalApi = {
     return result.data as Journal;
   },
 
-  create: async (data: Omit<Journal, 'uuid' | 'createdAt' | 'updatedAt'>) => {
+  create: async (data: CreateJournalPayload) => {
     const result = await axios.post('/accounting/journal-entries', data);
     return result.data as Journal;
   },

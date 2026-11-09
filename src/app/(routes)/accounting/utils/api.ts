@@ -51,15 +51,12 @@ export const accountsApi = {
 
   // Get accounts by type
   getByType: async (type: string, search?: string) => {
-    // Using the filter parameter to filter by account type
     const queryParams = new URLSearchParams();
 
-    // Add filter for account type
-    queryParams.append('filter', `type:${type}`);
+    // ParsedQuery only keeps filters shaped column:operator:value
+    queryParams.append('filter', `type:$eq:${type.toUpperCase()}`);
 
-    // Add additional search term if provided
     if (search && search.trim() !== '') {
-      queryParams.append('searchBy', 'name,code');
       queryParams.append('search', search);
     }
 

@@ -59,7 +59,6 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
   { path: '/account_receivables/customers', permission: { resource: 'Customer', action: ['view', 'view-all'] } },
   { path: '/account_payables', permission: { resource: 'Bill', action: 'view-all' } },
   { path: '/account_payables/bills', permission: { resource: 'Bill', action: ['view', 'view-all'] } },
-  { path: '/account_payables/credit-notes', permission: { resource: 'CreditNote', action: 'view' } },
   { path: '/account_payables/purchase', permission: { resource: 'PurchaseOrder', action: ['view', 'view-all'] } },
   { path: '/account_payables/vendors', permission: { resource: 'Vendor', action: ['view', 'view-all'] } },
   { path: '/treasury/bank-accounts', permission: { resource: 'BankAccounts', action: ['view', 'view-all'] } },

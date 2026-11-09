@@ -14,17 +14,28 @@ import JournalViewSlider from './journalViewSlider';
 const sumLines = (journal: Journal, key: 'debit' | 'credit') =>
   (journal.lines ?? []).reduce((sum, line) => sum + Number(line[key] ?? 0), 0);
 
-const JournalEntriesTable = () => {
+const matchesSearch = (journal: Journal, term: string) =>
+  [journal.number, journal.referenceNumber, journal.type, journal.description, journal.sourceDocumentType]
+    .filter(Boolean)
+    .some((value) => String(value).toLowerCase().includes(term));
+
+const JournalEntriesTable = ({ search = '' }: { search?: string }) => {
   const { data, isLoading, error, refetch } = useGetJournalEntries();
   const [viewId, setViewId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const rows = useMemo(
+  const allRows = useMemo(
     () =>
       [...(data ?? [])].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       ),
     [data]
+  );
+
+  const term = search.trim().toLowerCase();
+  const rows = useMemo(
+    () => (term ? allRows.filter((journal) => matchesSearch(journal, term)) : allRows),
+    [allRows, term]
   );
 
   const columns: ColumnDef<Journal>[] = [
@@ -69,7 +80,7 @@ const JournalEntriesTable = () => {
           <button
             type="button"
             title="View"
-            className="p-2 hover:bg-gray-100"
+            className="p-2 hover:bg-accent"
             onClick={() => setViewId(row.original.uuid)}
           >
             <Eye className="h-4 w-4" />
@@ -78,7 +89,7 @@ const JournalEntriesTable = () => {
             <button
               type="button"
               title="Delete"
-              className="p-2 text-red-600 hover:bg-red-50"
+              className="p-2 text-destructive hover:bg-destructive/10"
               onClick={() => setDeleteId(row.original.uuid)}
             >
               <Trash2 className="h-4 w-4" />
@@ -91,7 +102,9 @@ const JournalEntriesTable = () => {
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   if (!isLoading && rows.length === 0)
-    return (
+    return term ? (
+      <EmptyState title="No matching entries" description={`Nothing matches "${search.trim()}".`} />
+    ) : (
       <EmptyState
         title="No journal entries"
         description="Entries posted from sales, purchases and manual journals appear here."

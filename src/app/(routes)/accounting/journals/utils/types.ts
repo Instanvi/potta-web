@@ -13,13 +13,21 @@ export interface Journal {
   type: string;
   date: string;
   description: string;
-  organizationId: string;
-  branchId: string;
+  organizationId?: string;
   sourceDocumentId?: string;
   sourceDocumentType?: string;
   lines: JournalLine[];
   createdAt: string;
   updatedAt: string;
+}
+
+/** Body of POST /accounting/journal-entries (potta-backend CreateJournalEntryDTO). */
+export interface CreateJournalPayload {
+  type: string;
+  date: string;
+  description: string;
+  sourceDocumentType?: string;
+  lines: { accountId: string; debit?: number; credit?: number; description?: string }[];
 }
 
 export interface JournalResponse {
