@@ -33,8 +33,16 @@ const addDays = (date: string, days: number) => {
   return toDateInput(d);
 };
 
-const BillForm = () => {
+interface BillFormProps {
+  /** `sheet`: rendered inside the half-screen slide-over (stacked layout, sheet-relative footer). */
+  variant?: 'page' | 'sheet';
+  /** Called after save (with the new bill id) or cancel; defaults to navigating back to the bills list. */
+  onDone?: (billId?: string) => void;
+}
+
+const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
   const router = useRouter();
+  const inSheet = variant === 'sheet';
   const createBill = useCreateBill();
   const { data: vendors = [], isLoading: vendorsLoading } = useVendorOptions();
   const [copyingLines, setCopyingLines] = useState(false);
@@ -135,13 +143,16 @@ const BillForm = () => {
           productId: l.productId || undefined,
         })),
       },
-      { onSuccess: (bill) => router.push(`/account_payables/bills?id=${bill.uuid}`) }
+      {
+        onSuccess: (bill) =>
+          onDone ? onDone(bill.uuid) : router.push(`/account_payables/bills?id=${bill.uuid}`),
+      }
     );
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="pb-24">
-      <div className="flex flex-col gap-8 xl:flex-row">
+    <form onSubmit={handleSubmit(onSubmit)} className={inSheet ? "w-full pb-2" : "pb-24"}>
+      <div className={inSheet ? 'flex flex-col gap-6' : 'flex flex-col gap-8 xl:flex-row'}>
         <div className="min-w-0 flex-1 space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Controller
@@ -207,7 +218,7 @@ const BillForm = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className={inSheet ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 gap-4 md:grid-cols-4'}>
             <Input
               type="text"
               name="vendorInvoiceNumber"
@@ -243,7 +254,7 @@ const BillForm = () => {
                 register={register}
                 errors={errors.expenseAccountCode}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Debited when the bill is approved (601 purchases of goods, 605 other purchases, 622 rent...).
               </p>
             </div>
@@ -263,7 +274,7 @@ const BillForm = () => {
           </div>
 
           <div>
-            <h3 className="mb-2 text-lg font-medium text-gray-900">
+            <h3 className="mb-2 text-lg font-medium text-foreground">
               Line items <RequiredMark />
             </h3>
             <LineItemsEditor control={control} register={register} errors={errors} currency={currency} />
@@ -278,28 +289,28 @@ const BillForm = () => {
           />
         </div>
 
-        <aside className="w-full shrink-0 xl:w-80">
-          <div className="sticky top-4 border border-gray-200 bg-gray-50 p-5">
-            <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-gray-500">Summary</h3>
+        <aside className={inSheet ? 'w-full' : 'w-full shrink-0 xl:w-80'}>
+          <div className="dashboard-panel sticky top-4 p-5">
+            <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">Summary</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Subtotal</span>
+                <span className="text-muted-foreground">Subtotal</span>
                 <span>{formatMoney(summary.subtotal, currency)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Discounts</span>
+                <span className="text-muted-foreground">Discounts</span>
                 <span>−{formatMoney(summary.discount, currency)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">VAT</span>
+                <span className="text-muted-foreground">VAT</span>
                 <span>{formatMoney(summary.tax, currency)}</span>
               </div>
-              <div className="flex justify-between border-t border-gray-200 pt-3 text-base font-medium">
+              <div className="flex justify-between border-t border-black/10 pt-3 text-base font-medium">
                 <span>Total</span>
                 <span className="text-primary">{formatMoney(summary.total, currency)}</span>
               </div>
             </div>
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-muted-foreground">
               The bill is saved as a draft. Approving it later posts Dr {expenseAccountCode || '601'}{' '}
               expense + Dr 445 VAT / Cr vendor payable.
             </p>
@@ -307,13 +318,19 @@ const BillForm = () => {
         </aside>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-20 flex justify-end gap-3 border-t border-gray-200 bg-white p-3 pr-20">
+      <div
+        className={
+          inSheet
+            ? 'sticky bottom-0 z-20 -mx-4 flex justify-end gap-3 border-t border-black/10 bg-white p-3 sm:-mx-6'
+            : 'fixed bottom-0 left-0 right-0 z-20 flex justify-end gap-3 border-t border-black/10 bg-white p-3 pr-20'
+        }
+      >
         <Button
           text="Cancel"
           type="button"
           theme="gray"
           color
-          onClick={() => router.push('/account_payables/bills')}
+          onClick={() => (onDone ? onDone() : router.push('/account_payables/bills'))}
         />
         <Button
           text="Save bill"
