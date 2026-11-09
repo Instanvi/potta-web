@@ -8,8 +8,15 @@ import {
   useAuthContextStore,
 } from '@/store/use-auth-context-store';
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://potta.dev.instanvi.com/api/';
+/** potta-backend serves every route under its API_PREFIX ("api"), so the base always ends in /api/. */
+export function withApiPrefix(raw: string): string {
+  const base = raw.trim().replace(/\/+$/, '');
+  return `${/\/api$/i.test(base) ? base : `${base}/api`}/`;
+}
+
+export const API_BASE_URL = withApiPrefix(
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://potta.dev.instanvi.com/api/'
+);
 
 export const AUTH_API_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:3002/api';
 
