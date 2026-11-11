@@ -6,6 +6,7 @@ import ProductSelectionStep from './ProductSelectionStep';
 import Button from '@potta/components/button';
 import useCreateProduct from '../_hooks/useCreateProduct';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '../../utils/sale';
 
 interface ProductStepperModalProps {
   open: boolean;
@@ -86,7 +87,6 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
       components: components,
     };
 
-    console.log('Creating product with components:', finalProductData);
 
     // Call the create product API with components
     mutation.mutate(finalProductData, {
@@ -100,14 +100,13 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
           toast.error('Product created but no product ID was returned.');
           return;
         }
-        toast.success('Product created successfully!');
+        toast.success(`"${finalProductData?.name ?? 'Item'}" created`);
         setProductId(createdProductId);
         setProductData(finalProductData);
         setActive('confirm');
       },
       onError: (error) => {
-        console.error('Product creation error:', error);
-        toast.error('Failed to create product');
+        toast.error(`Could not create the item: ${apiErrorMessage(error)}`);
       },
     });
   };
@@ -131,13 +130,13 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
   const getStepTitle = () => {
     switch (productType) {
       case 'ASSEMBLY':
-        return 'Assembly Product';
+        return 'New assembly';
       case 'SIMPLEGROUPS':
-        return 'Group Product';
+        return 'New group';
       case 'NON_INVENTORY':
-        return 'Non-Inventory Item';
+        return 'New non-inventory item';
       default:
-        return 'Inventory Item';
+        return 'New inventory item';
     }
   };
 
@@ -170,14 +169,14 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
     >
       <div className="w-full flex min-h-[60vh]">
         {/* Stepper */}
-        <div className="w-[12%] space-y-7 border-r">
+        <div className="w-40 shrink-0 space-y-5 border-r pr-4 pt-2 text-sm">
           <div onClick={() => setActive('create')}>
             <p
               className={`whitespace-nowrap ${
                 active === 'create' && 'text-green-700 font-medium'
               } cursor-pointer text-left`}
             >
-              Create Product
+              Details
             </p>
           </div>
 
@@ -189,9 +188,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
                   'text-green-700 font-medium'
                 } cursor-pointer text-left`}
               >
-                {productType === 'ASSEMBLY'
-                  ? 'Assemble Products'
-                  : 'Group Products'}
+                {productType === 'ASSEMBLY' ? 'Components' : 'Group items'}
               </p>
             </div>
           )}
@@ -211,7 +208,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
                 !isUploadStepEnabled() ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              Upload Images
+              Images
             </p>
           </div>
         </div>
@@ -243,7 +240,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
             {active === 'confirm' && productId && (
               <div className="p-8 flex flex-col items-center justify-center">
                 <h2 className="text-lg font-medium mb-4">
-                  Product Created Successfully!
+                  Item created
                 </h2>
                 <p className="mb-6 text-gray-600">
                   Would you like to add images to your product? This is

@@ -20,6 +20,8 @@ interface SelectProps {
   isDisabled?: boolean;
   SelectClass?: string;
   error?: string; // Add error prop
+  /** Shown when nothing is selected; defaults to `name`. */
+  placeholder?: string;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -36,6 +38,7 @@ const Select: React.FC<SelectProps> = ({
   labelClass,
   isDisabled = false,
   error,
+  placeholder,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -81,10 +84,14 @@ const Select: React.FC<SelectProps> = ({
           } w-full ${error ? 'border-2' : ''}`}
           aria-disabled={isDisabled}
         >
-          <span className="block truncate">
-            {options.find((option) => option.value === selectedValue)?.label ||
-              name}
-          </span>
+          {(() => {
+            const selected = options.find((option) => option.value === selectedValue)?.label;
+            return (
+              <span className={`block truncate ${selected ? '' : 'text-muted-foreground/70'}`}>
+                {selected || placeholder || name}
+              </span>
+            );
+          })()}
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <svg
               className={`h-5 w-5 transform transition-transform duration-200 ${
@@ -104,7 +111,7 @@ const Select: React.FC<SelectProps> = ({
 
         {!isDisabled && (
           <ul
-            className={`absolute z-50 mt-1 w-full rounded-[2px] border border-black/10 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${
+            className={`absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-[2px] border border-black/10 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${
               isOpen ? 'block' : 'hidden'
             }`}
           >

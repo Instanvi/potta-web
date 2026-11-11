@@ -43,7 +43,7 @@ const ITEM_KINDS: { value: ItemKind; label: string; hint: string }[] = [
 
 /** Items are created here or arrive with "Sync from Pay"; Pay-linked items stay read-only. */
 const Filter = () => {
-  const { selectedProduct, filters, setFilters } = useInventory();
+  const { filters, setFilters } = useInventory();
 
   const [selectedValue, setSelectedValue] = useState(filters.sort);
   const [searchValue, setSearchValue] = useState(filters.search);
@@ -142,7 +142,6 @@ const Filter = () => {
                 icon={<SquareStack className="h-4 w-4" />}
                 theme="outline"
                 onClick={() => setIsRestockOpen(true)}
-                disabled={!selectedProduct}
               />
             </Can>
             <Can resource="Item" action="create">

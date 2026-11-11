@@ -1,14 +1,36 @@
 import * as yup from 'yup';
 
+const emptyToUndefined = (value: unknown, original: unknown) => (original === '' ? undefined : value);
+
 export const productSchema = yup.object().shape({
-  name: yup.string().required('name is required'),
+  name: yup.string().trim().required('Item name is required'),
   description: yup.string(),
   unitOfMeasure: yup.string(),
-  cost: yup.number().required('cost is required').typeError('Must be a number'),
-  sku: yup.string().required('sku is required'),
-  inventoryLevel: yup.number(),
-  reorderPoint: yup.number(),
-  salesPrice: yup.number().required('sales price is required'),
+  cost: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .min(0, 'Cannot be negative')
+    .required('Cost price is required'),
+  sku: yup.string(),
+  inventoryLevel: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .integer('Whole numbers only')
+    .min(0, 'Cannot be negative'),
+  reorderPoint: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .integer('Whole numbers only')
+    .min(0, 'Cannot be negative'),
+  salesPrice: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .min(0, 'Cannot be negative')
+    .required('Selling price is required'),
   taxable: yup.boolean().required(),
   categoryId: yup.string(),
   taxId: yup.string(),
@@ -70,15 +92,37 @@ export const bundleSchema = yup.object().shape({
 });
 
 export const UpdateProductSchema = yup.object().shape({
-  name: yup.string().required('name is required'),
+  name: yup.string().trim().required('Item name is required'),
   description: yup.string(),
   unitOfMeasure: yup.string(),
-  cost: yup.number().required('cost is required').typeError('Must be a number'),
-  sku: yup.string().required('sku is required'),
-  inventoryLevel: yup.number(),
-  salesPrice: yup.number().required('sales price is required'),
+  cost: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .min(0, 'Cannot be negative')
+    .required('Cost price is required'),
+  sku: yup.string().trim().required('SKU is required'),
+  inventoryLevel: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .integer('Whole numbers only')
+    .min(0, 'Cannot be negative'),
+  reorderPoint: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .integer('Whole numbers only')
+    .min(0, 'Cannot be negative'),
+  salesPrice: yup
+    .number()
+    .transform(emptyToUndefined)
+    .typeError('Must be a number')
+    .min(0, 'Cannot be negative')
+    .required('Selling price is required'),
   taxable: yup.boolean().required(),
   categoryId: yup.string(),
+  taxId: yup.string(),
   images: yup.array().of(yup.string()).default([]),
   status: yup.string().required('status is required'),
   type: yup
