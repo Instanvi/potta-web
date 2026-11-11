@@ -317,7 +317,7 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({
                         {alert.actions.map((action, actionIndex) => (
                           <span
                             key={actionIndex}
-                            className="px-2 py-1 text-xs bg-yellow-200 text-yellow-800 "
+                            className="rounded-full px-2 py-1 text-xs bg-yellow-200 text-yellow-800 "
                           >
                             {action}
                           </span>

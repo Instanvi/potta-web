@@ -168,7 +168,7 @@ export const StatusBadge = ({
 }) => (
   <span
     className={cn(
-      'inline-flex h-7 items-center gap-1.5 rounded-[2px] border px-2 text-xs font-medium',
+      'inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium',
       STATUS_TONES[tone]
     )}
   >

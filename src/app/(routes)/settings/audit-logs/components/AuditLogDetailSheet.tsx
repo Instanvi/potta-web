@@ -83,9 +83,9 @@ export default function AuditLogDetailSheet({ log, onClose }: { log: AuditLog | 
             {change ? (
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-gray-500">Status</span>
-                <span className="bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{change.from ?? '—'}</span>
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{change.from ?? '—'}</span>
                 <ArrowRight size={12} className="text-gray-400" />
-                <span className="bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">{change.to ?? '—'}</span>
+                <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">{change.to ?? '—'}</span>
               </div>
             ) : null}
 

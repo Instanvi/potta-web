@@ -10,7 +10,7 @@ const styles: Record<CreditNoteStatus, string> = {
 
 const CreditNoteStatusBadge = ({ status }: { status: CreditNoteStatus }) => (
   <span
-    className={`inline-block px-2 py-0.5 text-xs font-medium uppercase border ${
+    className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium uppercase border ${
       styles[status] ?? styles.DRAFT
     }`}
   >

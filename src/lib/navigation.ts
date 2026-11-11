@@ -1,6 +1,7 @@
 import type { Icon } from '@phosphor-icons/react';
 import { APP_ICONS } from '@/components/app-icon';
 import {
+  ArrowUUpLeft,
   ArrowsClockwise,
   Bank,
   BookOpen,
@@ -25,6 +26,7 @@ import {
   Tray,
   Tag,
   Users,
+  SlidersHorizontal,
 } from '@phosphor-icons/react';
 
 export interface NavItem {
@@ -69,12 +71,14 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'inventory',
     title: 'Inventory',
-    description: 'Products from Pay, stock levels and categories.',
+    description: 'Products, categories, stock adjustments and returns.',
     icon: Package,
     matchPrefixes: ['/inventory', '/pos/inventory'],
     items: [
       { title: 'Products', href: '/inventory', icon: Package, exact: true },
       { title: 'Categories', href: '/inventory/categories', icon: Tag },
+      { title: 'Stock adjustments', href: '/inventory/adjustments', icon: SlidersHorizontal },
+      { title: 'Returns', href: '/inventory/returns', icon: ArrowUUpLeft },
     ],
   },
   {

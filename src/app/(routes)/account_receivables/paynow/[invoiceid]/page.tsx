@@ -78,7 +78,7 @@ const PayNowPage = () => {
                 <div className="text-4xl font-semibold tabular-nums text-primary">
                   {total.toLocaleString()} {currency}
                 </div>
-                <span className="text-xs uppercase tracking-wide px-2 py-0.5 border border-gray-300 text-gray-600">
+                <span className="text-xs uppercase tracking-wide rounded-full px-2 py-0.5 border border-gray-300 text-gray-600">
                   {status}
                 </span>
               </div>

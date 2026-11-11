@@ -101,7 +101,7 @@ const BankAccountCard: React.FC<BankAccountCardProps> = ({
                   </span>
                 )}
               </CardTitle>
-              <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-[#F3FBFB] text-gray-700">
+              <span className="inline-block mt-1 rounded-full px-2 py-0.5 text-xs bg-[#F3FBFB] text-gray-700">
                 {typeLabels[accountType || ''] || 'Account'}
               </span>
             </div>

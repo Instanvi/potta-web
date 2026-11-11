@@ -49,7 +49,7 @@ const VouchersBox: FC = () => {
           <div key={id} className="dashboard-panel p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <h3 className="text-sm font-medium text-muted-foreground">{item.name}</h3>
-              <span className="inline-flex items-center gap-1 rounded-[2px] bg-brand-subtle px-2 py-0.5 text-xs font-medium text-primary">
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-subtle px-2 py-0.5 text-xs font-medium text-primary">
                 <ArrowUp className="h-3.5 w-3.5" />
                 {item.percent}%
               </span>
