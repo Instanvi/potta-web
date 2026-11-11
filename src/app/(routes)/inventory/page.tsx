@@ -8,7 +8,7 @@ export default function InventoryProductsPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader title="Products" description="Products synced from Pay and their stock levels." />
+        <PageHeader title="Products" description="Your items and stock levels. Create them here or sync them from Pay." />
         <Filter />
         <InventoryTable />
       </PageContainer>

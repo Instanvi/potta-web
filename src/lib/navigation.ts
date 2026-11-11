@@ -115,6 +115,7 @@ export const NAV_MODULES: NavModule[] = [
     icon: Invoice,
     matchPrefixes: ['/account_payables', '/vendors'],
     items: [
+      { title: 'Dashboard', href: '/account_payables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
       { title: 'Bills', href: '/account_payables/bills', icon: Invoice, appIcon: APP_ICONS.bills },
       { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart, appIcon: APP_ICONS.shoppingCart },
       { title: 'Vendors', href: '/account_payables/vendors', icon: Storefront },

@@ -5,8 +5,9 @@ import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 
 import { SquareStack } from 'lucide-react';
-import { ArrowsClockwise } from '@phosphor-icons/react';
+import { ArrowsClockwise, Plus } from '@phosphor-icons/react';
 import RestockModal from './slides/components/restock';
+import ProductStepperModal from './ProductStepperModal';
 import { useInventory } from '../_utils/context';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import useImportFromPay from '../_hooks/useImportFromPay';
@@ -31,7 +32,16 @@ const issueList = (issues: PayImportResult['skipped']) =>
     .map((i) => `${i.name || i.payProductId}: ${i.reason}`)
     .join('\n') + (issues.length > 5 ? `\n…and ${issues.length - 5} more` : '');
 
-/** Products are owned by payment-service: they arrive with "Sync from Pay"; Potta only restocks. */
+type ItemKind = 'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS';
+
+const ITEM_KINDS: { value: ItemKind; label: string; hint: string }[] = [
+  { value: 'INVENTORY', label: 'Inventory item', hint: 'Stocked goods with quantities' },
+  { value: 'NON_INVENTORY', label: 'Non-inventory item', hint: 'Services or untracked goods' },
+  { value: 'ASSEMBLY', label: 'Assembly', hint: 'Built from other items' },
+  { value: 'SIMPLEGROUPS', label: 'Group', hint: 'Items sold together' },
+];
+
+/** Items are created here or arrive with "Sync from Pay"; Pay-linked items stay read-only. */
 const Filter = () => {
   const { selectedProduct, filters, setFilters } = useInventory();
 
@@ -39,7 +49,16 @@ const Filter = () => {
   const [searchValue, setSearchValue] = useState(filters.search);
   const [selectedProductType, setSelectedProductType] = useState(filters.productType);
   const [isRestockOpen, setIsRestockOpen] = useState(false);
+  const [isKindMenuOpen, setIsKindMenuOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createKind, setCreateKind] = useState<ItemKind>('INVENTORY');
   const importFromPay = useImportFromPay();
+
+  const startCreate = (kind: ItemKind) => {
+    setCreateKind(kind);
+    setIsKindMenuOpen(false);
+    setIsCreateOpen(true);
+  };
 
   const handleChange = (value: string) => {
     setSelectedValue(value);
@@ -131,10 +150,39 @@ const Filter = () => {
                 type="button"
                 text={importFromPay.isPending ? 'Syncing…' : 'Sync from Pay'}
                 icon={<ArrowsClockwise size={16} className={importFromPay.isPending ? 'animate-spin' : ''} />}
-                theme="default"
+                theme="outline"
                 onClick={handleSyncFromPay}
                 disabled={importFromPay.isPending}
               />
+            </Can>
+            <Can resource="Item" action="create">
+              <div className="relative">
+                <Button
+                  type="button"
+                  text="New item"
+                  icon={<Plus size={16} />}
+                  theme="default"
+                  onClick={() => setIsKindMenuOpen((open) => !open)}
+                />
+                {isKindMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsKindMenuOpen(false)} />
+                    <div className="absolute right-0 z-50 mt-2 w-64 border border-black/10 bg-white py-1 shadow-lg">
+                      {ITEM_KINDS.map((kind) => (
+                        <button
+                          key={kind.value}
+                          type="button"
+                          className="block w-full px-4 py-2 text-left hover:bg-gray-50"
+                          onClick={() => startCreate(kind.value)}
+                        >
+                          <span className="block text-sm font-medium">{kind.label}</span>
+                          <span className="block text-xs text-muted-foreground">{kind.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </Can>
           </>
         }
@@ -149,11 +197,12 @@ const Filter = () => {
         />
       </ListToolbar>
       <p className="mb-4 text-xs text-muted-foreground">
-        Products are managed in Pay. Create or edit them there, then use Sync from Pay.
+        Create items here, or bring them in with Sync from Pay. Items linked to Pay are edited in Pay.
       </p>
 
       {typeof window !== 'undefined' &&
         createPortal(<RestockModal open={isRestockOpen} setOpen={setIsRestockOpen} />, document.body)}
+      <ProductStepperModal open={isCreateOpen} setOpen={setIsCreateOpen} productType={createKind} />
     </>
   );
 };
