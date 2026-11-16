@@ -1,5 +1,5 @@
-import DocumentWorkspace from '@potta/components/document-workspace';
 'use client';
+import DocumentWorkspace from '@potta/components/document-workspace';
 import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
