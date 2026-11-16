@@ -3,6 +3,7 @@ import Button from '@potta/components/button';
 import { Can } from '@/components/auth/can';
 import React, { useState } from 'react';
 import SliderVendor from './vendorSlider';
+import BulkSlider from '@potta/app/(routes)/customers/components/bulkSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { ListToolbar } from '../../_shared/states';
 
@@ -25,6 +26,7 @@ const Filter: React.FC<FilterProps> = ({
   kycFilter,
   onKycFilterChange,
 }) => {
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const filterConfig = [
     {
       key: 'status',
@@ -56,6 +58,7 @@ const Filter: React.FC<FilterProps> = ({
   ];
 
   return (
+    <>
     <ListToolbar
       actions={
         <>
@@ -67,6 +70,12 @@ const Filter: React.FC<FilterProps> = ({
             color={true}
           />
           <Can resource="Vendor" action="create">
+            <Button
+              text="Import"
+              type="button"
+              theme="gray"
+              onClick={() => setIsUploadOpen(true)}
+            />
             <SliderVendor />
           </Can>
         </>
@@ -81,6 +90,8 @@ const Filter: React.FC<FilterProps> = ({
         className="p-0"
       />
     </ListToolbar>
+      <BulkSlider kind="vendor" open={isUploadOpen} setOpen={setIsUploadOpen} />
+    </>
   );
 };
 

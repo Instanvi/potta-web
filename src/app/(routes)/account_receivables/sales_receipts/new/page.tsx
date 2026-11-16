@@ -8,7 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import RootLayout from '../../../layout';
+import DocumentWorkspace from '@potta/components/document-workspace';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -37,7 +37,7 @@ const NewSalesReciept = () => {
   const shouldShowPreviewButton = !showPreview || leftPanelSize > 95;
 
   return (
-    <RootLayout>
+    <DocumentWorkspace title="Sales receipt" closeHref="/account_receivables/sales_receipts">
       <div className="max-h-[92.7vh] relative">
         {/* Preview toggle button with fade transition */}
         <div
@@ -98,7 +98,7 @@ const NewSalesReciept = () => {
           </ResizablePanelGroup>
         </div>
       </div>
-    </RootLayout>
+    </DocumentWorkspace>
   );
 };
 

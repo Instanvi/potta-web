@@ -1,3 +1,4 @@
+import DocumentWorkspace from '@potta/components/document-workspace';
 'use client';
 import React, { useState } from 'react';
 import Left from './components/left';
@@ -35,6 +36,7 @@ const NewInvoice = () => {
   const shouldShowPreviewButton = !showPreview || leftPanelSize > 95;
 
   return (
+    <DocumentWorkspace title="Purchase order" closeHref="/account_payables/purchase">
     <div className="max-h-[92.7vh] relative">
       {/* Preview toggle button with fade transition */}
       <div
@@ -95,6 +97,7 @@ const NewInvoice = () => {
         </ResizablePanelGroup>
       </div>
     </div>
+    </DocumentWorkspace>
   );
 };
 

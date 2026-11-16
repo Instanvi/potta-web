@@ -4,6 +4,7 @@ import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picke
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar } from '../../../_shared/states';
+import { exportRows } from '@/lib/export-file';
 import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
@@ -308,6 +309,33 @@ const SaleTable = () => {
               icon={<img src="/images/export.svg" />}
               theme="lightBlue"
               type={'button'}
+              onClick={() =>
+                void exportRows({
+                  filename: 'sales-receipts',
+                  rows: receiptsData,
+                  columns: [
+                    { key: 'receiptNumber', header: 'Receipt' },
+                    {
+                      key: 'saleDate',
+                      header: 'Date',
+                      value: (row) =>
+                        row.saleDate ? new Date(row.saleDate).toLocaleDateString() : '',
+                    },
+                    {
+                      key: 'customer',
+                      header: 'Customer',
+                      value: (row) =>
+                        row.customer
+                          ? `${row.customer.firstName} ${row.customer.lastName}`.trim()
+                          : '',
+                    },
+                    { key: 'paymentMethod', header: 'Method' },
+                    { key: 'notes', header: 'Memo' },
+                    { key: 'totalAmount', header: 'Total' },
+                    { key: 'paymentReference', header: 'Reference' },
+                  ],
+                })
+              }
             />
             <Link href={'/account_receivables/sales_receipts/new'}>
               <Button

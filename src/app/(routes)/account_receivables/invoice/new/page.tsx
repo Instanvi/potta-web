@@ -9,7 +9,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import RootLayout from '../../../layout';
+import DocumentWorkspace from '@potta/components/document-workspace';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { extractInvoiceFromFile } from './api/extractInvoice';
@@ -137,9 +137,9 @@ const NewInvoiceInner = () => {
 
 const NewInvoice = () => (
   <Suspense fallback={<div>Loading...</div>}>
-    <RootLayout>
+    <DocumentWorkspace title="Invoice" closeHref="/account_receivables/invoice">
       <NewInvoiceInner />
-    </RootLayout>
+    </DocumentWorkspace>
   </Suspense>
 );
 

@@ -26,8 +26,26 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
   { path: '/pos/sales/new', permission: { resource: 'SalesReciept', action: 'create' } },
   { path: '/pos/inventory', permission: { resource: 'Item', action: ['view', 'view-all'] } },
   { path: '/inventory', permission: { resource: 'Item', action: ['view', 'view-all'] } },
+  {
+    path: '/pos/contacts',
+    permission: {
+      anyOf: [
+        { resource: 'Customer', action: ['view', 'view-all'] },
+        { resource: 'Vendor', action: ['view', 'view-all'] },
+      ],
+    },
+  },
   { path: '/pos/customers', permission: { resource: 'Customer', action: ['view', 'view-all'] } },
   { path: '/pos/vendors', permission: { resource: 'Vendor', action: ['view', 'view-all'] } },
+  {
+    path: '/contacts',
+    permission: {
+      anyOf: [
+        { resource: 'Customer', action: ['view', 'view-all'] },
+        { resource: 'Vendor', action: ['view', 'view-all'] },
+      ],
+    },
+  },
   { path: '/pos/sync', permission: { resource: 'Transactions', action: 'view' } },
   { path: '/accounting', permission: { resource: 'Accounts', action: ['view', 'view-all', 'view-tree'] } },
   { path: '/accounting/journals', permission: { resource: 'JournalEntries', action: ['view', 'view-all'] } },
@@ -57,10 +75,28 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
   { path: '/account_receivables/credit', permission: { resource: 'CreditNote', action: 'view' } },
   { path: '/account_receivables/sales_receipts', permission: { resource: 'SalesReciept', action: ['view', 'view-all'] } },
   { path: '/account_receivables/vouchers', permission: { resource: 'Vouchers', action: 'view' } },
+  {
+    path: '/account_receivables/contacts',
+    permission: {
+      anyOf: [
+        { resource: 'Customer', action: ['view', 'view-all'] },
+        { resource: 'Vendor', action: ['view', 'view-all'] },
+      ],
+    },
+  },
   { path: '/account_receivables/customers', permission: { resource: 'Customer', action: ['view', 'view-all'] } },
   { path: '/account_payables', permission: { resource: 'Bill', action: 'view-all' } },
   { path: '/account_payables/bills', permission: { resource: 'Bill', action: ['view', 'view-all'] } },
   { path: '/account_payables/purchase', permission: { resource: 'PurchaseOrder', action: ['view', 'view-all'] } },
+  {
+    path: '/account_payables/contacts',
+    permission: {
+      anyOf: [
+        { resource: 'Customer', action: ['view', 'view-all'] },
+        { resource: 'Vendor', action: ['view', 'view-all'] },
+      ],
+    },
+  },
   { path: '/account_payables/vendors', permission: { resource: 'Vendor', action: ['view', 'view-all'] } },
   { path: '/treasury/bank-accounts', permission: { resource: 'BankAccounts', action: ['view', 'view-all'] } },
   {

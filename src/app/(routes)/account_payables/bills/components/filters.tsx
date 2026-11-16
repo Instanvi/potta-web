@@ -1,11 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { Can } from '@/components/auth/can';
 import { ListToolbar } from '../../../_shared/states';
 import { useVendorOptions } from '../../hooks';
-import NewBillSheet from './NewBillSheet';
 
 interface FilterProps {
   search: string;
@@ -35,7 +35,7 @@ const Filter: React.FC<FilterProps> = ({
   onVendorChange,
 }) => {
   const { data: vendors = [] } = useVendorOptions();
-  const [creating, setCreating] = useState(false);
+  const router = useRouter();
 
   return (
     <ListToolbar
@@ -46,7 +46,7 @@ const Filter: React.FC<FilterProps> = ({
             icon={<i className="ri-file-add-line" />}
             theme="default"
             type="button"
-            onClick={() => setCreating(true)}
+            onClick={() => router.push('/account_payables/bills/new')}
           />
         </Can>
       }
@@ -76,7 +76,6 @@ const Filter: React.FC<FilterProps> = ({
           },
         ]}
       />
-      <NewBillSheet open={creating} setOpen={setCreating} />
     </ListToolbar>
   );
 };

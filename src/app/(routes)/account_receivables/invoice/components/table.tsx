@@ -26,6 +26,7 @@ import useGetAllInvoice from '../_hooks/useGetAllInvoice';
 import useApproveInvoice from '../_hooks/useApproveInvoice';
 import { useInvoiceFilter } from '../_context/InvoiceFilterContext';
 import Button from '@potta/components/button';
+import { exportRows } from '@/lib/export-file';
 import ModalInvoice from './modal';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import {
@@ -509,6 +510,40 @@ const InvoiceTable = () => {
               icon={<i className="ri-upload-2-line"></i>}
               theme="lightBlue"
               type={'button'}
+              onClick={() =>
+                void exportRows({
+                  filename: 'invoices',
+                  rows: filteredData,
+                  columns: [
+                    { key: 'invoiceId', header: 'Invoice' },
+                    {
+                      key: 'customer',
+                      header: 'Customer',
+                      value: (row) =>
+                        row.customer
+                          ? `${row.customer.firstName} ${row.customer.lastName}`.trim()
+                          : '',
+                    },
+                    {
+                      key: 'issuedDate',
+                      header: 'Issued',
+                      value: (row) =>
+                        row.issuedDate ? moment(row.issuedDate).format('YYYY-MM-DD') : '',
+                    },
+                    {
+                      key: 'dueDate',
+                      header: 'Due',
+                      value: (row) =>
+                        row.dueDate ? moment(row.dueDate).format('YYYY-MM-DD') : '',
+                    },
+                    { key: 'status', header: 'Status' },
+                    { key: 'invoiceTotal', header: 'Total' },
+                    { key: 'currency', header: 'Currency' },
+                    { key: 'paymentMethod', header: 'Payment method' },
+                    { key: 'notes', header: 'Title' },
+                  ],
+                })
+              }
             />
             <Button
               text={'Create Invoice'}

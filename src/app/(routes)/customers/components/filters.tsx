@@ -88,7 +88,7 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange }) => {
         />
       </ListToolbar>
       <SliderCustomer open={isCreateOpen} setOpen={setIsCreateOpen} />
-      <BulkSlider open={isUploadOpen} setOpen={setIsUploadOpen} />
+      <BulkSlider kind="customer" open={isUploadOpen} setOpen={setIsUploadOpen} />
     </>
   );
 };
