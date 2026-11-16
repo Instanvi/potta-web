@@ -1,5 +1,6 @@
 'use client';
 import React, { useContext, useEffect, useState } from 'react';
+import { catalogApi } from '../../../_utils/api';
 import Input from '@potta/components/input';
 
 import Slider from '@potta/components/slideover';
@@ -34,6 +35,8 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
 
   // Local state as fallback if no controlled state is provided
   const [localOpen, setLocalOpen] = useState(false);
+  const [tab, setTab] = useState('overview');
+  const [movements, setMovements] = useState<any[]>([]);
 
 
   // Determine which open state to use
@@ -43,6 +46,7 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
   useEffect(() => {
     if (isOpen && productId) {
       refetch();
+      catalogApi.productMovements(productId, { limit: 20 }).then((res) => setMovements(res.data ?? res ?? []));
     }
   }, [productId, refetch, isOpen]);
 
@@ -82,6 +86,69 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
               className="mb-4 w-full"
             />
           )}
+          <div className="mb-4 flex flex-wrap gap-2 text-sm">
+            {['overview', 'variations', 'units', 'modifiers', 'bundle', 'movements', 'cost'].map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setTab(id)}
+                className={`rounded-[2px] px-3 py-1 capitalize ${tab === id ? 'bg-primary text-white' : 'bg-muted'}`}
+              >
+                {id === 'units' ? 'Units and packages' : id === 'movements' ? 'Stock movements' : id === 'cost' ? 'Cost history' : id}
+              </button>
+            ))}
+          </div>
+          {tab !== 'overview' ? (
+            <div className="w-full space-y-2 text-sm">
+              {tab === 'variations' &&
+                (data.variations ?? []).map((v: any) => (
+                  <div key={v.uuid} className="border p-3">
+                    {v.name || v.sku} · {v.inventoryLevel} in stock · {v.salesPrice}
+                  </div>
+                ))}
+              {tab === 'units' && (
+                <>
+                  {(data.unitAssignments ?? []).map((a: any) => (
+                    <div key={a.uuid} className="border p-3">
+                      {a.unit?.name} ({a.unit?.symbol})
+                    </div>
+                  ))}
+                  {[...(data.packagePrices ?? []), ...(data.variationPackagePrices ?? [])].map((p: any) => (
+                    <div key={p.uuid} className="border p-3">
+                      {p.packageName}: {p.unitsPerPackage} @ {p.packagePrice}
+                    </div>
+                  ))}
+                </>
+              )}
+              {tab === 'modifiers' &&
+                [...(data.modifiers ?? []), ...(data.orgModifiers ?? [])].map((m: any) => (
+                  <div key={m.uuid} className="border p-3">
+                    {m.name} +{m.price}
+                  </div>
+                ))}
+              {tab === 'bundle' &&
+                (data.componentLinks ?? data.components ?? []).map((c: any, i: number) => (
+                  <div key={i} className="border p-3">
+                    {c.component?.name || c.product?.name || c.productId} × {c.quantity}
+                  </div>
+                ))}
+              {tab === 'movements' &&
+                movements.map((m) => (
+                  <div key={m.uuid} className="border p-3">
+                    {m.reason} {m.quantity} → {m.balanceAfter}
+                  </div>
+                ))}
+              {tab === 'cost' &&
+                movements
+                  .filter((m) => m.reason === 'RESTOCK' || m.unitCost != null)
+                  .map((m) => (
+                    <div key={`c-${m.uuid}`} className="border p-3">
+                      {m.createdAt}: {m.unitCost}
+                    </div>
+                  ))}
+            </div>
+          ) : (
+          <>
           {/* Header */}
           <div className="w-full grid grid-cols-2 gap-3">
             <Text name="Name" value={data.name} height />
@@ -197,6 +264,8 @@ const ViewProductSlider: React.FC<ProductDetailsProps> = ({
               </div>
             )}
 
+          </>
+          )}
           {/* <div className="text-center md:text-right mt-4 md:flex md:justify-end space-x-4">
             <Button
               text="Cancel"

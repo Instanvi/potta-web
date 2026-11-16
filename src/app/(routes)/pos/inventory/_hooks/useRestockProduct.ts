@@ -6,6 +6,7 @@ interface RestockPayload {
   quantity: number;
   /** Cost per unit for this delivery; updates the weighted average cost. */
   cost?: number;
+  variationId?: string;
 }
 
 const useRestockProduct = () => {

@@ -56,6 +56,9 @@ const InventoryTable = () => {
               <StatusBadge tone="success">Pay</StatusBadge>
             </span>
           )}
+          {original.hasVariations && (
+            <StatusBadge tone="neutral">Variations</StatusBadge>
+          )}
         </div>
       ),
     },
@@ -138,7 +141,9 @@ const InventoryTable = () => {
     {
       accessorKey: 'inventoryLevel',
       header: 'Inventory',
-      cell: ({ row: { original } }) => <div>{original.inventoryLevel}</div>,
+      cell: ({ row: { original } }) => (
+        <div>{original.stockTotal ?? original.inventoryLevel}</div>
+      ),
     },
     {
       accessorKey: 'reorderPoint',

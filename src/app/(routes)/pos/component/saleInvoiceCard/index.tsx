@@ -5,6 +5,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import { Product } from '../../utils/types';
 import { posApi } from '../../utils/api';
 import { isStockTracked, productToLine, type SaleLineItem } from '../../utils/sale';
+import ProductChooser, { productNeedsChooser } from '@potta/components/product-lines/ProductChooser';
 import { toast } from 'sonner';
 import PottaLoader from '@potta/components/pottaloader';
 import { productImageUrl } from '../../inventory/_utils/images';
@@ -51,6 +52,7 @@ const SaleInvoiceCard = () => {
   const [activeId, setActiveId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [barcodeInput, setBarcodeInput] = useState<string>('');
+  const [chooserId, setChooserId] = useState<string | null>(null);
   const barcodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingLookup = useRef<string | null>(null);
 
@@ -175,27 +177,29 @@ const SaleInvoiceCard = () => {
       return;
     }
 
-    context?.setData((prevData: LineItem[]) => {
-      const existingItem = prevData?.find(
-        (item) => item.productId === itemToAdd.id
-      );
-
-      if (existingItem) {
-        if (itemToAdd.stock !== null && existingItem.quantity >= itemToAdd.stock) {
-          toast.error(`Only ${itemToAdd.stock} ${itemToAdd.name} in stock`);
-          return prevData;
+    const addLine = (line: SaleLineItem) => {
+      context?.setData((prevData: LineItem[]) => {
+        const key = line.lineKey ?? line.productId;
+        const existingItem = prevData?.find((item) => (item.lineKey ?? item.productId) === key);
+        if (existingItem) {
+          if (itemToAdd.stock !== null && existingItem.quantity >= itemToAdd.stock) {
+            toast.error(`Only ${itemToAdd.stock} ${itemToAdd.name} in stock`);
+            return prevData;
+          }
+          return prevData.map((item) =>
+            (item.lineKey ?? item.productId) === key ? { ...item, quantity: item.quantity + 1 } : item
+          );
         }
-        return prevData.map((item) =>
-          item.productId === itemToAdd.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      const lineItem: LineItem = { ...itemToAdd.line, stock: itemToAdd.stock };
-
-      return prevData?.length > 0 ? [...prevData, lineItem] : [lineItem];
-    });
+        const lineItem: LineItem = { ...line, stock: itemToAdd.stock };
+        return prevData?.length > 0 ? [...prevData, lineItem] : [lineItem];
+      });
+    };
+    const product = products.find((p) => p.uuid === itemToAdd.id);
+    if (product && productNeedsChooser(product)) {
+      setChooserId(product.uuid);
+      return;
+    }
+    addLine(itemToAdd.line);
   };
 
   const handleActive = (id: string) => {
@@ -339,6 +343,23 @@ const SaleInvoiceCard = () => {
           )}
         </div>
       </div>
+      <ProductChooser
+        productId={chooserId}
+        open={Boolean(chooserId)}
+        onClose={() => setChooserId(null)}
+        onConfirm={(line) => {
+          context?.setData((prevData: LineItem[]) => {
+            const key = line.lineKey ?? line.productId;
+            const existing = prevData?.find((item) => (item.lineKey ?? item.productId) === key);
+            if (existing) {
+              return prevData.map((item) =>
+                (item.lineKey ?? item.productId) === key ? { ...item, quantity: item.quantity + 1 } : item
+              );
+            }
+            return prevData?.length > 0 ? [...prevData, line] : [line];
+          });
+        }}
+      />
     </div>
   );
 };

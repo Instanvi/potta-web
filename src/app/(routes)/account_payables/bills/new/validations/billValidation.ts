@@ -8,6 +8,9 @@ export interface BillLineFormValues {
   taxRate?: number;
   discountAmount?: number;
   productId?: string;
+  variationId?: string;
+  packagePriceId?: string;
+  unitId?: string;
 }
 
 export interface BillFormValues {

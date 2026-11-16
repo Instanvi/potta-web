@@ -34,6 +34,7 @@ export const productApi = {
     productId: string;
     quantity: number;
     cost?: number;
+    variationId?: string;
   }) => {
     const { productId: product_id, ...payload } = data;
     const result = await axios.put(`/Item/${product_id}/restock`, payload);
@@ -80,4 +81,15 @@ export const productCategoryApi = {
     const result = await axios.delete(`/product-category/${uuid}`);
     return result?.data;
   },
+};
+
+export const catalogApi = {
+  labels: async () => (await axios.get('/product-labels')).data,
+  units: async () => (await axios.get('/units')).data,
+  modifiers: async (params?: { scope?: 'org' | 'product'; productId?: string }) =>
+    (await axios.get('/product-modifiers', { params })).data,
+  movements: async (params?: Record<string, unknown>) =>
+    (await axios.get('/inventory-movements', { params })).data,
+  productMovements: async (productId: string, params?: { page?: number; limit?: number }) =>
+    (await axios.get(`/Item/${productId}/movements`, { params })).data,
 };

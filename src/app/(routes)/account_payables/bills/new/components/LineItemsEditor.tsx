@@ -2,6 +2,7 @@
 import { Control, FieldErrors, UseFormRegister, useFieldArray, useWatch } from 'react-hook-form';
 import { Plus, Trash } from '@phosphor-icons/react';
 import { formatMoney } from '../../../utils/format';
+import useGetAllProducts from '@potta/app/(routes)/pos/inventory/_hooks/useGetAllProducts';
 import { BillFormValues, lineTotals } from '../validations/billValidation';
 
 export const DEFAULT_TAX_RATE = 19.25;
@@ -28,6 +29,8 @@ const LineItemsEditor = ({ control, register, errors, currency }: Props) => {
   const { fields, append, remove } = useFieldArray({ control, name: 'lineItems' });
   const lines = useWatch({ control, name: 'lineItems' }) ?? [];
   const lineErrors = errors.lineItems;
+  const { data: productsData } = useGetAllProducts({ page: 1, limit: 100 });
+  const products = productsData?.data ?? [];
 
   return (
     <div>
@@ -51,6 +54,17 @@ const LineItemsEditor = ({ control, register, errors, currency }: Props) => {
               return (
                 <tr key={field.id} className="border-t border-gray-100 align-top">
                   <td className="px-3 py-2">
+                    <select
+                      className={`${cellInput} mb-1`}
+                      {...register(`lineItems.${index}.productId`)}
+                    >
+                      <option value="">No product</option>
+                      {products.map((p) => (
+                        <option key={p.uuid} value={p.uuid}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       {...register(`lineItems.${index}.description`)}
                       placeholder="Item or service"

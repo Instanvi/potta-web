@@ -28,6 +28,11 @@ export type SaleLineItem = {
   discountRate: number;
   discountCap: number;
   productId: string;
+  variationId?: string;
+  packagePriceId?: string;
+  unitId?: string;
+  modifierIds?: string[];
+  lineKey?: string;
 };
 
 export type SaleTender = { paymentMethod: PaymentMethod; amount: number; reference?: string };
@@ -75,23 +80,38 @@ export function computeTotals(items: SaleLineItem[], orderDiscount = 0) {
 }
 
 /** Product -> cart line. Tax comes from the product's tax relation (`product.tax.rate`). */
-export function productToLine(product: {
-  uuid: string;
-  name: string;
-  salesPrice: number | string;
-  tax?: { rate?: number | string; type?: string } | null;
-  taxable?: boolean | null;
-}): SaleLineItem {
-  return {
-    description: product.name,
-    quantity: 1,
-    unitPrice: Number(product.salesPrice),
-    taxRate: productTaxRate(product),
-    discountType: 'PERCENTAGE',
-    discountRate: 0,
-    discountCap: 0,
+export function productToLine(
+  product: {
+    uuid: string;
+    name: string;
+    salesPrice: number | string;
+    tax?: { rate?: number | string; type?: string } | null;
+    taxable?: boolean | null;
+  },
+  extra?: Partial<SaleLineItem>,
+): SaleLineItem {
+  const line: SaleLineItem = {
+    description: extra?.description ?? product.name,
+    quantity: extra?.quantity ?? 1,
+    unitPrice: extra?.unitPrice ?? Number(product.salesPrice),
+    taxRate: extra?.taxRate ?? productTaxRate(product),
+    discountType: extra?.discountType ?? 'PERCENTAGE',
+    discountRate: extra?.discountRate ?? 0,
+    discountCap: extra?.discountCap ?? 0,
     productId: product.uuid,
+    variationId: extra?.variationId,
+    packagePriceId: extra?.packagePriceId,
+    unitId: extra?.unitId,
+    modifierIds: extra?.modifierIds,
   };
+  line.lineKey = [
+    line.productId,
+    line.variationId || '',
+    line.packagePriceId || '',
+    line.unitId || '',
+    [...(line.modifierIds ?? [])].sort().join(','),
+  ].join('|');
+  return line;
 }
 
 export function productTaxRate(product: { tax?: { rate?: number | string; type?: string } | null; taxable?: boolean | null }) {

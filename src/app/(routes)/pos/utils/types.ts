@@ -53,37 +53,12 @@ export type SalesReceiptFilter = {
   customerId?: string;
   salePerson?: string;
 };
-export type Product = {
-  uuid: string,
-  createdAt: string,
-  createdBy: string,
-  updatedBy: string | null,
-  deletedAt: string | null,
-  updatedAt: string | null,
-  productId: string,
-  name: string,
-  description: string,
-  unitOfMeasure: string,
-  cost: number,
-  sku: string,
-  inventoryLevel: number,
-  salesPrice: number,
-  taxable: boolean,
-  tax?: { uuid: string; name: string; rate: number | string; type?: string } | null,
-  type?: 'INVENTORY' | 'NON_INVENTORY' | null,
-  structure?: 'SIMPLE' | 'ASSEMBLY' | 'SIMPLEGROUPS' | null,
-  category: string | { uuid: string; name: string } | null,
-  images: string[] | null,
-  status: string,
-}
-
-
-export type ProductResponse = {
-  data: Product[],
-  meta: {
-    itemsPerPage: number,
-    totalItems: number,
-    currentPage: number,
-    totalPages: number
-  }
-}
+export type {
+  Product,
+  ProductResponse,
+  ProductVariation,
+  PackagePrice,
+  Unit,
+  ProductModifier,
+  InventoryMovement,
+} from '../inventory/_utils/types';

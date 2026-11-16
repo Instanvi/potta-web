@@ -4,7 +4,8 @@ import Button from '@potta/components/button';
 import Slider from '@potta/components/slideover';
 import SearchableSelect from '@potta/components/searchableSelect';
 import { apiErrorMessage } from '@potta/app/(routes)/pos/utils/sale';
-import { Product } from '../../../../_utils/types';
+import { Product, ProductVariation } from '../../../../_utils/types';
+import { productApi } from '../../../../_utils/api';
 import { useInventory } from '../../../../_utils/context';
 import useGetAllProducts from '../../../../_hooks/useGetAllProducts';
 import useRestockProduct from '../../../../_hooks/useRestockProduct';
@@ -25,15 +26,26 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
   const restock = useRestockProduct();
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [variationId, setVariationId] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unitCost, setUnitCost] = useState('');
+  const [detail, setDetail] = useState<Product | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setProduct(tableSelection ?? null);
+    setVariationId('');
     setQuantity('');
     setUnitCost(tableSelection ? String(Number(tableSelection.cost ?? 0)) : '');
   }, [open, tableSelection]);
+
+  useEffect(() => {
+    if (!product?.uuid) {
+      setDetail(null);
+      return;
+    }
+    productApi.getOne(product.uuid).then(setDetail);
+  }, [product?.uuid]);
 
   const stocked = (products?.data ?? []).filter((p) => p.type !== 'NON_INVENTORY');
   const qty = Number(quantity);
@@ -52,6 +64,7 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
         productId: product.uuid,
         quantity: qty,
         ...(unitCost !== '' ? { cost } : {}),
+        ...(variationId ? { variationId } : {}),
       });
       toast.success(`${qty} × ${product.name} added to stock`);
       setOpen(false);
@@ -78,6 +91,23 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
               />
               <FieldHint>Only stocked (inventory) items can be restocked.</FieldHint>
             </div>
+            {(detail?.variations?.length ?? 0) > 0 && (
+              <div>
+                <label className="text-sm font-medium">Variation</label>
+                <select
+                  className={inputClass}
+                  value={variationId}
+                  onChange={(e) => setVariationId(e.target.value)}
+                >
+                  <option value="">Product stock</option>
+                  {detail!.variations!.map((v: ProductVariation) => (
+                    <option key={v.uuid} value={v.uuid}>
+                      {v.name || v.sku} ({v.inventoryLevel})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {product && (
               <>

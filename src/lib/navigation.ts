@@ -76,6 +76,9 @@ export const NAV_MODULES: NavModule[] = [
     items: [
       { title: 'Products', href: '/inventory', icon: Package, exact: true },
       { title: 'Categories', href: '/inventory/categories', icon: Tag },
+      { title: 'Attributes', href: '/inventory/attributes', icon: SquaresFour },
+      { title: 'Units', href: '/inventory/units', icon: Package },
+      { title: 'Modifiers', href: '/inventory/modifiers', icon: Percent },
       { title: 'Stock adjustments', href: '/inventory/adjustments', icon: SlidersHorizontal },
       { title: 'Returns', href: '/inventory/returns', icon: ArrowUUpLeft },
     ],
