@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
@@ -15,12 +16,11 @@ import Button from '@potta/components/button';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar } from '../../../_shared/states';
+import { exportRows } from '@/lib/export-file';
 
 import useGetAllPurchaseOrders from '../hooks/useGetAllPurchaseOrders';
 import useApprovePurchaseOrder from '../hooks/useApprovePurchaseOrder';
 import useDeletePurchaseOrder from '../hooks/useDeletePurchaseOrder';
-import Slider from '@potta/components/slideover';
-import PurchaseOrderPage from '../new/page';
 import PurchaseOrderViewModal from './PurchaseOrderViewModal';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import useGetAllVendors from '../new/hooks/useGetAllVendors';
@@ -57,7 +57,7 @@ const InvoiceTable = () => {
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [vendorFilter, setVendorFilter] = useState<string>('all');
-  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<
     string | null
@@ -102,21 +102,6 @@ const InvoiceTable = () => {
     setVendorFilter(value);
   };
 
-  // Handle modal closing when purchase order is created
-  useEffect(() => {
-    const handleCloseModal = () => {
-      setIsOpen(false);
-      // Reset form data when modal is closed
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('resetPurchaseOrderForm'));
-      }
-    };
-
-    window.addEventListener('closePurchaseOrderModal', handleCloseModal);
-    return () => {
-      window.removeEventListener('closePurchaseOrderModal', handleCloseModal);
-    };
-  }, []);
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -354,13 +339,43 @@ const InvoiceTable = () => {
               theme="lightBlue"
               type={'button'}
               color={true}
+              onClick={() =>
+                void exportRows({
+                  filename: 'purchase-orders',
+                  rows: (data?.data ?? []) as PurchaseOrder[],
+                  columns: [
+                    { key: 'orderNumber', header: 'Order number' },
+                    {
+                      key: 'salePerson',
+                      header: 'Vendor',
+                      value: (row) => row.salePerson?.name || '',
+                    },
+                    {
+                      key: 'orderDate',
+                      header: 'Order date',
+                      value: (row) =>
+                        row.orderDate ? new Date(row.orderDate).toLocaleDateString() : '',
+                    },
+                    {
+                      key: 'requiredDate',
+                      header: 'Required date',
+                      value: (row) =>
+                        row.requiredDate
+                          ? new Date(row.requiredDate).toLocaleDateString()
+                          : '',
+                    },
+                    { key: 'status', header: 'Status' },
+                    { key: 'orderTotal', header: 'Total' },
+                  ],
+                })
+              }
             />
             <Button
               text={'Create Purchase Order'}
               icon={<i className="ri-file-add-line"></i>}
               theme="default"
               type={'button'}
-              onClick={() => setIsOpen(true)}
+              onClick={() => router.push('/account_payables/purchase/new')}
             />
           </>
         }
@@ -385,18 +400,6 @@ const InvoiceTable = () => {
           {...tableProps(data?.meta, data?.data?.length)}
         />
       )}
-
-      {/* Create Purchase Order Modal */}
-      <Slider
-        open={isOpen}
-        setOpen={setIsOpen}
-        edit={false}
-        title="Create Purchase Order"
-      >
-        <div className="w-full mx-auto">
-          <PurchaseOrderPage />
-        </div>
-      </Slider>
 
       {/* Purchase Order View Modal */}
       <PurchaseOrderViewModal

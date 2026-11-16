@@ -27,4 +27,12 @@ export const customerApi = {
     const result = await axios.delete(`/customer/${customer_id}`);
     return result?.data;
   },
+  importCsv: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const result = await axios.post('/customer/import-csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return result.data;
+  },
 };
