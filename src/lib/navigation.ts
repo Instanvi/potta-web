@@ -57,14 +57,13 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'pos',
     title: 'POS',
-    description: 'Ring up sales, customers and the desktop till.',
+    description: 'Ring up sales, contacts and the desktop till.',
     icon: Storefront,
     matchPrefixes: ['/pos'],
     items: [
       { title: 'Register', href: '/pos', icon: House, appIcon: APP_ICONS.shoppingCart, exact: true },
       { title: 'Sales', href: '/pos/sales', icon: ShoppingCart, appIcon: APP_ICONS.transactions },
-      { title: 'Customers', href: '/pos/customers', icon: Users, appIcon: APP_ICONS.people },
-      { title: 'Vendors', href: '/pos/vendors', icon: Storefront },
+      { title: 'Contacts', href: '/pos/contacts', icon: Users, appIcon: APP_ICONS.people },
       { title: 'Desktop sync', href: '/pos/sync', icon: ArrowsClockwise },
     ],
   },
@@ -109,7 +108,7 @@ export const NAV_MODULES: NavModule[] = [
       { title: 'Sales receipts', href: '/account_receivables/sales_receipts', icon: Receipt },
       { title: 'Credit notes', href: '/account_receivables/credit', icon: Tray, appIcon: APP_ICONS.reimbursement },
       { title: 'Vouchers', href: '/account_receivables/vouchers', icon: Gift },
-      { title: 'Customers', href: '/account_receivables/customers', icon: Users, appIcon: APP_ICONS.people },
+      { title: 'Contacts', href: '/account_receivables/contacts', icon: Users, appIcon: APP_ICONS.people },
     ],
   },
   {
@@ -122,7 +121,7 @@ export const NAV_MODULES: NavModule[] = [
       { title: 'Dashboard', href: '/account_payables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
       { title: 'Bills', href: '/account_payables/bills', icon: Invoice, appIcon: APP_ICONS.bills },
       { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart, appIcon: APP_ICONS.shoppingCart },
-      { title: 'Vendors', href: '/account_payables/vendors', icon: Storefront },
+      { title: 'Contacts', href: '/account_payables/contacts', icon: Users, appIcon: APP_ICONS.people },
     ],
   },
   {

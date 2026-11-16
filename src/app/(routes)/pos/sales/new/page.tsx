@@ -8,7 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import RootLayout from '../../../layout';
+import DocumentWorkspace from '@potta/components/document-workspace';
 import { DataProvider } from '@potta/components/providers/DataProvider';
 
 const NewSalesReciept = () => {
@@ -39,7 +39,7 @@ const NewSalesReciept = () => {
 
   // Own provider: this form keeps its state in `data`, which would otherwise clobber the till's cart.
   return (
-    <RootLayout>
+    <DocumentWorkspace title="New Sale" closeHref="/pos/sales">
       <DataProvider>
       <div className="max-h-[92.7vh] relative">
         {/* Preview toggle button with fade transition */}
@@ -102,7 +102,7 @@ const NewSalesReciept = () => {
         </div>
       </div>
       </DataProvider>
-    </RootLayout>
+    </DocumentWorkspace>
   );
 };
 

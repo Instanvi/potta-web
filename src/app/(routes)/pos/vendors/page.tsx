@@ -1,20 +1,5 @@
-'use client';
-import React from 'react';
-import VendorContent from '../../../../components/shared/VendorContent';
-import RootLayout from '../../layout';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { redirect } from 'next/navigation';
 
-const POSVendor = () => {
-  return (
-    <RootLayout>
-      <PageContainer>
-        <PageHeader
-          title="Vendors"
-          description="Suppliers you restock from: contact details, KYC status and opening balances."
-        />
-        <VendorContent />
-      </PageContainer>
-    </RootLayout>
-  );
-};
-export default POSVendor;
+export default function PosVendorsRedirect() {
+  redirect('/pos/contacts?type=vendors');
+}
