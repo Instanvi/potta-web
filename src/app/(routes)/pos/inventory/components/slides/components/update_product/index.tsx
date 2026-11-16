@@ -22,6 +22,10 @@ import {
   TaxField,
   UNIT_OPTIONS,
 } from '../../../fields/ItemFormFields';
+import CatalogPeripheralsEditor, {
+  catalogDraftFromProduct,
+  catalogDraftToPayload,
+} from '../../../CatalogPeripheralsEditor';
 
 type UpdateProductForm = yup.InferType<typeof UpdateProductSchema>;
 
@@ -50,6 +54,7 @@ interface EditProductProps {
 
 const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess }) => {
   const [images, setImages] = useState<string[]>(productImageUrls(product));
+  const [catalog, setCatalog] = useState(() => catalogDraftFromProduct(product));
   const {
     register,
     handleSubmit,
@@ -66,6 +71,10 @@ const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess
   useEffect(() => {
     setValue('images', images);
   }, [images, setValue]);
+
+  useEffect(() => {
+    setCatalog(catalogDraftFromProduct(product));
+  }, [product]);
 
   const mutation = useUpdateProduct(productId);
   const taxable = watch('taxable');
@@ -88,6 +97,7 @@ const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess
       ...(data.taxable && taxId ? { taxId } : {}),
       images,
       status: data.status || 'enabled',
+      ...catalogDraftToPayload(catalog),
     };
     mutation.mutate(payload, {
       onSuccess: () => {
@@ -223,6 +233,8 @@ const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess
             </div>
           </FormSection>
         )}
+
+        <CatalogPeripheralsEditor value={catalog} onChange={setCatalog} />
 
         {images.length > 0 && (
           <section className="rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">

@@ -85,9 +85,15 @@ export const productCategoryApi = {
 
 export const catalogApi = {
   labels: async () => (await axios.get('/product-labels')).data,
+  createLabel: async (data: { name: string; options: string[] }) =>
+    (await axios.post('/product-labels', data)).data,
   units: async () => (await axios.get('/units')).data,
-  modifiers: async (params?: { scope?: 'org' | 'product'; productId?: string }) =>
+  createUnit: async (data: { name: string; symbol?: string; factor?: number }) =>
+    (await axios.post('/units', data)).data,
+  modifiers: async (params?: { scope?: 'org' | 'product' | 'all'; productId?: string }) =>
     (await axios.get('/product-modifiers', { params })).data,
+  createModifier: async (data: { name: string; price: number }) =>
+    (await axios.post('/product-modifiers', data)).data,
   movements: async (params?: Record<string, unknown>) =>
     (await axios.get('/inventory-movements', { params })).data,
   productMovements: async (productId: string, params?: { page?: number; limit?: number }) =>

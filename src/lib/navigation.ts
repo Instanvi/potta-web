@@ -70,7 +70,7 @@ export const NAV_MODULES: NavModule[] = [
   {
     id: 'inventory',
     title: 'Inventory',
-    description: 'Products, categories, stock adjustments and returns.',
+    description: 'Products, categories, attributes, units, modifiers, stock adjustments and returns.',
     icon: Package,
     matchPrefixes: ['/inventory', '/pos/inventory'],
     items: [

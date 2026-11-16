@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -19,6 +19,10 @@ import {
   UNIT_OPTIONS,
   generateSku,
 } from './fields/ItemFormFields';
+import CatalogPeripheralsEditor, {
+  catalogDraftToPayload,
+  emptyCatalogDraft,
+} from './CatalogPeripheralsEditor';
 
 interface CreateProductFormProps {
   productType?: 'INVENTORY' | 'NON_INVENTORY';
@@ -76,6 +80,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   }, [productType, structure, isNonInventory, reset]);
 
   const mutation = useCreateProduct();
+  const [catalog, setCatalog] = useState(emptyCatalogDraft);
   const taxable = watch('taxable');
   const [cost, salesPrice] = watch(['cost', 'salesPrice']);
   const needsComponents = structure === 'ASSEMBLY' || structure === 'SIMPLEGROUPS';
@@ -94,6 +99,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
       images: [],
       inventoryLevel: isNonInventory ? 0 : Number(formData.inventoryLevel ?? 0),
       reorderPoint: isNonInventory ? 0 : Number(formData.reorderPoint ?? 0),
+      ...catalogDraftToPayload(catalog),
     };
   };
 
@@ -111,6 +117,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
       onSuccess: (response) => {
         toast.success(`"${payload.name}" created`);
         reset(defaults);
+        setCatalog(emptyCatalogDraft());
         const id = response?.data?.uuid ?? response?.uuid ?? response?.data?.id ?? response?.id;
         if (!id) {
           toast.error('Item created but no id was returned.');
@@ -276,6 +283,8 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
             </div>
           </FormSection>
         )}
+
+        <CatalogPeripheralsEditor value={catalog} onChange={setCatalog} />
       </div>
 
       <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
