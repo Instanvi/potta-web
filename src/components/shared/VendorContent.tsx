@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 
 import TableComponents from '@potta/app/(routes)/vendors/components/table';
