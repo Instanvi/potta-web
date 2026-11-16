@@ -56,7 +56,7 @@ export function LocationSwitcher({ className }: { className?: string }) {
         <button
           type="button"
           className={cn(
-            'flex h-10 max-w-[220px] items-center justify-between gap-2 rounded border border-black/[0.08] bg-white px-2.5 text-left hover:bg-gray-50',
+            'flex h-12 max-w-[220px] items-center justify-between gap-2 rounded-[2px] border border-black/[0.08] bg-white px-2.5 text-left hover:bg-gray-50',
             className,
           )}
         >

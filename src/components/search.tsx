@@ -26,7 +26,7 @@ const Search = ({
         placeholder={placeholder || 'Search'}
         value={value}
         onChange={onChange}
-        className={`h-11 pl-10 pr-10 ${className ? 'w-full' : 'w-full sm:w-[450px]'}`}
+        className={`h-12 pl-10 pr-10 ${className ? 'w-full' : 'w-full sm:w-[450px]'}`}
         aria-label={placeholder || 'Search'}
       />
       {value && onClear && (

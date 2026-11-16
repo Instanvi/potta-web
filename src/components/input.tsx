@@ -69,7 +69,7 @@ const Input: React.FC<Props> = ({
         value={value}
         {...inputProps}
         placeholder={placeholder}
-        className={`w-full ${inputClass} ${height ? 'py-1.5' : 'py-2.5'} ${
+        className={`w-full ${inputClass} ${height ? 'h-9 py-1.5' : 'h-12 py-2.5'} ${
           errors
             ? 'border-destructive focus:ring-destructive/30'
             : 'border-input focus:border-primary focus:ring-ring/30'

@@ -76,7 +76,7 @@ const InlineCreate = ({
 );
 
 const inlineInput =
-  'h-9 w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-ring/30';
+  'h-12 w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-ring/30';
 
 const AddLink = ({ onClick, children }: { onClick: () => void; children: ReactNode }) => (
   <button type="button" onClick={onClick} className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">

@@ -56,7 +56,7 @@ export interface StateAction {
 
 function ActionButton({ action, primary }: { action: StateAction; primary?: boolean }) {
   const className = cn(
-    'flex h-11 w-full items-center justify-center gap-2 px-6 text-sm transition-colors sm:w-auto',
+    'flex h-12 w-full items-center justify-center gap-2 px-6 text-sm transition-colors sm:w-auto',
     primary
       ? 'bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)]'
       : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50',

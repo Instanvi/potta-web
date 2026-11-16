@@ -29,7 +29,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 const triggerClass = (hasValue: boolean, error?: string, disabled?: boolean) =>
   cn(
-    'flex h-11 w-full items-center gap-2 rounded-[2px] border bg-background px-3 text-left text-sm transition-colors',
+    'flex h-12 w-full items-center gap-2 rounded-[2px] border bg-background px-3 text-left text-sm transition-colors',
     'focus:outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/30',
     error ? 'border-destructive' : 'border-input hover:border-black/20',
     !hasValue && 'text-muted-foreground/70',

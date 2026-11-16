@@ -75,7 +75,7 @@ const Select: React.FC<SelectProps> = ({
           tabIndex={isDisabled ? -1 : 0} // -1 removes from tab order when disabled
           className={`${bg} relative ${
             isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-          } px-3 py-2.5 pr-8 ${
+          } flex h-12 items-center px-3 py-2.5 pr-8 ${
             error
               ? 'border-red-500 focus:ring-red-500 focus:border-red-500 focus:outline-none focus:ring-2'
               : !outline && !isDisabled

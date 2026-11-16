@@ -21,7 +21,7 @@ export const KindFilter = ({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-11 min-w-[200px] items-center justify-between gap-2 rounded-[2px] border border-input bg-background px-3 text-left text-sm"
+        className="flex h-12 min-w-[200px] items-center justify-between gap-2 rounded-[2px] border border-input bg-background px-3 text-left text-sm"
       >
         {value.length ? `${value.length} selected` : 'All kinds'}
         <i className="ri-arrow-down-s-line text-muted-foreground" />

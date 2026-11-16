@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { catalogApi } from '../pos/inventory/_utils/api';
 
-const input = 'h-9 rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary';
+const input = 'h-12 rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary';
 
 export function CatalogList({
   queryKey,
@@ -53,7 +53,7 @@ export function AttributeCreateForm() {
     >
       <input className={input} placeholder="Name (Size)" value={name} onChange={(e) => setName(e.target.value)} />
       <input className={`${input} min-w-[16rem]`} placeholder="Options, comma separated (S, M, L)" value={options} onChange={(e) => setOptions(e.target.value)} />
-      <button type="submit" disabled={mutation.isPending} className="h-9 rounded-[2px] bg-primary px-3 text-sm font-medium text-white disabled:opacity-60">
+      <button type="submit" disabled={mutation.isPending} className="h-12 rounded-[2px] bg-primary px-3 text-sm font-medium text-white disabled:opacity-60">
         {mutation.isPending ? 'Saving…' : 'Add attribute'}
       </button>
     </form>
@@ -88,7 +88,7 @@ export function UnitCreateForm() {
       <input className={input} placeholder="Name (Carton)" value={name} onChange={(e) => setName(e.target.value)} />
       <input className={input} placeholder="Symbol (ctn)" value={symbol} onChange={(e) => setSymbol(e.target.value)} />
       <input className={`${input} w-24`} type="number" min={0} step="any" placeholder="Factor" value={factor} onChange={(e) => setFactor(e.target.value)} />
-      <button type="submit" disabled={mutation.isPending} className="h-9 rounded-[2px] bg-primary px-3 text-sm font-medium text-white disabled:opacity-60">
+      <button type="submit" disabled={mutation.isPending} className="h-12 rounded-[2px] bg-primary px-3 text-sm font-medium text-white disabled:opacity-60">
         {mutation.isPending ? 'Saving…' : 'Add unit'}
       </button>
     </form>
@@ -120,7 +120,7 @@ export function ModifierCreateForm() {
     >
       <input className={input} placeholder="Name (Gift wrap)" value={name} onChange={(e) => setName(e.target.value)} />
       <input className={`${input} w-28`} type="number" min={0} step="any" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
-      <button type="submit" disabled={mutation.isPending} className="h-9 rounded-[2px] bg-primary px-3 text-sm font-medium text-white disabled:opacity-60">
+      <button type="submit" disabled={mutation.isPending} className="h-12 rounded-[2px] bg-primary px-3 text-sm font-medium text-white disabled:opacity-60">
         {mutation.isPending ? 'Saving…' : 'Add modifier'}
       </button>
     </form>

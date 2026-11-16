@@ -59,7 +59,7 @@ export default function ProductChooser({
       <div className="w-full max-w-md space-y-3 rounded-[2px] bg-white p-5">
         <h3 className="text-lg font-medium">{detail?.name ?? 'Choose options'}</h3>
         {(detail?.variations?.length ?? 0) > 0 && (
-          <select className="h-11 w-full border px-3 text-sm" value={variationId} onChange={(e) => setVariationId(e.target.value)}>
+          <select className="h-12 w-full border px-3 text-sm" value={variationId} onChange={(e) => setVariationId(e.target.value)}>
             <option value="">Variation</option>
             {detail!.variations!.map((v) => (
               <option key={v.uuid} value={v.uuid}>
@@ -69,7 +69,7 @@ export default function ProductChooser({
           </select>
         )}
         {packages.length > 0 && (
-          <select className="h-11 w-full border px-3 text-sm" value={packageId} onChange={(e) => setPackageId(e.target.value)}>
+          <select className="h-12 w-full border px-3 text-sm" value={packageId} onChange={(e) => setPackageId(e.target.value)}>
             <option value="">Package</option>
             {packages.map((p) => (
               <option key={p.uuid} value={p.uuid}>
@@ -79,7 +79,7 @@ export default function ProductChooser({
           </select>
         )}
         {units.length > 0 && (
-          <select className="h-11 w-full border px-3 text-sm" value={unitId} onChange={(e) => setUnitId(e.target.value)}>
+          <select className="h-12 w-full border px-3 text-sm" value={unitId} onChange={(e) => setUnitId(e.target.value)}>
             <option value="">Unit</option>
             {units.map((u) => (
               <option key={u.uuid} value={u.uuid}>
@@ -101,12 +101,12 @@ export default function ProductChooser({
           </label>
         ))}
         <div className="flex justify-end gap-2">
-          <button type="button" className="px-3 py-2 text-sm" onClick={onClose}>
+          <button type="button" className="h-12 px-3 text-sm" onClick={onClose}>
             Cancel
           </button>
           <button
             type="button"
-            className="bg-primary px-3 py-2 text-sm text-white"
+            className="h-12 bg-primary px-3 text-sm text-white"
             onClick={() => {
               if (!detail) return;
               onConfirm(

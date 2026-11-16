@@ -97,7 +97,7 @@ export function cartesianVariations(attributes: { name: string; options: string[
   }, []);
 }
 
-const input = 'h-9 w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary';
+const input = 'h-12 w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary';
 
 const AddRow = ({ onClick, children }: { onClick: () => void; children: string }) => (
   <button type="button" onClick={onClick} className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">

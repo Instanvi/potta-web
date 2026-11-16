@@ -150,11 +150,11 @@ export default function ProductLinesTable() {
           min={1}
           value={qty}
           onChange={(e) => setQty(Number(e.target.value))}
-          className="h-11 rounded-[2px] border border-input px-3 text-sm"
+          className="h-12 rounded-[2px] border border-input px-3 text-sm"
         />
       </div>
       {detail?.variations && detail.variations.length > 0 && (
-        <select className="h-11 w-full rounded-[2px] border border-input px-3 text-sm" value={variationId} onChange={(e) => setVariationId(e.target.value)}>
+        <select className="h-12 w-full rounded-[2px] border border-input px-3 text-sm" value={variationId} onChange={(e) => setVariationId(e.target.value)}>
           <option value="">Variation</option>
           {detail.variations.map((v) => (
             <option key={v.uuid} value={v.uuid}>
@@ -164,7 +164,7 @@ export default function ProductLinesTable() {
         </select>
       )}
       {packages.length > 0 && (
-        <select className="h-11 w-full rounded-[2px] border border-input px-3 text-sm" value={packageId} onChange={(e) => setPackageId(e.target.value)}>
+        <select className="h-12 w-full rounded-[2px] border border-input px-3 text-sm" value={packageId} onChange={(e) => setPackageId(e.target.value)}>
           <option value="">Package (optional)</option>
           {packages.map((p) => (
             <option key={p.uuid} value={p.uuid}>
@@ -174,7 +174,7 @@ export default function ProductLinesTable() {
         </select>
       )}
       {units.length > 0 && (
-        <select className="h-11 w-full rounded-[2px] border border-input px-3 text-sm" value={unitId} onChange={(e) => setUnitId(e.target.value)}>
+        <select className="h-12 w-full rounded-[2px] border border-input px-3 text-sm" value={unitId} onChange={(e) => setUnitId(e.target.value)}>
           <option value="">Unit (optional)</option>
           {units.map((u) => (
             <option key={u.uuid} value={u.uuid}>
@@ -199,7 +199,7 @@ export default function ProductLinesTable() {
           ))}
         </div>
       )}
-      <button type="button" onClick={add} className="rounded-[2px] bg-primary px-4 py-2 text-sm text-white">
+      <button type="button" onClick={add} className="h-12 rounded-[2px] bg-primary px-4 text-sm text-white">
         Add line · {currencySymbol} {money(priced.unitPrice)}
       </button>
       <table className="w-full text-sm">
