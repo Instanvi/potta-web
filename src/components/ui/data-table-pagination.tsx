@@ -29,20 +29,25 @@ export function DataTablePagination<TData>({
 
   return (
     <div className="flex flex-col gap-3 border-t border-black/10 bg-card px-4 py-3 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
-        <span>Show</span>
-        <select
-          value={pageSize}
-          onChange={(event) => table.setPageSize(Number(event.target.value))}
-          className="h-8 rounded-[2px] border border-input bg-background px-2 text-sm text-foreground focus:border-primary focus:outline-none"
-        >
+      <div className="flex flex-wrap items-center gap-2 text-sm font-normal text-muted-foreground">
+        <span>Rows</span>
+        <div className="inline-flex overflow-hidden rounded-[2px] border border-input bg-background">
           {pageSizeOptions.map((size) => (
-            <option key={size} value={size}>
+            <button
+              key={size}
+              type="button"
+              onClick={() => table.setPageSize(size)}
+              className={`h-8 min-w-9 px-2.5 text-sm transition-colors ${
+                pageSize === size
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-foreground hover:bg-accent'
+              }`}
+              aria-pressed={pageSize === size}
+            >
               {size}
-            </option>
+            </button>
           ))}
-        </select>
-        <span>entries</span>
+        </div>
       </div>
 
       <div className="text-sm font-normal text-muted-foreground">

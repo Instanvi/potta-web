@@ -11,12 +11,19 @@
   --brand-light-foreground: #0b3d12;
   --brand-subtle: #f1faf7;
   --radius: 0.25rem;
+  /* Match Talk card elevation */
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06);
 }
 
 @layer components {
-  /* Flat white panel used for every content block (payroll .dashboard-panel). */
+  /* Talk-aligned main card surface used across Potta content blocks. */
   .dashboard-panel {
-    @apply rounded-md border border-black/[0.06] bg-white;
+    @apply rounded-md border-0 bg-white;
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card) !important;
   }
 }
 

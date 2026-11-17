@@ -2,15 +2,18 @@
 import { useMemo, useState } from 'react';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
+import Search from '@potta/components/search';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, StatCard } from '../../../_shared/states';
+import { EmptyState, ErrorState, ListToolbar, StatCard } from '../../../_shared/states';
 import { useGeneralLedger } from '../hooks';
 import { GeneralLedgerEntry } from '../utils/types';
 
 const GeneralLedgerTab = () => {
   const [startDate, setStartDate] = useState(startOfMonth());
   const [endDate, setEndDate] = useState(today());
+  const [search, setSearch] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('all');
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 20,
@@ -23,7 +26,30 @@ const GeneralLedgerTab = () => {
     endDate: endDate ? `${endDate}T23:59:59.999Z` : undefined,
   });
 
-  const rows = data?.data ?? [];
+  const rows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return (data?.data ?? []).filter((row) => {
+      if (sourceFilter !== 'all' && (row.sourceModule || '') !== sourceFilter) return false;
+      if (!q) return true;
+      return [
+        row.journalEntryNumber,
+        row.accountNumber,
+        row.accountName,
+        row.description,
+        row.sourceModule,
+      ]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [data?.data, search, sourceFilter]);
+
+  const sources = useMemo(() => {
+    const set = new Set<string>();
+    (data?.data ?? []).forEach((r) => {
+      if (r.sourceModule) set.add(r.sourceModule);
+    });
+    return Array.from(set).sort();
+  }, [data?.data]);
   const pageTotals = useMemo(
     () =>
       rows.reduce(
@@ -75,7 +101,7 @@ const GeneralLedgerTab = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end gap-3">
+      <ListToolbar>
         <DateRangePicker
           id="ledgerPeriod"
           label="Period"
@@ -84,10 +110,30 @@ const GeneralLedgerTab = () => {
           value={{ from: startDate, to: endDate }}
           onChange={changeRange}
         />
+        <Search
+          placeholder="Search journal, account, description…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
+          className="w-full max-w-sm"
+        />
+        <select
+          className="h-10 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-zinc-50 px-3 text-sm text-foreground outline-none focus-visible:border-primary"
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+          aria-label="Filter by source"
+        >
+          <option value="all">All sources</option>
+          {sources.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
         {isFetching && !isLoading && (
-          <span className="pb-3 text-sm text-muted-foreground">Refreshing…</span>
+          <span className="text-sm text-muted-foreground">Refreshing…</span>
         )}
-      </div>
+      </ListToolbar>
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
@@ -108,9 +154,13 @@ const GeneralLedgerTab = () => {
             data={rows}
             isLoading={isLoading}
             withRowSelection={false}
-            manualPagination
-            pageCount={data?.meta?.totalPages ?? 1}
-            totalRows={data?.meta?.totalItems ?? 0}
+            manualPagination={!search && sourceFilter === 'all'}
+            pageCount={
+              search || sourceFilter !== 'all' ? undefined : (data?.meta?.totalPages ?? 1)
+            }
+            totalRows={
+              search || sourceFilter !== 'all' ? rows.length : (data?.meta?.totalItems ?? 0)
+            }
             pagination={pagination}
             onPaginationChange={setPagination}
             pageSize={pagination.pageSize}

@@ -24,8 +24,8 @@ const CustomSelect: FC<SelectProps> = ({ options, value, onChange, placeholder =
     <div className="relative w-fit min-w-[10rem] shrink-0" ref={selectRef}>
       <div
         className={cn(
-          'flex h-12 cursor-pointer items-center justify-between gap-3 whitespace-nowrap rounded-[2px] border bg-background px-3 text-sm transition-colors',
-          isOpen ? 'border-primary ring-[3px] ring-ring/30' : 'border-input hover:border-black/20'
+          'flex h-10 cursor-pointer items-center justify-between gap-3 whitespace-nowrap rounded-t-[2px] rounded-b-none border-0 border-b bg-zinc-50 px-3 text-sm transition-colors',
+          isOpen ? 'border-primary' : 'border-black/15 hover:border-black/25'
         )}
         onClick={() => setIsOpen(!isOpen)}
         role="button"

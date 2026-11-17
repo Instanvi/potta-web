@@ -16,6 +16,9 @@ import {
   type ReportScopeMode,
 } from '@/lib/reports-catalog';
 import { cn } from '@/lib/utils';
+import { PanelCard, PanelCardContent, PanelCardHeader } from '@/components/ui/panel-card';
+import { Input } from '@/components/shadcn/input';
+import { Button } from '@/components/shadcn/button';
 
 const FAV_KEY = 'potta.report.favourites';
 
@@ -42,7 +45,7 @@ function ReportRow({
 }) {
   const href = report.live && report.href ? report.href : `/reports/view/${report.id}`;
   return (
-    <div className="group flex items-center gap-2 border-b border-black/[0.06] py-2.5 last:border-b-0">
+    <div className="group flex items-center gap-2 border-b border-neutral-50 py-2.5 last:border-b-0">
       <Link href={href} className="min-w-0 flex-1 text-sm text-foreground hover:text-primary">
         {report.title}
         {!report.live ? (
@@ -63,12 +66,14 @@ function ReportRow({
 
 function CategoryBlock({
   title,
+  description,
   reports,
   favourites,
   onToggleFavourite,
   defaultOpen = true,
 }: {
   title: string;
+  description?: string;
   reports: ReportDef[];
   favourites: Set<string>;
   onToggleFavourite: (id: string) => void;
@@ -80,40 +85,47 @@ function CategoryBlock({
   const right = reports.slice(mid);
 
   return (
-    <section className="rounded-[2px] border border-black/[0.06] bg-white">
+    <PanelCard>
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium"
+        className="flex w-full items-start justify-between gap-4 border-b border-neutral-50 p-6 text-left"
         onClick={() => setOpen((v) => !v)}
       >
-        {open ? <CaretDown className="size-4" /> : <CaretRight className="size-4" />}
-        {title}
+        <div className="min-w-0">
+          <h3 className="flex items-center gap-2 text-lg font-medium text-black">
+            {open ? <CaretDown className="size-4 shrink-0" /> : <CaretRight className="size-4 shrink-0" />}
+            {title}
+          </h3>
+          {description ? <p className="mt-1 text-sm text-black/70">{description}</p> : null}
+        </div>
       </button>
       {open ? (
-        <div className="grid gap-x-8 border-t border-black/[0.06] px-4 pb-2 sm:grid-cols-2">
-          <div>
-            {left.map((r) => (
-              <ReportRow
-                key={r.id}
-                report={r}
-                favourite={favourites.has(r.id)}
-                onToggleFavourite={() => onToggleFavourite(r.id)}
-              />
-            ))}
+        <PanelCardContent className="pt-2">
+          <div className="grid gap-x-8 sm:grid-cols-2">
+            <div>
+              {left.map((r) => (
+                <ReportRow
+                  key={r.id}
+                  report={r}
+                  favourite={favourites.has(r.id)}
+                  onToggleFavourite={() => onToggleFavourite(r.id)}
+                />
+              ))}
+            </div>
+            <div>
+              {right.map((r) => (
+                <ReportRow
+                  key={r.id}
+                  report={r}
+                  favourite={favourites.has(r.id)}
+                  onToggleFavourite={() => onToggleFavourite(r.id)}
+                />
+              ))}
+            </div>
           </div>
-          <div>
-            {right.map((r) => (
-              <ReportRow
-                key={r.id}
-                report={r}
-                favourite={favourites.has(r.id)}
-                onToggleFavourite={() => onToggleFavourite(r.id)}
-              />
-            ))}
-          </div>
-        </div>
+        </PanelCardContent>
       ) : null}
-    </section>
+    </PanelCard>
   );
 }
 
@@ -169,50 +181,65 @@ function ReportsHub() {
       <PageHeader
         title="Reports"
         description="Financial and operational reports. Scoped to your branch unless you can view the whole organization."
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              Scope
-              <select
-                className="h-10 rounded-[2px] border border-input bg-background px-2 text-sm text-foreground"
-                value={canOrgWide ? scope : 'branch'}
-                disabled={!canOrgWide}
-                onChange={(e) => setScope(e.target.value as ReportScopeMode)}
-              >
-                <option value="branch">
-                  Branch{activeLocation?.name ? `: ${activeLocation.name}` : ''}
-                </option>
-                <option value="organization">Organization-wide</option>
-              </select>
-            </label>
-            {!canOrgWide ? (
-              <span className="text-xs text-muted-foreground">Org-wide locked (needs permission)</span>
-            ) : null}
-          </div>
-        }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Type report name here"
-          className="h-12 w-full max-w-md rounded-[2px] border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-ring/30"
+      <PanelCard className="mb-4">
+        <PanelCardHeader
+          title="Find reports"
+          description="Search the catalog or switch branch vs organization scope."
+          action={
+            <span
+              className={cn(
+                'rounded-[2px] px-2 py-1 text-xs',
+                scope === 'organization' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {scope === 'organization' ? 'Organization' : 'Branch'} data
+            </span>
+          }
         />
-        <span
-          className={cn(
-            'rounded-[2px] px-2 py-1 text-xs',
-            scope === 'organization' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
-          )}
-        >
-          {scope === 'organization' ? 'Organization' : 'Branch'} data
-        </span>
-      </div>
+        <PanelCardContent className="flex flex-wrap items-end gap-3 pt-0">
+          <div className="min-w-[220px] flex-1 max-w-md">
+            <label className="mb-1 block text-sm font-medium text-foreground">Search</label>
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Type report name here"
+            />
+          </div>
+          <div className="w-full max-w-xs">
+            <label className="mb-1 block text-sm font-medium text-foreground">Scope</label>
+            <select
+              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-zinc-50 px-3 text-sm text-foreground outline-none focus-visible:border-primary"
+              value={canOrgWide ? scope : 'branch'}
+              disabled={!canOrgWide}
+              onChange={(e) => setScope(e.target.value as ReportScopeMode)}
+            >
+              <option value="branch">
+                Branch{activeLocation?.name ? `: ${activeLocation.name}` : ''}
+              </option>
+              <option value="organization">Organization-wide</option>
+            </select>
+          </div>
+          {!canOrgWide ? (
+            <p className="w-full text-xs text-muted-foreground">Org-wide locked (needs permission)</p>
+          ) : null}
+          <div className="flex gap-2">
+            <Button asChild variant={showOnlyFavourites ? 'outline' : 'default'} size="sm">
+              <Link href="/reports">All reports</Link>
+            </Button>
+            <Button asChild variant={showOnlyFavourites ? 'default' : 'outline'} size="sm">
+              <Link href="/reports?tab=favourites">Favourites</Link>
+            </Button>
+          </div>
+        </PanelCardContent>
+      </PanelCard>
 
       <div className="space-y-4">
         {!showOnlyFavourites || favouriteReports.length > 0 ? (
           <CategoryBlock
             title="Favourites"
+            description="Reports you star for quick access"
             reports={
               showOnlyFavourites
                 ? favouriteReports
@@ -228,6 +255,7 @@ function ReportsHub() {
               <CategoryBlock
                 key={cat.id}
                 title={cat.title}
+                description={`${cat.reports.length} report${cat.reports.length === 1 ? '' : 's'}`}
                 reports={cat.reports}
                 favourites={favSet}
                 onToggleFavourite={toggleFavourite}

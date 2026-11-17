@@ -2,9 +2,10 @@
 import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
+import Search from '@potta/components/search';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatAmount, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState, StatCard } from '../../../_shared/states';
+import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
 import { useAgingReport } from '../hooks';
 import { AgingRow, SubLedgerKind } from '../utils/api';
 import SubLedgerSheet from './SubLedgerSheet';
@@ -23,9 +24,19 @@ const Amount = ({ value, strong }: { value: unknown; strong?: boolean }) => (
 
 const AgingTab = ({ type }: { type: SubLedgerKind }) => {
   const [asOfDate, setAsOfDate] = useState(today());
+  const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<AgingRow | null>(null);
   const { data, isLoading, error, refetch } = useAgingReport(type, asOfDate);
-  const rows = useMemo(() => data ?? [], [data]);
+  const rows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const all = data ?? [];
+    if (!q) return all;
+    return all.filter((r) =>
+      [r.referenceName, r.referenceId]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q)),
+    );
+  }, [data, search]);
 
   const totals = useMemo(() => {
     const t = { current: 0, days30: 0, days60: 0, days90: 0, over90: 0, balance: 0 };
@@ -60,13 +71,22 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <DatePicker
-        id="agingAsOf"
-        label="As of"
-        className="w-52"
-        value={asOfDate}
-        onChange={(value) => setAsOfDate(value || today())}
-      />
+      <ListToolbar>
+        <DatePicker
+          id="agingAsOf"
+          label="As of"
+          className="w-52"
+          value={asOfDate}
+          onChange={(value) => setAsOfDate(value || today())}
+        />
+        <Search
+          placeholder={`Search ${partyLabel.toLowerCase()}…`}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
+          className="w-full max-w-sm"
+        />
+      </ListToolbar>
 
       {isLoading ? (
         <LoadingState />

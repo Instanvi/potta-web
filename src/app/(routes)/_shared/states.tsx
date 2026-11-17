@@ -69,9 +69,9 @@ export const EmptyState = ({
   description?: ReactNode;
   action?: ReactNode;
 }) => (
-  <div className="dashboard-panel flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-    <p className="text-base font-medium text-foreground">{title}</p>
-    {description && <p className="text-sm text-muted-foreground">{description}</p>}
+  <div className="dashboard-panel flex flex-col items-center justify-center gap-2 px-6 py-16 text-center shadow-card">
+    <p className="text-base font-medium text-black">{title}</p>
+    {description && <p className="text-sm text-black/70">{description}</p>}
     {action && <div className="mt-2">{action}</div>}
   </div>
 );

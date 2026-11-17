@@ -69,11 +69,11 @@ const Input: React.FC<Props> = ({
         value={value}
         {...inputProps}
         placeholder={placeholder}
-        className={`w-full ${inputClass} ${height ? 'h-9 py-1.5' : 'h-12 py-2.5'} ${
+        className={`w-full ${inputClass} ${height ? 'h-9 py-1.5' : 'h-10 py-1.5'} ${
           errors
-            ? 'border-destructive focus:ring-destructive/30'
-            : 'border-input focus:border-primary focus:ring-ring/30'
-        } mt-2 rounded-[2px] border bg-background px-3 text-sm outline-none placeholder:text-muted-foreground/70 focus:outline-none focus:ring-[3px] disabled:cursor-not-allowed disabled:opacity-60`}
+            ? 'border-destructive'
+            : 'border-black/15 focus-visible:border-primary'
+        } mt-2 rounded-t-[2px] rounded-b-none border-0 border-b bg-zinc-50 px-3 text-sm font-normal leading-none text-foreground outline-none shadow-none placeholder:text-black/35 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50`}
       />
       {errors ? (
         <small className="col-span-2 text-red-500">

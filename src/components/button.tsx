@@ -15,9 +15,9 @@ type Props = {
   className?: string;
 };
 
-/* Variants follow instanvi-payroll-expense-fe components/ui/button.tsx. */
+/* Talk-aligned button variants (same corner radius + solid primary). */
 const themes = {
-  default: 'bg-primary hover:bg-brand-hover',
+  default: 'bg-primary text-primary-foreground hover:bg-primary/90',
   lightBlue: 'bg-secondary !text-secondary-foreground hover:bg-secondary/85',
   light: 'bg-primary-500 hover:bg-primary',
   red: 'bg-destructive hover:bg-destructive/90',
@@ -25,7 +25,7 @@ const themes = {
   gray: 'bg-muted !text-foreground hover:bg-black/[0.08]',
   dark: 'bg-gray-900 hover:bg-gray-800',
   danger: 'bg-destructive hover:bg-destructive/90',
-  outline: 'border border-input !text-foreground bg-background hover:bg-accent !py-[11px]',
+  outline: 'border border-input !text-foreground bg-background hover:bg-accent',
 };
 
 const Button = ({
@@ -46,14 +46,14 @@ const Button = ({
     <button
       type={type}
       disabled={disabled}
-      className={`whitespace-nowrap rounded-[2px] text-sm font-medium transition-colors ${
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[2px] text-sm font-medium shadow-none transition-colors ${
         color ? 'text-black' : 'text-white'
-      } items-center text-center gap-2 ${
-        disabled ? 'cursor-not-allowed' : 'cursor-pointer'
-      } ${width ? 'w-full text-center' : 'flex text-center justify-end'} ${
-        theme ? themes[theme] : themes.default
-      } ${rounded ? '!rounded-full' : ''}  ${height ? 'py-1.5' : 'py-3'}  px-6 ${
-        isLoading || disabled ? 'opacity-65' : 'opacity-100'
+      } ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${
+        width ? 'w-full' : ''
+      } ${theme ? themes[theme] : themes.default} ${
+        rounded ? '!rounded-full' : ''
+      } ${height ? 'h-8 px-3 text-xs' : 'h-9 px-4'} ${
+        isLoading || disabled ? 'opacity-50' : 'opacity-100'
       } ${className}`}
       onClick={onClick}
     >
