@@ -64,11 +64,35 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
       anyOf: [
         { resource: 'GeneralLedger', action: ['view-balance-sheet', 'income-statement'] },
         { resource: 'Ledger', action: ['view-balance-sheet', 'view-income-statement'] },
+        { resource: 'Report', action: ['view', 'view-organization'] },
+      ],
+    },
+  },
+  {
+    path: '/reports',
+    permission: {
+      anyOf: [
+        { resource: 'GeneralLedger', action: ['view-balance-sheet', 'income-statement', 'view-all'] },
+        { resource: 'Ledger', action: ['view-balance-sheet', 'view-income-statement', 'view-entries', 'view-organization'] },
+        { resource: 'Report', action: ['view', 'view-organization'] },
       ],
     },
   },
   { path: '/accounting/cashbook', permission: { resource: 'Cashbook', action: 'view' } },
+  { path: '/accounting/bank-transactions', permission: { resource: 'BankAccounts', action: ['view', 'view-all'] } },
+  {
+    path: '/accounting/integration-transactions',
+    permission: {
+      anyOf: [
+        { resource: 'JournalEntries', action: ['view', 'view-all', 'create'] },
+        { resource: 'Transactions', action: ['view', 'view-all'] },
+      ],
+    },
+  },
+  { path: '/accounting/reconcile', permission: { resource: 'BankAccounts', action: ['view', 'view-all'] } },
+  { path: '/accounting/rules', permission: { resource: 'Accounts', action: ['view', 'view-all'] } },
   { path: '/accounting/taxes', permission: { resource: 'Tax', action: ['view', 'view-all'] } },
+  { path: '/tax', permission: { resource: 'Tax', action: ['view', 'view-all'] } },
   { path: '/account_receivables', permission: { resource: 'Invoice', action: 'view-all' } },
   { path: '/account_receivables/invoice', permission: { resource: 'Invoice', action: ['view', 'view-all'] } },
   { path: '/account_receivables/recurring', permission: { resource: 'Invoice', action: ['view', 'view-all'] } },

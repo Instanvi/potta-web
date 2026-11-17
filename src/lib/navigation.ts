@@ -6,27 +6,36 @@ import {
   Bank,
   BookOpen,
   Books,
+  Buildings,
   ChartLineUp,
   ChartPieSlice,
+  CheckCircle,
   ClockCounterClockwise,
   Coins,
   FileText,
+  Funnel,
   Gift,
   GearSix,
   House,
   Invoice,
+  ListBullets,
+  Lock,
   Notebook,
   Package,
   Percent,
+  Plugs,
   Receipt,
   Repeat,
+  Scales,
   ShoppingCart,
   Storefront,
   SquaresFour,
   Tray,
   Tag,
   Users,
+  UserCircle,
   SlidersHorizontal,
+  Wallet,
 } from '@phosphor-icons/react';
 
 export interface NavItem {
@@ -52,8 +61,119 @@ export interface NavModule {
   items: NavItem[];
 }
 
-/** Potta POS + Books navigation. Items are filtered by src/lib/route-permissions.ts. */
+/**
+ * Potta rail — each blue Accounting-services topic is its own main menu module.
+ * Order: Core Ledger → AR → AP → Trade → Tax → Reports → POS → Settings.
+ */
 export const NAV_MODULES: NavModule[] = [
+  {
+    id: 'core-ledger',
+    title: 'Core Ledger',
+    description: 'Chart of accounts, journals, bank lines and period close.',
+    icon: Books,
+    matchPrefixes: ['/accounting', '/treasury'],
+    items: [
+      { title: 'Chart of accounts', href: '/accounting', icon: Books, appIcon: APP_ICONS.budget, exact: true },
+      { title: 'Journal entry', href: '/accounting/journals', icon: Notebook },
+      { title: 'General ledger', href: '/accounting/ledger', icon: BookOpen },
+      { title: 'Cashbook', href: '/accounting/cashbook', icon: Coins, appIcon: APP_ICONS.money },
+      { title: 'Bank accounts', href: '/treasury/bank-accounts', icon: Bank, appIcon: APP_ICONS.piggyBank },
+      { title: 'Bank transactions', href: '/accounting/bank-transactions', icon: ListBullets },
+      { title: 'Integration transactions', href: '/accounting/integration-transactions', icon: Plugs },
+      { title: 'Reconcile', href: '/accounting/reconcile', icon: CheckCircle },
+      { title: 'Rules', href: '/accounting/rules', icon: Funnel },
+      { title: 'Recurring transactions', href: '/accounting/recurring', icon: Repeat },
+      { title: 'Opening balances', href: '/accounting/opening-balances', icon: Scales },
+      { title: 'Period close', href: '/accounting/period-close', icon: Lock },
+      { title: 'Projects', href: '/accounting/projects', icon: Buildings },
+      { title: 'Employees', href: '/accounting/employees', icon: Users },
+      { title: 'My accountant', href: '/accounting/my-accountant', icon: UserCircle },
+    ],
+  },
+  {
+    id: 'ar',
+    title: 'Accounts Receivable',
+    description: 'Invoices, receipts, credit notes and what customers owe.',
+    icon: FileText,
+    matchPrefixes: ['/account_receivables', '/customers'],
+    items: [
+      { title: 'Overview', href: '/account_receivables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
+      { title: 'Sales transactions', href: '/account_receivables/transactions', icon: ListBullets },
+      { title: 'Invoices', href: '/account_receivables/invoice', icon: FileText },
+      { title: 'Recurring', href: '/account_receivables/recurring', icon: Repeat, appIcon: APP_ICONS.clock },
+      { title: 'Sales receipts', href: '/account_receivables/sales_receipts', icon: Receipt },
+      { title: 'Payments received', href: '/account_receivables/payments', icon: Wallet },
+      { title: 'Credit notes / Refunds', href: '/account_receivables/credit', icon: Tray, appIcon: APP_ICONS.reimbursement },
+      { title: 'Estimates', href: '/account_receivables/estimates', icon: FileText },
+      { title: 'Sales orders', href: '/account_receivables/sales-orders', icon: ShoppingCart },
+      { title: 'Vouchers', href: '/account_receivables/vouchers', icon: Gift },
+      { title: 'Customers and leads', href: '/account_receivables/contacts', icon: Users, appIcon: APP_ICONS.people },
+      { title: 'General ledger', href: '/accounting/ledger', icon: BookOpen },
+    ],
+  },
+  {
+    id: 'ap',
+    title: 'Accounts Payable',
+    description: 'Bills, expenses, purchase orders and supplier balances.',
+    icon: Invoice,
+    matchPrefixes: ['/account_payables', '/vendors'],
+    items: [
+      { title: 'Overview', href: '/account_payables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
+      { title: 'Expense transactions', href: '/account_payables/transactions', icon: ListBullets },
+      { title: 'Bills', href: '/account_payables/bills', icon: Invoice, appIcon: APP_ICONS.bills },
+      { title: 'Bill payments', href: '/account_payables/payments', icon: Wallet },
+      { title: 'Supplier credits', href: '/account_payables/credits', icon: Tray },
+      { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart, appIcon: APP_ICONS.shoppingCart },
+      { title: 'Expenses', href: '/account_payables/expenses', icon: Receipt },
+      { title: 'Suppliers', href: '/account_payables/contacts', icon: Users, appIcon: APP_ICONS.people },
+      { title: 'General ledger', href: '/accounting/ledger', icon: BookOpen },
+    ],
+  },
+  {
+    id: 'trade',
+    title: 'Trade',
+    description: 'Products, inventory, purchase orders and item receipts.',
+    icon: Package,
+    matchPrefixes: ['/inventory', '/pos/inventory'],
+    items: [
+      { title: 'Overview', href: '/inventory/overview', icon: ChartPieSlice, appIcon: APP_ICONS.analytics },
+      { title: 'Products and services', href: '/inventory', icon: Package, exact: true },
+      { title: 'Categories', href: '/inventory/categories', icon: Tag },
+      { title: 'Attributes', href: '/inventory/attributes', icon: SquaresFour },
+      { title: 'Units', href: '/inventory/units', icon: Package },
+      { title: 'Modifiers', href: '/inventory/modifiers', icon: Percent },
+      { title: 'Inventory', href: '/inventory/adjustments', icon: SlidersHorizontal },
+      { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart, appIcon: APP_ICONS.shoppingCart },
+      { title: 'Item receipts', href: '/inventory/receipts', icon: Tray },
+      { title: 'Returns', href: '/inventory/returns', icon: ArrowUUpLeft },
+    ],
+  },
+  {
+    id: 'tax',
+    title: 'Tax',
+    description: 'Tax rates, filings and settlements.',
+    icon: Percent,
+    matchPrefixes: ['/accounting/taxes', '/tax'],
+    items: [
+      { title: 'Tax rates and codes', href: '/accounting/taxes', icon: Percent, appIcon: APP_ICONS.taxes, exact: true },
+      { title: 'Filings: prepare', href: '/tax/filings/prepare', icon: FileText },
+      { title: 'Filings: submit and pay', href: '/tax/filings/submit', icon: CheckCircle },
+    ],
+  },
+  {
+    id: 'reports',
+    title: 'Reports',
+    description: 'Financial and operational reports for the branch or organization.',
+    icon: ChartLineUp,
+    matchPrefixes: ['/reports'],
+    items: [
+      { title: 'All reports', href: '/reports', icon: ChartLineUp, appIcon: APP_ICONS.report, exact: true },
+      { title: 'Favourites', href: '/reports?tab=favourites', icon: ChartLineUp },
+      { title: 'Balance Sheet', href: '/reports/balance-sheet', icon: Scales },
+      { title: 'Profit and Loss', href: '/reports/profit-and-loss', icon: ChartLineUp },
+      { title: 'AR ageing', href: '/reports/ar-ageing', icon: FileText },
+    ],
+  },
   {
     id: 'pos',
     title: 'POS',
@@ -66,74 +186,6 @@ export const NAV_MODULES: NavModule[] = [
       { title: 'Contacts', href: '/pos/contacts', icon: Users, appIcon: APP_ICONS.people },
       { title: 'Desktop sync', href: '/pos/sync', icon: ArrowsClockwise },
     ],
-  },
-  {
-    id: 'inventory',
-    title: 'Inventory',
-    description: 'Products, categories, attributes, units, modifiers, stock adjustments and returns.',
-    icon: Package,
-    matchPrefixes: ['/inventory', '/pos/inventory'],
-    items: [
-      { title: 'Products', href: '/inventory', icon: Package, exact: true },
-      { title: 'Categories', href: '/inventory/categories', icon: Tag },
-      { title: 'Attributes', href: '/inventory/attributes', icon: SquaresFour },
-      { title: 'Units', href: '/inventory/units', icon: Package },
-      { title: 'Modifiers', href: '/inventory/modifiers', icon: Percent },
-      { title: 'Stock adjustments', href: '/inventory/adjustments', icon: SlidersHorizontal },
-      { title: 'Returns', href: '/inventory/returns', icon: ArrowUUpLeft },
-    ],
-  },
-  {
-    id: 'books',
-    title: 'Books',
-    description: 'Chart of accounts, journals, ledger, cashbook and financial reports.',
-    icon: Books,
-    matchPrefixes: ['/accounting'],
-    items: [
-      { title: 'Accounts', href: '/accounting', icon: Books, appIcon: APP_ICONS.budget, exact: true },
-      { title: 'Journals', href: '/accounting/journals', icon: Notebook },
-      { title: 'Ledger', href: '/accounting/ledger', icon: BookOpen },
-      { title: 'Reports', href: '/accounting/reports', icon: ChartLineUp, appIcon: APP_ICONS.report },
-      { title: 'Cashbook', href: '/accounting/cashbook', icon: Coins, appIcon: APP_ICONS.money },
-      { title: 'Taxes', href: '/accounting/taxes', icon: Percent, appIcon: APP_ICONS.taxes },
-    ],
-  },
-  {
-    id: 'ar',
-    title: 'Account Receivables',
-    description: 'Invoice customers, issue receipts and credit notes, track what is owed.',
-    icon: FileText,
-    matchPrefixes: ['/account_receivables', '/customers'],
-    items: [
-      { title: 'Dashboard', href: '/account_receivables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
-      { title: 'Invoices', href: '/account_receivables/invoice', icon: FileText },
-      { title: 'Recurring', href: '/account_receivables/recurring', icon: Repeat, appIcon: APP_ICONS.clock },
-      { title: 'Sales receipts', href: '/account_receivables/sales_receipts', icon: Receipt },
-      { title: 'Credit notes', href: '/account_receivables/credit', icon: Tray, appIcon: APP_ICONS.reimbursement },
-      { title: 'Vouchers', href: '/account_receivables/vouchers', icon: Gift },
-      { title: 'Contacts', href: '/account_receivables/contacts', icon: Users, appIcon: APP_ICONS.people },
-    ],
-  },
-  {
-    id: 'ap',
-    title: 'Account Payables',
-    description: 'Record vendor bills and purchase orders, approve and pay them.',
-    icon: Invoice,
-    matchPrefixes: ['/account_payables', '/vendors'],
-    items: [
-      { title: 'Dashboard', href: '/account_payables', icon: ChartPieSlice, appIcon: APP_ICONS.analytics, exact: true },
-      { title: 'Bills', href: '/account_payables/bills', icon: Invoice, appIcon: APP_ICONS.bills },
-      { title: 'Purchase orders', href: '/account_payables/purchase', icon: ShoppingCart, appIcon: APP_ICONS.shoppingCart },
-      { title: 'Contacts', href: '/account_payables/contacts', icon: Users, appIcon: APP_ICONS.people },
-    ],
-  },
-  {
-    id: 'treasury',
-    title: 'Treasury',
-    description: 'Bank accounts and their balances.',
-    icon: Bank,
-    matchPrefixes: ['/treasury'],
-    items: [{ title: 'Bank accounts', href: '/treasury/bank-accounts', icon: Bank, appIcon: APP_ICONS.piggyBank }],
   },
   {
     id: 'settings',
@@ -150,12 +202,19 @@ export const NAV_MODULES: NavModule[] = [
 ];
 
 export function getActiveModule(pathname: string): NavModule | null {
-  return (
-    NAV_MODULES.find((m) => m.matchPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`))) ?? null
-  );
+  let best: { module: NavModule; len: number } | null = null;
+  for (const m of NAV_MODULES) {
+    for (const p of m.matchPrefixes) {
+      if (pathname === p || pathname.startsWith(`${p}/`)) {
+        if (!best || p.length > best.len) best = { module: m, len: p.length };
+      }
+    }
+  }
+  return best?.module ?? null;
 }
 
 export function isNavActive(pathname: string, item: NavItem): boolean {
   if (item.exact) return pathname === item.href;
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const hrefPath = item.href.split('?')[0];
+  return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
 }

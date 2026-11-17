@@ -1,5 +1,5 @@
-import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
-import { ChevronDown, ChevronRight, MoreVertical, Plus, FileDown } from 'lucide-react';
+import React, { useState, useEffect, ChangeEvent, useRef, useCallback } from 'react';
+import { ChevronDown, ChevronRight, MoreVertical, Plus, FileDown, Sprout } from 'lucide-react';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import SliderAccount from './sliderAccount';
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
 import { Can, useCan } from '@/components/auth/can';
+import { toast } from 'sonner';
 
 interface AccountNode {
   uuid: string;
@@ -50,6 +51,64 @@ const TableAccount = () => {
   const [totalBalance, setTotalBalance] = useState<{ [key: string]: number }>(
     {}
   );
+  const [isSeeding, setIsSeeding] = useState(false);
+  const canSeed =
+    canAccess('Accounts', 'seed-accounts') || canAccess('Accounts', 'create');
+
+  const refreshAccounts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await accountsApi.getAll();
+      setAccounts(response);
+      setFilteredAccounts(response);
+
+      const balances: { [key: string]: number } = {};
+      const calculateBalances = (accountList: AccountNode[]) => {
+        accountList.forEach((account) => {
+          if (!balances[account.type]) {
+            balances[account.type] = 0;
+          }
+          balances[account.type] += Number(account.currentBalance) || 0;
+          if (account.children && account.children.length > 0) {
+            calculateBalances(account.children);
+          }
+        });
+      };
+      calculateBalances(response);
+      setTotalBalance(balances);
+
+      const initialExpandedState: Record<string, boolean> = {};
+      response.forEach((account: AccountNode) => {
+        initialExpandedState[account.uuid] = true;
+      });
+      setExpandedRows(initialExpandedState);
+    } catch {
+      setAccounts([]);
+      setFilteredAccounts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const seedLedgerAccounts = async () => {
+    if (isSeeding) return;
+    setIsSeeding(true);
+    try {
+      const result = await accountsApi.seedAccounts();
+      if (result.reason === 'already_seeded') {
+        toast.message('Ledger accounts already seeded for this organization');
+      } else {
+        toast.success('Ledger accounts seeded');
+      }
+      await refreshAccounts();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || 'Could not seed ledger accounts',
+      );
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   const getHierarchyColors = (level: number) => {
     const indicators = ['bg-primary', 'bg-primary-400', 'bg-primary-300', 'bg-primary-200'];
@@ -60,48 +119,8 @@ const TableAccount = () => {
   };
 
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await accountsApi.getAll();
-        setAccounts(response);
-        setFilteredAccounts(response);
-
-        // Calculate total balances by account type
-        const balances: { [key: string]: number } = {};
-
-        const calculateBalances = (accountList: AccountNode[]) => {
-          accountList.forEach((account) => {
-            if (!balances[account.type]) {
-              balances[account.type] = 0;
-            }
-            balances[account.type] += Number(account.currentBalance) || 0;
-
-            if (account.children && account.children.length > 0) {
-              calculateBalances(account.children);
-            }
-          });
-        };
-
-        calculateBalances(response);
-        setTotalBalance(balances);
-
-        // Initialize expanded state for top-level accounts
-        const initialExpandedState: Record<string, boolean> = {};
-        response.forEach((account: AccountNode) => {
-          initialExpandedState[account.uuid] = true;
-        });
-        setExpandedRows(initialExpandedState);
-      } catch {
-        setAccounts([]);
-        setFilteredAccounts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
+    void refreshAccounts();
+  }, [refreshAccounts]);
 
   // Calculate available height for the table
   useEffect(() => {
@@ -437,6 +456,16 @@ const TableAccount = () => {
             onClick={exportAccounts}
             disabled={filteredAccounts.length === 0}
           />
+          {canSeed && (
+            <Button
+              type="button"
+              text={isSeeding ? 'Seeding…' : 'Seed ledger accounts'}
+              icon={<Sprout className="h-4 w-4" />}
+              theme="outline"
+              onClick={() => void seedLedgerAccounts()}
+              disabled={isSeeding}
+            />
+          )}
           <Can resource="Accounts" action="create">
             <Button
               type="button"
@@ -492,8 +521,24 @@ const TableAccount = () => {
                 </tr>
               ) : filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="h-32 text-center text-sm text-muted-foreground">
-                    {searchTerm ? 'No accounts match your search.' : 'No accounts yet.'}
+                  <td colSpan={5} className="h-40 px-4 text-center text-sm text-muted-foreground">
+                    {searchTerm ? (
+                      'No accounts match your search.'
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-3 py-4">
+                        <p>No accounts yet. Seed the standard OHADA chart to get started.</p>
+                        {canSeed && (
+                          <Button
+                            type="button"
+                            text={isSeeding ? 'Seeding…' : 'Seed ledger accounts'}
+                            icon={<Sprout className="h-4 w-4" />}
+                            theme="default"
+                            onClick={() => void seedLedgerAccounts()}
+                            disabled={isSeeding}
+                          />
+                        )}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -510,11 +555,7 @@ const TableAccount = () => {
         account={selectedAccount}
         onAccountSaved={() => {
           setCreateDrawer(false);
-          // Refresh accounts after saving
-          accountsApi.getAll().then((response) => {
-            setAccounts(response);
-            setFilteredAccounts(response);
-          });
+          void refreshAccounts();
         }}
       />
     </div>

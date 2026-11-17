@@ -119,4 +119,14 @@ export const accountsApi = {
     );
     return result.data;
   },
+
+  /** Idempotent OHADA chart seed for the current org. */
+  seedAccounts: async (): Promise<{
+    ok: boolean;
+    seeded: boolean;
+    reason: 'already_seeded' | 'seeded_now';
+  }> => {
+    const result = await axios.post('/accounting/seed-accounts');
+    return result.data;
+  },
 };
