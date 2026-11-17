@@ -9,6 +9,7 @@ import { productApi } from '../../../../_utils/api';
 import { useInventory } from '../../../../_utils/context';
 import useGetAllProducts from '../../../../_hooks/useGetAllProducts';
 import useRestockProduct from '../../../../_hooks/useRestockProduct';
+import { FIELD_INPUT, FIELD_SELECT } from '@/lib/field-styles';
 import { FieldHint } from '../../../fields/ItemFormFields';
 
 interface RestockModalProps {
@@ -16,8 +17,8 @@ interface RestockModalProps {
   setOpen: (open: boolean) => void;
 }
 
-const inputClass =
-  'mt-2 h-[42px] w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-ring/30';
+const inputClass = `mt-2 ${FIELD_INPUT}`;
+const selectClass = `mt-2 ${FIELD_SELECT}`;
 
 /** Records stock received: quantity plus the unit cost paid, which updates the weighted average cost. */
 const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
@@ -95,7 +96,7 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
               <div>
                 <label className="text-sm font-medium">Variation</label>
                 <select
-                  className={inputClass}
+                  className={selectClass}
                   value={variationId}
                   onChange={(e) => setVariationId(e.target.value)}
                 >

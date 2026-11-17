@@ -15,11 +15,11 @@ export default function ModifiersPage() {
         <CatalogList
           queryKey="product-modifiers"
           loader={loadModifiers}
-          empty="No modifiers yet. Add one above, or create them on a product."
+          empty="No modifiers yet. Add one with the button, or create them on a product."
           render={(row) => (
-            <div key={row.uuid} className="dashboard-panel p-4">
-              <p className="font-medium">{row.name}</p>
-              <p className="text-sm text-muted-foreground">
+            <div key={row.uuid} className="rounded-[2px] border-b border-neutral-50 px-2 py-3 last:border-b-0">
+              <p className="font-medium text-black">{row.name}</p>
+              <p className="text-sm text-black/70">
                 {row.price}
                 {row.product?.name ? ` · ${row.product.name}` : ' · all products'}
                 {row.payModifierId ? ' · from Pay' : ''}

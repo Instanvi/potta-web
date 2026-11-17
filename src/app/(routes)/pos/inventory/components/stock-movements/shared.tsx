@@ -5,13 +5,13 @@ import SearchableSelect from '@potta/components/searchableSelect';
 import { StatusBadge } from '../../../../_shared/states';
 import useGetAllProducts from '../../_hooks/useGetAllProducts';
 import type { Product } from '../../_utils/types';
+import { FIELD_INPUT } from '@/lib/field-styles';
 import { FieldHint } from '../fields/ItemFormFields';
 
-export const inputClass =
-  'mt-2 h-[42px] w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-ring/30';
+export const inputClass = `mt-2 ${FIELD_INPUT}`;
 
 export const panelClass =
-  'space-y-4 rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+  'space-y-4 rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-card';
 
 const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
   PENDING: 'warning',
@@ -58,7 +58,7 @@ export const MovementFilters = ({
 }) => (
   <>
     <input
-      className="h-[38px] w-full max-w-xs rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary"
+      className={`${FIELD_INPUT} max-w-xs`}
       placeholder="Search item name or SKU"
       value={search}
       onChange={(e) => onSearch(e.target.value)}

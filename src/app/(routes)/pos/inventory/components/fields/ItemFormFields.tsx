@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Plus } from '@phosphor-icons/react';
 import Select from '@potta/components/select';
 import { useCreateTax, useTaxes } from '@potta/app/(routes)/accounting/taxes/hooks';
+import { FIELD_INPUT, FIELD_SELECT } from '@/lib/field-styles';
 import useGetAllProductCategories from '../../_hooks/useGetAllProductCategories';
 import useCreateProductCategory from '../../_hooks/useCreateProductCategory';
 
@@ -75,8 +76,8 @@ const InlineCreate = ({
   </div>
 );
 
-const inlineInput =
-  'h-12 w-full rounded-[2px] border border-input bg-white px-3 text-sm outline-none focus:border-primary focus:ring-[3px] focus:ring-ring/30';
+const inlineInput = FIELD_INPUT;
+const inlineSelect = FIELD_SELECT;
 
 const AddLink = ({ onClick, children }: { onClick: () => void; children: ReactNode }) => (
   <button type="button" onClick={onClick} className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
@@ -207,7 +208,7 @@ export const TaxField = ({
           <input className={inlineInput} placeholder="Name, e.g. VAT" value={name} onChange={(e) => setName(e.target.value)} />
           <div className="flex gap-2">
             <select
-              className={`${inlineInput} w-40`}
+              className={`${inlineSelect} w-40`}
               value={type}
               onChange={(e) => setType(e.target.value as 'PERCENTAGE' | 'FIXED')}
             >

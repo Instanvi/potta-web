@@ -15,11 +15,11 @@ export default function AttributesPage() {
         <CatalogList
           queryKey="product-labels"
           loader={loadLabels}
-          empty="No attributes yet. Add one above, or create them on a product."
+          empty="No attributes yet. Add one with the button, or create them on a product."
           render={(row) => (
-            <div key={row.uuid} className="dashboard-panel p-4">
-              <p className="font-medium">{row.name}</p>
-              <p className="text-sm text-muted-foreground">
+            <div key={row.uuid} className="rounded-[2px] border-b border-neutral-50 px-2 py-3 last:border-b-0">
+              <p className="font-medium text-black">{row.name}</p>
+              <p className="text-sm text-black/70">
                 {(row.options ?? []).map((o: any) => o.value).join(', ') || 'No options'}
                 {row.payLabelId ? ' · from Pay' : ''}
               </p>
