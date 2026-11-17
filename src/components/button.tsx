@@ -46,13 +46,13 @@ const Button = ({
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[2px] text-sm font-medium shadow-none transition-colors ${
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[2px] text-base font-medium shadow-none transition-colors ${
         color ? 'text-black' : 'text-white'
       } ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${
         width ? 'w-full' : ''
       } ${theme ? themes[theme] : themes.default} ${
         rounded ? '!rounded-full' : ''
-      } ${height ? 'h-8 px-3 text-xs' : 'h-9 px-4'} ${
+      } ${height ? 'h-9 px-3 text-sm' : 'h-10 px-4'} ${
         isLoading || disabled ? 'opacity-50' : 'opacity-100'
       } ${className}`}
       onClick={onClick}

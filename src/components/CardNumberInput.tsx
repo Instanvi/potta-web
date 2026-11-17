@@ -33,7 +33,7 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <span className="mb-3 text-gray-900">
+        <span className="mb-3 text-base font-medium text-foreground">
           {label}
           {required && <span className=" text-red-500">*</span>}
         </span>
@@ -46,7 +46,7 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
         maxLength={19}
         autoComplete="cc-number"
         placeholder={placeholder}
-        className="w-full tracking-widest py-2.5 px-4 border border-gray-200 rounded-[2px] outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        className="mt-2 h-10 w-full tracking-widest rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-zinc-50 px-3 text-sm font-normal leading-none text-foreground outline-none shadow-none placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0"
         inputMode="numeric"
         pattern="[0-9 ]*"
       />

@@ -54,7 +54,7 @@ const Input: React.FC<Props> = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <span className={`mb-3 text-sm font-medium text-foreground ${labelClass}`}>
+        <span className={`mb-3 text-base font-medium text-foreground ${labelClass}`}>
           {label}
           {required && <span className=" text-red-500">*</span>}
         </span>

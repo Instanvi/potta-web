@@ -43,7 +43,9 @@ const RailButton = ({
       onClick={() => onSelect(module)}
       className={cn(
         'flex size-10 items-center justify-center rounded-md transition-colors',
-        active ? 'bg-white/20 text-white' : 'text-white/75 hover:bg-white/15 hover:text-white'
+        active
+          ? 'bg-primary text-primary-foreground'
+          : 'text-foreground/70 hover:bg-brand-subtle hover:text-primary'
       )}
     >
       <ModuleIcon size={20} weight={active ? 'fill' : 'regular'} />
@@ -66,7 +68,7 @@ const UserMenu = () => {
         <button
           type="button"
           aria-label="Account"
-          className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-white/20 text-xs font-medium text-white hover:bg-white/30"
+          className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-medium text-white"
         >
           {initials || <User size={16} />}
         </button>
@@ -111,10 +113,10 @@ const Sidebars = () => {
   const bottom = modules.filter((m) => m.placement === 'bottom');
 
   return (
-    <aside className="flex h-screen border-r border-white/15 bg-primary font-sans text-white">
-      <div className="flex w-14 shrink-0 flex-col items-center gap-2 border-r border-white/15 py-3">
+    <aside className="flex h-screen border-r border-black/[0.08] bg-[#f9f9f9]">
+      <div className="flex w-14 shrink-0 flex-col items-center gap-2 py-3">
         <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-md">
-          <img src="/icons/Potta.svg" alt="Potta" className="size-8 object-contain brightness-0 invert" />
+          <img src="/icons/Potta.svg" alt="Potta" className="size-8 object-contain" />
         </Link>
         <nav aria-label="Modules" className="flex flex-1 flex-col items-center gap-2">
           {top.map((m) => (
@@ -130,7 +132,7 @@ const Sidebars = () => {
             title={collapsed ? 'Show menu' : 'Hide menu'}
             aria-label={collapsed ? 'Show menu' : 'Hide menu'}
             onClick={() => context?.setToggle(!collapsed)}
-            className="flex size-10 items-center justify-center rounded-md text-white/75 hover:bg-white/15 hover:text-white"
+            className="flex size-10 items-center justify-center rounded-md text-foreground/60 hover:bg-brand-subtle hover:text-primary"
           >
             {collapsed ? <CaretDoubleRight size={18} /> : <CaretDoubleLeft size={18} />}
           </button>
@@ -140,12 +142,12 @@ const Sidebars = () => {
 
       {!collapsed && active && (
         <div
-          className="flex min-w-0 flex-col"
+          className="flex min-w-0 flex-col border-l border-black/[0.06]"
           style={{ width: SIDEBAR_PANEL_WIDTH }}
         >
-          <div className="shrink-0 border-b border-white/15 px-3 py-3">
-            <p className="truncate text-sm font-semibold text-white">{active.title}</p>
-            <p className="truncate text-[11px] text-white/70" title={active.description}>
+          <div className="shrink-0 border-b border-black/[0.06] px-3 py-3">
+            <p className="truncate text-sm font-semibold text-foreground">{active.title}</p>
+            <p className="truncate text-[11px] text-muted-foreground" title={active.description}>
               {active.description}
             </p>
           </div>
@@ -160,8 +162,8 @@ const Sidebars = () => {
                   className={cn(
                     'flex h-10 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors',
                     on
-                      ? 'bg-white/20 font-medium text-white'
-                      : 'text-white/90 hover:bg-white/15 hover:text-white'
+                      ? 'bg-primary font-medium text-primary-foreground'
+                      : 'text-foreground hover:bg-brand-subtle hover:text-primary'
                   )}
                 >
                   {item.appIcon ? (

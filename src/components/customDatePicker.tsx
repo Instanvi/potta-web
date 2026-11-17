@@ -85,7 +85,7 @@ export function MonthYearInput({
   return (
     <div className={className}>
       {label && (
-        <span className="mb-2 block text-sm font-medium text-foreground">
+        <span className="mb-3 block text-base font-medium text-foreground">
           {label}
           {required && <span className="text-destructive"> *</span>}
         </span>

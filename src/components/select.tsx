@@ -59,29 +59,29 @@ const Select: React.FC<SelectProps> = ({
     <>
       {label && (
         <div
-          className={`mb-[4px] text-sm font-medium text-foreground ${labelClass}`}
+          className={`mb-3 text-base font-medium text-foreground ${labelClass}`}
         >
           {label}
           {required && <span className=" text-red-500">*</span>}
         </div>
       )}
       <div
-        className={`relative inline-block rounded-[2px] ${
-          border ? '' : 'border border-input'
-        } w-full md:w-full ${SelectClass} ${error ? 'border-destructive' : ''}`}
+        className={`relative inline-block w-full md:w-full ${SelectClass} ${
+          border
+            ? ''
+            : error
+              ? 'border-0 border-b border-destructive'
+              : 'border-0 border-b border-black/15'
+        } rounded-t-[2px] rounded-b-none bg-zinc-50`}
       >
         <div
           onClick={toggleDropdown}
           tabIndex={isDisabled ? -1 : 0} // -1 removes from tab order when disabled
-          className={`${bg} relative ${
+          className={`${bg || 'bg-transparent'} relative ${
             isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-          } flex h-12 items-center px-3 py-2.5 pr-8 ${
-            error
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500 focus:outline-none focus:ring-2'
-              : !outline && !isDisabled
-              ? 'focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-ring/30'
-              : ''
-          } w-full ${error ? 'border-2' : ''}`}
+          } flex h-10 items-center px-3 py-2 pr-8 text-sm leading-none outline-none focus-visible:border-primary ${
+            outline || isDisabled ? '' : 'focus-visible:ring-0'
+          } w-full`}
           aria-disabled={isDisabled}
         >
           {(() => {
