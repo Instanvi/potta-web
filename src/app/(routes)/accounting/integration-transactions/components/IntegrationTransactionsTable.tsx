@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Check, X } from 'lucide-react';
+import { ArrowsClockwise } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { DataTable } from '@potta/components/ui/data-table';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -13,6 +14,7 @@ import { useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDateTime } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import { cn } from '@/lib/utils';
 import {
   useAcceptIntegrationTransaction,
   useExcludeIntegrationTransaction,
@@ -68,15 +70,11 @@ const IntegrationTransactionsTable = () => {
     search: search.trim() || undefined,
   };
 
-  const { data, isLoading, error, refetch } = useIntegrationTransactions(filter);
+  const { data, isLoading, isFetching, error, refetch } = useIntegrationTransactions(filter);
   const acceptMutation = useAcceptIntegrationTransaction();
   const excludeMutation = useExcludeIntegrationTransaction();
 
   const rows = data?.data ?? [];
-  const pendingCount = useMemo(
-    () => rows.filter((r) => r.status === 'new' || r.status === 'reviewed').length,
-    [rows]
-  );
 
   const columns: ColumnDef<IntegrationTransaction>[] = [
     {
@@ -217,20 +215,20 @@ const IntegrationTransactionsTable = () => {
           />
         </div>
         <div className="ml-auto flex items-end">
-          <Button
-            text="Refresh"
+          <button
             type="button"
-            theme="outline"
-            color
-            onClick={() => refetch()}
-          />
+            aria-label="Refresh"
+            disabled={isFetching}
+            onClick={() => void refetch()}
+            className="inline-flex size-10 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:opacity-50"
+          >
+            <ArrowsClockwise
+              className={cn('size-4', isFetching && 'animate-spin')}
+              weight="bold"
+            />
+          </button>
         </div>
       </ListToolbar>
-
-      <p className="text-sm text-muted-foreground">
-        {pendingCount} actionable on this page. Accept posts a journal; original amount/direction stay
-        unchanged.
-      </p>
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
