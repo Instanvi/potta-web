@@ -1,16 +1,12 @@
 'use client';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { PageContainer } from '../../_shared/states';
 import { AttributeCreateForm, CatalogList, loadLabels } from '../catalog-lists';
 
 export default function AttributesPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Attributes"
-          description="Variation attributes such as Size and Color. Add them here or when you create an item."
-        />
         <AttributeCreateForm />
         <CatalogList
           queryKey="product-labels"

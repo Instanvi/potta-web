@@ -103,24 +103,34 @@ export const ErrorState = ({
   );
 };
 
-/** Page title row; the top bar already names the page, so the description carries the context. */
+/**
+ * Optional actions row only. Prefer omitting title/description — the sidebar
+ * and top bar already name the page.
+ */
 export const PageHeader = ({
   title,
   description,
   actions,
 }: {
-  title: string;
+  title?: string;
   description?: ReactNode;
   actions?: ReactNode;
-}) => (
-  <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h2 className="text-lg font-medium text-foreground">{title}</h2>
-      {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
+}) => {
+  if (!title && !description && !actions) return null;
+  return (
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      {(title || description) && (
+        <div>
+          {title ? <h2 className="text-lg font-medium text-foreground">{title}</h2> : null}
+          {description ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+      )}
+      {actions ? <div className="flex items-center gap-3">{actions}</div> : null}
     </div>
-    {actions && <div className="flex items-center gap-3">{actions}</div>}
-  </div>
-);
+  );
+};
 
 /** Segmented control (payroll segmented-control). */
 export const Tabs = <T extends string>({

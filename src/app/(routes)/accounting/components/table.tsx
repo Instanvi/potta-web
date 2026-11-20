@@ -97,14 +97,14 @@ const TableAccount = () => {
     try {
       const result = await accountsApi.seedAccounts();
       if (result.reason === 'already_seeded') {
-        toast.message('Ledger accounts already seeded for this organization');
+        toast.message('Accounts already set up for this organization');
       } else {
-        toast.success('Ledger accounts seeded');
+        toast.success('Accounts set up');
       }
       await refreshAccounts();
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.message || 'Could not seed ledger accounts',
+        error?.response?.data?.message || 'Could not set up accounts',
       );
     } finally {
       setIsSeeding(false);
@@ -473,7 +473,7 @@ const TableAccount = () => {
           {canSeed && (
             <Button
               type="button"
-              text={isSeeding ? 'Seeding…' : 'Seed ledger accounts'}
+              text={isSeeding ? 'Setting up…' : 'Setup account'}
               icon={<Sprout className="h-4 w-4" />}
               theme="outline"
               onClick={() => void seedLedgerAccounts()}
@@ -540,11 +540,11 @@ const TableAccount = () => {
                       'No accounts match your search.'
                     ) : (
                       <div className="flex flex-col items-center justify-center gap-3 py-4">
-                        <p>No accounts yet. Seed the standard OHADA chart to get started.</p>
+                        <p>No accounts yet. Setup account to load the standard OHADA chart.</p>
                         {canSeed && (
                           <Button
                             type="button"
-                            text={isSeeding ? 'Seeding…' : 'Seed ledger accounts'}
+                            text={isSeeding ? 'Setting up…' : 'Setup account'}
                             icon={<Sprout className="h-4 w-4" />}
                             theme="default"
                             onClick={() => void seedLedgerAccounts()}

@@ -2,41 +2,44 @@
 import { useState } from 'react';
 import CustomerContent from './CustomerContent';
 import VendorContent from './VendorContent';
-import { Tabs } from '@potta/app/(routes)/_shared/states';
+import Select from '@potta/components/select';
 
-export type ContactTypeFilter = 'all' | 'customers' | 'vendors';
+export type ContactTypeFilter = 'customers' | 'vendors';
 
-const TABS: { id: ContactTypeFilter; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'customers', label: 'Customers' },
-  { id: 'vendors', label: 'Vendors' },
+const TYPE_OPTIONS = [
+  { value: 'customers', label: 'Customers' },
+  { value: 'vendors', label: 'Vendors' },
 ];
 
 export function readContactType(value?: string | null): ContactTypeFilter {
-  if (value === 'customers' || value === 'customer') return 'customers';
   if (value === 'vendors' || value === 'vendor') return 'vendors';
-  return 'all';
+  return 'customers';
 }
 
-/** Customers and vendors on one page, filtered by type. */
-const ContactsContent = ({ initialType = 'all' }: { initialType?: ContactTypeFilter }) => {
-  const [type, setType] = useState<ContactTypeFilter>(initialType);
+/** One contacts table at a time — switch between customers and vendors. */
+const ContactsContent = ({
+  initialType = 'customers',
+}: {
+  initialType?: ContactTypeFilter;
+}) => {
+  const [type, setType] = useState<ContactTypeFilter>(
+    initialType === 'vendors' ? 'vendors' : 'customers',
+  );
 
   return (
     <div>
-      <Tabs tabs={TABS} value={type} onChange={setType} />
-      {type !== 'vendors' && (
-        <section className={type === 'all' ? 'mb-8' : undefined}>
-          {type === 'all' && <h3 className="mb-3 text-sm font-medium text-foreground">Customers</h3>}
-          <CustomerContent />
-        </section>
-      )}
-      {type !== 'customers' && (
-        <section>
-          {type === 'all' && <h3 className="mb-3 text-sm font-medium text-foreground">Vendors</h3>}
-          <VendorContent />
-        </section>
-      )}
+      <div className="mb-4 w-full max-w-[220px]">
+        <Select
+          bg="bg-white"
+          options={TYPE_OPTIONS}
+          selectedValue={type}
+          onChange={(value) =>
+            setType(value === 'vendors' ? 'vendors' : 'customers')
+          }
+          placeholder="Contact type"
+        />
+      </div>
+      {type === 'customers' ? <CustomerContent /> : <VendorContent />}
     </div>
   );
 };
