@@ -2,7 +2,7 @@
 
 import { useContext, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { CaretDoubleLeft, CaretDoubleRight, SignOut, User } from '@phosphor-icons/react';
 import { ContextData } from '@potta/components/providers/DataProvider';
@@ -16,7 +16,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
-import { NAV_MODULES, getActiveModule, isNavActive, type NavModule } from '@/lib/navigation';
+import {
+  NAV_MODULES,
+  getActiveModule,
+  getActiveNavItem,
+  type NavModule,
+} from '@/lib/navigation';
 import { useCanOpenRoute } from '@/lib/use-can-open-route';
 import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 
@@ -90,18 +95,24 @@ const UserMenu = () => {
 
 const Sidebars = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
   const router = useRouter();
   const context = useContext(ContextData);
   const canOpen = useCanOpenRoute();
   const collapsed = !!context?.toggle;
 
-  const modules = NAV_MODULES.map((m) => ({ ...m, items: m.items.filter((i) => canOpen(i.href)) })).filter(
-    (m) => m.items.length > 0
-  );
+  const modules = NAV_MODULES.map((m) => ({
+    ...m,
+    items: m.items.filter((i) => canOpen(i.href.split('?')[0])),
+  })).filter((m) => m.items.length > 0);
   const routeModule = getActiveModule(pathname);
   const [pickedId, setPickedId] = useState<string | null>(null);
   const highlightedId = routeModule?.id ?? pickedId;
   const active = modules.find((m) => m.id === highlightedId) ?? modules[0];
+  const activeItem = active
+    ? getActiveNavItem(pathname, active.items, search)
+    : null;
 
   const select = (module: NavModule) => {
     setPickedId(module.id);
@@ -113,7 +124,7 @@ const Sidebars = () => {
   const bottom = modules.filter((m) => m.placement === 'bottom');
 
   return (
-    <aside className="flex h-screen border-r border-black/[0.08] bg-[#f9f9f9]">
+    <aside className="flex h-screen border-r border-black/[0.08] bg-[#f9f9f9] font-sans">
       <div className="flex w-14 shrink-0 flex-col items-center gap-2 py-3">
         <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-md">
           <img src="/icons/Potta.svg" alt="Potta" className="size-8 object-contain" />
@@ -146,13 +157,16 @@ const Sidebars = () => {
           style={{ width: SIDEBAR_PANEL_WIDTH }}
         >
           <div className="shrink-0 border-b border-black/[0.06] px-3 py-3.5">
-            <p className="truncate font-display text-lg font-medium tracking-tight text-foreground">
+            <p className="truncate text-base font-medium tracking-tight text-foreground">
               {active.title}
             </p>
           </div>
-          <nav aria-label={`${active.title} pages`} className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 py-2">
+          <nav
+            aria-label={`${active.title} pages`}
+            className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 py-2 font-sans"
+          >
             {active.items.map((item) => {
-              const on = isNavActive(pathname, item);
+              const on = activeItem?.href === item.href;
               const ItemIcon = item.icon;
               return (
                 <Link
