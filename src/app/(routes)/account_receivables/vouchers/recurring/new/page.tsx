@@ -8,6 +8,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
+import { DocumentPreviewShell } from '@potta/components/document-master-detail';
+
 const NewInvoice = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [leftPanelSize, setLeftPanelSize] = useState(100);
@@ -87,9 +89,16 @@ const NewInvoice = () => {
               opacity: showPreview ? 1 : 0,
             }}
           >
-            <div className="h-[92.7vh] overflow-y-auto bg-main-bg">
-              {/* Only render PdfView when preview is showing for performance */}
-              {showPreview && <PdfView />}
+            <div className="h-[92.7vh] overflow-hidden bg-main-bg">
+              {showPreview && (
+                <DocumentPreviewShell
+                  title="Preview"
+                  downloadTitle="Recurring voucher"
+                  onClose={() => setShowPreview(false)}
+                >
+                  <PdfView />
+                </DocumentPreviewShell>
+              )}
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
