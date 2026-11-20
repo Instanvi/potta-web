@@ -13,6 +13,7 @@ import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { extractInvoiceFromFile } from './api/extractInvoice';
 import RootLayout from '../../../layout';
+import { DocumentPreviewShell } from '@potta/components/document-master-detail';
 
 const NewInvoiceInner = () => {
   const [showPreview, setShowPreview] = useState(true);
@@ -77,8 +78,14 @@ const NewInvoiceInner = () => {
             <>
               <ResizableHandle withHandle className="bg-transparent" />
               <ResizablePanel minSize={25} defaultSize={42} className="min-w-0">
-                <div className="h-full min-h-0 overflow-y-auto border-l border-black/[0.06] bg-main-bg">
-                  <PdfView />
+                <div className="h-full min-h-0 overflow-hidden border-l border-black/[0.06] bg-main-bg">
+                  <DocumentPreviewShell
+                    title="Preview"
+                    downloadTitle="Invoice"
+                    onClose={() => setShowPreview(false)}
+                  >
+                    <PdfView />
+                  </DocumentPreviewShell>
                 </div>
               </ResizablePanel>
             </>

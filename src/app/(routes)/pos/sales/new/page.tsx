@@ -9,6 +9,7 @@ import {
   ResizablePanelGroup,
 } from '@potta/components/resizable';
 import DocumentWorkspace from '@potta/components/document-workspace';
+import { DocumentPreviewShell } from '@potta/components/document-master-detail';
 import { DataProvider } from '@potta/components/providers/DataProvider';
 
 const NewSalesReciept = () => {
@@ -94,8 +95,15 @@ const NewSalesReciept = () => {
               }}
             >
               <div className="h-[92.7vh] overflow-hidden bg-white">
-                {/* Only render PdfView when preview is showing for performance */}
-                {showPreview && <PdfView />}
+                {showPreview && (
+                  <DocumentPreviewShell
+                    title="Preview"
+                    downloadTitle="Sale receipt"
+                    onClose={() => setShowPreview(false)}
+                  >
+                    <PdfView />
+                  </DocumentPreviewShell>
+                )}
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>
