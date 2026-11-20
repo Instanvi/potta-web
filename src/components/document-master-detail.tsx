@@ -25,9 +25,11 @@ export type DocumentMasterDetailProps = {
   detailDefaultSize?: number;
   previewDefaultSize?: number;
   previewLabel?: string;
+  /** Optional brand strip above the three columns (flush under app navbar). */
+  banner?: ReactNode;
 };
 
-/** Zoho-style 3-column master–detail shell (list | detail | preview). */
+/** Zoho-style 3-column master–detail shell (list | detail | preview). Full-bleed under the app shell. */
 export function DocumentMasterDetail({
   list,
   detail,
@@ -39,6 +41,7 @@ export function DocumentMasterDetail({
   detailDefaultSize = 43,
   previewDefaultSize = 35,
   previewLabel = 'Preview',
+  banner,
 }: DocumentMasterDetailProps) {
   const hasSelection = Boolean(selectedId);
   const [previewOpen, setPreviewOpen] = useState(true);
@@ -57,22 +60,28 @@ export function DocumentMasterDetail({
   return (
     <div
       className={cn(
-        'flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-white',
+        'flex h-full min-h-0 w-full flex-col overflow-hidden border-t border-black/[0.06] bg-white',
         className
       )}
     >
-      {preview && hasSelection && (
-        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-black/[0.06] px-3 py-1.5 lg:hidden">
+      {banner ? (
+        <div className="flex h-11 shrink-0 items-center justify-between gap-3 bg-primary px-3 text-primary-foreground md:px-4">
+          {banner}
+        </div>
+      ) : null}
+
+      {preview && hasSelection ? (
+        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-black/[0.06] px-3 py-1.5">
           <button
             type="button"
             onClick={() => setPreviewOpen((v) => !v)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-[2px] px-2.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="inline-flex h-8 items-center gap-1.5 rounded-[2px] px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             <i className={previewOpen ? 'ri-eye-off-line' : 'ri-eye-line'} />
             {previewOpen ? `Hide ${previewLabel}` : `Show ${previewLabel}`}
           </button>
         </div>
-      )}
+      ) : null}
 
       <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1 space-x-0">
         <ResizablePanel

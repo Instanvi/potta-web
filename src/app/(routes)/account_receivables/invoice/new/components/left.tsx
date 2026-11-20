@@ -58,7 +58,7 @@ interface LineItemsDto {
   unitPrice: number;
   taxRate: number;
   discountRate: number;
-  productId: string;
+  productId?: string;
 }
 
 // Add validation errors interface
@@ -96,6 +96,8 @@ interface LeftProps {
   isEditMode?: boolean;
   originalInvoice?: any;
   onSave?: () => void;
+  onTogglePreview?: () => void;
+  showPreview?: boolean;
 }
 
 const Left = ({
@@ -103,6 +105,8 @@ const Left = ({
   isEditMode = false,
   originalInvoice,
   onSave,
+  onTogglePreview,
+  showPreview = true,
 }: LeftProps) => {
   const context = useContext(ContextData);
   const router = useRouter();
@@ -405,16 +409,22 @@ const Left = ({
     const tableData: TableItem[] = context?.data?.table || [];
 
     // Format line items according to LineItemsDto structure with proper typing
-    const lineItems: LineItemsDto[] = tableData.map((item: TableItem) => ({
-      description: item.name,
-      quantity: item.qty,
-      discountCap: 0,
-      discountType: 'PERCENTAGE_WITH_CAP', // Fixed enum value
-      unitPrice: Number(item.price),
-      taxRate: item.tax,
-      discountRate: 0,
-      productId: item.uuid,
-    }));
+    const lineItems: LineItemsDto[] = tableData.map((item: TableItem) => {
+      const line: LineItemsDto = {
+        description: item.name,
+        quantity: item.qty,
+        discountCap: 0,
+        discountType: 'PERCENTAGE_WITH_CAP',
+        unitPrice: Number(item.price),
+        taxRate: item.tax,
+        discountRate: 0,
+      };
+      // Catalog lines keep productId; free-text services omit it
+      if (item.uuid && !String(item.uuid).startsWith('custom-')) {
+        line.productId = item.uuid;
+      }
+      return line;
+    });
 
     // Calculate total amount with proper typing
     const totalAmount = tableData.reduce((sum: number, item: TableItem) => {
@@ -932,8 +942,13 @@ const Left = ({
         }
         center={
           <>
-            <DocumentFooterLink onClick={() => toast.info('Print / preview opens after save.')}>
-              Print or Preview
+            <DocumentFooterLink
+              onClick={() => {
+                if (onTogglePreview) onTogglePreview();
+                else toast.info('Preview is available in the side panel.');
+              }}
+            >
+              {showPreview ? 'Hide preview' : 'Print or Preview'}
             </DocumentFooterLink>
             <DocumentFooterLink href="/account_receivables/recurring">
               Make recurring
@@ -945,13 +960,18 @@ const Left = ({
             <ShadcnButton
               type="button"
               variant="outline"
-              className="border-white/30 bg-white text-foreground hover:bg-white/90"
+              className="border-white/40 bg-white text-foreground hover:bg-white/90"
               onClick={handleSaveInvoice}
               disabled={saving}
             >
               {saveLabel}
             </ShadcnButton>
-            <ShadcnButton type="button" onClick={handleSaveInvoice} disabled={saving}>
+            <ShadcnButton
+              type="button"
+              className="bg-white/15 text-white hover:bg-white/25"
+              onClick={handleSaveInvoice}
+              disabled={saving}
+            >
               {sendLater ? 'Save and close' : 'Save and send'}
             </ShadcnButton>
           </>

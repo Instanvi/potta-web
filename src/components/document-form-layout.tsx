@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@potta/lib/utils';
 
-/** QuickBooks-inspired document canvas used by Invoice and Bill create screens. */
+/** Document canvas used by Invoice and Bill create screens — fills the app content area. */
 export function DocumentFormShell({
   className,
   children,
@@ -12,13 +12,13 @@ export function DocumentFormShell({
   children: ReactNode;
 }) {
   return (
-    <div className={cn('mx-auto flex w-full max-w-6xl flex-col pb-28', className)}>
-      <div className="rounded-[2px] border border-black/[0.08] bg-white shadow-sm">{children}</div>
+    <div className={cn('flex w-full flex-col bg-white', className)}>
+      <div className="border-b border-black/[0.08] bg-white">{children}</div>
     </div>
   );
 }
 
-/** Sticky dark footer: Cancel | center links | Save / Save and send. */
+/** Sticky green action bar: Cancel | center links | Save / Save and send. */
 export function DocumentFormFooter({
   left,
   center,
@@ -29,8 +29,8 @@ export function DocumentFormFooter({
   right?: ReactNode;
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-black/30 bg-[#1f2937] px-4 py-3 md:px-6">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3">
+    <div className="sticky bottom-0 z-30 border-t border-primary/30 bg-primary px-4 py-3 md:px-6">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">{left}</div>
         {center ? (
           <div className="order-last flex w-full flex-wrap items-center justify-center gap-4 md:order-none md:w-auto">
@@ -57,7 +57,7 @@ export function DocumentFormCard({
     <section
       className={cn(
         flush
-          ? 'border-b border-black/[0.06] px-5 py-5 last:border-b-0 md:px-8 md:py-6'
+          ? 'border-b border-black/[0.06] px-4 py-5 last:border-b-0 md:px-6 md:py-6'
           : 'rounded-[2px] border border-black/[0.08] bg-white p-5 shadow-sm md:p-6',
         className,
       )}
@@ -96,7 +96,7 @@ export function DocumentFooterLink({
   href?: string;
 }) {
   const className =
-    'text-sm font-medium text-white/85 underline-offset-2 hover:text-white hover:underline';
+    'text-sm text-white/90 underline-offset-2 hover:text-white hover:underline';
   if (href) {
     return (
       <a href={href} className={className}>

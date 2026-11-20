@@ -402,7 +402,11 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
             >
               {createBill.isPending ? 'Saving…' : 'Save'}
             </ShadcnButton>
-            <ShadcnButton type="submit" disabled={createBill.isPending}>
+            <ShadcnButton
+              type="submit"
+              className="bg-white/15 text-white hover:bg-white/25"
+              disabled={createBill.isPending}
+            >
               {createBill.isPending ? 'Saving…' : 'Save and close'}
             </ShadcnButton>
           </>
