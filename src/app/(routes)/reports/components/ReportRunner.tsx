@@ -61,7 +61,7 @@ export function ReportRunner({
   const { data, isLoading, error, refetch } = useReportRun(reportId, params);
 
   const columns = useMemo<ColumnDef<Record<string, unknown>>[]>(() => {
-    return (data?.columns ?? []).map((col) => ({
+    return (data?.columns ?? []).map((col: ReportColumn) => ({
       id: col.key,
       accessorKey: col.key,
       header: () => (
@@ -69,7 +69,7 @@ export function ReportRunner({
           {col.label}
         </div>
       ),
-      cell: ({ row }) => (
+      cell: ({ row }: { row: { original: Record<string, unknown> } }) => (
         <div
           className={
             col.type === 'money' || col.type === 'number'
@@ -99,7 +99,7 @@ export function ReportRunner({
             <ExportButton
               filename={reportId}
               rows={data?.rows ?? []}
-              columns={(data?.columns ?? []).map((c) => ({
+              columns={(data?.columns ?? []).map((c: ReportColumn) => ({
                 key: c.key,
                 header: c.label,
                 value: (row: Record<string, unknown>) => formatCell(row[c.key], c.type),

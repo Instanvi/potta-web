@@ -2,9 +2,9 @@
 
 import { useParams } from 'next/navigation';
 import { findReport, REPORT_CATEGORIES } from '@/lib/reports-catalog';
-import { ReportRunner } from '../components/ReportRunner';
-import { ReportPageShell } from '../components/ReportPageShell';
-import { EmptyState } from '../../_shared/states';
+import { ReportRunner } from '@/app/(routes)/reports/components/ReportRunner';
+import { ReportPageShell } from '@/app/(routes)/reports/components/ReportPageShell';
+import { EmptyState } from '@/app/(routes)/_shared/states';
 import Link from 'next/link';
 
 const AS_OF_IDS = new Set([

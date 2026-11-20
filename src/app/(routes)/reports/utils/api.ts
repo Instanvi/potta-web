@@ -1,4 +1,4 @@
-import axios from '@/lib/axios';
+import axios from 'config/axios.config';
 
 export type ReportColumn = {
   key: string;
