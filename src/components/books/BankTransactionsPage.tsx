@@ -12,7 +12,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { FIELD_INPUT } from '@/lib/field-styles';
+import { SHEET_FIELD_INPUT, SHEET_FIELD_LABEL } from '@/lib/field-styles';
+import { DatePicker } from '@/components/ui/date-picker';
 import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
 
@@ -201,22 +202,32 @@ export function BankTransactionsPage() {
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>New bank transaction</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-4">
-              {FIELDS.map((f) => (
-                <label key={f.key} className="block space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">{f.label}</span>
-                  <input
-                    type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
+            <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
+              {FIELDS.map((f) =>
+                f.type === 'date' ? (
+                  <DatePicker
+                    key={f.key}
+                    label={f.label}
                     value={form[f.key] ?? ''}
-                    onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                    className={FIELD_INPUT}
+                    onChange={(v) => setForm((p) => ({ ...p, [f.key]: v }))}
+                    outlined
                   />
-                </label>
-              ))}
+                ) : (
+                  <label key={f.key} className="block space-y-1">
+                    <span className={SHEET_FIELD_LABEL}>{f.label}</span>
+                    <input
+                      type={f.type === 'number' ? 'number' : 'text'}
+                      value={form[f.key] ?? ''}
+                      onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                      className={SHEET_FIELD_INPUT}
+                    />
+                  </label>
+                )
+              )}
             </div>
             <SheetFooter>
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
@@ -230,24 +241,24 @@ export function BankTransactionsPage() {
         </Sheet>
 
         <Sheet open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>Match transaction</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-3 text-sm">
+            <div className="mt-6 min-h-0 flex-1 space-y-3 overflow-y-auto text-sm">
               {COLUMNS.map((c) => (
                 <div key={c.key} className="flex justify-between gap-4 border-b border-black/10 py-2">
-                  <span className="text-muted-foreground">{c.label}</span>
+                  <span className="text-foreground">{c.label}</span>
                   <span>{detail ? cellValue(detail, c.key) : '—'}</span>
                 </div>
               ))}
               <label className="block space-y-1 pt-2">
-                <span className="text-xs font-medium text-muted-foreground">AR payment ID</span>
-                <input value={matchAr} onChange={(e) => setMatchAr(e.target.value)} className={FIELD_INPUT} />
+                <span className={SHEET_FIELD_LABEL}>AR payment ID</span>
+                <input value={matchAr} onChange={(e) => setMatchAr(e.target.value)} className={SHEET_FIELD_INPUT} />
               </label>
               <label className="block space-y-1">
-                <span className="text-xs font-medium text-muted-foreground">AP payment ID</span>
-                <input value={matchAp} onChange={(e) => setMatchAp(e.target.value)} className={FIELD_INPUT} />
+                <span className={SHEET_FIELD_LABEL}>AP payment ID</span>
+                <input value={matchAp} onChange={(e) => setMatchAp(e.target.value)} className={SHEET_FIELD_INPUT} />
               </label>
             </div>
             <SheetFooter className="flex-wrap gap-2">

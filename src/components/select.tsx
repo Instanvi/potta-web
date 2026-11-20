@@ -59,7 +59,7 @@ const Select: React.FC<SelectProps> = ({
     <>
       {label && (
         <div
-          className={`mb-3 text-base font-medium text-foreground ${labelClass}`}
+          className={`mb-1 block text-sm font-normal text-foreground ${labelClass}`}
         >
           {label}
           {required && <span className=" text-red-500">*</span>}

@@ -12,7 +12,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { FIELD_INPUT, FIELD_TEXTAREA } from '@/lib/field-styles';
+import {
+  SHEET_FIELD_INPUT,
+  SHEET_FIELD_LABEL,
+  SHEET_FIELD_TEXTAREA,
+} from '@/lib/field-styles';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   booksApi,
   cellValue,
@@ -286,11 +291,11 @@ export function BooksResourcePage({
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>New {title}</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
               {fields.map((f) => (
                 <FieldInput
                   key={f.key}
@@ -312,11 +317,11 @@ export function BooksResourcePage({
         </Sheet>
 
         <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>{title}</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
               {fields.map((f) => (
                 <FieldInput
                   key={f.key}
@@ -368,12 +373,12 @@ function FieldInput({
   if (type === 'textarea' || type === 'json') {
     return (
       <label className="block space-y-1">
-        <span className="text-xs font-medium text-muted-foreground">{field.label}</span>
+        <span className={SHEET_FIELD_LABEL}>{field.label}</span>
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={type === 'json' ? 6 : 3}
-          className={FIELD_TEXTAREA}
+          className={SHEET_FIELD_TEXTAREA}
           placeholder={field.label}
         />
       </label>
@@ -381,25 +386,35 @@ function FieldInput({
   }
   if (type === 'checkbox' || type === 'boolean') {
     return (
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
           checked={value === 'true'}
           onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
-          className="size-4 rounded-[2px] border-black/20"
+          className="size-4 rounded-[2px] border border-black/20"
         />
         <span>{field.label}</span>
       </label>
     );
   }
+  if (type === 'date') {
+    return (
+      <DatePicker
+        label={field.label}
+        value={value}
+        onChange={(v) => onChange(v)}
+        outlined
+      />
+    );
+  }
   return (
     <label className="block space-y-1">
-      <span className="text-xs font-medium text-muted-foreground">{field.label}</span>
+      <span className={SHEET_FIELD_LABEL}>{field.label}</span>
       <input
-        type={type === 'number' ? 'number' : type === 'date' ? 'date' : 'text'}
+        type={type === 'number' ? 'number' : 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={FIELD_INPUT}
+        className={SHEET_FIELD_INPUT}
         placeholder={field.label}
       />
     </label>

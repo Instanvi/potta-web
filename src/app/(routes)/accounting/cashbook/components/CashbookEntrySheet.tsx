@@ -124,7 +124,7 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
 
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="left" className="w-full overflow-y-auto rounded-none sm:max-w-lg">
+      <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{isEdit ? 'Edit cashbook entry' : 'New cashbook entry'}</SheetTitle>
         </SheetHeader>
@@ -175,7 +175,7 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
               required
               register={register}
               errors={errors.amount}
-            />
+            outlined />
             <Controller
               name="currency"
               control={control}
@@ -202,7 +202,7 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
               id="transactionDate"
               label="Date"
               required
-            />
+            outlined />
             <Controller
               name="entryType"
               control={control}
@@ -249,21 +249,21 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
             label="Counterparty"
             placeholder="Customer, vendor or person"
             register={register}
-          />
+          outlined />
           <Input
             type="text"
             name="reference"
             label="Reference"
             placeholder="Receipt or voucher number"
             register={register}
-          />
+          outlined />
           <Input
             type="text"
             name="narration"
             label="Narration"
             placeholder="What was this for?"
             register={register}
-          />
+          outlined />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button text="Cancel" type="button" theme="gray" color onClick={onClose} />
