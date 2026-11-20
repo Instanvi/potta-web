@@ -72,7 +72,7 @@ const Select: React.FC<SelectProps> = ({
             : error
               ? 'border-0 border-b border-destructive'
               : 'border-0 border-b border-black/15'
-        } rounded-t-[2px] rounded-b-none bg-zinc-50`}
+        } rounded-t-[2px] rounded-b-none bg-white`}
       >
         <div
           onClick={toggleDropdown}
