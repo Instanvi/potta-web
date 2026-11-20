@@ -14,6 +14,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-inter)', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Sohne', 'var(--font-inter)', 'Inter', 'sans-serif'],
       },
       /* Inter runs heavier than Outfit: keep 600 as the strongest weight in the UI. */
       fontWeight: {

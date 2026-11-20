@@ -130,7 +130,9 @@ export const PageHeader = ({
       {(title || description) && (
         <div className="min-w-0">
           {title ? (
-            <h2 className="text-xl font-medium tracking-tight text-foreground">{title}</h2>
+            <h2 className="font-display text-xl font-medium tracking-tight text-foreground">
+              {title}
+            </h2>
           ) : null}
           {description ? (
             <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
