@@ -19,6 +19,7 @@ export const PottaAppPermissions: PermissionDefinition[] = [
   { resource: 'CreditNote', action: ['add-invoice', 'approve', 'create', 'refund', 'remove', 'update', 'view'] },
   { resource: 'Customer', action: ['create', 'remove', 'update', 'view', 'view-all'] },
   { resource: 'Customers', action: ['view'] },
+  /** Home + custom KPI layouts (potta-backend dashboards module). */
   { resource: 'Dashboard', action: ['view', 'create', 'update', 'delete'] },
   {
     resource: 'GeneralLedger',
@@ -76,6 +77,7 @@ export const PottaAppPermissions: PermissionDefinition[] = [
       'view-vendor-orders',
     ],
   },
+  /** Saved/org reports runner (potta-backend reports module). */
   { resource: 'Report', action: ['view', 'view-organization', 'export'] },
   { resource: 'SalesReciept', action: ['create', 'remove', 'view', 'view-all'] },
   { resource: 'Tax', action: ['create', 'remove', 'update', 'view', 'view-all'] },
