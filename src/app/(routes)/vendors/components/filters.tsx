@@ -6,6 +6,7 @@ import SliderVendor from './vendorSlider';
 import BulkSlider from '@potta/app/(routes)/customers/components/bulkSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { ListToolbar } from '../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 
 interface FilterProps {
   searchValue: string;
@@ -15,6 +16,7 @@ interface FilterProps {
   onStatusFilterChange: (value: string) => void;
   kycFilter: string;
   onKycFilterChange: (value: string) => void;
+  rows?: any[];
 }
 
 const Filter: React.FC<FilterProps> = ({
@@ -25,6 +27,7 @@ const Filter: React.FC<FilterProps> = ({
   onStatusFilterChange,
   kycFilter,
   onKycFilterChange,
+  rows = [],
 }) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const filterConfig = [
@@ -62,12 +65,29 @@ const Filter: React.FC<FilterProps> = ({
     <ListToolbar
       actions={
         <>
-          <Button
-            text={'Export'}
-            icon={<img src="/images/export.svg" />}
-            theme="lightBlue"
-            type={'button'}
-            color={true}
+          <ExportButton
+            filename="vendors"
+            rows={rows}
+            columns={[
+              { key: 'name', header: 'Vendor/ Company Name' },
+              { key: 'phone', header: 'Telephone' },
+              { key: 'email', header: 'Email' },
+              { key: 'status', header: 'Status' },
+              {
+                key: 'isKYCVerified',
+                header: 'KYC Status',
+                value: (row) => (row.isKYCVerified ? 'Verified' : 'Unverified'),
+              },
+              { key: 'industry', header: 'Industry' },
+              {
+                key: 'openingBalance',
+                header: 'Balance',
+                value: (row) =>
+                  row.openingBalance != null
+                    ? `${row.currency ?? ''}${row.openingBalance}`
+                    : 'N/A',
+              },
+            ]}
           />
           <Can resource="Vendor" action="create">
             <Button

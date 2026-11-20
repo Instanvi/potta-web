@@ -172,6 +172,7 @@ export function BillsTable({ initialBillId }: BillsTableProps) {
         onStatusChange={(v) => setStatus(v || 'all')}
         vendorId={vendorId}
         onVendorChange={setVendorId}
+        rows={rows}
       />
 
       {error ? (

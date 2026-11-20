@@ -252,6 +252,7 @@ const TableComponents = () => {
         onStatusFilterChange={setStatusFilter}
         kycFilter={kycFilter}
         onKycFilterChange={setKycFilter}
+        rows={vendor?.data ?? []}
       />
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />

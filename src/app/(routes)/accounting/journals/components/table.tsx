@@ -24,7 +24,13 @@ const useDebounced = <T,>(value: T, delay = 300) => {
   return debounced;
 };
 
-const JournalEntriesTable = ({ search = '' }: { search?: string }) => {
+const JournalEntriesTable = ({
+  search = '',
+  onRowsChange,
+}: {
+  search?: string;
+  onRowsChange?: (rows: Journal[]) => void;
+}) => {
   const term = useDebounced(search.trim());
   const { page, limit, tableProps } = useServerPagination({ pageSize: 20, resetOn: [term] });
   const { data, isLoading, error, refetch } = useGetJournalEntries({ page, limit, search: term });
@@ -32,6 +38,10 @@ const JournalEntriesTable = ({ search = '' }: { search?: string }) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const rows = data?.data ?? [];
+
+  useEffect(() => {
+    onRowsChange?.(data?.data ?? []);
+  }, [data?.data, onRowsChange]);
 
   const columns: ColumnDef<Journal>[] = [
     {

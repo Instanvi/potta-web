@@ -9,6 +9,7 @@ import DynamicFilter from '@potta/components/dynamic-filter';
 import Button from '@potta/components/button';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { ErrorState, ListToolbar } from '../../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { IFilter } from '../_utils/types';
 import useGetAllInvoice from '../_hooks/useGetAllInvoice';
 import ModalInvoice from './modal';
@@ -190,11 +191,32 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
-            <Button
-              text={'Export'}
-              icon={<i className="ri-upload-2-line"></i>}
-              theme="lightBlue"
-              type={'button'}
+            <ExportButton
+              filename="recurring-vouchers"
+              rows={rows}
+              columns={[
+                {
+                  key: 'issuedDate',
+                  header: 'Date',
+                  value: (row) => formatDate(row.issuedDate),
+                },
+                {
+                  key: 'customer',
+                  header: 'Customer',
+                  value: (row) =>
+                    row.customer
+                      ? `${row.customer.firstName} ${row.customer.lastName}`
+                      : 'N/A',
+                },
+                { key: 'invoiceId', header: 'ID' },
+                {
+                  key: 'notes',
+                  header: 'Title',
+                  value: (row) => row.notes || 'No title',
+                },
+                { key: 'status', header: 'Status' },
+                { key: 'invoiceTotal', header: 'Amount' },
+              ]}
             />
             <Link href={'/account_receivables/recurring/new'}>
               <Button

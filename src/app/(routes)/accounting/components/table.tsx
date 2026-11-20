@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
 import { Can, useCan } from '@/components/auth/can';
+import { exportRows } from '@/lib/export-file';
 import { toast } from 'sonner';
 
 interface AccountNode {
@@ -268,27 +269,40 @@ const TableAccount = () => {
   };
 
   const exportAccounts = () => {
-    const rows: string[][] = [['Code', 'Name', 'Type', 'Level', 'Initial balance', 'Current balance']];
+    type FlatAccount = {
+      code: string;
+      name: string;
+      type: string;
+      level: number;
+      initialBalance: number;
+      currentBalance: number;
+    };
+    const flat: FlatAccount[] = [];
     const walk = (list: AccountNode[], level: number) =>
       list.forEach((account) => {
-        rows.push([
-          account.code ?? '',
-          account.name,
-          account.type,
-          String(level),
-          String(Number(account.initialBalance) || 0),
-          String(Number(account.currentBalance) || 0),
-        ]);
+        flat.push({
+          code: account.code ?? '',
+          name: account.name,
+          type: account.type,
+          level,
+          initialBalance: Number(account.initialBalance) || 0,
+          currentBalance: Number(account.currentBalance) || 0,
+        });
         if (account.children?.length) walk(account.children, level + 1);
       });
     walk(filteredAccounts, 0);
-    const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'chart-of-accounts.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    void exportRows({
+      filename: 'chart-of-accounts',
+      rows: flat,
+      columns: [
+        { key: 'code', header: 'Code' },
+        { key: 'name', header: 'Name' },
+        { key: 'type', header: 'Type' },
+        { key: 'level', header: 'Level' },
+        { key: 'initialBalance', header: 'Initial balance' },
+        { key: 'currentBalance', header: 'Current balance' },
+      ],
+    });
   };
 
   // Expand all rows

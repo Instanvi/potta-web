@@ -6,6 +6,7 @@ import Search from '@potta/components/search';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, StatCard } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { useGeneralLedger } from '../hooks';
 import { GeneralLedgerEntry } from '../utils/types';
 
@@ -101,7 +102,38 @@ const GeneralLedgerTab = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <ListToolbar>
+      <ListToolbar
+        actions={
+          <ExportButton
+            filename="general-ledger"
+            rows={rows}
+            columns={[
+              {
+                key: 'transactionDate',
+                header: 'Date',
+                value: (row) => formatDate(row.transactionDate),
+              },
+              { key: 'journalEntryNumber', header: 'Journal #' },
+              { key: 'accountNumber', header: 'Account' },
+              { key: 'accountName', header: 'Account name' },
+              { key: 'description', header: 'Description' },
+              {
+                key: 'debitAmount',
+                header: 'Debit',
+                value: (row) =>
+                  Number(row.debitAmount) ? formatAmount(row.debitAmount) : '',
+              },
+              {
+                key: 'creditAmount',
+                header: 'Credit',
+                value: (row) =>
+                  Number(row.creditAmount) ? formatAmount(row.creditAmount) : '',
+              },
+              { key: 'sourceModule', header: 'Source' },
+            ]}
+          />
+        }
+      >
         <DateRangePicker
           id="ledgerPeriod"
           label="Period"

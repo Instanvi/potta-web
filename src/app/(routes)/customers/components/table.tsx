@@ -195,6 +195,7 @@ const TableComponents = () => {
       <Filter
         searchValue={searchValue}
         onSearchChange={setSearchValue}
+        rows={customer?.data ?? []}
       />
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />

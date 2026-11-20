@@ -4,6 +4,7 @@ import {
   ArrowUUpLeft,
   ArrowsClockwise,
   Bank,
+  Bell,
   BookOpen,
   Books,
   ChartLineUp,
@@ -171,6 +172,7 @@ export const NAV_MODULES: NavModule[] = [
     matchPrefixes: ['/settings'],
     items: [
       { title: 'Config', href: '/settings', icon: SquaresFour, exact: true },
+      { title: 'Notifications', href: '/notifications', icon: Bell },
       { title: 'Audit log', href: '/settings/audit-logs', icon: ClockCounterClockwise },
     ],
   },

@@ -14,6 +14,8 @@ import useImportFromPay from '../_hooks/useImportFromPay';
 import { PayImportResult } from '../_utils/payImportApi';
 import { Can } from '@/components/auth/can';
 import { ListToolbar } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
+import type { Product } from '../_utils/types';
 
 const summarize = (r: PayImportResult) =>
   [
@@ -42,7 +44,14 @@ const ITEM_KINDS: { value: ItemKind; label: string; hint: string }[] = [
 ];
 
 /** Items are created here or arrive with "Sync from Pay"; Pay-linked items stay read-only. */
-const Filter = () => {
+const productTypeLabel = (product: Product) => {
+  if (product.structure === 'ASSEMBLY') return 'Assembly';
+  if (product.structure === 'SIMPLEGROUPS') return 'Group';
+  if (product.type === 'NON_INVENTORY') return 'Non-Inventory';
+  return 'Inventory';
+};
+
+const Filter = ({ rows = [] }: { rows?: Product[] }) => {
   const { filters, setFilters } = useInventory();
 
   const [selectedValue, setSelectedValue] = useState(filters.sort);
@@ -135,6 +144,48 @@ const Filter = () => {
         className="mb-2"
         actions={
           <>
+            <ExportButton
+              filename="inventory"
+              rows={rows}
+              columns={[
+                { key: 'name', header: 'Name' },
+                { key: 'sku', header: 'Sku' },
+                {
+                  key: 'category',
+                  header: 'Category',
+                  value: (row) =>
+                    row.category && typeof row.category === 'object'
+                      ? (row.category as { name?: string }).name ?? ''
+                      : String(row.category || ''),
+                },
+                {
+                  key: 'productType',
+                  header: 'Product Type',
+                  value: (row) => productTypeLabel(row),
+                },
+                {
+                  key: 'tax',
+                  header: 'Tax',
+                  value: (row) =>
+                    row.tax && typeof row.tax === 'object'
+                      ? (row.tax as { name?: string }).name ?? ''
+                      : String(row.tax || ''),
+                },
+                { key: 'cost', header: 'Cost' },
+                { key: 'salesPrice', header: 'Sale Price' },
+                {
+                  key: 'inventoryLevel',
+                  header: 'Inventory',
+                  value: (row) =>
+                    String(row.stockTotal ?? row.inventoryLevel ?? ''),
+                },
+                {
+                  key: 'reorderPoint',
+                  header: 'Reorder Point',
+                  value: (row) => String(row.reorderPoint ?? 0),
+                },
+              ]}
+            />
             <Can resource="Item" action="restock">
               <Button
                 type="button"
