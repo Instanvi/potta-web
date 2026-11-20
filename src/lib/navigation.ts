@@ -148,6 +148,18 @@ export const NAV_MODULES: NavModule[] = [
       { title: 'Balance Sheet', href: '/reports/balance-sheet', icon: Books },
       { title: 'Profit and Loss', href: '/reports/profit-and-loss', icon: ChartLineUp },
       { title: 'AR ageing', href: '/reports/ar-ageing', icon: FileText },
+      { title: 'AP ageing', href: '/reports/ap-ageing', icon: FileText },
+    ],
+  },
+  {
+    id: 'dashboards',
+    title: 'Dashboards',
+    description: 'Built-in books metrics and custom KPI layouts you can edit.',
+    icon: ChartPieSlice,
+    matchPrefixes: ['/dashboards', '/home'],
+    items: [
+      { title: 'Home', href: '/home', icon: House, appIcon: APP_ICONS.analytics, exact: true },
+      { title: 'All dashboards', href: '/dashboards', icon: ChartPieSlice },
     ],
   },
   {

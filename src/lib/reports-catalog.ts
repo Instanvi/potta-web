@@ -66,8 +66,8 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
     id: 'what-you-owe',
     title: 'What you owe',
     reports: [
-      { id: 'ap-ageing-summary', title: 'Accounts payable ageing summary' },
-      { id: 'ap-ageing-detail', title: 'Accounts payable ageing detail' },
+      { id: 'ap-ageing-summary', title: 'Accounts payable ageing summary', href: '/reports/ap-ageing', live: true },
+      { id: 'ap-ageing-detail', title: 'Accounts payable ageing detail', href: '/reports/ap-ageing', live: true },
       { id: 'bills-payments', title: 'Bills and Applied Payments' },
       { id: 'bill-payment-list', title: 'Bill Payment List' },
       { id: 'unpaid-bills', title: 'Unpaid Bills', href: '/account_payables/bills', live: true },
