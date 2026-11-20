@@ -17,7 +17,8 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out",
+      /* Above DocumentWorkspace (z-[100]) so sheets work on full-screen creates */
+      "fixed inset-0 z-[110] bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out",
       className
     )}
     {...props}
@@ -51,7 +52,7 @@ const SheetContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 flex h-full flex-col bg-white p-6 shadow-lg transition ease-in-out",
+        "fixed z-[110] flex h-full flex-col bg-white p-6 shadow-lg transition ease-in-out",
         sheetVariants[side],
         className,
         SHEET_WIDTH

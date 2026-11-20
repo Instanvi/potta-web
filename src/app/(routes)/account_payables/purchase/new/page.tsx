@@ -1,5 +1,6 @@
 'use client';
 import DocumentWorkspace from '@potta/components/document-workspace';
+import { DocumentPreviewShell } from '@potta/components/document-master-detail';
 import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
@@ -89,9 +90,16 @@ const NewInvoice = () => {
               opacity: showPreview ? 1 : 0,
             }}
           >
-            <div className="h-[92.7vh] overflow-y-auto bg-main-bg">
-              {/* Only render PdfView when preview is showing for performance */}
-              {showPreview && <PdfView />}
+            <div className="h-[92.7vh] overflow-hidden bg-main-bg">
+              {showPreview && (
+                <DocumentPreviewShell
+                  title="Preview"
+                  downloadTitle="Purchase order"
+                  onClose={() => setShowPreview(false)}
+                >
+                  <PdfView />
+                </DocumentPreviewShell>
+              )}
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
