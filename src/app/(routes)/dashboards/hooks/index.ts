@@ -47,6 +47,8 @@ export const useAggregate = (
     status?: string[];
     groupBy?: string;
     limit?: number;
+    fromDate?: string | null;
+    toDate?: string | null;
   },
   enabled = true,
 ) =>

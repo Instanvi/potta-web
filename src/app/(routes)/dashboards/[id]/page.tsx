@@ -31,6 +31,7 @@ export default function DashboardDetailPage() {
   const catalog = useDashboardEntities();
   const saveWidgets = useSetWidgets(id);
   const [draft, setDraft] = useState<DashboardWidget[] | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     if (data?.widgets) setDraft(data.widgets);
@@ -69,6 +70,9 @@ export default function DashboardDetailPage() {
                   </Button>
                   {editing ? (
                     <>
+                      <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
+                        Add widget
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
@@ -92,14 +96,14 @@ export default function DashboardDetailPage() {
               }
             />
 
-            {editing && catalog.data && (
-              <div className="mb-4">
-                <AddWidgetPanel
-                  catalog={catalog.data}
-                  onAdd={(widget) => setDraft((prev) => [...(prev ?? []), widget])}
-                />
-              </div>
-            )}
+            {editing && catalog.data ? (
+              <AddWidgetPanel
+                open={addOpen}
+                onOpenChange={setAddOpen}
+                catalog={catalog.data}
+                onAdd={(widget) => setDraft((prev) => [...(prev ?? []), widget])}
+              />
+            ) : null}
 
             <DashboardGrid
               widgets={widgets}

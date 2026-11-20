@@ -3,15 +3,28 @@ export type DashboardStatus = 'active' | 'archived';
 export type EntityKey =
   | 'invoices'
   | 'bills'
+  | 'cash_sales'
+  | 'sales_receipts'
+  | 'estimates'
+  | 'sales_orders'
   | 'purchase_orders'
+  | 'ar_payments'
+  | 'ap_payments'
+  | 'credit_notes'
+  | 'supplier_credits'
   | 'customers'
   | 'vendors'
   | 'products'
-  | 'journal_entries';
+  | 'cashbook_entries'
+  | 'bank_transactions'
+  | 'bank_accounts'
+  | 'journal_entries'
+  | 'recurring_templates';
 
 export type Aggregation = 'count' | 'sum' | 'avg' | 'min' | 'max';
 export type ChartType = 'bar' | 'horizontal_bar' | 'donut' | 'table';
 export type WidgetWidth = 3 | 4 | 6 | 8 | 12;
+export type DatePreset = 'all' | 'today' | '7d' | '30d' | 'month' | 'ytd';
 
 export interface NumberFormat {
   decimals: 'auto' | 0 | 1 | 2;
@@ -25,6 +38,8 @@ export interface MeasureConfig {
   field: string | null;
   statuses: string[];
   format: NumberFormat;
+  fromDate?: string | null;
+  toDate?: string | null;
 }
 
 export interface EntityListConfig {
@@ -73,6 +88,7 @@ export interface EntityCatalogEntry {
   amounts: { key: string; label: string }[];
   groupBy: { key: string; label: string }[];
   sort: { key: string; label: string }[];
+  dateColumn?: string | null;
 }
 
 export interface AggregateResult {
