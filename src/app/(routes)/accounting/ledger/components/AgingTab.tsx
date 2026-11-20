@@ -6,6 +6,7 @@ import Search from '@potta/components/search';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatAmount, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { useAgingReport } from '../hooks';
 import { AgingRow, SubLedgerKind } from '../utils/api';
 import SubLedgerSheet from './SubLedgerSheet';
@@ -71,7 +72,31 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <ListToolbar>
+      <ListToolbar
+        actions={
+          <ExportButton
+            filename={`${type === 'AR' ? 'ar' : 'ap'}-aging`}
+            rows={rows}
+            columns={[
+              {
+                key: 'party',
+                header: partyLabel,
+                value: (row) => row.referenceName || row.referenceId,
+              },
+              ...BUCKETS.map((b) => ({
+                key: b.key,
+                header: b.label,
+                value: (row: AgingRow) => formatAmount(row.aging?.[b.key]),
+              })),
+              {
+                key: 'balance',
+                header: 'Balance',
+                value: (row: AgingRow) => formatAmount(row.currentBalance),
+              },
+            ]}
+          />
+        }
+      >
         <DatePicker
           id="agingAsOf"
           label="As of"

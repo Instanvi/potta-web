@@ -20,6 +20,7 @@ import {
   ListToolbar,
   PageHeader,
 } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import {
   useApproveCreditNote,
   useCreditNotes,
@@ -170,16 +171,53 @@ const CreditNotesView = () => {
       />
       <ListToolbar
         actions={
-          <Can resource="CreditNote" action="create">
-            <Link href="/account_receivables/credit/new">
-              <Button
-                text="New credit note"
-                type="button"
-                theme="default"
-                icon={<i className="ri-file-add-line" />}
-              />
-            </Link>
-          </Can>
+          <>
+            <ExportButton
+              filename="credit-notes"
+              rows={rows}
+              columns={[
+                { key: 'creditNoteId', header: 'Credit note' },
+                {
+                  key: 'issueDate',
+                  header: 'Issue date',
+                  value: (row) => formatDate(row.issueDate),
+                },
+                {
+                  key: 'customer',
+                  header: 'Customer',
+                  value: (row) => partyName(row.customer),
+                },
+                {
+                  key: 'invoice',
+                  header: 'Invoice',
+                  value: (row) => {
+                    const inv = row.invoice;
+                    return inv
+                      ? inv.invoiceNumber || inv.invoiceId || inv.code || ''
+                      : '';
+                  },
+                },
+                { key: 'reason', header: 'Reason' },
+                {
+                  key: 'creditAmount',
+                  header: 'Amount',
+                  value: (row) =>
+                    formatAmount(row.creditAmount, row.invoice?.currency),
+                },
+                { key: 'status', header: 'Status' },
+              ]}
+            />
+            <Can resource="CreditNote" action="create">
+              <Link href="/account_receivables/credit/new">
+                <Button
+                  text="New credit note"
+                  type="button"
+                  theme="default"
+                  icon={<i className="ri-file-add-line" />}
+                />
+              </Link>
+            </Can>
+          </>
         }
       >
         <div className="w-56">

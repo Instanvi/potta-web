@@ -20,7 +20,11 @@ import ProductEditStepperModal from './ProductEditStepperModal';
 import { StatusBadge } from '../../../_shared/states';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 
-const InventoryTable = () => {
+const InventoryTable = ({
+  onRowsChange,
+}: {
+  onRowsChange?: (rows: Product[]) => void;
+} = {}) => {
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState<string | null>(null);
   const [openUpdateModal, setOpenUpdateModal] = useState<string | null>(null);
@@ -227,6 +231,10 @@ const InventoryTable = () => {
   };
   const { data, isLoading, refetch } = useGetAllProducts(filter);
   const rows = React.useMemo(() => data?.data || [], [data]);
+
+  React.useEffect(() => {
+    onRowsChange?.(data?.data || []);
+  }, [data?.data, onRowsChange]);
 
   return (
     <div>

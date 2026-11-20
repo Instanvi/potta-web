@@ -10,6 +10,7 @@ import DynamicFilter from '@potta/components/dynamic-filter';
 import Button from '@potta/components/button';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { ErrorState, ListToolbar } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { Filter } from '../_utils/types';
 import { useGetAllVouchers } from '../_hooks/hooks';
 import DeleteModal from './deleteModal';
@@ -155,11 +156,33 @@ const VoucherTable = () => {
       <ListToolbar
         actions={
           <>
-            <Button
-              text={'Export'}
-              icon={<i className="ri-upload-2-line" />}
-              theme="lightBlue"
-              type={'button'}
+            <ExportButton
+              filename="vouchers"
+              rows={rows as any[]}
+              columns={[
+                { key: 'code', header: 'Code' },
+                { key: 'type', header: 'Type' },
+                {
+                  key: 'startDate',
+                  header: 'Start Date',
+                  value: (row: any) =>
+                    formatDate(row.scheduling?.programStartDate),
+                },
+                {
+                  key: 'endDate',
+                  header: 'End Date',
+                  value: (row: any) =>
+                    row.scheduling?.neverEnds == true
+                      ? 'NeverEnds'
+                      : formatDate(row.scheduling?.ProgramEndDate),
+                },
+                {
+                  key: 'active',
+                  header: 'Status',
+                  value: (row: any) =>
+                    row.active == true ? 'Active' : 'Inactive',
+                },
+              ]}
             />
             <Link href={'/account_receivables/vouchers/new'}>
               <Button

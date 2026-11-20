@@ -1,10 +1,8 @@
 'use client';
-import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import React, { useState } from 'react';
 import SliderCustomer from './customerSlider';
 import BulkSlider from './bulkSlider';
-import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -12,13 +10,15 @@ import {
   DropdownMenuItem,
 } from '@potta/components/shadcn/dropdown';
 import { ListToolbar } from '../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 
 interface FilterProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
+  rows?: any[];
 }
 
-const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange }) => {
+const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [] }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -28,20 +28,21 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange }) => {
       <ListToolbar
         actions={
           <>
-            <Button
-              type={'button'}
-              text="Export"
-              color
-              icon={
-                <Image
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                  src="/images/export.svg"
-                  alt="Export"
-                />
-              }
-              theme="lightBlue"
+            <ExportButton
+              filename="customers"
+              rows={rows}
+              columns={[
+                {
+                  key: 'name',
+                  header: 'Customer Name',
+                  value: (row) =>
+                    `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim(),
+                },
+                { key: 'phone', header: 'Telephone' },
+                { key: 'email', header: 'Email' },
+                { key: 'type', header: 'Type' },
+                { key: 'status', header: 'Status' },
+              ]}
             />
             <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>

@@ -14,6 +14,7 @@ import { useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDateTime } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { cn } from '@/lib/utils';
 import {
   useAcceptIntegrationTransaction,
@@ -173,7 +174,65 @@ const IntegrationTransactionsTable = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <ListToolbar>
+      <ListToolbar
+        actions={
+          <>
+            <ExportButton
+              filename="integration-transactions"
+              rows={rows}
+              columns={[
+                {
+                  key: 'createdAt',
+                  header: 'Received',
+                  value: (row) => formatDateTime(row.createdAt),
+                },
+                {
+                  key: 'source',
+                  header: 'Source',
+                  value: (row) => SOURCE_LABEL[row.source] ?? row.source,
+                },
+                { key: 'externalId', header: 'External ID' },
+                {
+                  key: 'description',
+                  header: 'Description',
+                  value: (row) => row.description || '',
+                },
+                {
+                  key: 'direction',
+                  header: 'Direction',
+                  value: (row) => (row.direction === 'in' ? 'In' : 'Out'),
+                },
+                {
+                  key: 'amount',
+                  header: 'Amount',
+                  value: (row) =>
+                    `${row.direction === 'in' ? '+' : '−'}${formatAmount(row.amount, row.currency)}`,
+                },
+                {
+                  key: 'status',
+                  header: 'Status',
+                  value: (row) =>
+                    row.journalEntryNumber
+                      ? `${row.status} · ${row.journalEntryNumber}`
+                      : row.status,
+                },
+              ]}
+            />
+            <button
+              type="button"
+              aria-label="Refresh"
+              disabled={isFetching}
+              onClick={() => void refetch()}
+              className="inline-flex size-10 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:opacity-50"
+            >
+              <ArrowsClockwise
+                className={cn('size-4', isFetching && 'animate-spin')}
+                weight="bold"
+              />
+            </button>
+          </>
+        }
+      >
         <div className="w-40">
           <Select
             label="Status"
@@ -213,20 +272,6 @@ const IntegrationTransactionsTable = () => {
             value={search}
             onchange={(e) => setSearch(e.target.value)}
           />
-        </div>
-        <div className="ml-auto flex items-end">
-          <button
-            type="button"
-            aria-label="Refresh"
-            disabled={isFetching}
-            onClick={() => void refetch()}
-            className="inline-flex size-10 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:opacity-50"
-          >
-            <ArrowsClockwise
-              className={cn('size-4', isFetching && 'animate-spin')}
-              weight="bold"
-            />
-          </button>
         </div>
       </ListToolbar>
 

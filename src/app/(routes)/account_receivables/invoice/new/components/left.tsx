@@ -3,7 +3,6 @@ import Input from '@potta/components/input';
 import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import DynamicTable from './newtableInvoice';
-import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
@@ -21,6 +20,15 @@ import {
   validateInvoiceForm,
   fieldSchemas,
 } from '../validations/invoiceValidation';
+import {
+  DocumentBalanceDue,
+  DocumentFormCard,
+  DocumentFormFooter,
+  DocumentFormShell,
+  DocumentFooterLink,
+  DocumentSectionTitle,
+} from '@potta/components/document-form-layout';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
 
 // Import Option interface from SearchableSelect to avoid conflicts
 import type { Option as SearchableSelectOption } from '@potta/components/searchableSelect';
@@ -121,8 +129,11 @@ const Left = ({
   const [billingAddress, setBillingAddress] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
   const [note, setNote] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('');
+  const [paymentTerms, setPaymentTerms] = useState('Net 30');
   const [paymentReference, setPaymentReference] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [sendLater, setSendLater] = useState(false);
+  const [amountsAre, setAmountsAre] = useState<'exclusive' | 'inclusive'>('exclusive');
   const [isAddCustomerDrawer, setIsAddCustomerDrawer] = useState(false);
   const [taxRate, setTaxRate] = useState(0);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -609,266 +620,346 @@ const Left = ({
   };
 
   // Helper function to render required field marker
-  const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
+  const RequiredMark = () => <span className="ml-1 text-red-500">*</span>;
+
+  const tableRows: TableItem[] = context?.data?.table || [];
+  const lineSubtotal = tableRows.reduce(
+    (sum, row) => sum + Number(row.qty || 0) * Number(row.price || 0),
+    0,
+  );
+  const taxAmount = lineSubtotal * (Number(taxRate) || 0) / 100;
+  const balanceDue = lineSubtotal + taxAmount;
+  const money = (n: number) =>
+    `${currency} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const selectedCustomerRecord = customers.find((c) => c.uuid === customerName);
+  const resolvedEmail = customerEmail || selectedCustomerRecord?.email || '';
+
+  const saving = isEditMode ? updateMutation.isPending : createMutation.isPending;
+  const saveLabel = isEditMode
+    ? updateMutation.isPending
+      ? 'Updating…'
+      : 'Update invoice'
+    : createMutation.isPending
+      ? 'Saving…'
+      : 'Save';
 
   return (
-    <div className="max-w-5xl min-w-5xl p-4 bg-transparent overflow-y-auto scroll bg-white ">
-      {/* Basic Information Section */}
-      <div className="mb-6">
-        <div className="w-full grid grid-cols-4 gap-4">
-          <div className={`${errors.currency ? 'error-field' : ''}`}>
-            <Select
-              label="Currency"
-              options={[
-                { label: 'USD($)', value: 'USD' },
-                { label: 'EUR(€)', value: 'EUR' },
-                { label: 'XAF', value: 'XAF' },
-              ]}
-              selectedValue={currency}
-              onChange={(value: any) => handleInputChange('currency', value)}
-              bg={''}
-              error={errors.currency}
-            />
-          </div>
-          <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-            <DatePicker
-              label="Issued Date"
-              name="issueDate"
-              value={issueDate}
-              onChange={(value) => handleInputChange('issueDate', value)}
-              placeholder="Select issue date"
-              required
-              error={errors.issueDate}
-            />
-          </div>
-          <div className={`${errors.dueDate ? 'error-field' : ''}`}>
-            <DatePicker
-              label="Due Date"
-              name="dueDate"
-              value={dueDate}
-              min={issueDate || undefined}
-              onChange={(value) => handleInputChange('dueDate', value)}
-              placeholder="Select due date"
-              required
-              error={errors.dueDate}
-            />
-          </div>
-        </div>
-
-        <div className="mt-3 w-full flex flex-col">
-          <div
-            className={`w-[50%] flex items-center space-x-3 ${
-              errors.customerName ? 'error-field' : ''
-            }`}
-          >
-            <div className="w-full">
-              <SearchableSelect
-                label="Customer"
-                options={customerOptions}
-                selectedValue={customerName}
-                onChange={(value: string) => {
-                  console.log('SearchableSelect onChange called with:', value);
-                  handleInputChange('customerName', value);
-                  // Find and set the selected customer option
-                  const selectedOption = customerOptions.find(
-                    (option) => option.value === value
-                  );
-                  setSelectedCustomer(
-                    selectedOption
-                      ? {
-                          label: selectedOption.label,
-                          value: selectedOption.value,
+    <>
+      <DocumentFormShell>
+        {/* Party + balance due */}
+        <DocumentFormCard flush>
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className={errors.customerName ? 'error-field' : ''}>
+                <div className="flex items-end gap-2">
+                  <div className="min-w-0 flex-1">
+                    <SearchableSelect
+                      label="Customer"
+                      options={customerOptions}
+                      selectedValue={customerName}
+                      onChange={(value: string) => {
+                        handleInputChange('customerName', value);
+                        const selectedOption = customerOptions.find((option) => option.value === value);
+                        setSelectedCustomer(
+                          selectedOption
+                            ? { label: selectedOption.label, value: selectedOption.value }
+                            : null,
+                        );
+                        const cust = customers.find((c) => c.uuid === value);
+                        setCustomerEmail(cust?.email || '');
+                        if (cust?.address?.address) {
+                          handleInputChange('billing', cust.address.address);
                         }
-                      : null
-                  );
-                }}
-                placeholder="Select a customer..."
-                isDisabled={customersLoading}
-                required
-              />
-              {errors.customerName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.customerName}
-                </p>
-              )}
+                      }}
+                      placeholder="Select a customer"
+                      isDisabled={customersLoading}
+                      required
+                    />
+                    {errors.customerName && (
+                      <p className="mt-1 text-sm text-red-500">{errors.customerName}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCustomerDrawer(true)}
+                    className="mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+                    aria-label="Add customer"
+                  >
+                    <i className="ri-add-line text-xl" />
+                  </button>
+                </div>
+              </div>
+              <div>
+                <Input
+                  type="email"
+                  label="Customer email"
+                  name="customerEmail"
+                  value={resolvedEmail}
+                  onchange={(e: any) => setCustomerEmail(e.target.value)}
+                />
+                <label className="mt-2 flex items-center gap-2 text-sm text-black/70">
+                  <Checkbox
+                    id="send-later"
+                    label="Send later"
+                    checked={sendLater}
+                    onChange={() => setSendLater((v) => !v)}
+                  />
+                </label>
+              </div>
             </div>
-            <div className="h-full mt-8 flex items-center">
-              <button
-                type="button"
-                onClick={() => setIsAddCustomerDrawer(true)}
-                className="flex items-center justify-center text-white bg-green-700 rounded-full size-10"
-              >
-                <i className="ri-add-line text-3xl"></i>
-              </button>
-            </div>
+            <DocumentBalanceDue amount={money(balanceDue)} />
           </div>
-          <div className="flex space-x-4 mt-4">
-            <div
-              className={`w-full ${errors.billingAddress ? 'error-field' : ''}`}
-            >
-              <Input
-                type="text"
-                label="Billing Address"
+        </DocumentFormCard>
+
+        {/* Billing meta */}
+        <DocumentFormCard flush>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+            <div className={`md:col-span-3 ${errors.billingAddress ? 'error-field' : ''}`}>
+              <TextArea
+                label="Billing address"
                 name="billing"
                 value={billingAddress}
-                onchange={(e: any) =>
-                  handleInputChange('billing', e.target.value)
-                }
+                onchange={(e: any) => handleInputChange('billing', e.target.value)}
                 errors={errors.billingAddress}
               />
             </div>
-            <div
-              className={`w-full ${
-                errors.shippingAddress ? 'error-field' : ''
-              }`}
-            >
+            <div className={`md:col-span-2 ${errors.paymentTerms ? 'error-field' : ''}`}>
+              <Select
+                label="Terms"
+                options={[
+                  { label: 'Due on receipt', value: 'Due on receipt' },
+                  { label: 'Net 15', value: 'Net 15' },
+                  { label: 'Net 30', value: 'Net 30' },
+                  { label: 'Net 60', value: 'Net 60' },
+                ]}
+                selectedValue={paymentTerms}
+                onChange={(value: any) => handleInputChange('paymentTerms', value)}
+                bg=""
+                error={errors.paymentTerms}
+              />
+            </div>
+            <div className={`md:col-span-2 ${errors.issueDate ? 'error-field' : ''}`}>
+              <DatePicker
+                label="Invoice date"
+                name="issueDate"
+                value={issueDate}
+                onChange={(value) => handleInputChange('issueDate', value)}
+                placeholder="Select date"
+                required
+                error={errors.issueDate}
+              />
+            </div>
+            <div className={`md:col-span-2 ${errors.dueDate ? 'error-field' : ''}`}>
+              <DatePicker
+                label="Due date"
+                name="dueDate"
+                value={dueDate}
+                min={issueDate || undefined}
+                onChange={(value) => handleInputChange('dueDate', value)}
+                placeholder="Select date"
+                required
+                error={errors.dueDate}
+              />
+            </div>
+            <div className="md:col-span-1">
               <Input
                 type="text"
-                label="Shipping Address"
-                name="shipping"
-                value={shippingAddress}
-                onchange={(e: any) =>
-                  handleInputChange('shipping', e.target.value)
-                }
-                errors={errors.shippingAddress}
+                label="Invoice no."
+                name="invoiceNumber"
+                value={invoiceNumber}
+                onchange={(e: any) => handleInputChange('invoiceNumber', e.target.value)}
+              />
+            </div>
+            <div className={`md:col-span-2 ${errors.currency ? 'error-field' : ''}`}>
+              <Select
+                label="Currency"
+                options={[
+                  { label: 'XAF', value: 'XAF' },
+                  { label: 'USD ($)', value: 'USD' },
+                  { label: 'EUR (€)', value: 'EUR' },
+                ]}
+                selectedValue={currency}
+                onChange={(value: any) => handleInputChange('currency', value)}
+                bg=""
+                error={errors.currency}
               />
             </div>
           </div>
-        </div>
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+            <div className={`min-w-[12rem] ${errors.shippingAddress ? 'error-field' : ''}`}>
+              <TextArea
+                label="Shipping address"
+                name="shipping"
+                value={shippingAddress}
+                onchange={(e: any) => handleInputChange('shipping', e.target.value)}
+                errors={errors.shippingAddress}
+              />
+            </div>
+            <div className="ml-auto flex flex-wrap items-end gap-4">
+              <div className={errors.taxRate ? 'error-field' : ''}>
+                <Input
+                  type="number"
+                  label="Tax rate %"
+                  name="taxRate"
+                  value={taxRate}
+                  onchange={(e: any) => handleInputChange('taxRate', e.target.value)}
+                  errors={errors.taxRate}
+                />
+              </div>
+              <Select
+                label="Amounts are"
+                options={[
+                  { label: 'Exclusive of Tax', value: 'exclusive' },
+                  { label: 'Inclusive of Tax', value: 'inclusive' },
+                ]}
+                selectedValue={amountsAre}
+                onChange={(value: any) => setAmountsAre(value)}
+                bg=""
+              />
+            </div>
+          </div>
+        </DocumentFormCard>
 
-        <div className="my-5 pt-10">
-          <h3 className="text-lg mb-2 text-gray-900 font-medium">
-            Line Items
-            <RequiredMark />
-          </h3>
+        {/* Line items */}
+        <DocumentFormCard flush>
+          <DocumentSectionTitle>
+            Product / service lines <RequiredMark />
+          </DocumentSectionTitle>
           <DynamicTable />
           {errors.lineItems && (
-            <p className="text-red-500 text-sm mt-1">{errors.lineItems}</p>
+            <p className="mt-2 text-sm text-red-500">{errors.lineItems}</p>
           )}
-        </div>
+        </DocumentFormCard>
 
-        <hr className="my-5" />
-        <h3 className="text-lg font-medium my-2">
-          Payment Methods
-          <RequiredMark />
-        </h3>
-        <div className={`mt-2 ${errors.paymentMethod ? 'error-field' : ''}`}>
-          <div className="grid grid-cols-2 py-4 gap-4">
-            {[
-              'Credit Card',
-              'Bank Transfer',
-              'ACH Transfer',
-              'Mobile Money',
-              'Cash',
-              'Credit',
-              'Other',
-            ].map((option) => (
+        {/* Message + payments + totals */}
+        <DocumentFormCard flush>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+            <div className="space-y-4 lg:col-span-7">
+              <div className={errors.notes ? 'error-field' : ''}>
+                <TextArea
+                  label="Message on invoice"
+                  name="note"
+                  value={note}
+                  onchange={(e: any) => handleInputChange('note', e.target.value)}
+                  errors={errors.notes}
+                />
+              </div>
+              <DocumentSectionTitle>
+                Payment method <RequiredMark />
+              </DocumentSectionTitle>
               <div
-                key={option}
-                onClick={() => handlePaymentMethodClick(option)}
-                className={`p-4 border cursor-pointer ${
-                  selectedPaymentMethod === option
-                    ? 'border-green-500 text-green-500'
-                    : errors.paymentMethod && formSubmitted
-                    ? 'border-red-500'
-                    : 'border-gray-300'
-                }`}
+                className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${errors.paymentMethod ? 'error-field' : ''}`}
               >
-                <div className="flex items-center">
-                  <Checkbox
-                    id={`payment-${option}`}
-                    label={option.replace(/([A-Z])/g, ' $1').toUpperCase()}
-                    checked={selectedPaymentMethod === option}
-                    onChange={() => handlePaymentMethodClick(option)}
-                  />
+                {[
+                  'Credit Card',
+                  'Bank Transfer',
+                  'ACH Transfer',
+                  'Mobile Money',
+                  'Cash',
+                  'Credit',
+                  'Other',
+                ].map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => handlePaymentMethodClick(option)}
+                    className={`flex items-center gap-2 rounded-[2px] border px-3 py-2.5 text-left text-sm transition-colors ${
+                      selectedPaymentMethod === option
+                        ? 'border-primary bg-brand-subtle text-primary'
+                        : errors.paymentMethod && formSubmitted
+                          ? 'border-red-500'
+                          : 'border-black/10 hover:border-black/20'
+                    }`}
+                  >
+                    <Checkbox
+                      id={`payment-${option}`}
+                      label={option}
+                      checked={selectedPaymentMethod === option}
+                      onChange={() => handlePaymentMethodClick(option)}
+                    />
+                  </button>
+                ))}
+              </div>
+              {errors.paymentMethod && (
+                <p className="mt-2 text-sm text-red-500">{errors.paymentMethod}</p>
+              )}
+              <div className={errors.paymentReference ? 'error-field' : ''}>
+                <Input
+                  type="text"
+                  label="Payment reference"
+                  name="paymentReference"
+                  value={paymentReference}
+                  onchange={(e: any) => handleInputChange('paymentReference', e.target.value)}
+                  errors={errors.paymentReference}
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-5">
+              <div className="ml-auto w-full max-w-sm space-y-2 text-sm">
+                <div className="flex justify-between text-black/70">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums text-foreground">{money(lineSubtotal)}</span>
+                </div>
+                <div className="flex justify-between text-black/70">
+                  <span>Tax</span>
+                  <span className="tabular-nums text-foreground">{money(taxAmount)}</span>
+                </div>
+                <div className="flex justify-between border-t border-black/[0.08] pt-3 text-base font-medium">
+                  <span>Total</span>
+                  <span className="tabular-nums">{money(balanceDue)}</span>
+                </div>
+                <div className="flex justify-between pt-1 text-base font-medium">
+                  <span>Balance due</span>
+                  <span className="tabular-nums text-primary">{money(balanceDue)}</span>
                 </div>
               </div>
-            ))}
-            {errors.paymentMethod && (
-              <p className="text-red-500 text-sm col-span-2">
-                {errors.paymentMethod}
-              </p>
-            )}
+            </div>
           </div>
-          <div className={`${errors.paymentReference ? 'error-field' : ''}`}>
-            <Input
-              type="text"
-              label="Payment Reference"
-              name="paymentReference"
-              value={paymentReference}
-              onchange={(e: any) =>
-                handleInputChange('paymentReference', e.target.value)
-              }
-              errors={errors.paymentReference}
-            />
-          </div>
-          <div className={`${errors.taxRate ? 'error-field' : ''}`}>
-            <Input
-              type="number"
-              label="Tax Rate"
-              name="taxRate"
-              value={taxRate}
-              onchange={(e: any) =>
-                handleInputChange('taxRate', e.target.value)
-              }
-              errors={errors.taxRate}
-            />
-          </div>
-          <div className={`${errors.paymentTerms ? 'error-field' : ''}`}>
-            <TextArea
-              label="Payment Terms"
-              name="paymentTerms"
-              value={paymentTerms}
-              onchange={(e: any) =>
-                handleInputChange('paymentTerms', e.target.value)
-              }
-              errors={errors.paymentTerms}
-            />
-          </div>
-        </div>
+        </DocumentFormCard>
+      </DocumentFormShell>
 
-        <hr className="my-5" />
-        <h3 className="text-xl  my-2">Notes</h3>
-        <div className={`${errors.notes ? 'error-field' : ''}`}>
-          <textarea
-            value={note}
-            onChange={(e) => handleInputChange('note', e.target.value)}
-            className={`h-36 border p-2 w-full outline-none mt-2 focus:outline-none focus:ring-2 mb-10 ${
-              errors.notes
-                ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                : 'focus:ring-green-500 focus:border-green-500'
-            }`}
-          ></textarea>
-          {errors.notes && (
-            <p className="text-red-500 text-sm mt-1">{errors.notes}</p>
-          )}
-        </div>
+      <DocumentFormFooter
+        left={
+          <ShadcnButton
+            type="button"
+            variant="outline"
+            className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            onClick={() => router.push('/account_receivables/invoice')}
+          >
+            Cancel
+          </ShadcnButton>
+        }
+        center={
+          <>
+            <DocumentFooterLink onClick={() => toast.info('Print / preview opens after save.')}>
+              Print or Preview
+            </DocumentFooterLink>
+            <DocumentFooterLink href="/account_receivables/recurring">
+              Make recurring
+            </DocumentFooterLink>
+          </>
+        }
+        right={
+          <>
+            <ShadcnButton
+              type="button"
+              variant="outline"
+              className="border-white/30 bg-white text-foreground hover:bg-white/90"
+              onClick={handleSaveInvoice}
+              disabled={saving}
+            >
+              {saveLabel}
+            </ShadcnButton>
+            <ShadcnButton type="button" onClick={handleSaveInvoice} disabled={saving}>
+              {sendLater ? 'Save and close' : 'Save and send'}
+            </ShadcnButton>
+          </>
+        }
+      />
 
-        <div className="fixed bottom-0 left-0 right-0 p-2 bg-white border-t border-gray-200 flex justify-end space-x-3">
-          {' '}
-          <Button
-            text={
-              isEditMode
-                ? updateMutation.isPending
-                  ? 'Updating Invoice...'
-                  : 'Update Invoice'
-                : createMutation.isPending
-                ? 'Creating Invoice...'
-                : 'Save Invoice'
-            }
-            onClick={handleSaveInvoice}
-            type={'button'}
-            disabled={
-              isEditMode ? updateMutation.isPending : createMutation.isPending
-            }
-          />
-        </div>
-        <SliderCustomer
-          open={isAddCustomerDrawer}
-          setOpen={setIsAddCustomerDrawer}
-        />
-      </div>
-    </div>
+      <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} />
+    </>
   );
 };
 

@@ -91,7 +91,11 @@ const BankAccountsPage = () => {
           title="Bank accounts"
           description="Bank accounts and cards linked to your ledger, with their current balances."
         />
-        <BankAccountsFilter search={search} onSearchChange={setSearch} />
+        <BankAccountsFilter
+          search={search}
+          onSearchChange={setSearch}
+          rows={accounts}
+        />
 
         <Tabs tabs={TABS} value={activeTab} onChange={setActiveTab} />
 

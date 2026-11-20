@@ -12,6 +12,7 @@ import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, StatCard, StatusBadge } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { useCashAccounts, useCashbookEntries, useDeleteCashbookEntry } from '../hooks';
 import { CashbookDirection, CashbookEntry, CashbookFilter } from '../utils/types';
 import CashbookEntrySheet from './CashbookEntrySheet';
@@ -197,17 +198,65 @@ const CashbookTable = () => {
             />
           </div>
         </div>
-        <Can resource="Cashbook" action="create">
-          <Button
-            text="New entry"
-            type="button"
-            icon={<Plus className="h-4 w-4" />}
-            onClick={() => {
-              setEditing(null);
-              setSheetOpen(true);
-            }}
+        <div className="flex flex-wrap items-center gap-3">
+          <ExportButton
+            filename="cashbook"
+            rows={rows}
+            columns={[
+              {
+                key: 'transactionDate',
+                header: 'Date',
+                value: (row) => formatDate(row.transactionDate),
+              },
+              {
+                key: 'direction',
+                header: 'Direction',
+                value: (row) => (row.direction === 'IN' ? 'In' : 'Out'),
+              },
+              { key: 'entryType', header: 'Type' },
+              {
+                key: 'account',
+                header: 'Account',
+                value: (row) =>
+                  row.cashAccount
+                    ? `${row.cashAccount.code} · ${row.cashAccount.name}`
+                    : '',
+              },
+              {
+                key: 'counterparty',
+                header: 'Counterparty',
+                value: (row) => row.counterparty || '',
+              },
+              {
+                key: 'narration',
+                header: 'Narration',
+                value: (row) => row.narration || '',
+              },
+              {
+                key: 'reference',
+                header: 'Reference',
+                value: (row) => row.reference || '',
+              },
+              {
+                key: 'amount',
+                header: 'Amount',
+                value: (row) =>
+                  `${row.direction === 'IN' ? '+' : '−'}${formatAmount(row.amount, row.currency)}`,
+              },
+            ]}
           />
-        </Can>
+          <Can resource="Cashbook" action="create">
+            <Button
+              text="New entry"
+              type="button"
+              icon={<Plus className="h-4 w-4" />}
+              onClick={() => {
+                setEditing(null);
+                setSheetOpen(true);
+              }}
+            />
+          </Can>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

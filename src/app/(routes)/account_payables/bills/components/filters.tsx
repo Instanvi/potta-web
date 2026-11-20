@@ -5,7 +5,11 @@ import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { Can } from '@/components/auth/can';
 import { ListToolbar } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { useVendorOptions } from '../../hooks';
+import { Bill } from '../utils/types';
+import { formatDate } from '../../../_shared/format';
+import { formatMoney } from '../../utils/format';
 
 interface FilterProps {
   search: string;
@@ -14,6 +18,7 @@ interface FilterProps {
   onStatusChange: (value: string) => void;
   vendorId: string;
   onVendorChange: (value: string) => void;
+  rows?: Bill[];
 }
 
 const statusOptions = [
@@ -33,6 +38,7 @@ const Filter: React.FC<FilterProps> = ({
   onStatusChange,
   vendorId,
   onVendorChange,
+  rows = [],
 }) => {
   const { data: vendors = [] } = useVendorOptions();
   const router = useRouter();
@@ -40,15 +46,50 @@ const Filter: React.FC<FilterProps> = ({
   return (
     <ListToolbar
       actions={
-        <Can resource="Bill" action="create">
-          <Button
-            text="New bill"
-            icon={<i className="ri-file-add-line" />}
-            theme="default"
-            type="button"
-            onClick={() => router.push('/account_payables/bills/new')}
+        <>
+          <ExportButton
+            filename="bills"
+            rows={rows}
+            columns={[
+              { key: 'code', header: 'Bill' },
+              {
+                key: 'vendorInvoiceNumber',
+                header: 'Vendor ref',
+                value: (row) => row.vendorInvoiceNumber || '',
+              },
+              {
+                key: 'vendor',
+                header: 'Vendor',
+                value: (row) => row.vendor?.name ?? '',
+              },
+              {
+                key: 'issuedDate',
+                header: 'Issued',
+                value: (row) => formatDate(row.issuedDate),
+              },
+              {
+                key: 'dueDate',
+                header: 'Due date',
+                value: (row) => formatDate(row.dueDate),
+              },
+              {
+                key: 'invoiceTotal',
+                header: 'Amount',
+                value: (row) => formatMoney(row.invoiceTotal, row.currency),
+              },
+              { key: 'status', header: 'Status' },
+            ]}
           />
-        </Can>
+          <Can resource="Bill" action="create">
+            <Button
+              text="New bill"
+              icon={<i className="ri-file-add-line" />}
+              theme="default"
+              type="button"
+              onClick={() => router.push('/account_payables/bills/new')}
+            />
+          </Can>
+        </>
       }
     >
       <DynamicFilter

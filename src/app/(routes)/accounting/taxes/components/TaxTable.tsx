@@ -9,6 +9,7 @@ import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 import { useDeleteTax, useImportTaxesCsv, useTaxes } from '../hooks';
 import { Tax } from '../utils/api';
 import TaxSheet from './TaxSheet';
@@ -123,8 +124,44 @@ const TaxTable = () => {
     <div className="flex flex-col gap-4">
       <ListToolbar
         actions={
-          <Can resource="Tax" action="create">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <ExportButton
+              filename="taxes"
+              rows={rows}
+              columns={[
+                { key: 'name', header: 'Name' },
+                {
+                  key: 'taxId',
+                  header: 'Code',
+                  value: (row) => row.taxId || '',
+                },
+                {
+                  key: 'type',
+                  header: 'Type',
+                  value: (row) =>
+                    row.type === 'FIXED' ? 'Fixed' : 'Percentage',
+                },
+                {
+                  key: 'value',
+                  header: 'Rate / amount',
+                  value: (row) =>
+                    row.type === 'FIXED'
+                      ? formatAmount(row.flatRate)
+                      : `${Number(row.rate ?? 0)}%`,
+                },
+                {
+                  key: 'isActive',
+                  header: 'Status',
+                  value: (row) => (row.isActive ? 'Active' : 'Inactive'),
+                },
+                {
+                  key: 'description',
+                  header: 'Description',
+                  value: (row) => row.description || '',
+                },
+              ]}
+            />
+            <Can resource="Tax" action="create">
               <input
                 ref={fileInput}
                 type="file"
@@ -153,8 +190,8 @@ const TaxTable = () => {
                   setSheetOpen(true);
                 }}
               />
-            </div>
-          </Can>
+            </Can>
+          </div>
         }
       >
         <Search
