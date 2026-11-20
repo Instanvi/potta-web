@@ -65,6 +65,8 @@ export const dashboardDataApi = {
       status?: string[];
       groupBy?: string;
       limit?: number;
+      fromDate?: string | null;
+      toDate?: string | null;
     },
   ) => {
     const res = await axios.get<AggregateResult>(`/dashboard-data/${entity}/aggregate`, {
@@ -74,6 +76,8 @@ export const dashboardDataApi = {
         status: params.status?.length ? params.status.join(',') : undefined,
         groupBy: params.groupBy,
         limit: params.limit,
+        fromDate: params.fromDate ?? undefined,
+        toDate: params.toDate ?? undefined,
       },
     });
     return res.data;

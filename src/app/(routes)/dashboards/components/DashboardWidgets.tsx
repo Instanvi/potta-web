@@ -33,6 +33,8 @@ function KpiWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'kpi' 
     aggregation: widget.config.aggregation,
     field: widget.config.field,
     status: widget.config.statuses,
+    fromDate: widget.config.fromDate,
+    toDate: widget.config.toDate,
   });
   if (isLoading) return <LoadingState label="Loading metric…" />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -51,6 +53,8 @@ function ChartWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'cha
     status: widget.config.statuses,
     groupBy: widget.config.groupBy,
     limit: widget.config.limit,
+    fromDate: widget.config.fromDate,
+    toDate: widget.config.toDate,
   });
   if (isLoading) return <LoadingState label="Loading chart…" />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -179,7 +183,7 @@ export function DashboardGrid({
     return (
       <EmptyState
         title="No widgets"
-        description="Add KPIs, charts, or lists to build this dashboard."
+        description="Use Add widget to open the sheet and pick from dozens of ready KPIs, charts, or lists."
       />
     );
   }
