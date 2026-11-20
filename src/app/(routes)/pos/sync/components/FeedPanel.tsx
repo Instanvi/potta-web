@@ -101,7 +101,7 @@ const FeedPanel = () => {
         />
       )}
       <Sheet open={!!payloadItem} onOpenChange={(open) => !open && setPayloadItem(null)}>
-        <SheetContent side="left" className="flex h-full w-full flex-col p-0 sm:max-w-[560px]">
+        <SheetContent side="right" className="flex h-full w-full flex-col p-0 sm:max-w-[560px]">
           <SheetHeader className="border-b border-black/10 px-4 py-4">
             <SheetTitle>Payload</SheetTitle>
             <SheetDescription className="text-muted-foreground">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FieldError, UseFormRegister } from 'react-hook-form';
-import { FIELD_INPUT } from '@/lib/field-styles';
+import { FIELD_INPUT, SHEET_FIELD_INPUT } from '@/lib/field-styles';
 import { cn } from '@/lib/utils';
 
 // Create a custom error type that can handle both FieldError and simple message objects
@@ -24,6 +24,8 @@ type Props = {
   disabled?: boolean;
   min?: number;
   max?: number;
+  /** Full light outline for white sheet backgrounds. */
+  outlined?: boolean;
 };
 
 const Input: React.FC<Props> = ({
@@ -44,6 +46,7 @@ const Input: React.FC<Props> = ({
   disabled,
   min,
   max,
+  outlined,
 }) => {
   // Get register props if register is provided
   const registerProps = register ? register(name) : {};
@@ -56,7 +59,7 @@ const Input: React.FC<Props> = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <span className={`mb-3 text-base font-medium text-foreground ${labelClass}`}>
+        <span className={`mb-1 block text-sm font-normal text-foreground ${labelClass}`}>
           {label}
           {required && <span className=" text-red-500">*</span>}
         </span>
@@ -72,7 +75,7 @@ const Input: React.FC<Props> = ({
         {...inputProps}
         placeholder={placeholder}
         className={cn(
-          FIELD_INPUT,
+          outlined ? SHEET_FIELD_INPUT : FIELD_INPUT,
           'mt-2',
           height ? 'h-9' : 'h-10',
           errors ? 'border-destructive' : '',

@@ -148,7 +148,7 @@ export function PayrollEmployeesPage() {
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-md">
+          <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
             <SheetHeader>
               <SheetTitle>New employee</SheetTitle>
             </SheetHeader>
@@ -159,6 +159,7 @@ export function PayrollEmployeesPage() {
                 label="First name"
                 placeholder="Jane"
                 required
+                outlined
                 register={register}
                 errors={errors.first_name}
               />
@@ -168,6 +169,7 @@ export function PayrollEmployeesPage() {
                 label="Last name"
                 placeholder="Doe"
                 required
+                outlined
                 register={register}
                 errors={errors.last_name}
               />
@@ -177,6 +179,7 @@ export function PayrollEmployeesPage() {
                 label="Email"
                 placeholder="jane@example.com"
                 required
+                outlined
                 register={register}
                 errors={errors.email}
               />
@@ -185,10 +188,11 @@ export function PayrollEmployeesPage() {
                 name="job_title"
                 label="Job title"
                 placeholder="Accountant"
+                outlined
                 register={register}
                 errors={errors.job_title}
               />
-              <SheetFooter className="mt-6 px-0 sm:justify-end">
+              <SheetFooter className="px-0 sm:justify-end">
                 <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
                   Cancel
                 </Button>

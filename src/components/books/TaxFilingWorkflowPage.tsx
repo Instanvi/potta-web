@@ -12,7 +12,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { FIELD_INPUT } from '@/lib/field-styles';
+import { SHEET_FIELD_INPUT, SHEET_FIELD_LABEL } from '@/lib/field-styles';
+import { DatePicker } from '@/components/ui/date-picker';
 import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
 
 const COLUMNS = [
@@ -143,28 +144,32 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>New tax filing</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-4">
-              {(
-                [
-                  ['name', 'Name', 'text'],
-                  ['periodStart', 'Period start', 'date'],
-                  ['periodEnd', 'Period end', 'date'],
-                ] as const
-              ).map(([key, label, type]) => (
-                <label key={key} className="block space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">{label}</span>
-                  <input
-                    type={type}
-                    value={form[key]}
-                    onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
-                    className={FIELD_INPUT}
-                  />
-                </label>
-              ))}
+            <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
+              <label className="block space-y-1">
+                <span className={SHEET_FIELD_LABEL}>Name</span>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  className={SHEET_FIELD_INPUT}
+                />
+              </label>
+              <DatePicker
+                label="Period start"
+                value={form.periodStart}
+                onChange={(v) => setForm((p) => ({ ...p, periodStart: v }))}
+                outlined
+              />
+              <DatePicker
+                label="Period end"
+                value={form.periodEnd}
+                onChange={(v) => setForm((p) => ({ ...p, periodEnd: v }))}
+                outlined
+              />
             </div>
             <SheetFooter>
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
@@ -178,7 +183,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
         </Sheet>
 
         <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>{mode === 'prepare' ? 'Prepare filing' : 'Submit filing'}</SheetTitle>
             </SheetHeader>

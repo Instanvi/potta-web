@@ -67,7 +67,7 @@ function CatalogCreateSheet({
 }) {
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="left" className="flex w-full flex-col">
+      <SheetContent side="right" className="flex w-full flex-col">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
@@ -153,7 +153,7 @@ export function AttributeCreateForm() {
           placeholder="e.g. Size"
           value={name}
           onchange={(e) => setName(e.target.value)}
-        />
+        outlined />
         <Input
           type="text"
           name="options"
@@ -161,7 +161,7 @@ export function AttributeCreateForm() {
           placeholder="Comma separated, e.g. S, M, L"
           value={options}
           onchange={(e) => setOptions(e.target.value)}
-        />
+        outlined />
       </CatalogCreateSheet>
     </>
   );
@@ -231,7 +231,7 @@ export function UnitCreateForm() {
           placeholder="e.g. Carton"
           value={name}
           onchange={(e) => setName(e.target.value)}
-        />
+        outlined />
         <Input
           type="text"
           name="symbol"
@@ -239,7 +239,7 @@ export function UnitCreateForm() {
           placeholder="e.g. ctn"
           value={symbol}
           onchange={(e) => setSymbol(e.target.value)}
-        />
+        outlined />
         <Input
           type="number"
           name="factor"
@@ -248,7 +248,7 @@ export function UnitCreateForm() {
           placeholder="1"
           value={factor}
           onchange={(e) => setFactor(e.target.value)}
-        />
+        outlined />
       </CatalogCreateSheet>
     </>
   );
@@ -311,7 +311,7 @@ export function ModifierCreateForm() {
           placeholder="e.g. Gift wrap"
           value={name}
           onchange={(e) => setName(e.target.value)}
-        />
+        outlined />
         <Input
           type="number"
           name="price"
@@ -320,7 +320,7 @@ export function ModifierCreateForm() {
           placeholder="0"
           value={price}
           onchange={(e) => setPrice(e.target.value)}
-        />
+        outlined />
       </CatalogCreateSheet>
     </>
   );

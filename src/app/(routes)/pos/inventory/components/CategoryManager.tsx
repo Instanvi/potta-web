@@ -143,7 +143,7 @@ const CategoryManager = () => {
         }}
       >
         <SheetContent
-          side="left"
+          side="right"
           className="flex h-full w-full flex-col bg-white p-0"
         >
           <SheetHeader className="border-b border-black/10 bg-white px-6 py-5">
@@ -163,6 +163,7 @@ const CategoryManager = () => {
               register={register}
               errors={errors.name}
               required
+              outlined
             />
             <Input
               label="Description"
@@ -170,6 +171,7 @@ const CategoryManager = () => {
               name="description"
               register={register}
               errors={errors.description}
+              outlined
             />
           </form>
           <SheetFooter className="mt-0 border-t border-black/10 px-6 py-3">

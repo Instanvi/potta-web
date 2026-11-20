@@ -89,7 +89,7 @@ const TaxSheet = ({ open, tax, onClose }: Props) => {
 
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="left" className="w-full overflow-y-auto rounded-none sm:max-w-md">
+      <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{tax ? 'Edit tax' : 'New tax'}</SheetTitle>
         </SheetHeader>
@@ -102,14 +102,14 @@ const TaxSheet = ({ open, tax, onClose }: Props) => {
             required
             register={register}
             errors={errors.name}
-          />
+          outlined />
           <Input
             type="text"
             name="taxId"
             label="Tax code"
             placeholder="e.g. TVA-19.25"
             register={register}
-          />
+          outlined />
           <Controller
             name="type"
             control={control}
@@ -134,7 +134,7 @@ const TaxSheet = ({ open, tax, onClose }: Props) => {
               required
               register={register}
               errors={errors.rate}
-            />
+            outlined />
           ) : (
             <Input
               type="number"
@@ -143,9 +143,9 @@ const TaxSheet = ({ open, tax, onClose }: Props) => {
               required
               register={register}
               errors={errors.flatRate}
-            />
+            outlined />
           )}
-          <Input type="text" name="description" label="Description" register={register} />
+          <Input type="text" name="description" label="Description" register={register} outlined />
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input type="checkbox" {...register('isActive')} className="accent-primary" />
             Active

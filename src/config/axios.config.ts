@@ -36,7 +36,7 @@ export const authClient = Axios.create({
 
 /** instanvi-payroll-expense-be (employees + expense transactions). */
 export const PAYROLL_API_URL = withApiPrefix(
-  process.env.NEXT_PUBLIC_PAYROLL_API_URL || 'https://payroll.dev.instanvi.com/api/'
+  process.env.NEXT_PUBLIC_PAYROLL_API_URL || 'https://api.spend.instanvi.com/api/'
 );
 
 export const payrollClient = Axios.create({

@@ -6,6 +6,7 @@ import RootLayout from '@/app/(routes)/layout';
 import { EmptyState, ListToolbar, PageContainer, Panel, StatCard } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
+import { DatePicker } from '@/components/ui/date-picker';
 import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
 import axios from 'config/axios.config';
 import { cn } from '@/lib/utils';
@@ -159,12 +160,12 @@ export function ReconcilePage() {
               );
             })}
           </select>
-          <input
-            type="date"
+          <DatePicker
             value={statementDate}
-            onChange={(e) => setStatementDate(e.target.value)}
-            className={cn(FIELD_INPUT, 'max-w-[180px]')}
+            onChange={setStatementDate}
+            placeholder="Statement date"
             disabled={!!reconcileId}
+            className="max-w-[200px]"
           />
           <input
             type="number"

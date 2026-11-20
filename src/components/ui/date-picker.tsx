@@ -27,10 +27,18 @@ export const parseDateValue = (value?: string | Date | null): Date | undefined =
 const DISPLAY_FORMAT = 'dd MMM yyyy';
 const CURRENT_YEAR = new Date().getFullYear();
 
-const triggerClass = (hasValue: boolean, error?: string, disabled?: boolean) =>
+const triggerClass = (
+  hasValue: boolean,
+  error?: string,
+  disabled?: boolean,
+  outlined?: boolean,
+) =>
   cn(
-    'flex h-10 w-full items-center gap-2 rounded-t-[2px] rounded-b-none border-0 border-b bg-white px-3 text-left text-sm leading-none shadow-none transition-colors',
+    'flex h-10 w-full items-center gap-2 bg-white px-3 text-left text-sm font-normal leading-none shadow-none transition-colors',
     'focus:outline-none focus-visible:border-primary focus-visible:ring-0',
+    outlined
+      ? 'rounded-[2px] border'
+      : 'rounded-t-[2px] rounded-b-none border-0 border-b',
     error ? 'border-destructive' : 'border-black/15',
     !hasValue && 'text-black/35',
     disabled && 'cursor-not-allowed opacity-60'
@@ -38,7 +46,7 @@ const triggerClass = (hasValue: boolean, error?: string, disabled?: boolean) =>
 
 const FieldLabel = ({ label, required, htmlFor }: { label?: React.ReactNode; required?: boolean; htmlFor?: string }) =>
   label ? (
-    <label htmlFor={htmlFor} className="mb-3 block text-base font-medium text-foreground">
+    <label htmlFor={htmlFor} className="mb-1 block text-sm font-normal text-foreground">
       {label}
       {required && <span className="text-destructive"> *</span>}
     </label>
@@ -62,6 +70,8 @@ interface BaseDatePickerProps {
   id?: string;
   name?: string;
   align?: 'start' | 'center' | 'end';
+  /** Full light outline — use on white sheets. */
+  outlined?: boolean;
 }
 
 export type DatePickerProps = BaseDatePickerProps &
@@ -87,6 +97,7 @@ export function DatePicker(props: DatePickerProps) {
     id,
     name,
     align = 'start',
+    outlined,
   } = props;
   const [open, setOpen] = React.useState(false);
   const selected = parseDateValue(props.value ?? undefined);
@@ -115,7 +126,7 @@ export function DatePicker(props: DatePickerProps) {
             type="button"
             disabled={disabled}
             aria-invalid={!!error}
-            className={triggerClass(!!selected, error, disabled)}
+            className={triggerClass(!!selected, error, disabled, outlined)}
           >
             <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="flex-1 truncate">{selected ? format(selected, DISPLAY_FORMAT) : placeholder}</span>
