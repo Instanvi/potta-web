@@ -21,9 +21,9 @@ export default function Page() {
         { key: 'salvageValue', label: 'Salvage value', type: 'number' },
         { key: 'usefulLifeMonths', label: 'Useful life (months)', type: 'number' },
         { key: 'purchaseDate', label: 'Purchase date', type: 'date' },
-        { key: 'assetAccountId', label: 'Asset account ID' },
-        { key: 'depreciationExpenseAccountId', label: 'Depreciation expense account ID' },
-        { key: 'accumulatedDepreciationAccountId', label: 'Accumulated depreciation account ID' },
+        { key: 'assetAccountId', label: 'Asset account', type: 'account' },
+        { key: 'depreciationExpenseAccountId', label: 'Depreciation expense account', type: 'account' },
+        { key: 'accumulatedDepreciationAccountId', label: 'Accumulated depreciation account', type: 'account' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
       ]}
       actions={[

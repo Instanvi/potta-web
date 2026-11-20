@@ -14,12 +14,12 @@ export default function Page() {
         { key: 'receivedDate', label: 'Received' },
       ]}
       fields={[
-        { key: 'purchaseOrderId', label: 'Purchase order ID' },
+        { key: 'purchaseOrderId', label: 'Purchase order', type: 'purchaseOrder' },
         { key: 'vendorId', label: 'Vendor', type: 'vendor' },
         { key: 'receivedDate', label: 'Received date', type: 'date' },
         { key: 'postInventory', label: 'Post inventory', type: 'checkbox' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
-        { key: 'lines', label: 'Line items', type: 'lines' },
+        { key: 'lines', label: 'Received items', type: 'lines' },
       ]}
       actions={[
         { label: 'Post inventory', action: 'post-inventory', confirm: true },

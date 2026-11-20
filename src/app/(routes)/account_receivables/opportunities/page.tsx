@@ -17,7 +17,7 @@ export default function Page() {
       fields={[
         { key: 'name', label: 'Name' },
         { key: 'customerId', label: 'Customer', type: 'customer' },
-        { key: 'leadId', label: 'Lead ID' },
+        { key: 'leadId', label: 'Lead', type: 'lead' },
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'expectedCloseDate', label: 'Expected close', type: 'date' },
         { key: 'notes', label: 'Notes', type: 'textarea' },

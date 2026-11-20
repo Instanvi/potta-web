@@ -16,7 +16,7 @@ export default function Page() {
       ]}
       fields={[
         { key: 'vendorId', label: 'Vendor', type: 'vendor' },
-        { key: 'billId', label: 'Bill ID' },
+        { key: 'billId', label: 'Bill', type: 'bill' },
         { key: 'creditAmount', label: 'Credit amount', type: 'number' },
         { key: 'issueDate', label: 'Issue date', type: 'date' },
         { key: 'reason', label: 'Reason' },

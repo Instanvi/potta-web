@@ -362,6 +362,12 @@ const InvoiceTable = () => {
         preview={
           <InvoiceDetailPreview invoiceId={selectedId} fallback={selectedFromList} />
         }
+        previewLabel="Invoice preview"
+        previewDownloadTitle={
+          selectedFromList?.invoiceNumber ||
+          selectedFromList?.invoiceId ||
+          'Invoice'
+        }
       />
     );
   }

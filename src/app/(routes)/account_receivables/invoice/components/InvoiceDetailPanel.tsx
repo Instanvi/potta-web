@@ -13,6 +13,7 @@ import useApproveInvoice from '../_hooks/useApproveInvoice';
 import useGetOneInvoice from '../_hooks/useGetOneInvoice';
 import InvoicePdfPreview, { InvoicePreviewModel } from './InvoicePdfPreview';
 import EditInvoiceModal from './EditInvoiceModal';
+import { downloadPreviewAsPdf } from '@/lib/print-preview';
 
 /** Statuses that are considered posted / non-editable — use a credit note instead. */
 export const POSTED_INVOICE_STATUSES = [
@@ -122,11 +123,23 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
         />
       ) : null}
       <Button
-        text="PDF"
+        text="Download PDF"
         type="button"
         theme="lightBlue"
-        icon={<i className="ri-file-pdf-line" />}
-        onClick={() => toast.success('Use the preview panel to view or print the invoice.')}
+        icon={<i className="ri-download-2-line" />}
+        onClick={() => {
+          const el = document.querySelector(
+            '[data-document-preview]'
+          ) as HTMLElement | null;
+          if (!el) {
+            toast.message('Open Preview first, then download the PDF.');
+            return;
+          }
+          downloadPreviewAsPdf(
+            el,
+            invoice.invoiceNumber || invoice.invoiceId || 'Invoice'
+          );
+        }}
       />
     </>
   );

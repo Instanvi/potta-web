@@ -315,6 +315,10 @@ export function BillsTable() {
         list={list}
         detail={<BillDetailPanel billId={selectedId} />}
         preview={<BillPreviewPanel billId={selectedId} />}
+        previewLabel="Bill preview"
+        previewDownloadTitle={
+          rows.find((b) => b.uuid === selectedId)?.code || 'Bill'
+        }
       />
     );
   }

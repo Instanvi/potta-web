@@ -14,6 +14,8 @@ import { Bill, billExpenseAccount, paymentMethodLabel } from '../utils/types';
 import BillStatusBadge from './BillStatusBadge';
 import PayBillModal from './PayBillModal';
 import RejectBillModal from './RejectBillModal';
+import { downloadPreviewAsPdf } from '@/lib/print-preview';
+import { toast } from 'sonner';
 
 type TimelineStep = {
   label: string;
@@ -146,6 +148,22 @@ export function BillDetailPanel({ billId }: { billId: string }) {
           />
         </Can>
       )}
+      <Button
+        text="Download PDF"
+        type="button"
+        theme="lightBlue"
+        icon={<i className="ri-download-2-line" />}
+        onClick={() => {
+          const el = document.querySelector(
+            '[data-document-preview]'
+          ) as HTMLElement | null;
+          if (!el) {
+            toast.message('Open Preview first, then download the PDF.');
+            return;
+          }
+          downloadPreviewAsPdf(el, bill.code || 'Bill');
+        }}
+      />
     </>
   );
 
