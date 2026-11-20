@@ -1,12 +1,7 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { TaxFilingWorkflowPage } from '@/components/books/TaxFilingWorkflowPage';
 
 export default function Page() {
-  return (
-    <ComingSoonPage
-      title="Submit and pay tax"
-      description="Record filing, settlement and payment."
-    />
-  );
+  return <TaxFilingWorkflowPage mode="submit" />;
 }

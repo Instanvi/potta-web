@@ -34,6 +34,17 @@ export const authClient = Axios.create({
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 });
 
+/** instanvi-payroll-expense-be (employees + expense transactions). */
+export const PAYROLL_API_URL = withApiPrefix(
+  process.env.NEXT_PUBLIC_PAYROLL_API_URL || 'https://payroll.dev.instanvi.com/api/'
+);
+
+export const payrollClient = Axios.create({
+  baseURL: PAYROLL_API_URL,
+  timeout: 30000,
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+});
+
 const PUBLIC_PATHS = ['/login', '/auth-callback', '/vendor-portal'];
 
 function isPublicPath(pathname: string): boolean {
@@ -58,10 +69,10 @@ function rejectWhileSigningOut() {
   return Promise.reject(new Axios.CanceledError('Session expired'));
 }
 
-apiClient.interceptors.request.use(async (config) => {
+async function attachOrgAuthHeaders(config: import('axios').InternalAxiosRequestConfig) {
   if (typeof window === 'undefined') return config;
   if (isSessionExpired() && !isPublicPath(window.location.pathname)) {
-    return rejectWhileSigningOut();
+    return rejectWhileSigningOut() as never;
   }
 
   const token = await resolveBearerToken();
@@ -75,7 +86,9 @@ apiClient.interceptors.request.use(async (config) => {
   if (organizationId) config.headers['x-organization-id'] = organizationId;
 
   return config;
-});
+}
+
+apiClient.interceptors.request.use(attachOrgAuthHeaders);
 
 authClient.interceptors.request.use(async (config) => {
   if (typeof window === 'undefined') return config;
@@ -86,6 +99,8 @@ authClient.interceptors.request.use(async (config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+payrollClient.interceptors.request.use(attachOrgAuthHeaders);
 
 function handleResponseError(error: AxiosError) {
   if (typeof window === 'undefined') return Promise.reject(error);
@@ -115,5 +130,6 @@ function handleResponseError(error: AxiosError) {
 
 apiClient.interceptors.response.use((response) => response, handleResponseError);
 authClient.interceptors.response.use((response) => response, handleResponseError);
+payrollClient.interceptors.response.use((response) => response, handleResponseError);
 
 export default apiClient;

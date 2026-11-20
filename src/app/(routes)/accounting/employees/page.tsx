@@ -1,12 +1,7 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { PayrollEmployeesPage } from '@/components/books/PayrollEmployeesPage';
 
 export default function Page() {
-  return (
-    <ComingSoonPage
-      title="Employees"
-      description="Directory for expense claims and project costs."
-    />
-  );
+  return <PayrollEmployeesPage />;
 }

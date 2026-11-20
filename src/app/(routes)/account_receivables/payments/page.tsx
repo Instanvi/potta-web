@@ -1,12 +1,30 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { BooksResourcePage } from '@/components/books/BooksResourcePage';
 
 export default function Page() {
   return (
-    <ComingSoonPage
-      title="Payments received"
-      description="Customer payments applied to receivables."
+    <BooksResourcePage
+      resourcePath="ar-payments"
+      title="AR payment"
+      columns={[
+        { key: 'paymentDate', label: 'Date' },
+        { key: 'amount', label: 'Amount' },
+        { key: 'method', label: 'Method' },
+        { key: 'customerId', label: 'Customer' },
+        { key: 'invoiceId', label: 'Invoice' },
+        { key: 'reference', label: 'Reference' },
+      ]}
+      fields={[
+        { key: 'amount', label: 'Amount', type: 'number' },
+        { key: 'paymentDate', label: 'Payment date', type: 'date' },
+        { key: 'method', label: 'Method' },
+        { key: 'customerId', label: 'Customer ID' },
+        { key: 'invoiceId', label: 'Invoice ID' },
+        { key: 'reference', label: 'Reference' },
+        { key: 'applyToInvoice', label: 'Apply to invoice', type: 'checkbox' },
+        { key: 'notes', label: 'Notes', type: 'textarea' },
+      ]}
     />
   );
 }
