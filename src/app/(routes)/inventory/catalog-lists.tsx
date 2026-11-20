@@ -12,7 +12,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from '@potta/components/ui/sheet';
 import { EmptyState, ListToolbar } from '../_shared/states';
 import { PanelCard, PanelCardContent } from '@/components/ui/panel-card';
@@ -53,7 +52,6 @@ function CatalogCreateSheet({
   open,
   onClose,
   title,
-  description,
   children,
   onSubmit,
   pending,
@@ -62,7 +60,6 @@ function CatalogCreateSheet({
   open: boolean;
   onClose: () => void;
   title: string;
-  description: string;
   children: ReactNode;
   onSubmit: () => void;
   pending: boolean;
@@ -73,7 +70,6 @@ function CatalogCreateSheet({
       <SheetContent side="left" className="flex w-full flex-col">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
         <form
           className="mt-6 flex flex-1 flex-col gap-4"
@@ -142,7 +138,6 @@ export function AttributeCreateForm() {
         open={open}
         onClose={close}
         title="Add attribute"
-        description="Variation attributes such as Size and Color."
         pending={mutation.isPending}
         submitLabel={mutation.isPending ? 'Saving…' : 'Add attribute'}
         onSubmit={() => {
@@ -221,7 +216,6 @@ export function UnitCreateForm() {
         open={open}
         onClose={close}
         title="Add unit"
-        description="Sellable units for counting and packing items."
         pending={mutation.isPending}
         submitLabel={mutation.isPending ? 'Saving…' : 'Add unit'}
         onSubmit={() => {
@@ -302,7 +296,6 @@ export function ModifierCreateForm() {
         open={open}
         onClose={close}
         title="Add modifier"
-        description="Add-ons charged on top of an item."
         pending={mutation.isPending}
         submitLabel={mutation.isPending ? 'Saving…' : 'Add modifier'}
         onSubmit={() => {

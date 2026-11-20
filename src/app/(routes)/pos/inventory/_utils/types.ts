@@ -141,6 +141,9 @@ export type ProductCategory = {
   uuid: string;
   name: string;
   description: string;
+  /** Count of products in this category (from list API). */
+  productCount?: number;
+  productsCount?: number;
   createdAt: string;
   updatedAt: string;
   orgId: string;

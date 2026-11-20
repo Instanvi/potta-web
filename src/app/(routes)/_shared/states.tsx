@@ -112,8 +112,8 @@ export const ErrorState = ({
 };
 
 /**
- * Optional actions row only. Prefer omitting title/description — the sidebar
- * and top bar already name the page.
+ * Page chrome matching Home / Books overview: large title left, actions right.
+ * Description is optional — omit when the heading alone is enough.
  */
 export const PageHeader = ({
   title,
@@ -128,14 +128,16 @@ export const PageHeader = ({
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
       {(title || description) && (
-        <div>
-          {title ? <h2 className="text-lg font-medium text-foreground">{title}</h2> : null}
+        <div className="min-w-0">
+          {title ? (
+            <h2 className="text-xl font-medium tracking-tight text-foreground">{title}</h2>
+          ) : null}
           {description ? (
             <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
       )}
-      {actions ? <div className="flex items-center gap-3">{actions}</div> : null}
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   );
 };

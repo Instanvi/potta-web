@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
-import { ErrorState, PageContainer, Panel, StatCard } from '@/app/(routes)/_shared/states';
+import { ErrorState, PageContainer, PageHeader, StatCard } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import axios from 'config/axios.config';
 import { booksApi, extractBooksRows } from '@/lib/books-api';
@@ -58,25 +58,24 @@ export function InventoryOverviewPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <div className="mb-4 flex justify-end">
-          <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-            Refresh
-          </Button>
-        </div>
+        <PageHeader
+          title="Inventory overview"
+          actions={
+            <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+              Refresh
+            </Button>
+          }
+        />
         {error ? (
           <ErrorState error={error} onRetry={() => void load()} />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Items" value={loading ? '…' : itemCount} hint="Products & services" />
-            <StatCard label="Open POs" value={loading ? '…' : poOpen} hint="Purchase orders" />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Items" value={loading ? '…' : itemCount} />
+            <StatCard label="Open POs" value={loading ? '…' : poOpen} />
             <StatCard label="Item receipts" value={loading ? '…' : receiptCount} />
             <StatCard label="Shipments" value={loading ? '…' : shipmentCount} />
           </div>
         )}
-        <Panel className="mt-6 px-6 py-8 text-sm text-muted-foreground">
-          Inventory KPIs from Item and purchase-order APIs. Use the sidebar for receipts, shipments, and stock
-          movements.
-        </Panel>
       </PageContainer>
     </RootLayout>
   );

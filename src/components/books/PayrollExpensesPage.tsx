@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { extractBooksRows, cellValue, rowId } from '@/lib/books-api';
@@ -58,13 +58,15 @@ export function PayrollExpensesPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <ListToolbar
+        <PageHeader
+          title="Expenses"
           actions={
             <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
               Refresh
             </Button>
           }
-        >
+        />
+        <ListToolbar>
           <input
             type="search"
             value={search}
