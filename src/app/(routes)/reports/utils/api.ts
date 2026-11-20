@@ -24,6 +24,8 @@ export type ReportRunParams = {
   compareStart?: string;
   compareEnd?: string;
   search?: string;
+  /** branch (default) or organization — must match backend ReportRunQueryDto.scope */
+  scope?: 'branch' | 'organization';
 };
 
 export const reportsApi = {
