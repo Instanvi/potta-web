@@ -11,6 +11,8 @@ export type BooksDocumentLine = {
   productId?: string;
   description?: string;
   quantity: number;
+  /** Ordered qty from PO — shown for GRN confirmation when present. */
+  orderedQuantity?: number;
   unitPrice: number;
   taxRate?: number;
   taxAmount?: number;
@@ -34,6 +36,8 @@ function parseLines(raw: string): BooksDocumentLine[] {
       productId: row?.productId ? String(row.productId) : undefined,
       description: row?.description != null ? String(row.description) : '',
       quantity: Number(row?.quantity) || 0,
+      orderedQuantity:
+        row?.orderedQuantity != null ? Number(row.orderedQuantity) : undefined,
       unitPrice: Number(row?.unitPrice) || 0,
       taxRate: Number(row?.taxRate) || 0,
       taxAmount: Number(row?.taxAmount) || 0,
@@ -75,10 +79,13 @@ export function BooksLinesEditor({
   label = 'Line items',
   value,
   onChange,
+  confirmQuantities = false,
 }: {
   label?: string;
   value: string;
   onChange: (next: string) => void;
+  /** When true (e.g. goods receipt), emphasize received qty vs ordered. */
+  confirmQuantities?: boolean;
 }) {
   const lines = useMemo(() => parseLines(value), [value]);
   const { data } = useGetAllProducts({ page: 1, limit: 100 });
@@ -142,7 +149,9 @@ export function BooksLinesEditor({
               />
             </div>
             <label className="sm:col-span-2">
-              <span className={SHEET_FIELD_LABEL}>Qty</span>
+              <span className={SHEET_FIELD_LABEL}>
+                {confirmQuantities ? 'Received qty' : 'Qty'}
+              </span>
               <input
                 type="number"
                 min={0}
@@ -151,6 +160,11 @@ export function BooksLinesEditor({
                 onChange={(e) => setLine(index, { quantity: Number(e.target.value) || 0 })}
                 className={SHEET_FIELD_INPUT}
               />
+              {confirmQuantities && line.orderedQuantity != null ? (
+                <span className="mt-1 block text-[11px] text-muted-foreground">
+                  Ordered {line.orderedQuantity}
+                </span>
+              ) : null}
             </label>
             <label className="sm:col-span-2">
               <span className={SHEET_FIELD_LABEL}>Price</span>

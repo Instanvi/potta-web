@@ -15,8 +15,8 @@ export default function Page() {
         { key: 'customerId', label: 'Customer' },
       ]}
       fields={[
-        { key: 'salesOrderId', label: 'Sales order ID' },
-        { key: 'invoiceId', label: 'Invoice ID' },
+        { key: 'salesOrderId', label: 'Sales order', type: 'salesOrder' },
+        { key: 'invoiceId', label: 'Invoice', type: 'invoice' },
         { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'shipDate', label: 'Ship date', type: 'date' },
         { key: 'trackingNumber', label: 'Tracking number' },

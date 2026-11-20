@@ -27,19 +27,39 @@ import {
 } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
 import SearchableSelect from '@/components/searchableSelect';
-import { customerApi } from '@/app/(routes)/customers/utils/api';
 import { BooksLinesEditor } from '@/components/books/BooksLinesEditor';
+import {
+  BooksEntityKind,
+  downloadBooksPdf,
+  loadBooksEntityOptions,
+  loadPurchaseOrderForReceipt,
+} from '@/lib/books-entities';
 
 export type BooksColumn = { key: string; label: string };
 export type BooksField = {
   key: string;
   label: string;
   /**
-   * text | number | textarea | checkbox | date |
-   * customer | estimate | vendor | lines | json
+   * text | number | textarea | checkbox | date | lines | json |
+   * customer | vendor | estimate | purchaseOrder | salesOrder |
+   * invoice | bill | opportunity | lead | proposal | account
    */
   type?: string;
 };
+
+const ENTITY_FIELD_TYPES = new Set<string>([
+  'customer',
+  'vendor',
+  'estimate',
+  'purchaseOrder',
+  'salesOrder',
+  'invoice',
+  'bill',
+  'opportunity',
+  'lead',
+  'proposal',
+  'account',
+]);
 export type BooksAction = { label: string; action: string; confirm?: boolean };
 
 export type BooksResourcePageProps = {
@@ -236,7 +256,7 @@ export function BooksResourcePage({
                 Refresh
               </Button>
               <Button type="button" size="sm" onClick={openCreate}>
-                New
+                New {title}
               </Button>
             </>
           }
@@ -264,7 +284,7 @@ export function BooksResourcePage({
               title={`No ${title.toLowerCase()} yet`}
               action={
                 <Button type="button" size="sm" onClick={openCreate}>
-                  New
+                  New {title}
                 </Button>
               }
             />
@@ -309,14 +329,13 @@ export function BooksResourcePage({
               <SheetTitle>New {title}</SheetTitle>
             </SheetHeader>
             <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
-              {fields.map((f) => (
-                <FieldInput
-                  key={f.key}
-                  field={f}
-                  value={form[f.key] ?? ''}
-                  onChange={(v) => setForm((prev) => ({ ...prev, [f.key]: v }))}
-                />
-              ))}
+              <BooksFormFields
+                fields={fields}
+                values={form}
+                resourcePath={resourcePath}
+                onChange={(key, v) => setForm((prev) => ({ ...prev, [key]: v }))}
+                onPatch={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+              />
             </div>
             <SheetFooter>
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
@@ -335,18 +354,49 @@ export function BooksResourcePage({
               <SheetTitle>{title}</SheetTitle>
             </SheetHeader>
             <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
-              {fields.map((f) => (
-                <FieldInput
-                  key={f.key}
-                  field={f}
-                  value={editForm[f.key] ?? ''}
-                  onChange={(v) => setEditForm((prev) => ({ ...prev, [f.key]: v }))}
-                />
-              ))}
+              <BooksFormFields
+                fields={fields}
+                values={editForm}
+                resourcePath={resourcePath}
+                onChange={(key, v) => setEditForm((prev) => ({ ...prev, [key]: v }))}
+                onPatch={(patch) => setEditForm((prev) => ({ ...prev, ...patch }))}
+              />
             </div>
             <SheetFooter className="flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={() => setDetailOpen(false)}>
                 Close
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  let lines: any[] = [];
+                  try {
+                    lines = editForm.lines ? JSON.parse(editForm.lines) : [];
+                  } catch {
+                    lines = [];
+                  }
+                  downloadBooksPdf({
+                    title: selected
+                      ? String(
+                          selected.receiptNumber ??
+                            selected.code ??
+                            selected.orderNumber ??
+                            title
+                        )
+                      : title,
+                    subtitle: title,
+                    fields: fields
+                      .filter((f) => f.type !== 'lines' && f.type !== 'json')
+                      .map((f) => ({
+                        label: f.label,
+                        value: editForm[f.key] ?? '',
+                      })),
+                    lines,
+                  });
+                }}
+              >
+                Download PDF
               </Button>
               <Button type="button" variant="destructive" onClick={() => void handleDelete()} disabled={saving}>
                 Delete
@@ -373,23 +423,93 @@ export function BooksResourcePage({
   );
 }
 
+function BooksFormFields({
+  fields,
+  values,
+  resourcePath,
+  onChange,
+  onPatch,
+}: {
+  fields: BooksField[];
+  values: Record<string, string>;
+  resourcePath: string;
+  onChange: (key: string, value: string) => void;
+  onPatch: (patch: Record<string, string>) => void;
+}) {
+  const [loadingPo, setLoadingPo] = useState(false);
+  const confirmQuantities = resourcePath === 'item-receipt';
+
+  const handleFieldChange = async (field: BooksField, next: string) => {
+    onChange(field.key, next);
+
+    // Goods receipt: selecting a PO loads vendor + ordered lines for qty confirmation.
+    if (
+      field.type === 'purchaseOrder' &&
+      field.key === 'purchaseOrderId' &&
+      resourcePath === 'item-receipt' &&
+      next
+    ) {
+      setLoadingPo(true);
+      try {
+        const loaded = await loadPurchaseOrderForReceipt(next);
+        onPatch({
+          purchaseOrderId: next,
+          ...(loaded.vendorId ? { vendorId: loaded.vendorId } : {}),
+          lines: loaded.linesJson,
+        });
+        toast.success('Purchase order lines loaded — confirm received quantities');
+      } catch (e: any) {
+        toast.error(e?.response?.data?.message || e?.message || 'Could not load purchase order');
+      } finally {
+        setLoadingPo(false);
+      }
+    }
+  };
+
+  return (
+    <>
+      {loadingPo ? (
+        <p className="text-sm text-muted-foreground">Loading purchase order lines…</p>
+      ) : null}
+      {fields.map((f) => (
+        <FieldInput
+          key={f.key}
+          field={f}
+          value={values[f.key] ?? ''}
+          confirmQuantities={confirmQuantities && f.type === 'lines'}
+          onChange={(v) => void handleFieldChange(f, v)}
+        />
+      ))}
+    </>
+  );
+}
+
 function FieldInput({
   field,
   value,
   onChange,
+  confirmQuantities = false,
 }: {
   field: BooksField;
   value: string;
   onChange: (v: string) => void;
+  confirmQuantities?: boolean;
 }) {
   const type = field.type || 'text';
   if (type === 'lines') {
-    return <BooksLinesEditor label={field.label} value={value} onChange={onChange} />;
+    return (
+      <BooksLinesEditor
+        label={field.label}
+        value={value}
+        onChange={onChange}
+        confirmQuantities={confirmQuantities}
+      />
+    );
   }
-  if (type === 'customer' || type === 'estimate' || type === 'vendor') {
+  if (ENTITY_FIELD_TYPES.has(type)) {
     return (
       <EntitySelectField
-        entity={type}
+        entity={type as BooksEntityKind}
         label={field.label}
         value={value}
         onChange={onChange}
@@ -453,7 +573,7 @@ function EntitySelectField({
   value,
   onChange,
 }: {
-  entity: 'customer' | 'estimate' | 'vendor';
+  entity: BooksEntityKind;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -466,46 +586,8 @@ function EntitySelectField({
     (async () => {
       setLoading(true);
       try {
-        if (entity === 'customer') {
-          const data = await customerApi.getAll({ page: 1, limit: 100 });
-          const rows = extractBooksRows(data);
-          if (!cancelled) {
-            setOptions(
-              rows.map((row) => ({
-                value: String(row.uuid ?? ''),
-                label:
-                  [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
-                  String(row.email ?? row.customerId ?? row.uuid ?? 'Customer'),
-              }))
-            );
-          }
-          return;
-        }
-        if (entity === 'vendor') {
-          const data = await booksApi.list('vendor', {}, { page: 1, limit: 100 });
-          const rows = extractBooksRows(data);
-          if (!cancelled) {
-            setOptions(
-              rows.map((row) => ({
-                value: String(row.uuid ?? ''),
-                label: String(row.name ?? row.vendorName ?? row.uuid ?? 'Vendor'),
-              }))
-            );
-          }
-          return;
-        }
-        const data = await booksApi.list('estimate', {}, { page: 1, limit: 100, sortBy: 'createdAt:DESC' });
-        const rows = extractBooksRows(data);
-        if (!cancelled) {
-          setOptions(
-            rows.map((row) => ({
-              value: String(row.uuid ?? ''),
-              label:
-                String(row.code ?? row.estimateNumber ?? row.uuid ?? 'Estimate') +
-                (row.total != null ? ` · ${row.total}` : ''),
-            }))
-          );
-        }
+        const next = await loadBooksEntityOptions(entity);
+        if (!cancelled) setOptions(next.filter((o) => o.value));
       } catch {
         if (!cancelled) setOptions([]);
       } finally {
@@ -520,7 +602,7 @@ function EntitySelectField({
   return (
     <SearchableSelect
       label={label}
-      required={entity === 'customer'}
+      required={entity === 'customer' || entity === 'purchaseOrder'}
       options={options}
       selectedValue={value}
       onChange={onChange}
