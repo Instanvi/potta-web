@@ -12,7 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { SHEET_FIELD_INPUT, SHEET_FIELD_LABEL } from '@/lib/field-styles';
+import { FIELD_INPUT, SHEET_FIELD_INPUT, SHEET_FIELD_LABEL } from '@/lib/field-styles';
 import { DatePicker } from '@/components/ui/date-picker';
 import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
