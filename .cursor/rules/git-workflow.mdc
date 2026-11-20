@@ -5,7 +5,18 @@ alwaysApply: true
 
 # Git workflow
 
-- Feature work happens on `feat/<topic>` branches (POS + Books slimming lives on `feat/pos-books-web`). `main` deploys production and `staging` deploys staging through `.github/workflows`.
-- Only commit or push when the user asks. Push the current branch with `git push origin HEAD`; never force-push `main` or `staging`.
+## Branches — hard rules
+
+- **NEVER touch `main`.** Do not push to it, open PRs into it, merge into it, rebase onto it for delivery, or cherry-pick “onto main”. Production CD fires from `main`; treating it as a working base is a mistake.
+- **Deployable / integration branch is `feat/pos-books-web`.** All feature PRs for potta-web must target `feat/pos-books-web` (staging CD). Open work from that branch: `git checkout -b feat/<topic> origin/feat/pos-books-web`.
+- Feature work lives on `feat/<topic>` branches. Example: POS + Books slimming and payment-methods UX land via PRs into `feat/pos-books-web`.
+
+## Commits / push
+
+- Only commit or push when the user asks. Push the current branch with `git push origin HEAD`; never force-push `main`, `staging`, or `feat/pos-books-web` unless the user explicitly requests it.
 - Before committing: `npm run typecheck` and `npm run lint` on the files you changed.
 - Never commit `.env*` files except `.env.example`.
+
+## Auth backend note (cross-repo)
+
+- For **instanvi-auth-starter**, the deployable branch is `dev` (not `main`).
