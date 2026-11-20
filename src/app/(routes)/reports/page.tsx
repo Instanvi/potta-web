@@ -12,6 +12,8 @@ import { useAuthContextStore } from '@/store/use-auth-context-store';
 import {
   DEFAULT_FAVOURITE_IDS,
   REPORT_CATEGORIES,
+  loadReportScope,
+  saveReportScope,
   type ReportDef,
   type ReportScopeMode,
 } from '@/lib/reports-catalog';
@@ -142,7 +144,7 @@ function ReportsHub() {
   }, [hierarchy, assignments, locationId]);
 
   const canOrgWide = canAccess('Report', 'view-organization') || canAccess('Ledger', 'view-organization');
-  const [scope, setScope] = useState<ReportScopeMode>('branch');
+  const [scope, setScope] = useState<ReportScopeMode>(() => loadReportScope());
   const [query, setQuery] = useState('');
   const [favourites, setFavourites] = useState<string[]>(() => loadFavourites());
   const favSet = useMemo(() => new Set(favourites), [favourites]);
@@ -213,7 +215,11 @@ function ReportsHub() {
               className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm text-foreground outline-none focus-visible:border-primary"
               value={canOrgWide ? scope : 'branch'}
               disabled={!canOrgWide}
-              onChange={(e) => setScope(e.target.value as ReportScopeMode)}
+              onChange={(e) => {
+                const next = e.target.value as ReportScopeMode;
+                setScope(next);
+                saveReportScope(next);
+              }}
             >
               <option value="branch">
                 Branch{activeLocation?.name ? `: ${activeLocation.name}` : ''}

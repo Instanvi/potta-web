@@ -51,13 +51,33 @@ export default function ReportViewPage() {
     );
   }
 
+  if (!report.live) {
+    return (
+      <ReportPageShell
+        title={report.title}
+        description={`${category?.title ?? 'Reports'} · Not available yet.`}
+      >
+        <EmptyState
+          variant="plain"
+          title="Report not available"
+          description="This report needs domain data Potta books does not store yet (for example time or payroll). It will generate once that data exists for the org."
+          action={
+            <Link href="/reports" className="text-sm font-medium text-primary hover:underline">
+              Back to reports
+            </Link>
+          }
+        />
+      </ReportPageShell>
+    );
+  }
+
   const mode = COMPARE_IDS.has(id) ? 'compare' : AS_OF_IDS.has(id) ? 'asOf' : 'range';
 
   return (
     <ReportRunner
       reportId={id}
       title={report.title}
-      description={`${category?.title ?? 'Reports'} · Live from posted books data.`}
+      description={`${category?.title ?? 'Reports'} · Generated from posted books data for this org.`}
       mode={mode}
     />
   );
