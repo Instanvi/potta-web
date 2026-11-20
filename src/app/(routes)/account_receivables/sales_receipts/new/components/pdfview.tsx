@@ -4,6 +4,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext, useEffect, useState } from 'react';
 import { Customer } from '../../../../customers/utils/types';
 import useGetOneCustomer from '../../../../customers/hooks/useGetOneCustomer';
+import { paymentMethodLabel } from '../../../utils/types';
 
 interface TableItem {
   name: string;
@@ -75,7 +76,7 @@ const PdfView = () => {
   const total = subtotal + totalTax;
 
   return (
-    <div className="flex  flex-col items-center justify-center overflow-y-auto w-full bg-main-bg">
+    <div className="flex  flex-col items-center justify-center overflow-y-auto w-full bg-white">
       <div className="flex min-w-[30rem] justify-between w-full p-8">
         <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>
@@ -182,7 +183,15 @@ const PdfView = () => {
               <div className="pl-4">
                 <p>
                   <strong>Payment Method:</strong>{' '}
-                  {contextData.payment_method?.[0] || 'Not selected'}
+                  {(() => {
+                    const raw =
+                      typeof contextData.payment_method === 'string'
+                        ? contextData.payment_method
+                        : contextData.payment_method?.[0] ||
+                          contextData.paymentMethod ||
+                          '';
+                    return paymentMethodLabel(raw) || 'Not selected';
+                  })()}
                 </p>
                 {contextData.note && (
                   <div className="mt-4">
