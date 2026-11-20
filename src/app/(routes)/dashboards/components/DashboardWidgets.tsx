@@ -1,22 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import { formatMetricValue } from '@/lib/dashboards/format';
-import type { DashboardWidget } from '@/lib/dashboards/types';
+import type { ChartType, DashboardWidget } from '@/lib/dashboards/types';
 import { EmptyState, ErrorState, LoadingState, StatCard } from '../../_shared/states';
 import { useAggregate, useDashboardRecords } from '../hooks';
+import { ChartWidget } from './ChartWidget';
 
 const colSpan: Record<number, string> = {
   3: 'md:col-span-3',
@@ -25,8 +14,6 @@ const colSpan: Record<number, string> = {
   8: 'md:col-span-8',
   12: 'md:col-span-12',
 };
-
-const CHART_COLORS = ['hsl(var(--primary))', '#64748b', '#0f766e', '#b45309', '#7c3aed', '#be123c'];
 
 function KpiWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'kpi' }> }) {
   const { data, isLoading, error, refetch } = useAggregate(widget.config.entity, {
@@ -43,80 +30,6 @@ function KpiWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'kpi' 
       label={widget.title}
       value={formatMetricValue(data?.value, widget.config.format)}
     />
-  );
-}
-
-function ChartWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'chart' }> }) {
-  const { data, isLoading, error, refetch } = useAggregate(widget.config.entity, {
-    aggregation: widget.config.aggregation,
-    field: widget.config.field,
-    status: widget.config.statuses,
-    groupBy: widget.config.groupBy,
-    limit: widget.config.limit,
-    fromDate: widget.config.fromDate,
-    toDate: widget.config.toDate,
-  });
-  if (isLoading) return <LoadingState label="Loading chart…" />;
-  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
-  const groups = data?.groups ?? [];
-  const chartData = groups.map((g) => ({
-    name: g.label || g.key || '—',
-    value: Number(g.value) || 0,
-  }));
-  const chartType = widget.config.chartType ?? 'bar';
-  const formatTip = (v: number | string) => formatMetricValue(v, widget.config.format);
-
-  return (
-    <div className="dashboard-panel p-4">
-      <p className="text-xs text-muted-foreground">{widget.title}</p>
-      {chartData.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">No data for this period.</p>
-      ) : chartType === 'donut' ? (
-        <div className="mt-2 h-[220px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={55}
-                outerRadius={85}
-                paddingAngle={2}
-              >
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(v: number) => formatTip(v)} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      ) : chartType === 'horizontal_bar' ? (
-        <div className="mt-2 h-[220px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => formatTip(v)} />
-              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 2, 2, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      ) : (
-        <div className="mt-2 h-[220px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ left: 0, right: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => formatTip(v)} />
-              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -175,9 +88,11 @@ function EntityListWidget({ widget }: { widget: Extract<DashboardWidget, { type:
 export function DashboardGrid({
   widgets,
   onRemove,
+  onUpdateWidget,
 }: {
   widgets: DashboardWidget[];
   onRemove?: (id: string) => void;
+  onUpdateWidget?: (id: string, next: DashboardWidget) => void;
 }) {
   if (!widgets.length) {
     return (
@@ -202,7 +117,20 @@ export function DashboardGrid({
             </button>
           )}
           {widget.type === 'kpi' && <KpiWidget widget={widget} />}
-          {widget.type === 'chart' && <ChartWidget widget={widget} />}
+          {widget.type === 'chart' && (
+            <ChartWidget
+              widget={widget}
+              onChartTypeChange={
+                onUpdateWidget
+                  ? (chartType: ChartType) =>
+                      onUpdateWidget(widget.id, {
+                        ...widget,
+                        config: { ...widget.config, chartType },
+                      })
+                  : undefined
+              }
+            />
+          )}
           {widget.type === 'entity_list' && <EntityListWidget widget={widget} />}
         </div>
       ))}

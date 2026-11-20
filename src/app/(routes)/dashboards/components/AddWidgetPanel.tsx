@@ -1,18 +1,21 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { CHART_TYPE_OPTIONS, COLOR_PALETTE_OPTIONS } from '@/lib/dashboards/chart-types';
 import { DATE_PRESET_OPTIONS, resolveDatePreset } from '@/lib/dashboards/date-range';
 import { DEFAULT_FORMAT, MONEY_FORMAT } from '@/lib/dashboards/format';
 import { KPI_PRESETS } from '@/lib/dashboards/kpi-presets';
 import type {
   Aggregation,
   ChartType,
+  ColorPalette,
   DashboardWidget,
   DatePreset,
   EntityCatalogEntry,
   EntityKey,
   WidgetWidth,
 } from '@/lib/dashboards/types';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
@@ -52,6 +55,10 @@ export function AddWidgetPanel({
   const [groupBy, setGroupBy] = useState<string>('');
   const [datePreset, setDatePreset] = useState<DatePreset>('all');
   const [presetFilter, setPresetFilter] = useState('');
+  const [colorPalette, setColorPalette] = useState<ColorPalette>('brand');
+  const [showLegend, setShowLegend] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
+  const [limit, setLimit] = useState(10);
 
   const selected = useMemo(() => catalog.find((c) => c.key === entity), [catalog, entity]);
   const catalogKeys = useMemo(() => new Set(catalog.map((c) => c.key)), [catalog]);
@@ -81,6 +88,11 @@ export function AddWidgetPanel({
     setStatuses([]);
     setChartType('bar');
     setDatePreset('all');
+    setColorPalette('brand');
+    setShowLegend(true);
+    setShowGrid(true);
+    setLimit(10);
+    setW(4);
   };
 
   const addCustom = () => {
@@ -121,7 +133,10 @@ export function AddWidgetPanel({
           toDate: range.toDate ?? null,
           chartType,
           groupBy: groupBy || selected.groupBy[0]?.key || 'status',
-          limit: 10,
+          limit,
+          showLegend,
+          showGrid,
+          colorPalette,
         },
       });
     } else {
@@ -216,7 +231,12 @@ export function AddWidgetPanel({
                 <select
                   className={fieldClass}
                   value={type}
-                  onChange={(e) => setType(e.target.value as typeof type)}
+                  onChange={(e) => {
+                    const next = e.target.value as typeof type;
+                    setType(next);
+                    if (next === 'chart' && w < 6) setW(6);
+                    if (next === 'entity_list') setW(12);
+                  }}
                 >
                   <option value="kpi">KPI</option>
                   <option value="chart">Chart</option>
@@ -311,19 +331,6 @@ export function AddWidgetPanel({
               {type === 'chart' && (
                 <>
                   <label className="text-xs">
-                    Chart type
-                    <select
-                      className={fieldClass}
-                      value={chartType}
-                      onChange={(e) => setChartType(e.target.value as ChartType)}
-                    >
-                      <option value="bar">Bar</option>
-                      <option value="horizontal_bar">Horizontal bar</option>
-                      <option value="donut">Donut</option>
-                      <option value="table">Table</option>
-                    </select>
-                  </label>
-                  <label className="text-xs">
                     Group by
                     <select
                       className={fieldClass}
@@ -333,6 +340,20 @@ export function AddWidgetPanel({
                       {(selected?.groupBy ?? []).map((g) => (
                         <option key={g.key} value={g.key}>
                           {g.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="text-xs">
+                    Categories
+                    <select
+                      className={fieldClass}
+                      value={limit}
+                      onChange={(e) => setLimit(Number(e.target.value))}
+                    >
+                      {[5, 8, 10, 12, 15, 20].map((n) => (
+                        <option key={n} value={n}>
+                          Top {n}
                         </option>
                       ))}
                     </select>
@@ -354,6 +375,95 @@ export function AddWidgetPanel({
                 </select>
               </label>
             </div>
+
+            {type === 'chart' ? (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-medium">Chart style</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Pick the look that fits your story — you can change it again while editing.
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {CHART_TYPE_OPTIONS.map((opt) => {
+                      const active = chartType === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            setChartType(opt.value);
+                            if (w < 6) setW(6);
+                          }}
+                          className={cn(
+                            'rounded-[2px] border px-2.5 py-2 text-left transition-colors',
+                            active
+                              ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                              : 'border-black/10 hover:border-black/25 hover:bg-muted/40',
+                          )}
+                        >
+                          <p className="text-xs font-medium">{opt.label}</p>
+                          <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">
+                            {opt.blurb}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-medium">Color palette</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {COLOR_PALETTE_OPTIONS.map((pal) => {
+                      const active = colorPalette === pal.value;
+                      return (
+                        <button
+                          key={pal.value}
+                          type="button"
+                          onClick={() => setColorPalette(pal.value)}
+                          className={cn(
+                            'flex items-center gap-2 rounded-[2px] border px-2 py-1.5 text-xs',
+                            active
+                              ? 'border-primary bg-primary/5'
+                              : 'border-black/10 hover:border-black/25',
+                          )}
+                        >
+                          <span className="flex gap-0.5">
+                            {pal.swatches.slice(0, 4).map((c) => (
+                              <span
+                                key={c}
+                                className="size-2.5 rounded-[1px]"
+                                style={{ background: c }}
+                              />
+                            ))}
+                          </span>
+                          {pal.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4 text-xs">
+                  <label className="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={showLegend}
+                      onChange={(e) => setShowLegend(e.target.checked)}
+                    />
+                    Show legend
+                  </label>
+                  <label className="inline-flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={showGrid}
+                      onChange={(e) => setShowGrid(e.target.checked)}
+                    />
+                    Show grid
+                  </label>
+                </div>
+              </div>
+            ) : null}
 
             {type !== 'entity_list' && (selected?.statuses.length ?? 0) > 0 ? (
               <div className="space-y-2">
