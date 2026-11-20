@@ -119,9 +119,9 @@ const CategoryManager = () => {
       >
         <SheetContent
           side="left"
-          className="flex h-full w-full flex-col p-0 sm:max-w-[420px]"
+          className="flex h-full w-full flex-col bg-white p-0 sm:max-w-[420px]"
         >
-          <SheetHeader className="border-b border-black/10 px-4 py-4">
+          <SheetHeader className="border-b border-black/10 bg-white px-4 py-4">
             <SheetTitle>
               {editMode ? 'Edit Category' : 'Add Category'}
             </SheetTitle>
@@ -132,7 +132,7 @@ const CategoryManager = () => {
           <form
             id="category-form-sheet"
             onSubmit={handleSubmit(onSubmit)}
-            className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
+            className="flex-1 space-y-4 overflow-y-auto bg-white px-4 py-4"
           >
             <Input
               label="Name"

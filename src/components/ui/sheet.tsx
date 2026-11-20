@@ -44,7 +44,7 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "left", className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <DialogPrimitive.Content
@@ -126,7 +126,7 @@ function CustomSheet({
   heading,
   description,
   children,
-  side = "right",
+  side = "left",
   footer,
   cancelText = "Cancel",
   confirmText = "Save",
@@ -136,13 +136,13 @@ function CustomSheet({
 }: CustomSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side={side}>
+      <SheetContent side={side} className="bg-white">
         <SheetHeader>
           <SheetTitle>{heading}</SheetTitle>
           {description ? <SheetDescription>{description}</SheetDescription> : null}
         </SheetHeader>
 
-        <div className="mt-6">{children}</div>
+        <div className="mt-6 bg-white">{children}</div>
 
         <SheetFooter>
           {footer ?? (

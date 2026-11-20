@@ -96,7 +96,7 @@ const Transactions = ({ type, row }: { type: SubLedgerKind; row: AgingRow }) => 
 
 const SubLedgerSheet = ({ type, row, onClose }: Props) => (
   <Sheet open={!!row} onOpenChange={(open) => !open && onClose()}>
-    <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-[min(100vw,720px)]">
+    <SheetContent side="left" className="w-full overflow-y-auto rounded-none sm:max-w-[min(100vw,720px)]">
       <SheetHeader>
         <SheetTitle>{row?.referenceName ?? 'Sub-ledger'}</SheetTitle>
       </SheetHeader>
