@@ -22,7 +22,19 @@ export type EntityKey =
   | 'recurring_templates';
 
 export type Aggregation = 'count' | 'sum' | 'avg' | 'min' | 'max';
-export type ChartType = 'bar' | 'horizontal_bar' | 'donut' | 'table';
+export type ChartType =
+  | 'bar'
+  | 'horizontal_bar'
+  | 'stacked_bar'
+  | 'line'
+  | 'area'
+  | 'composed'
+  | 'pie'
+  | 'donut'
+  | 'radar'
+  | 'radial'
+  | 'table';
+export type ColorPalette = 'brand' | 'ocean' | 'sunset' | 'forest' | 'mono';
 export type WidgetWidth = 3 | 4 | 6 | 8 | 12;
 export type DatePreset = 'all' | 'today' | '7d' | '30d' | 'month' | 'ytd';
 
@@ -54,6 +66,9 @@ export interface ChartConfig extends MeasureConfig {
   chartType: ChartType;
   groupBy: string;
   limit: number;
+  showLegend?: boolean;
+  showGrid?: boolean;
+  colorPalette?: ColorPalette;
 }
 
 export type DashboardWidget =

@@ -1,0 +1,277 @@
+'use client';
+
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { paletteColors } from '@/lib/dashboards/chart-types';
+import { formatMetricValue } from '@/lib/dashboards/format';
+import type { DashboardWidget } from '@/lib/dashboards/types';
+import { ErrorState, LoadingState } from '../../_shared/states';
+import { useAggregate } from '../hooks';
+
+type ChartWidgetProps = {
+  widget: Extract<DashboardWidget, { type: 'chart' }>;
+  onChartTypeChange?: (chartType: Extract<DashboardWidget, { type: 'chart' }>['config']['chartType']) => void;
+};
+
+export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
+  const { data, isLoading, error, refetch } = useAggregate(widget.config.entity, {
+    aggregation: widget.config.aggregation,
+    field: widget.config.field,
+    status: widget.config.statuses,
+    groupBy: widget.config.groupBy,
+    limit: widget.config.limit,
+    fromDate: widget.config.fromDate,
+    toDate: widget.config.toDate,
+  });
+
+  if (isLoading) return <LoadingState label="Loading chart…" />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
+
+  const colors = paletteColors(widget.config.colorPalette);
+  const groups = data?.groups ?? [];
+  const chartData = groups.map((g, i) => ({
+    name: g.label || g.key || '—',
+    value: Number(g.value) || 0,
+    fill: colors[i % colors.length],
+  }));
+  const chartType = widget.config.chartType ?? 'bar';
+  const showLegend = widget.config.showLegend !== false;
+  const showGrid = widget.config.showGrid !== false;
+  const total = chartData.reduce((s, r) => s + r.value, 0);
+  const formatTip = (v: number | string) => formatMetricValue(v, widget.config.format);
+  const tip = {
+    formatter: ((v: number | string) => [formatTip(v), 'Value']) as never,
+    contentStyle: { borderRadius: 2, border: '1px solid rgba(0,0,0,0.08)', fontSize: 12 },
+  };
+
+  return (
+    <div className="dashboard-panel flex h-full flex-col p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">{widget.title}</p>
+          <p className="mt-0.5 text-lg font-semibold tabular-nums tracking-tight">
+            {formatMetricValue(total, widget.config.format)}
+          </p>
+        </div>
+        {onChartTypeChange ? (
+          <select
+            className="rounded-[2px] border border-black/10 bg-white px-2 py-1 text-[11px] text-muted-foreground"
+            value={chartType}
+            aria-label="Chart type"
+            onChange={(e) =>
+              onChartTypeChange(e.target.value as typeof chartType)
+            }
+          >
+            <option value="bar">Bar</option>
+            <option value="horizontal_bar">Horizontal</option>
+            <option value="stacked_bar">Stacked</option>
+            <option value="line">Line</option>
+            <option value="area">Area</option>
+            <option value="composed">Combo</option>
+            <option value="pie">Pie</option>
+            <option value="donut">Donut</option>
+            <option value="radar">Radar</option>
+            <option value="radial">Radial</option>
+            <option value="table">Table</option>
+          </select>
+        ) : (
+          <span className="rounded-[2px] bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+            {chartType.replace(/_/g, ' ')}
+          </span>
+        )}
+      </div>
+
+      {chartData.length === 0 ? (
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          No data for this period. Try another range or group.
+        </p>
+      ) : chartType === 'table' ? (
+        <div className="mt-3 max-h-[240px] overflow-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-black/10 text-xs text-muted-foreground">
+                <th className="py-1.5 font-medium">Category</th>
+                <th className="py-1.5 text-right font-medium">Value</th>
+                <th className="py-1.5 text-right font-medium">Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chartData.map((row) => (
+                <tr key={row.name} className="border-b border-black/[0.04]">
+                  <td className="flex items-center gap-2 py-1.5">
+                    <span
+                      className="inline-block size-2.5 shrink-0 rounded-[2px]"
+                      style={{ background: row.fill }}
+                    />
+                    {row.name}
+                  </td>
+                  <td className="py-1.5 text-right tabular-nums">{formatTip(row.value)}</td>
+                  <td className="py-1.5 text-right tabular-nums text-muted-foreground">
+                    {total ? `${Math.round((row.value / total) * 100)}%` : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="mt-2 h-[220px] w-full min-h-[180px] flex-1">
+          <ResponsiveContainer width="100%" height="100%">
+            {chartType === 'pie' || chartType === 'donut' ? (
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={chartType === 'donut' ? 58 : 0}
+                  outerRadius={88}
+                  paddingAngle={2}
+                >
+                  {chartData.map((row, i) => (
+                    <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
+                  ))}
+                </Pie>
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+              </PieChart>
+            ) : chartType === 'radar' ? (
+              <RadarChart data={chartData} cx="50%" cy="50%" outerRadius="70%">
+                <PolarGrid />
+                <PolarAngleAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <PolarRadiusAxis tick={{ fontSize: 10 }} />
+                <Radar
+                  dataKey="value"
+                  stroke={colors[0]}
+                  fill={colors[0]}
+                  fillOpacity={0.35}
+                />
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+              </RadarChart>
+            ) : chartType === 'radial' ? (
+              <RadialBarChart
+                data={chartData}
+                innerRadius="20%"
+                outerRadius="95%"
+                startAngle={90}
+                endAngle={-270}
+              >
+                <RadialBar dataKey="value" background cornerRadius={2}>
+                  {chartData.map((row, i) => (
+                    <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
+                  ))}
+                </RadialBar>
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+              </RadialBarChart>
+            ) : chartType === 'line' ? (
+              <LineChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
+                {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke={colors[0]}
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: colors[0] }}
+                />
+              </LineChart>
+            ) : chartType === 'area' ? (
+              <AreaChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
+                {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={colors[0]}
+                  fill={colors[1] ?? colors[0]}
+                  fillOpacity={0.25}
+                />
+              </AreaChart>
+            ) : chartType === 'composed' ? (
+              <ComposedChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
+                {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                <Bar dataKey="value" name="Value" radius={[2, 2, 0, 0]}>
+                  {chartData.map((row, i) => (
+                    <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
+                  ))}
+                </Bar>
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  name="Trend"
+                  stroke={colors[0]}
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </ComposedChart>
+            ) : chartType === 'horizontal_bar' ? (
+              <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8, top: 8 }}>
+                {showGrid ? <CartesianGrid strokeDasharray="3 3" horizontal={false} /> : null}
+                <XAxis type="number" tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={96} tick={{ fontSize: 11 }} />
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                <Bar dataKey="value" radius={[0, 2, 2, 0]}>
+                  {chartData.map((row, i) => (
+                    <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            ) : (
+              <BarChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
+                {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip {...tip} />
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                <Bar
+                  dataKey="value"
+                  radius={[2, 2, 0, 0]}
+                  stackId={chartType === 'stacked_bar' ? 'a' : undefined}
+                >
+                  {chartData.map((row, i) => (
+                    <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}
