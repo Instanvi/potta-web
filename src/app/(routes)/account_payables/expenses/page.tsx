@@ -1,12 +1,7 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { PayrollExpensesPage } from '@/components/books/PayrollExpensesPage';
 
 export default function Page() {
-  return (
-    <ComingSoonPage
-      title="Expenses"
-      description="Cash or card expenses posted to the books."
-    />
-  );
+  return <PayrollExpensesPage />;
 }

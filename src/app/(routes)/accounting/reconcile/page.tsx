@@ -1,12 +1,7 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { ReconcilePage } from '@/components/books/ReconcilePage';
 
 export default function Page() {
-  return (
-    <ComingSoonPage
-      title="Reconcile"
-      description="Match posted transactions to statement balances."
-    />
-  );
+  return <ReconcilePage />;
 }

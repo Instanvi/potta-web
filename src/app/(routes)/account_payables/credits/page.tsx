@@ -1,12 +1,28 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { BooksResourcePage } from '@/components/books/BooksResourcePage';
 
 export default function Page() {
   return (
-    <ComingSoonPage
-      title="Supplier credits"
-      description="Credits from suppliers that reverse or reduce bill balances."
+    <BooksResourcePage
+      resourcePath="supplier-credit"
+      title="Supplier credit"
+      columns={[
+        { key: 'vendorId', label: 'Vendor' },
+        { key: 'creditAmount', label: 'Amount' },
+        { key: 'status', label: 'Status' },
+        { key: 'issueDate', label: 'Issue date' },
+        { key: 'reason', label: 'Reason' },
+      ]}
+      fields={[
+        { key: 'vendorId', label: 'Vendor ID' },
+        { key: 'billId', label: 'Bill ID' },
+        { key: 'creditAmount', label: 'Credit amount', type: 'number' },
+        { key: 'issueDate', label: 'Issue date', type: 'date' },
+        { key: 'reason', label: 'Reason' },
+        { key: 'notes', label: 'Notes', type: 'textarea' },
+        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+      ]}
     />
   );
 }

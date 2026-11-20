@@ -1,43 +1,53 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ColumnDef, PaginationState } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
-import { DataTable } from '@potta/components/ui/data-table';
+
+import React, { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { PaginationState } from '@tanstack/react-table';
+import Button from '@potta/components/button';
+import DynamicFilter from '@potta/components/dynamic-filter';
+import { Can, useCan } from '@/components/auth/can';
+import { ExportButton } from '@/components/export-button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@potta/components/shadcn/dropdown';
-import { useCan } from '@/components/auth/can';
-import ConfirmModal from '../../../_shared/ConfirmModal';
+  DocumentMasterDetail,
+  DocumentListPanel,
+  DocumentListRow,
+} from '@potta/components/document-master-detail';
+import { InlineLoader } from '@potta/components/ui/loaders';
 import { formatDate } from '../../../_shared/format';
 import { EmptyState, ErrorState } from '../../../_shared/states';
 import { formatMoney } from '../../utils/format';
-import { useApproveBill, useBills } from '../hooks';
+import { useVendorOptions } from '../../hooks';
+import { useBills } from '../hooks';
 import { Bill, BillStatus } from '../utils/types';
-import BillDetailsSlideover from './BillDetailsSlideover';
+import { BillDetailPanel, BillPreviewPanel } from './BillDetailPanel';
 import BillStatusBadge from './BillStatusBadge';
-import Filter from './filters';
-import PayBillModal from './PayBillModal';
-import RejectBillModal from './RejectBillModal';
 
-const isPastDue = (bill: Bill) =>
-  (bill.status === 'APPROVED' || bill.status === 'ISSUED' || bill.status === 'OVERDUE') &&
-  !!bill.dueDate &&
-  new Date(bill.dueDate) < new Date();
+const statusOptions = [
+  { label: 'All statuses', value: 'all' },
+  { label: 'Draft', value: 'DRAFT' },
+  { label: 'Issued', value: 'ISSUED' },
+  { label: 'Approved', value: 'APPROVED' },
+  { label: 'Overdue', value: 'OVERDUE' },
+  { label: 'Paid', value: 'PAID' },
+  { label: 'Rejected', value: 'REJECTED' },
+];
 
-interface BillsTableProps {
-  initialBillId?: string | null;
-}
+export function BillsTable() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedId = searchParams.get('id');
 
-export function BillsTable({ initialBillId }: BillsTableProps) {
   const { canAccess } = useCan();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [vendorId, setVendorId] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 40,
+  });
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -57,170 +67,208 @@ export function BillsTable({ initialBillId }: BillsTableProps) {
   });
   const rows = data?.data ?? [];
   const filtered = !!debouncedSearch || status !== 'all' || !!vendorId;
+  const page = pagination.pageIndex + 1;
+  const pageCount = data?.meta?.totalPages ?? 1;
 
-  const [selectedBillId, setSelectedBillId] = useState<string | null>(initialBillId ?? null);
-  const [toApprove, setToApprove] = useState<Bill | null>(null);
-  const [toReject, setToReject] = useState<Bill | null>(null);
-  const [toPay, setToPay] = useState<Bill | null>(null);
-  const approve = useApproveBill();
+  const { data: vendors = [] } = useVendorOptions();
 
-  useEffect(() => {
-    if (initialBillId) setSelectedBillId(initialBillId);
-  }, [initialBillId]);
+  const setSelectedId = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (id) params.set('id', id);
+      else params.delete('id');
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
-  const columns = useMemo<ColumnDef<Bill>[]>(
-    () => [
-      {
-        accessorKey: 'code',
-        header: 'Bill',
-        cell: ({ row }) => (
-          <div>
-            <p className="font-medium text-gray-900">{row.original.code}</p>
-            {row.original.vendorInvoiceNumber && (
-              <p className="text-xs text-gray-500">Vendor ref. {row.original.vendorInvoiceNumber}</p>
-            )}
+  const list = (
+    <DocumentListPanel
+      header={
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-medium text-foreground">Bills</p>
+            <Can resource="Bill" action="create">
+              <Link
+                href="/account_payables/bills/new"
+                className="inline-flex size-8 items-center justify-center rounded-[2px] bg-primary text-primary-foreground hover:bg-primary/90"
+                aria-label="New bill"
+                title="New bill"
+              >
+                <i className="ri-add-line text-lg" />
+              </Link>
+            </Can>
           </div>
-        ),
-      },
-      {
-        id: 'vendor',
-        header: 'Vendor',
-        cell: ({ row }) => row.original.vendor?.name ?? '—',
-      },
-      {
-        accessorKey: 'issuedDate',
-        header: 'Issued',
-        cell: ({ row }) => formatDate(row.original.issuedDate),
-      },
-      {
-        accessorKey: 'dueDate',
-        header: 'Due date',
-        cell: ({ row }) => (
-          <span className={isPastDue(row.original) ? 'font-medium text-red-600' : ''}>
-            {formatDate(row.original.dueDate)}
+          <DynamicFilter
+            className="p-0"
+            searchValue={search}
+            onSearchChange={(e) => setSearch(e.target.value)}
+            onSearchClear={() => setSearch('')}
+            searchPlaceholder="Search bills…"
+            filters={[
+              {
+                key: 'status',
+                label: 'Status',
+                value: status,
+                options: statusOptions,
+                onChange: (v) => setStatus(v || 'all'),
+              },
+              {
+                key: 'vendor',
+                label: 'All vendors',
+                value: vendorId,
+                isSearchable: true,
+                selectClassName: 'min-w-[160px]',
+                options: vendors.map((v) => ({ label: v.name, value: v.uuid })),
+                onChange: setVendorId,
+              },
+            ]}
+          />
+          <div className="flex justify-end">
+            <ExportButton
+              filename="bills"
+              rows={rows}
+              columns={[
+                { key: 'code', header: 'Bill' },
+                {
+                  key: 'vendorInvoiceNumber',
+                  header: 'Vendor ref',
+                  value: (row) => row.vendorInvoiceNumber || '',
+                },
+                {
+                  key: 'vendor',
+                  header: 'Vendor',
+                  value: (row) => row.vendor?.name ?? '',
+                },
+                {
+                  key: 'issuedDate',
+                  header: 'Issued',
+                  value: (row) => formatDate(row.issuedDate),
+                },
+                {
+                  key: 'dueDate',
+                  header: 'Due date',
+                  value: (row) => formatDate(row.dueDate),
+                },
+                {
+                  key: 'invoiceTotal',
+                  header: 'Amount',
+                  value: (row) => formatMoney(row.invoiceTotal, row.currency),
+                },
+                { key: 'status', header: 'Status' },
+              ]}
+            />
+          </div>
+        </>
+      }
+      footer={
+        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <button
+            type="button"
+            className="rounded-[2px] px-2 py-1 hover:bg-accent disabled:opacity-40"
+            disabled={page <= 1}
+            onClick={() =>
+              setPagination((p) => ({ ...p, pageIndex: Math.max(0, p.pageIndex - 1) }))
+            }
+          >
+            Prev
+          </button>
+          <span>
+            {page}/{pageCount}
           </span>
-        ),
-      },
-      {
-        accessorKey: 'invoiceTotal',
-        header: 'Amount',
-        cell: ({ row }) => (
-          <span className="font-medium text-gray-900">
-            {formatMoney(row.original.invoiceTotal, row.original.currency)}
-          </span>
-        ),
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-        cell: ({ row }) => <BillStatusBadge status={row.original.status} />,
-      },
-      {
-        id: 'actions',
-        header: '',
-        cell: ({ row }) => {
-          const bill = row.original;
-          const open = bill.status === 'DRAFT' || bill.status === 'ISSUED';
-          const payable = bill.status === 'APPROVED' || bill.status === 'OVERDUE';
-          return (
-            <div onClick={(e) => e.stopPropagation()}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => setSelectedBillId(bill.uuid)}>
-                    <i className="ri-eye-line mr-2" /> View details
-                  </DropdownMenuItem>
-                  {open && canAccess('Bill', 'approve') && (
-                    <DropdownMenuItem onClick={() => setToApprove(bill)}>
-                      <i className="ri-check-line mr-2" /> Approve
-                    </DropdownMenuItem>
-                  )}
-                  {open && canAccess('Bill', 'reject') && (
-                    <DropdownMenuItem className="text-red-600" onClick={() => setToReject(bill)}>
-                      <i className="ri-close-line mr-2" /> Reject
-                    </DropdownMenuItem>
-                  )}
-                  {payable && canAccess('Bill', 'pay') && (
-                    <DropdownMenuItem onClick={() => setToPay(bill)}>
-                      <i className="ri-bank-card-line mr-2" /> Record payment
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <button
+            type="button"
+            className="rounded-[2px] px-2 py-1 hover:bg-accent disabled:opacity-40"
+            disabled={page >= pageCount}
+            onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+          >
+            Next
+          </button>
+        </div>
+      }
+    >
+      {error ? (
+        <div className="p-3">
+          <ErrorState error={error} onRetry={() => refetch()} />
+        </div>
+      ) : isLoading ? (
+        <div className="flex justify-center py-10">
+          <InlineLoader label="Loading…" />
+        </div>
+      ) : rows.length === 0 ? (
+        <p className="px-3 py-8 text-center text-sm text-muted-foreground">
+          {filtered ? 'No bills match these filters' : 'No bills yet'}
+        </p>
+      ) : (
+        rows.map((bill: Bill) => (
+          <DocumentListRow
+            key={bill.uuid}
+            selected={bill.uuid === selectedId}
+            onClick={() => setSelectedId(bill.uuid)}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span className="truncate text-sm font-medium text-foreground">{bill.code}</span>
+              <span className="shrink-0 text-sm tabular-nums text-foreground">
+                {formatMoney(bill.invoiceTotal, bill.currency)}
+              </span>
             </div>
-          );
-        },
-      },
-    ],
-    [canAccess]
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="truncate text-muted-foreground">
+                {bill.vendor?.name ?? '—'}
+              </span>
+              <BillStatusBadge status={bill.status} />
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              Due {formatDate(bill.dueDate)}
+            </span>
+          </DocumentListRow>
+        ))
+      )}
+    </DocumentListPanel>
   );
 
   return (
-    <div>
-      <Filter
-        search={search}
-        onSearchChange={setSearch}
-        status={status}
-        onStatusChange={(v) => setStatus(v || 'all')}
-        vendorId={vendorId}
-        onVendorChange={setVendorId}
-        rows={rows}
-      />
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="flex shrink-0 justify-end">
+        <Can resource="Bill" action="create">
+          <Link href="/account_payables/bills/new">
+            <Button
+              text="New bill"
+              icon={<i className="ri-add-line" />}
+              theme="default"
+              type="button"
+            />
+          </Link>
+        </Can>
+      </div>
 
-      {error ? (
-        <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title={filtered ? 'No bills match these filters' : 'No bills yet'}
-          description={
-            filtered
-              ? 'Clear the search or filters to see all bills.'
-              : 'Record a vendor bill to track what you owe; approving it posts the expense and payable.'
-          }
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={rows}
-          isLoading={isLoading}
-          withRowSelection={false}
-          onRowClick={(row) => setSelectedBillId(row.uuid)}
-          manualPagination
-          pageCount={data?.meta?.totalPages ?? 1}
-          totalRows={data?.meta?.total ?? 0}
-          pagination={pagination}
-          onPaginationChange={setPagination}
-          pageSize={pagination.pageSize}
-          pageSizeOptions={[10, 20, 50, 100]}
-        />
-      )}
-
-      <BillDetailsSlideover billId={selectedBillId} onClose={() => setSelectedBillId(null)} />
-      <RejectBillModal bill={toReject} onClose={() => setToReject(null)} />
-      <PayBillModal bill={toPay} onClose={() => setToPay(null)} />
-      <ConfirmModal
-        open={!!toApprove}
-        title={`Approve bill ${toApprove?.code ?? ''}`}
-        message={
-          toApprove
-            ? `Approving posts ${formatMoney(toApprove.invoiceTotal, toApprove.currency)} to the books (expense + VAT / vendor payable). Continue?`
-            : ''
-        }
-        confirmText="Approve"
-        isLoading={approve.isPending}
-        onClose={() => setToApprove(null)}
-        onConfirm={() =>
-          toApprove && approve.mutate({ id: toApprove.uuid }, { onSuccess: () => setToApprove(null) })
+      <DocumentMasterDetail
+        className="min-h-0 flex-1"
+        selectedId={selectedId}
+        list={list}
+        detail={selectedId ? <BillDetailPanel billId={selectedId} /> : null}
+        preview={selectedId ? <BillPreviewPanel billId={selectedId} /> : null}
+        emptyState={
+          <EmptyState
+            variant="plain"
+            title="Select a bill"
+            description={
+              filtered
+                ? 'Choose a bill from the list, or clear filters.'
+                : 'Record a vendor bill to track what you owe.'
+            }
+            action={
+              canAccess('Bill', 'create') ? (
+                <Link href="/account_payables/bills/new">
+                  <Button text="New bill" type="button" theme="default" />
+                </Link>
+              ) : undefined
+            }
+          />
         }
       />
+
     </div>
   );
 }

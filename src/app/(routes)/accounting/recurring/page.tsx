@@ -1,12 +1,31 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { BooksResourcePage } from '@/components/books/BooksResourcePage';
 
 export default function Page() {
   return (
-    <ComingSoonPage
-      title="Recurring transactions"
-      description="Templates that create invoices, bills, expenses or journals on a schedule."
+    <BooksResourcePage
+      resourcePath="recurring-template"
+      title="Recurring template"
+      columns={[
+        { key: 'name', label: 'Name' },
+        { key: 'documentType', label: 'Document type' },
+        { key: 'frequency', label: 'Frequency' },
+        { key: 'isActive', label: 'Active' },
+        { key: 'nextRunDate', label: 'Next run' },
+      ]}
+      fields={[
+        { key: 'name', label: 'Name' },
+        { key: 'documentType', label: 'Document type' },
+        { key: 'frequency', label: 'Frequency' },
+        { key: 'isActive', label: 'Active', type: 'checkbox' },
+        { key: 'nextRunDate', label: 'Next run date', type: 'date' },
+        { key: 'endDate', label: 'End date', type: 'date' },
+        { key: 'customerId', label: 'Customer ID' },
+        { key: 'vendorId', label: 'Vendor ID' },
+        { key: 'templatePayload', label: 'Template payload (JSON)', type: 'json' },
+        { key: 'notes', label: 'Notes', type: 'textarea' },
+      ]}
     />
   );
 }

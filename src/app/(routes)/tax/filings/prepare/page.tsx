@@ -1,12 +1,7 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { TaxFilingWorkflowPage } from '@/components/books/TaxFilingWorkflowPage';
 
 export default function Page() {
-  return (
-    <ComingSoonPage
-      title="Prepare tax filing"
-      description="Compute the period return from posted entries."
-    />
-  );
+  return <TaxFilingWorkflowPage mode="prepare" />;
 }

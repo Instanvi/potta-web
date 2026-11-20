@@ -1,12 +1,23 @@
 'use client';
 
-import { ComingSoonPage } from '@/components/accounting/ComingSoonPage';
+import { BooksResourcePage } from '@/components/books/BooksResourcePage';
 
 export default function Page() {
   return (
-    <ComingSoonPage
-      title="Opening balances"
-      description="One-time journal to load starting balances."
+    <BooksResourcePage
+      resourcePath="opening-balance"
+      title="Opening balance"
+      columns={[
+        { key: 'asOfDate', label: 'As of' },
+        { key: 'status', label: 'Status' },
+        { key: 'createdAt', label: 'Created' },
+      ]}
+      fields={[
+        { key: 'asOfDate', label: 'As of date', type: 'date' },
+        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+        { key: 'notes', label: 'Notes', type: 'textarea' },
+      ]}
+      actions={[{ label: 'Post opening balance', action: 'post', confirm: true }]}
     />
   );
 }
