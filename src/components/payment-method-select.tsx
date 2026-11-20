@@ -62,11 +62,11 @@ export function PaymentMethodSelect({
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+          className="mb-1 flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-white"
           aria-label="Add payment method"
           title="Add payment method"
         >
-          <i className="ri-add-line text-xl" />
+          <i className="ri-add-line text-2xl" />
         </button>
       )}
       <PaymentMethodSheet

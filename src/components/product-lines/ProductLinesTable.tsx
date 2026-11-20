@@ -8,7 +8,7 @@ import { productApi } from '@potta/app/(routes)/pos/inventory/_utils/api';
 import type { PackagePrice, Product, ProductModifier, Unit } from '@potta/app/(routes)/pos/inventory/_utils/types';
 import { lineKey } from '@potta/app/(routes)/pos/inventory/_utils/types';
 import { priceCatalogSelection } from '@/lib/catalog-price';
-import { FIELD_INPUT, FIELD_SELECT, SHEET_FIELD_LABEL } from '@/lib/field-styles';
+import { FIELD_INPUT, FIELD_SELECT } from '@/lib/field-styles';
 
 const getCurrencySymbol = (currencyCode: string): string => {
   if (currencyCode === 'USD') return '$';
@@ -33,42 +33,15 @@ type TableRow = {
   isCustom?: boolean;
 };
 
-/** Underline control to match FIELD_INPUT / books document forms. */
 const selectStyles = {
   control: (provided: any, state: any) => ({
     ...provided,
     minHeight: '40px',
-    height: '40px',
-    borderRadius: '2px 2px 0 0',
-    borderWidth: 0,
-    borderBottomWidth: '1px',
-    borderBottomStyle: 'solid',
-    borderBottomColor: state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
+    borderRadius: '2px',
+    borderColor: state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
     boxShadow: 'none',
-    backgroundColor: '#ffffff',
-    '&:hover': {
-      borderBottomColor: state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
-    },
-  }),
-  valueContainer: (provided: any) => ({
-    ...provided,
-    padding: '0 12px',
-    height: '40px',
-  }),
-  indicatorsContainer: (provided: any) => ({
-    ...provided,
-    height: '40px',
-  }),
-  input: (provided: any) => ({ ...provided, margin: 0, padding: 0 }),
-  placeholder: (provided: any) => ({
-    ...provided,
-    color: 'rgba(0,0,0,0.35)',
-    fontSize: '0.875rem',
-  }),
-  singleValue: (provided: any) => ({
-    ...provided,
-    fontSize: '0.875rem',
-    color: '#111111',
+    backgroundColor: '#fafafa',
+    '&:hover': { borderColor: state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)' },
   }),
   menu: (provided: any) => ({ ...provided, borderRadius: '2px', zIndex: 30 }),
   option: (provided: any, state: any) => ({
@@ -234,239 +207,151 @@ export default function ProductLinesTable() {
   const money = (n: number) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
   const displayPrice = isCustom || !detail ? unitPrice : priced.unitPrice;
-  const linePreview = Number(displayPrice) * Number(qty || 0);
 
   return (
-    <div className="space-y-5">
-      {/* Composer: one labeled row — Product | Qty | Price | Add */}
-      <div className="rounded-[2px] border border-black/[0.08] bg-white p-4">
-        <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-12">
-          <div className="md:col-span-6">
-            <span className={SHEET_FIELD_LABEL}>Product / service</span>
-            <CreatableSelect<Option, false>
-              styles={selectStyles}
-              options={productOptions}
-              value={selectedOption}
-              isClearable
-              isDisabled={isLoading}
-              placeholder={isLoading ? 'Loading…' : 'Select or type a product / service'}
-              formatCreateLabel={(input) => `Use “${input}” as a free-text line`}
-              noOptionsMessage={({ inputValue }) =>
-                inputValue
-                  ? `No products match — press Enter to use “${inputValue}”`
-                  : 'No products found — type a service name'
-              }
-              onChange={(opt) => {
-                if (!opt) {
-                  setProductId('');
-                  setCustomName('');
-                  setUnitPrice(0);
-                  return;
-                }
-                const value = String(opt.value);
-                if (value.startsWith('custom:') || !products.some((p) => p.uuid === value)) {
-                  setProductId('');
-                  setCustomName(opt.label);
-                  setDetail(null);
-                } else {
-                  setCustomName('');
-                  setProductId(value);
-                }
-              }}
-              onCreateOption={(input) => {
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_auto_auto] md:items-end">
+        <div>
+          <CreatableSelect<Option, false>
+            styles={selectStyles}
+            options={productOptions}
+            value={selectedOption}
+            isClearable
+            isDisabled={isLoading}
+            placeholder={isLoading ? 'Loading…' : 'Select or type a product / service'}
+            formatCreateLabel={(input) => `Use “${input}” as a free-text line`}
+            noOptionsMessage={({ inputValue }) =>
+              inputValue
+                ? `No products match — press Enter to use “${inputValue}”`
+                : 'No products found — type a service name'
+            }
+            onChange={(opt) => {
+              if (!opt) {
                 setProductId('');
-                setCustomName(input.trim());
+                setCustomName('');
+                setUnitPrice(0);
+                return;
+              }
+              const value = String(opt.value);
+              if (value.startsWith('custom:') || !products.some((p) => p.uuid === value)) {
+                setProductId('');
+                setCustomName(opt.label);
                 setDetail(null);
-              }}
-            />
-            {errors.product && <p className="mt-1 text-sm text-red-500">{errors.product}</p>}
-          </div>
-          <div className="md:col-span-2">
-            <label className={SHEET_FIELD_LABEL} htmlFor="line-qty">
-              Qty
-            </label>
-            <input
-              id="line-qty"
-              type="number"
-              min={1}
-              value={qty}
-              onChange={(e) => setQty(Number(e.target.value))}
-              className={FIELD_INPUT}
-            />
-            {errors.quantity && <p className="mt-1 text-sm text-red-500">{errors.quantity}</p>}
-          </div>
-          <div className="md:col-span-2">
-            <label className={SHEET_FIELD_LABEL} htmlFor="line-price">
-              Price
-            </label>
-            <input
-              id="line-price"
-              type="number"
-              min={0}
-              step="0.01"
-              value={displayPrice}
-              onChange={(e) => setUnitPrice(Number(e.target.value))}
-              className={FIELD_INPUT}
-              title={detail && !isCustom ? 'Catalog price (editable)' : 'Unit price'}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <button
-              type="button"
-              onClick={add}
-              className="inline-flex h-10 w-full items-center justify-center rounded-[2px] bg-primary px-3 text-sm text-white hover:bg-brand-hover"
-            >
-              Add line
-            </button>
-            <p className="mt-1 text-right text-xs tabular-nums text-muted-foreground">
-              {currencySymbol} {money(linePreview)}
-            </p>
-          </div>
+              } else {
+                setCustomName('');
+                setProductId(value);
+              }
+            }}
+            onCreateOption={(input) => {
+              setProductId('');
+              setCustomName(input.trim());
+              setDetail(null);
+            }}
+          />
+          {errors.product && <small className="text-red-500">{errors.product}</small>}
         </div>
-
-        {(detail?.variations?.length ||
-          packages.length > 0 ||
-          units.length > 0 ||
-          modifiers.length > 0) && (
-          <div className="mt-4 grid grid-cols-1 gap-3 border-t border-black/[0.06] pt-4 md:grid-cols-3">
-            {detail?.variations && detail.variations.length > 0 && (
-              <div>
-                <span className={SHEET_FIELD_LABEL}>Variation</span>
-                <select
-                  className={FIELD_SELECT}
-                  value={variationId}
-                  onChange={(e) => setVariationId(e.target.value)}
-                >
-                  <option value="">Select variation</option>
-                  {detail.variations.map((v) => (
-                    <option key={v.uuid} value={v.uuid}>
-                      {v.name || v.sku || v.uuid}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            {packages.length > 0 && (
-              <div>
-                <span className={SHEET_FIELD_LABEL}>Package</span>
-                <select
-                  className={FIELD_SELECT}
-                  value={packageId}
-                  onChange={(e) => setPackageId(e.target.value)}
-                >
-                  <option value="">Optional</option>
-                  {packages.map((p) => (
-                    <option key={p.uuid} value={p.uuid}>
-                      {p.packageName} · {p.unitsPerPackage} × {p.packagePrice}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            {units.length > 0 && (
-              <div>
-                <span className={SHEET_FIELD_LABEL}>Unit</span>
-                <select
-                  className={FIELD_SELECT}
-                  value={unitId}
-                  onChange={(e) => setUnitId(e.target.value)}
-                >
-                  <option value="">Optional</option>
-                  {units.map((u) => (
-                    <option key={u.uuid} value={u.uuid}>
-                      {u.name} ({u.symbol})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            {modifiers.length > 0 && (
-              <div className="md:col-span-3">
-                <span className={SHEET_FIELD_LABEL}>Modifiers</span>
-                <div className="mt-1 flex flex-wrap gap-3">
-                  {modifiers.map((m) => (
-                    <label key={m.uuid} className="flex items-center gap-2 text-sm text-foreground">
-                      <input
-                        type="checkbox"
-                        checked={modifierIds.includes(m.uuid)}
-                        onChange={(e) =>
-                          setModifierIds((ids) =>
-                            e.target.checked ? [...ids, m.uuid] : ids.filter((id) => id !== m.uuid),
-                          )
-                        }
-                      />
-                      {m.name} (+{m.price})
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <input
+          type="number"
+          min={1}
+          value={qty}
+          onChange={(e) => setQty(Number(e.target.value))}
+          className={`${FIELD_INPUT} w-24`}
+          aria-label="Quantity"
+        />
+        <input
+          type="number"
+          min={0}
+          step="0.01"
+          value={displayPrice}
+          onChange={(e) => setUnitPrice(Number(e.target.value))}
+          className={`${FIELD_INPUT} w-32`}
+          aria-label="Unit price"
+          title={detail && !isCustom ? 'Catalog price (editable)' : 'Unit price'}
+        />
+        <button
+          type="button"
+          onClick={add}
+          className="inline-flex h-10 items-center justify-center rounded-[2px] bg-primary px-4 text-sm text-white hover:bg-brand-hover"
+        >
+          Add line · {currencySymbol} {money(Number(displayPrice) || 0)}
+        </button>
       </div>
-
-      {/* Added lines */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-black/[0.08] text-left text-muted-foreground">
-              <th className="py-2 pr-3 font-normal">Item</th>
-              <th className="w-20 py-2 pr-3 font-normal">Qty</th>
-              <th className="w-28 py-2 pr-3 text-right font-normal">Amount</th>
-              <th className="w-16 py-2 font-normal" />
+      {detail?.variations && detail.variations.length > 0 && (
+        <select className={FIELD_SELECT} value={variationId} onChange={(e) => setVariationId(e.target.value)}>
+          <option value="">Variation</option>
+          {detail.variations.map((v) => (
+            <option key={v.uuid} value={v.uuid}>
+              {v.name || v.sku || v.uuid}
+            </option>
+          ))}
+        </select>
+      )}
+      {packages.length > 0 && (
+        <select className={FIELD_SELECT} value={packageId} onChange={(e) => setPackageId(e.target.value)}>
+          <option value="">Package (optional)</option>
+          {packages.map((p) => (
+            <option key={p.uuid} value={p.uuid}>
+              {p.packageName} · {p.unitsPerPackage} × {p.packagePrice}
+            </option>
+          ))}
+        </select>
+      )}
+      {units.length > 0 && (
+        <select className={FIELD_SELECT} value={unitId} onChange={(e) => setUnitId(e.target.value)}>
+          <option value="">Unit (optional)</option>
+          {units.map((u) => (
+            <option key={u.uuid} value={u.uuid}>
+              {u.name} ({u.symbol})
+            </option>
+          ))}
+        </select>
+      )}
+      {modifiers.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {modifiers.map((m) => (
+            <label key={m.uuid} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={modifierIds.includes(m.uuid)}
+                onChange={(e) =>
+                  setModifierIds((ids) => (e.target.checked ? [...ids, m.uuid] : ids.filter((id) => id !== m.uuid)))
+                }
+              />
+              {m.name} (+{m.price})
+            </label>
+          ))}
+        </div>
+      )}
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b text-left text-muted-foreground">
+            <th className="py-2">Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.lineKey} className="border-b">
+              <td className="py-2">{row.name}</td>
+              <td>{row.qty}</td>
+              <td>
+                {currencySymbol} {money(row.qty * row.price)}
+              </td>
+              <td>
+                <button type="button" onClick={() => persist(rows.filter((r) => r.lineKey !== row.lineKey))}>
+                  Remove
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="py-6 text-center text-sm text-muted-foreground">
-                  No lines yet — select a product and click Add line.
-                </td>
-              </tr>
-            ) : (
-              rows.map((row) => (
-                <tr key={row.lineKey} className="border-b border-black/[0.06]">
-                  <td className="py-2.5 pr-3 text-foreground">{row.name}</td>
-                  <td className="py-2.5 pr-3 tabular-nums">{row.qty}</td>
-                  <td className="py-2.5 pr-3 text-right tabular-nums">
-                    {currencySymbol} {money(row.qty * row.price)}
-                  </td>
-                  <td className="py-2.5 text-right">
-                    <button
-                      type="button"
-                      className="text-sm text-muted-foreground hover:text-destructive"
-                      onClick={() => persist(rows.filter((r) => r.lineKey !== row.lineKey))}
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="ml-auto w-full max-w-xs space-y-1.5 text-sm">
-        <div className="flex justify-between text-muted-foreground">
-          <span>Subtotal</span>
-          <span className="tabular-nums text-foreground">
-            {currencySymbol} {money(subtotal)}
-          </span>
-        </div>
-        <div className="flex justify-between text-muted-foreground">
-          <span>Tax</span>
-          <span className="tabular-nums text-foreground">
-            {currencySymbol} {money(taxAmount)}
-          </span>
-        </div>
-        <div className="flex justify-between border-t border-black/[0.08] pt-2 text-base font-medium text-foreground">
-          <span>Total</span>
-          <span className="tabular-nums">
-            {currencySymbol} {money(subtotal + taxAmount)}
-          </span>
-        </div>
-      </div>
+          ))}
+        </tbody>
+      </table>
+      <p className="text-sm text-muted-foreground">
+        Subtotal {currencySymbol} {money(subtotal)} · Tax {currencySymbol} {money(taxAmount)} · Total {currencySymbol}{' '}
+        {money(subtotal + taxAmount)}
+      </p>
     </div>
   );
 }
