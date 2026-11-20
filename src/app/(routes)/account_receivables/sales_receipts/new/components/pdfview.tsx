@@ -4,7 +4,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import React, { useContext, useEffect, useState } from 'react';
 import { Customer } from '../../../../customers/utils/types';
 import useGetOneCustomer from '../../../../customers/hooks/useGetOneCustomer';
-import { paymentMethodLabel } from '../../utils/types';
+import { paymentMethodLabel } from '../../../utils/types';
 
 interface TableItem {
   name: string;

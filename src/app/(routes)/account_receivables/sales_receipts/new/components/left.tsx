@@ -13,7 +13,7 @@ import { Customer } from '../../../../customers/utils/types';
 import * as Yup from 'yup';
 import { toast } from 'sonner'; // Assuming you have a toast library
 import { useCreateSalesReceipt } from '../../hooks/useCreateReceipt';
-import { SalesReceiptPayload } from '../../utils/validation';
+import { SalesReceiptPayload } from '../../../utils/validation';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
 
 // Define Option interface to match the one in SearchSelect component
@@ -262,19 +262,19 @@ const Left = () => {
       return sum + itemTotal + itemTax;
     }, 0);
 
-    // Backend recomputes totals; totalAmount is sent for client-side display parity.
-    const saleReceiptData = {
+    // Create the sales receipt data using the SalesReceiptPayload type from your validation schema
+    const saleReceiptData: SalesReceiptPayload = {
       saleDate: date,
-      totalAmount,
+      totalAmount: totalAmount,
       paymentReference: paymentReference,
       notes: note,
       paymentMethod: selectedPaymentMethod,
       receiptNumber: invoiceNumber,
-      discountAmount: 0,
-      customerId: customerName,
-      salePerson: '532e5da0-204f-4417-95e0-f26a13c62e39',
+      discountAmount: 0, // Add default or actual value if available
+      customerId: customerName, // Using the customer UUID as customerId
+      salePerson: '532e5da0-204f-4417-95e0-f26a13c62e39', // Fixed sales person ID as required
       lineItems: lineItems,
-    } as SalesReceiptPayload;
+    };
 
     // Save to context
     context?.setData((prevData: any) => ({
