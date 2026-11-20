@@ -113,6 +113,14 @@ export default function DashboardDetailPage() {
                       setDraft((prev) => (prev ?? []).filter((w) => w.id !== widgetId))
                   : undefined
               }
+              onUpdateWidget={
+                editing
+                  ? (widgetId, next) =>
+                      setDraft((prev) =>
+                        (prev ?? []).map((w) => (w.id === widgetId ? next : w)),
+                      )
+                  : undefined
+              }
             />
           </>
         )}
