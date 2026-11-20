@@ -1,12 +1,13 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
 import { cn } from '@potta/lib/utils';
+import { downloadPreviewAsPdf } from '@/lib/print-preview';
 
 export type DocumentMasterDetailProps = {
   /** Scrollable left list panel content. */
@@ -25,6 +26,8 @@ export type DocumentMasterDetailProps = {
   detailDefaultSize?: number;
   previewDefaultSize?: number;
   previewLabel?: string;
+  /** Filename / print title for Download PDF. */
+  previewDownloadTitle?: string;
   /** Optional brand strip above the three columns (flush under app navbar). */
   banner?: ReactNode;
 };
@@ -41,6 +44,7 @@ export function DocumentMasterDetail({
   detailDefaultSize = 43,
   previewDefaultSize = 35,
   previewLabel = 'Preview',
+  previewDownloadTitle,
   banner,
 }: DocumentMasterDetailProps) {
   const hasSelection = Boolean(selectedId);
@@ -70,19 +74,6 @@ export function DocumentMasterDetail({
         </div>
       ) : null}
 
-      {preview && hasSelection ? (
-        <div className="flex shrink-0 items-center justify-end gap-2 border-b border-black/[0.06] px-3 py-1.5">
-          <button
-            type="button"
-            onClick={() => setPreviewOpen((v) => !v)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-[2px] px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-          >
-            <i className={previewOpen ? 'ri-eye-off-line' : 'ri-eye-line'} />
-            {previewOpen ? `Hide ${previewLabel}` : `Show ${previewLabel}`}
-          </button>
-        </div>
-      ) : null}
-
       <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1 space-x-0">
         <ResizablePanel
           defaultSize={listDefaultSize}
@@ -102,8 +93,20 @@ export function DocumentMasterDetail({
           minSize={28}
           className="min-w-0"
         >
-          <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+          <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white">
             {hasSelection ? detail : emptyState}
+            {preview && hasSelection && !previewOpen ? (
+              <div className="pointer-events-none absolute bottom-4 right-4 z-10">
+                <button
+                  type="button"
+                  onClick={() => setPreviewOpen(true)}
+                  className="pointer-events-auto inline-flex h-10 items-center gap-2 rounded-[2px] border border-black/10 bg-white px-3 text-sm font-medium text-foreground shadow-sm hover:bg-accent"
+                >
+                  <i className="ri-eye-line text-base text-primary" />
+                  {previewLabel}
+                </button>
+              </div>
+            ) : null}
           </div>
         </ResizablePanel>
 
@@ -112,12 +115,78 @@ export function DocumentMasterDetail({
             <ResizableHandle withHandle className="bg-transparent" />
             <ResizablePanel defaultSize={previewDefaultSize} minSize={20} className="min-w-0">
               <div className="h-full min-h-0 overflow-hidden border-l border-black/[0.06] bg-main-bg">
-                {preview}
+                <DocumentPreviewShell
+                  title={previewLabel}
+                  downloadTitle={previewDownloadTitle || previewLabel}
+                  onClose={() => setPreviewOpen(false)}
+                >
+                  {preview}
+                </DocumentPreviewShell>
               </div>
             </ResizablePanel>
           </>
         ) : null}
       </ResizablePanelGroup>
+    </div>
+  );
+}
+
+/** Preview column chrome: title, Download PDF, Hide. */
+export function DocumentPreviewShell({
+  title = 'Preview',
+  downloadTitle,
+  onClose,
+  children,
+  className,
+}: {
+  title?: string;
+  downloadTitle?: string;
+  onClose?: () => void;
+  children: ReactNode;
+  className?: string;
+}) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className={cn('flex h-full min-h-0 flex-col', className)}>
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-black/[0.06] bg-white px-3 py-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex size-7 items-center justify-center rounded-[2px] bg-brand-subtle text-primary">
+            <i className="ri-eye-line text-sm" />
+          </span>
+          <p className="truncate text-sm font-medium text-foreground">{title}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() =>
+              downloadPreviewAsPdf(contentRef.current, downloadTitle || title)
+            }
+            className="inline-flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-2.5 text-xs font-medium text-foreground hover:bg-accent"
+          >
+            <i className="ri-download-2-line text-sm" />
+            Download PDF
+          </button>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex size-8 items-center justify-center rounded-[2px] text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label={`Hide ${title}`}
+              title={`Hide ${title}`}
+            >
+              <i className="ri-close-line text-base" />
+            </button>
+          ) : null}
+        </div>
+      </div>
+      <div
+        ref={contentRef}
+        data-document-preview
+        className="min-h-0 flex-1 overflow-hidden"
+      >
+        {children}
+      </div>
     </div>
   );
 }
