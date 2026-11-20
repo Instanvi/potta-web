@@ -247,8 +247,14 @@ export const NAV_MODULES: NavModule[] = [
     icon: ChartLineUp,
     matchPrefixes: ['/reports'],
     items: [
-      { title: 'All reports', href: '/reports', icon: ChartLineUp, appIcon: APP_ICONS.report, exact: true },
-      { title: 'Favourites', href: '/reports?tab=favourites', icon: ChartLineUp },
+      {
+        title: 'All reports',
+        href: '/reports',
+        icon: ChartLineUp,
+        appIcon: APP_ICONS.report,
+        exact: true,
+      },
+      { title: 'Favourites', href: '/reports?tab=favourites', icon: ChartLineUp, exact: true },
       { title: 'Balance Sheet', href: '/reports/balance-sheet', icon: Books },
       { title: 'Profit and Loss', href: '/reports/profit-and-loss', icon: ChartLineUp },
       { title: 'AR ageing', href: '/reports/ar-ageing', icon: FileText },
@@ -284,8 +290,49 @@ export function getActiveModule(pathname: string): NavModule | null {
   return best?.module ?? null;
 }
 
-export function isNavActive(pathname: string, item: NavItem): boolean {
-  if (item.exact) return pathname === item.href;
-  const hrefPath = item.href.split('?')[0];
+/**
+ * Whether `item` matches the current location. Query-bearing hrefs (e.g.
+ * `/reports?tab=favourites`) only match when those params are present — they
+ * must not light up for every child under the same path.
+ */
+export function isNavActive(
+  pathname: string,
+  item: NavItem,
+  search: string = '',
+): boolean {
+  const [hrefPath, hrefQuery = ''] = item.href.split('?');
+  const rawSearch = search.startsWith('?') ? search.slice(1) : search;
+  const actual = new URLSearchParams(rawSearch);
+
+  if (item.exact || hrefQuery) {
+    if (pathname !== hrefPath) return false;
+    if (!hrefQuery) {
+      // Exact path with no query requirement — inactive when a tab query is set
+      // so e.g. All reports ≠ Favourites.
+      return !actual.toString();
+    }
+    const required = new URLSearchParams(hrefQuery);
+    for (const [key, value] of required.entries()) {
+      if (actual.get(key) !== value) return false;
+    }
+    return true;
+  }
+
   return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
+}
+
+/** Most specific matching item in a module (longest path, then query hrefs). */
+export function getActiveNavItem(
+  pathname: string,
+  items: NavItem[],
+  search: string = '',
+): NavItem | null {
+  const matches = items.filter((item) => isNavActive(pathname, item, search));
+  if (!matches.length) return null;
+  return [...matches].sort((a, b) => {
+    const aPath = a.href.split('?')[0].length;
+    const bPath = b.href.split('?')[0].length;
+    if (bPath !== aPath) return bPath - aPath;
+    return (b.href.includes('?') ? 1 : 0) - (a.href.includes('?') ? 1 : 0);
+  })[0];
 }
