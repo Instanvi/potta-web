@@ -54,8 +54,19 @@ export interface NavModule {
   items: NavItem[];
 }
 
-/** Restored Potta rail (POS → Inventory → Books → AR → AP → Treasury → Reports → Settings). */
+/** Rail: Dashboards (Home) first, then POS → Inventory → Books → AR → AP → Treasury → Reports → Settings. */
 export const NAV_MODULES: NavModule[] = [
+  {
+    id: 'dashboards',
+    title: 'Dashboards',
+    description: 'Built-in books metrics and custom KPI layouts you can edit.',
+    icon: ChartPieSlice,
+    matchPrefixes: ['/dashboards', '/home'],
+    items: [
+      { title: 'Home', href: '/home', icon: House, appIcon: APP_ICONS.analytics, exact: true },
+      { title: 'All dashboards', href: '/dashboards', icon: ChartPieSlice },
+    ],
+  },
   {
     id: 'pos',
     title: 'POS',
@@ -149,18 +160,9 @@ export const NAV_MODULES: NavModule[] = [
       { title: 'Balance Sheet', href: '/reports/balance-sheet', icon: Books },
       { title: 'Profit and Loss', href: '/reports/profit-and-loss', icon: ChartLineUp },
       { title: 'AR ageing', href: '/reports/ar-ageing', icon: FileText },
+      { title: 'AR ageing detail', href: '/reports/ar-ageing-detail', icon: FileText },
       { title: 'AP ageing', href: '/reports/ap-ageing', icon: FileText },
-    ],
-  },
-  {
-    id: 'dashboards',
-    title: 'Dashboards',
-    description: 'Built-in books metrics and custom KPI layouts you can edit.',
-    icon: ChartPieSlice,
-    matchPrefixes: ['/dashboards', '/home'],
-    items: [
-      { title: 'Home', href: '/home', icon: House, appIcon: APP_ICONS.analytics, exact: true },
-      { title: 'All dashboards', href: '/dashboards', icon: ChartPieSlice },
+      { title: 'AP ageing detail', href: '/reports/ap-ageing-detail', icon: FileText },
     ],
   },
   {

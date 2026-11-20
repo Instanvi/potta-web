@@ -6,7 +6,7 @@ import { NAV_MODULES } from '@/lib/navigation';
 import { useCanOpenRoute } from '@/lib/use-can-open-route';
 import { useAuthContextStore } from '@/store/use-auth-context-store';
 
-/** No landing page: open the first module page the user can access (the sidebar rail switches modules). */
+/** Prefer Home metrics; otherwise first module page the user can access. */
 export default function RootRedirect() {
   const router = useRouter();
   const canOpen = useCanOpenRoute();
@@ -22,6 +22,10 @@ export default function RootRedirect() {
 
   useEffect(() => {
     if (!permissionsReady && !waited) return;
+    if (canOpen('/home')) {
+      router.replace('/home');
+      return;
+    }
     const first = NAV_MODULES.flatMap((m) => m.items).find((item) => canOpen(item.href));
     router.replace(first?.href ?? '/pos');
   }, [permissionsReady, waited, canOpen, router]);
