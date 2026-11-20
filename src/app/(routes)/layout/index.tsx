@@ -3,6 +3,7 @@ import ImprovedCustomNavbar from '../../../components/improved-custom-navbar';
 import Sidebars from '@potta/app/sidebar';
 import Navbar from './navbar';
 import { useContext } from 'react';
+import { usePathname } from 'next/navigation';
 import { ContextData } from '../../../components/providers/DataProvider';
 import React from 'react';
 
@@ -12,7 +13,9 @@ export const revalidate = false;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const context = useContext(ContextData);
-  const useSidebar = context?.layoutMode === 'sidebar';
+  const pathname = usePathname() ?? '';
+  const isMetricsSection = pathname === '/home' || pathname.startsWith('/dashboards');
+  const useSidebar = !isMetricsSection && context?.layoutMode === 'sidebar';
 
   return (
     <div className="relative flex h-screen min-h-0 w-full overflow-hidden">
