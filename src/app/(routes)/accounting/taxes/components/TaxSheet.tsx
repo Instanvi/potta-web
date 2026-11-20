@@ -89,7 +89,7 @@ const TaxSheet = ({ open, tax, onClose }: Props) => {
 
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-md">
+      <SheetContent side="left" className="w-full overflow-y-auto rounded-none sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{tax ? 'Edit tax' : 'New tax'}</SheetTitle>
         </SheetHeader>

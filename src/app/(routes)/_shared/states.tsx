@@ -22,7 +22,7 @@ export const ListToolbar = ({
   actions?: ReactNode;
   className?: string;
 }) => (
-  <div className={cn('mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between', className)}>
+  <div className={cn('flex flex-col gap-3 md:flex-row md:items-end md:justify-between', className)}>
     <div className="flex min-w-0 flex-1 flex-wrap items-end gap-3">{children}</div>
     {actions && <div className="flex shrink-0 flex-wrap items-end justify-end gap-3">{actions}</div>}
   </div>
@@ -64,12 +64,20 @@ export const EmptyState = ({
   title,
   description,
   action,
+  variant = 'card',
 }: {
   title: string;
   description?: ReactNode;
   action?: ReactNode;
+  /** `plain` for use inside an existing report shell (no nested card). */
+  variant?: 'card' | 'plain';
 }) => (
-  <div className="dashboard-panel flex flex-col items-center justify-center gap-2 px-6 py-16 text-center shadow-card">
+  <div
+    className={cn(
+      'flex flex-col items-center justify-center gap-2 px-6 py-16 text-center',
+      variant === 'card' && 'dashboard-panel shadow-card',
+    )}
+  >
     <p className="text-base font-medium text-black">{title}</p>
     {description && <p className="text-sm text-black/70">{description}</p>}
     {action && <div className="mt-2">{action}</div>}

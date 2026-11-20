@@ -1,6 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { formatMetricValue } from '@/lib/dashboards/format';
 import type { DashboardWidget } from '@/lib/dashboards/types';
 import { EmptyState, ErrorState, LoadingState, StatCard } from '../../_shared/states';
@@ -13,6 +25,8 @@ const colSpan: Record<number, string> = {
   8: 'md:col-span-8',
   12: 'md:col-span-12',
 };
+
+const CHART_COLORS = ['hsl(var(--primary))', '#64748b', '#0f766e', '#b45309', '#7c3aed', '#be123c'];
 
 function KpiWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'kpi' }> }) {
   const { data, isLoading, error, refetch } = useAggregate(widget.config.entity, {
@@ -41,32 +55,62 @@ function ChartWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'cha
   if (isLoading) return <LoadingState label="Loading chart…" />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   const groups = data?.groups ?? [];
-  const max = Math.max(...groups.map((g) => Number(g.value) || 0), 1);
+  const chartData = groups.map((g) => ({
+    name: g.label || g.key || '—',
+    value: Number(g.value) || 0,
+  }));
+  const chartType = widget.config.chartType ?? 'bar';
+  const formatTip = (v: number | string) => formatMetricValue(v, widget.config.format);
 
   return (
     <div className="dashboard-panel p-4">
       <p className="text-xs text-muted-foreground">{widget.title}</p>
-      {groups.length === 0 ? (
+      {chartData.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">No data for this period.</p>
+      ) : chartType === 'donut' ? (
+        <div className="mt-2 h-[220px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={55}
+                outerRadius={85}
+                paddingAngle={2}
+              >
+                {chartData.map((_, i) => (
+                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v: number) => formatTip(v)} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      ) : chartType === 'horizontal_bar' ? (
+        <div className="mt-2 h-[220px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: number) => formatTip(v)} />
+              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 2, 2, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       ) : (
-        <ul className="mt-4 space-y-2">
-          {groups.map((g) => (
-            <li key={g.key || g.label} className="space-y-1">
-              <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="truncate">{g.label}</span>
-                <span className="tabular-nums font-medium">
-                  {formatMetricValue(g.value, widget.config.format)}
-                </span>
-              </div>
-              <div className="h-2 rounded-[2px] bg-black/[0.06]">
-                <div
-                  className="h-2 rounded-[2px] bg-primary"
-                  style={{ width: `${Math.min(100, (Number(g.value) / max) * 100)}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-2 h-[220px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ left: 0, right: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: number) => formatTip(v)} />
+              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   );
@@ -86,7 +130,7 @@ function EntityListWidget({ widget }: { widget: Extract<DashboardWidget, { type:
     <div className="dashboard-panel p-4">
       <p className="text-xs text-muted-foreground">{widget.title}</p>
       {items.length === 0 ? (
-        <EmptyState title="No records" description="Nothing to show for this list yet." />
+        <EmptyState title="No records" description="Nothing to show for this list yet." variant="plain" />
       ) : (
         <ul className="mt-3 divide-y divide-black/[0.06]">
           {items.map((row) => {
