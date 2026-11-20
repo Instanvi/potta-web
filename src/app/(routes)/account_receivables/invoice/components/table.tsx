@@ -187,6 +187,7 @@ const InvoiceTable = () => {
             onSearchClear={() => setSearchValue('')}
             searchPlaceholder="Search…"
             filters={filterConfig}
+            orientation="stack"
             className="p-0"
           />
           <DateRangePicker
@@ -290,18 +291,6 @@ const InvoiceTable = () => {
     <DocumentMasterDetail
       className="min-h-0 flex-1"
       selectedId={selectedId}
-      banner={
-        <>
-          <p className="truncate text-sm font-medium">Accounts receivable · Invoices</p>
-          <Link
-            href="/account_receivables/invoice/new"
-            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[2px] bg-white/15 px-3 text-sm text-white hover:bg-white/25"
-          >
-            <i className="ri-add-line text-base" />
-            New invoice
-          </Link>
-        </>
-      }
       list={list}
       detail={
         selectedId ? (
