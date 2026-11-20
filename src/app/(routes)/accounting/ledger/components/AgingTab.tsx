@@ -119,6 +119,7 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : rows.length === 0 ? (
         <EmptyState
+          variant="plain"
           title={`No ${type === 'AR' ? 'receivables' : 'payables'}`}
           description={`${partyLabel} balances appear here once invoices or purchases are posted.`}
         />
