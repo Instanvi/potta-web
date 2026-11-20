@@ -219,7 +219,7 @@ export const NAV_MODULES: NavModule[] = [
     title: 'Tax',
     description: 'Tax rates, codes and filings.',
     icon: Percent,
-    matchPrefixes: ['/accounting/taxes', '/tax'],
+    matchPrefixes: ['/accounting/taxes', '/accounting/payment-methods', '/tax'],
     items: [
       {
         title: 'Tax rates and codes',
@@ -227,6 +227,11 @@ export const NAV_MODULES: NavModule[] = [
         icon: Percent,
         appIcon: APP_ICONS.taxes,
         exact: true,
+      },
+      {
+        title: 'Payment methods',
+        href: '/accounting/payment-methods',
+        icon: Coins,
       },
       { title: 'Filings: prepare', href: '/tax/filings/prepare', icon: FileText },
       { title: 'Filings: submit and pay', href: '/tax/filings/submit', icon: SealCheck },

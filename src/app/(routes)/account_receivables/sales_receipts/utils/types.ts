@@ -14,9 +14,32 @@ export type Filters = {
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Enum Types
-export const PaymentMethods = ['Credit Card', 'Bank Transfer', 'ACH Transfer', 'Other'] as const;
-export type PaymentMethod = typeof PaymentMethods[number];
+/** @deprecated Prefer GET /payment-method — kept for filters/labels fallback. */
+export const SALES_RECEIPT_PAYMENT_METHODS = [
+  { value: 'CASH', label: 'Cash' },
+  { value: 'MOBILE_MONEY', label: 'Mobile Money' },
+  { value: 'CREDIT_CARD', label: 'Credit Card' },
+  { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
+  { value: 'ACH_TRANSAFER', label: 'ACH Transfer' },
+  { value: 'DIGITAL_WALLET', label: 'Digital Wallet' },
+  { value: 'CREDIT', label: 'Credit' },
+  { value: 'OTHER', label: 'Other' },
+] as const;
+
+/** Org payment method code stored on the receipt (dynamic catalog). */
+export type PaymentMethod = string;
+
+/** @deprecated use SALES_RECEIPT_PAYMENT_METHODS */
+export const PaymentMethods = SALES_RECEIPT_PAYMENT_METHODS.map((m) => m.label);
+
+export const paymentMethodLabel = (value?: string | null) =>
+  SALES_RECEIPT_PAYMENT_METHODS.find((m) => m.value === value)?.label ??
+  value ??
+  '—';
+
+/** @deprecated validation now accepts any org method code string */
+export const SALES_RECEIPT_PAYMENT_METHOD_VALUES =
+  SALES_RECEIPT_PAYMENT_METHODS.map((m) => m.value);
 
 export const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
 export type DiscountType = typeof DiscountTypes[number];
