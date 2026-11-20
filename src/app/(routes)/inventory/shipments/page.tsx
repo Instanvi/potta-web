@@ -17,12 +17,12 @@ export default function Page() {
       fields={[
         { key: 'salesOrderId', label: 'Sales order ID' },
         { key: 'invoiceId', label: 'Invoice ID' },
-        { key: 'customerId', label: 'Customer ID' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'shipDate', label: 'Ship date', type: 'date' },
         { key: 'trackingNumber', label: 'Tracking number' },
         { key: 'carrier', label: 'Carrier' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
-        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+        { key: 'lines', label: 'Line items', type: 'lines' },
       ]}
     />
   );

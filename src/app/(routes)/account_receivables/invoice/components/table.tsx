@@ -4,6 +4,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import moment from 'moment';
+import { ColumnDef } from '@tanstack/react-table';
 import { DateRangePicker } from '@potta/components/ui/date-picker';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -14,7 +15,7 @@ import {
 } from '@potta/components/document-master-detail';
 import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
 import { InlineLoader } from '@potta/components/ui/loaders';
 import { IFilter } from '../_utils/types';
 import useGetAllInvoice from '../_hooks/useGetAllInvoice';
@@ -23,6 +24,7 @@ import {
   InvoiceDetailPanel,
   InvoiceDetailPreview,
 } from './InvoiceDetailPanel';
+import DataGrid from './DataGrid';
 
 const startOfLocalDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -86,6 +88,11 @@ const statusClass = (status: string) => {
   }
 };
 
+const customerLabel = (invoice: Invoice) =>
+  invoice.customer
+    ? `${invoice.customer.firstName} ${invoice.customer.lastName}`
+    : invoice.notes || 'No customer';
+
 const InvoiceTable = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -103,7 +110,7 @@ const InvoiceTable = () => {
     ? endOfLocalDay(dateRange.to ?? dateRange.from).toISOString()
     : undefined;
   const { page, limit, setPagination, tableProps } = useServerPagination({
-    pageSize: 40,
+    pageSize: 20,
     resetOn: [statusFilter, debouncedSearch, issuedFrom, issuedTo],
   });
 
@@ -164,6 +171,60 @@ const InvoiceTable = () => {
     },
   ];
 
+  const columns: ColumnDef<Invoice>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'invoiceNumber',
+        header: 'Invoice',
+        cell: ({ row: { original } }) => (
+          <span className="font-medium text-foreground">
+            {original.invoiceNumber || original.invoiceId}
+          </span>
+        ),
+      },
+      {
+        id: 'customer',
+        header: 'Customer',
+        cell: ({ row: { original } }) => (
+          <span className="truncate">{customerLabel(original)}</span>
+        ),
+      },
+      {
+        accessorKey: 'issuedDate',
+        header: 'Issued',
+        cell: ({ row: { original } }) => (
+          <span>{moment(original.issuedDate).format('MMM DD, YYYY')}</span>
+        ),
+      },
+      {
+        accessorKey: 'dueDate',
+        header: 'Due',
+        cell: ({ row: { original } }) => (
+          <span>{moment(original.dueDate).format('MMM DD, YYYY')}</span>
+        ),
+      },
+      {
+        accessorKey: 'invoiceTotal',
+        header: 'Total',
+        cell: ({ row: { original } }) => (
+          <span className="tabular-nums">
+            {Number(original.invoiceTotal).toLocaleString(undefined, {
+              maximumFractionDigits: 0,
+            })}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row: { original } }) => (
+          <span className={statusClass(original.status)}>{original.status}</span>
+        ),
+      },
+    ],
+    []
+  );
+
   const { pageCount } = tableProps(data?.meta, data?.data?.length);
 
   const list = (
@@ -171,7 +232,14 @@ const InvoiceTable = () => {
       header={
         <>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-foreground">Invoices</p>
+            <button
+              type="button"
+              onClick={() => setSelectedId(null)}
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <i className="ri-arrow-left-line" />
+              All invoices
+            </button>
             <Link
               href="/account_receivables/invoice/new"
               className="inline-flex size-8 items-center justify-center rounded-[2px] bg-primary text-primary-foreground hover:bg-primary/90"
@@ -251,70 +319,111 @@ const InvoiceTable = () => {
           No invoices found
         </p>
       ) : (
-        filteredData.map((invoice: Invoice) => {
-          const customerLabel = invoice.customer
-            ? `${invoice.customer.firstName} ${invoice.customer.lastName}`
-            : invoice.notes || 'No customer';
-          return (
-            <DocumentListRow
-              key={invoice.uuid}
-              selected={invoice.uuid === selectedId}
-              onClick={() => setSelectedId(invoice.uuid)}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="truncate text-sm font-medium text-foreground">
-                  {customerLabel}
-                </span>
-                <span className="shrink-0 text-sm tabular-nums text-foreground">
-                  {Number(invoice.invoiceTotal).toLocaleString(undefined, {
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="truncate text-muted-foreground">
-                  {invoice.invoiceNumber || invoice.invoiceId}
-                </span>
-                <span className={statusClass(invoice.status)}>{invoice.status}</span>
-              </div>
-              <span className="text-[11px] text-muted-foreground">
-                {moment(invoice.issuedDate).format('MMM DD, YYYY')}
+        filteredData.map((invoice: Invoice) => (
+          <DocumentListRow
+            key={invoice.uuid}
+            selected={invoice.uuid === selectedId}
+            onClick={() => setSelectedId(invoice.uuid)}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span className="truncate text-sm font-medium text-foreground">
+                {customerLabel(invoice)}
               </span>
-            </DocumentListRow>
-          );
-        })
+              <span className="shrink-0 text-sm tabular-nums text-foreground">
+                {Number(invoice.invoiceTotal).toLocaleString(undefined, {
+                  maximumFractionDigits: 0,
+                })}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="truncate text-muted-foreground">
+                {invoice.invoiceNumber || invoice.invoiceId}
+              </span>
+              <span className={statusClass(invoice.status)}>{invoice.status}</span>
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              {moment(invoice.issuedDate).format('MMM DD, YYYY')}
+            </span>
+          </DocumentListRow>
+        ))
       )}
     </DocumentListPanel>
   );
 
-  return (
-    <DocumentMasterDetail
-      className="min-h-0 flex-1"
-      selectedId={selectedId}
-      list={list}
-      detail={
-        selectedId ? (
+  if (selectedId) {
+    return (
+      <DocumentMasterDetail
+        className="min-h-0 flex-1"
+        selectedId={selectedId}
+        list={list}
+        detail={
           <InvoiceDetailPanel invoiceId={selectedId} fallback={selectedFromList} />
-        ) : null
-      }
-      preview={
-        selectedId ? (
+        }
+        preview={
           <InvoiceDetailPreview invoiceId={selectedId} fallback={selectedFromList} />
-        ) : null
-      }
-      emptyState={
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-4 bg-main-bg p-4 md:p-5">
+      <ListToolbar
+        actions={
+          <Link href="/account_receivables/invoice/new">
+            <Button
+              text="New invoice"
+              icon={<i className="ri-add-line" />}
+              theme="default"
+              type="button"
+            />
+          </Link>
+        }
+      >
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={(e) => setSearchValue(e.target.value)}
+          onSearchClear={() => setSearchValue('')}
+          searchPlaceholder="Search invoices…"
+          filters={filterConfig}
+          className="p-0"
+        />
+        <DateRangePicker
+          valueType="date"
+          className="w-auto min-w-[240px]"
+          placeholder="Issued: all dates"
+          clearable
+          value={dateRange ?? {}}
+          onChange={(range) =>
+            setDateRange(
+              range.from ? { from: range.from, to: range.to } : undefined
+            )
+          }
+        />
+      </ListToolbar>
+
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : !isLoading && filteredData.length === 0 ? (
         <EmptyState
-          variant="plain"
-          title="Select an invoice"
-          description="Choose an invoice from the list, or create a new one."
+          title="No invoices yet"
+          description="Create an invoice to bill a customer."
           action={
             <Link href="/account_receivables/invoice/new">
               <Button text="New invoice" type="button" theme="default" />
             </Link>
           }
         />
-      }
-    />
+      ) : (
+        <DataGrid
+          columns={columns}
+          data={filteredData}
+          onRowClick={(row) => setSelectedId(row.uuid)}
+          isLoading={isLoading}
+          {...tableProps(data?.meta, data?.data?.length)}
+        />
+      )}
+    </div>
   );
 };
 

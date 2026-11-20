@@ -19,7 +19,7 @@ export default function Page() {
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'paymentDate', label: 'Payment date', type: 'date' },
         { key: 'method', label: 'Method' },
-        { key: 'vendorId', label: 'Vendor ID' },
+        { key: 'vendorId', label: 'Vendor', type: 'vendor' },
         { key: 'billId', label: 'Bill ID' },
         { key: 'reference', label: 'Reference' },
         { key: 'applyToBill', label: 'Apply to bill', type: 'checkbox' },

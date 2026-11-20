@@ -15,13 +15,13 @@ export default function Page() {
         { key: 'reason', label: 'Reason' },
       ]}
       fields={[
-        { key: 'vendorId', label: 'Vendor ID' },
+        { key: 'vendorId', label: 'Vendor', type: 'vendor' },
         { key: 'billId', label: 'Bill ID' },
         { key: 'creditAmount', label: 'Credit amount', type: 'number' },
         { key: 'issueDate', label: 'Issue date', type: 'date' },
         { key: 'reason', label: 'Reason' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
-        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+        { key: 'lines', label: 'Line items', type: 'lines' },
       ]}
     />
   );

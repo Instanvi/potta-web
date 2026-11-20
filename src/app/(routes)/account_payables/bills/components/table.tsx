@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { PaginationState } from '@tanstack/react-table';
+import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { Can, useCan } from '@/components/auth/can';
@@ -13,9 +13,10 @@ import {
   DocumentListPanel,
   DocumentListRow,
 } from '@potta/components/document-master-detail';
+import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
 import { InlineLoader } from '@potta/components/ui/loaders';
 import { formatDate } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
 import { formatMoney } from '../../utils/format';
 import { useVendorOptions } from '../../hooks';
 import { useBills } from '../hooks';
@@ -46,7 +47,7 @@ export function BillsTable() {
   const [vendorId, setVendorId] = useState('');
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 40,
+    pageSize: 20,
   });
 
   useEffect(() => {
@@ -83,12 +84,141 @@ export function BillsTable() {
     [pathname, router, searchParams]
   );
 
+  const filterControls = (orientation: 'row' | 'stack' = 'row') => (
+    <DynamicFilter
+      className="p-0"
+      orientation={orientation}
+      searchValue={search}
+      onSearchChange={(e) => setSearch(e.target.value)}
+      onSearchClear={() => setSearch('')}
+      searchPlaceholder="Search bills…"
+      filters={[
+        {
+          key: 'status',
+          label: 'Status',
+          value: status,
+          options: statusOptions,
+          onChange: (v) => setStatus(v || 'all'),
+        },
+        {
+          key: 'vendor',
+          label: 'All vendors',
+          value: vendorId,
+          isSearchable: true,
+          selectClassName: 'min-w-[160px]',
+          options: vendors.map((v) => ({ label: v.name, value: v.uuid })),
+          onChange: setVendorId,
+        },
+      ]}
+    />
+  );
+
+  const exportButton = (
+    <ExportButton
+      filename="bills"
+      rows={rows}
+      columns={[
+        { key: 'code', header: 'Bill' },
+        {
+          key: 'vendorInvoiceNumber',
+          header: 'Vendor ref',
+          value: (row) => row.vendorInvoiceNumber || '',
+        },
+        {
+          key: 'vendor',
+          header: 'Vendor',
+          value: (row) => row.vendor?.name ?? '',
+        },
+        {
+          key: 'issuedDate',
+          header: 'Issued',
+          value: (row) => formatDate(row.issuedDate),
+        },
+        {
+          key: 'dueDate',
+          header: 'Due date',
+          value: (row) => formatDate(row.dueDate),
+        },
+        {
+          key: 'invoiceTotal',
+          header: 'Amount',
+          value: (row) => formatMoney(row.invoiceTotal, row.currency),
+        },
+        { key: 'status', header: 'Status' },
+      ]}
+    />
+  );
+
+  const columns: ColumnDef<Bill>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'code',
+        header: 'Bill',
+        cell: ({ row: { original } }) => (
+          <span className="font-medium text-foreground">{original.code}</span>
+        ),
+      },
+      {
+        accessorKey: 'vendorInvoiceNumber',
+        header: 'Vendor ref',
+        cell: ({ row: { original } }) => (
+          <span>{original.vendorInvoiceNumber || '—'}</span>
+        ),
+      },
+      {
+        id: 'vendor',
+        header: 'Vendor',
+        cell: ({ row: { original } }) => (
+          <span className="truncate">{original.vendor?.name ?? '—'}</span>
+        ),
+      },
+      {
+        accessorKey: 'issuedDate',
+        header: 'Issued',
+        cell: ({ row: { original } }) => (
+          <span>{formatDate(original.issuedDate)}</span>
+        ),
+      },
+      {
+        accessorKey: 'dueDate',
+        header: 'Due',
+        cell: ({ row: { original } }) => (
+          <span>{formatDate(original.dueDate)}</span>
+        ),
+      },
+      {
+        accessorKey: 'invoiceTotal',
+        header: 'Amount',
+        cell: ({ row: { original } }) => (
+          <span className="tabular-nums">
+            {formatMoney(original.invoiceTotal, original.currency)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row: { original } }) => (
+          <BillStatusBadge status={original.status} />
+        ),
+      },
+    ],
+    []
+  );
+
   const list = (
     <DocumentListPanel
       header={
         <>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-foreground">Bills</p>
+            <button
+              type="button"
+              onClick={() => setSelectedId(null)}
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <i className="ri-arrow-left-line" />
+              All bills
+            </button>
             <Can resource="Bill" action="create">
               <Link
                 href="/account_payables/bills/new"
@@ -100,66 +230,8 @@ export function BillsTable() {
               </Link>
             </Can>
           </div>
-          <DynamicFilter
-            className="p-0"
-            searchValue={search}
-            onSearchChange={(e) => setSearch(e.target.value)}
-            onSearchClear={() => setSearch('')}
-            searchPlaceholder="Search bills…"
-            filters={[
-              {
-                key: 'status',
-                label: 'Status',
-                value: status,
-                options: statusOptions,
-                onChange: (v) => setStatus(v || 'all'),
-              },
-              {
-                key: 'vendor',
-                label: 'All vendors',
-                value: vendorId,
-                isSearchable: true,
-                selectClassName: 'min-w-[160px]',
-                options: vendors.map((v) => ({ label: v.name, value: v.uuid })),
-                onChange: setVendorId,
-              },
-            ]}
-          />
-          <div className="flex justify-end">
-            <ExportButton
-              filename="bills"
-              rows={rows}
-              columns={[
-                { key: 'code', header: 'Bill' },
-                {
-                  key: 'vendorInvoiceNumber',
-                  header: 'Vendor ref',
-                  value: (row) => row.vendorInvoiceNumber || '',
-                },
-                {
-                  key: 'vendor',
-                  header: 'Vendor',
-                  value: (row) => row.vendor?.name ?? '',
-                },
-                {
-                  key: 'issuedDate',
-                  header: 'Issued',
-                  value: (row) => formatDate(row.issuedDate),
-                },
-                {
-                  key: 'dueDate',
-                  header: 'Due date',
-                  value: (row) => formatDate(row.dueDate),
-                },
-                {
-                  key: 'invoiceTotal',
-                  header: 'Amount',
-                  value: (row) => formatMoney(row.invoiceTotal, row.currency),
-                },
-                { key: 'status', header: 'Status' },
-              ]}
-            />
-          </div>
+          {filterControls('stack')}
+          <div className="flex justify-end">{exportButton}</div>
         </>
       }
       footer={
@@ -169,19 +241,24 @@ export function BillsTable() {
             className="rounded-[2px] px-2 py-1 hover:bg-accent disabled:opacity-40"
             disabled={page <= 1}
             onClick={() =>
-              setPagination((p) => ({ ...p, pageIndex: Math.max(0, p.pageIndex - 1) }))
+              setPagination((p) => ({
+                ...p,
+                pageIndex: Math.max(0, p.pageIndex - 1),
+              }))
             }
           >
             Prev
           </button>
           <span>
-            {page}/{pageCount}
+            {page}/{pageCount || 1}
           </span>
           <button
             type="button"
             className="rounded-[2px] px-2 py-1 hover:bg-accent disabled:opacity-40"
             disabled={page >= pageCount}
-            onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+            onClick={() =>
+              setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))
+            }
           >
             Next
           </button>
@@ -208,7 +285,9 @@ export function BillsTable() {
             onClick={() => setSelectedId(bill.uuid)}
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="truncate text-sm font-medium text-foreground">{bill.code}</span>
+              <span className="truncate text-sm font-medium text-foreground">
+                {bill.code}
+              </span>
               <span className="shrink-0 text-sm tabular-nums text-foreground">
                 {formatMoney(bill.invoiceTotal, bill.currency)}
               </span>
@@ -228,47 +307,71 @@ export function BillsTable() {
     </DocumentListPanel>
   );
 
-  return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="flex shrink-0 justify-end">
-        <Can resource="Bill" action="create">
-          <Link href="/account_payables/bills/new">
-            <Button
-              text="New bill"
-              icon={<i className="ri-add-line" />}
-              theme="default"
-              type="button"
-            />
-          </Link>
-        </Can>
-      </div>
-
+  if (selectedId) {
+    return (
       <DocumentMasterDetail
         className="min-h-0 flex-1"
         selectedId={selectedId}
         list={list}
-        detail={selectedId ? <BillDetailPanel billId={selectedId} /> : null}
-        preview={selectedId ? <BillPreviewPanel billId={selectedId} /> : null}
-        emptyState={
-          <EmptyState
-            variant="plain"
-            title="Select a bill"
-            description={
-              filtered
-                ? 'Choose a bill from the list, or clear filters.'
-                : 'Record a vendor bill to track what you owe.'
-            }
-            action={
-              canAccess('Bill', 'create') ? (
-                <Link href="/account_payables/bills/new">
-                  <Button text="New bill" type="button" theme="default" />
-                </Link>
-              ) : undefined
-            }
-          />
-        }
+        detail={<BillDetailPanel billId={selectedId} />}
+        preview={<BillPreviewPanel billId={selectedId} />}
       />
+    );
+  }
 
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      <ListToolbar
+        actions={
+          <>
+            {exportButton}
+            <Can resource="Bill" action="create">
+              <Link href="/account_payables/bills/new">
+                <Button
+                  text="New bill"
+                  icon={<i className="ri-add-line" />}
+                  theme="default"
+                  type="button"
+                />
+              </Link>
+            </Can>
+          </>
+        }
+      >
+        {filterControls('row')}
+      </ListToolbar>
+
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : !isLoading && rows.length === 0 ? (
+        <EmptyState
+          title={filtered ? 'No bills match these filters' : 'No bills yet'}
+          description={
+            filtered
+              ? 'Try clearing filters, or create a new bill.'
+              : 'Record a vendor bill to track what you owe.'
+          }
+          action={
+            canAccess('Bill', 'create') ? (
+              <Link href="/account_payables/bills/new">
+                <Button text="New bill" type="button" theme="default" />
+              </Link>
+            ) : undefined
+          }
+        />
+      ) : (
+        <DataGrid
+          columns={columns}
+          data={rows}
+          onRowClick={(row) => setSelectedId(row.uuid)}
+          isLoading={isLoading}
+          manualPagination
+          pageCount={pageCount}
+          pagination={pagination}
+          onPaginationChange={setPagination}
+          totalRows={data?.meta?.total}
+        />
+      )}
     </div>
   );
 }

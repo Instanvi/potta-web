@@ -143,7 +143,7 @@ const CategoryManager = () => {
         }}
       >
         <SheetContent
-          side="right"
+          side="left"
           className="flex h-full w-full flex-col bg-white p-0"
         >
           <SheetHeader className="border-b border-black/10 bg-white px-6 py-5">

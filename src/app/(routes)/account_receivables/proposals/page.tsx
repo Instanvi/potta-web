@@ -16,10 +16,10 @@ export default function Page() {
       fields={[
         { key: 'title', label: 'Title' },
         { key: 'opportunityId', label: 'Opportunity ID' },
-        { key: 'customerId', label: 'Customer ID' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
-        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+        { key: 'lines', label: 'Line items', type: 'lines' },
       ]}
     />
   );

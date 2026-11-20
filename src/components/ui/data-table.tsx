@@ -177,19 +177,22 @@ export function DataTable<TData>({
   return (
     <div
       className={cn(
-        'flex flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-card',
+        'flex flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-white',
         className
       )}
     >
       <Table>
-        <TableHeader className="bg-table-head [&_tr]:border-b [&_tr]:border-black/10">
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border-0 hover:bg-table-head">
+            <TableRow
+              key={headerGroup.id}
+              className="border-t-0 border-b border-black/10 bg-zinc-50 hover:bg-zinc-50"
+            >
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   className={cn(
-                    'h-12 bg-table-head px-4 text-sm font-normal text-foreground',
+                    'h-11 bg-zinc-50 px-4 text-sm font-normal tracking-normal text-black',
                     header.column.getCanSort() && 'cursor-pointer select-none'
                   )}
                   onClick={header.column.getToggleSortingHandler()}
@@ -218,7 +221,7 @@ export function DataTable<TData>({
                 className={cn(
                   'border-0 border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.02]',
                   onRowClick && 'cursor-pointer',
-                  row.getIsSelected() && 'bg-brand-subtle hover:bg-brand-subtle'
+                  row.getIsSelected() && 'bg-muted hover:bg-muted'
                 )}
                 onClick={() => onRowClick?.(row.original)}
               >
@@ -235,7 +238,7 @@ export function DataTable<TData>({
                 colSpan={resolvedColumns.length || 1}
                 className="h-32 text-center text-sm font-normal text-muted-foreground"
               >
-                No data found.
+                No results.
               </TableCell>
             </TableRow>
           )}

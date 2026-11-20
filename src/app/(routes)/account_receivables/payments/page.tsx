@@ -19,7 +19,7 @@ export default function Page() {
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'paymentDate', label: 'Payment date', type: 'date' },
         { key: 'method', label: 'Method' },
-        { key: 'customerId', label: 'Customer ID' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'invoiceId', label: 'Invoice ID' },
         { key: 'reference', label: 'Reference' },
         { key: 'applyToInvoice', label: 'Apply to invoice', type: 'checkbox' },
