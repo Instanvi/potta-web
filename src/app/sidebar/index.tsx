@@ -145,10 +145,9 @@ const Sidebars = () => {
           className="flex min-w-0 flex-col border-l border-black/[0.06]"
           style={{ width: SIDEBAR_PANEL_WIDTH }}
         >
-          <div className="shrink-0 border-b border-black/[0.06] px-3 py-3">
-            <p className="truncate text-sm font-semibold text-foreground">{active.title}</p>
-            <p className="truncate text-[11px] text-muted-foreground" title={active.description}>
-              {active.description}
+          <div className="shrink-0 border-b border-black/[0.06] px-3 py-3.5">
+            <p className="truncate font-display text-lg font-medium tracking-tight text-foreground">
+              {active.title}
             </p>
           </div>
           <nav aria-label={`${active.title} pages`} className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 py-2">

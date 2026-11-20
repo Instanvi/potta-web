@@ -2,11 +2,10 @@ import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import type { ProductCategory } from '../_utils/types';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
-import Button from '@potta/components/button';
+import { Button } from '@potta/components/shadcn/button';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -19,7 +18,8 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import Input from '@potta/components/input';
 import { useProductCategoryManager } from '../_hooks/useProductCategoryManager';
-import { ListToolbar } from '../../../_shared/states';
+import { EmptyState, PageHeader, Panel } from '../../../_shared/states';
+import ButtonLegacy from '@potta/components/button';
 
 const CategoryManager = () => {
   const {
@@ -35,7 +35,6 @@ const CategoryManager = () => {
     tableProps,
     register,
     handleSubmit,
-    setValue,
     reset,
     errors,
     handleOpenModal,
@@ -52,22 +51,23 @@ const CategoryManager = () => {
     reset();
   };
 
+  const rows = data?.data || [];
+
   const columns: ColumnDef<ProductCategory>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
-      // cell: ({ row: { original } }) => original.name,
     },
     {
       accessorKey: 'description',
       header: 'Description',
-      // cell: ({ row: { original } }) => original.description,
+      cell: ({ row: { original } }) => original.description || '—',
     },
     {
-      accessorKey: 'createdAt',
-      header: 'Created',
+      id: 'products',
+      header: 'Products',
       cell: ({ row: { original } }) =>
-        new Date(original.createdAt).toLocaleDateString(),
+        original.productCount ?? original.productsCount ?? 0,
     },
     {
       id: 'actions',
@@ -75,19 +75,22 @@ const CategoryManager = () => {
       cell: ({ row: { original } }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <i className="ri-more-2-fill text-xl text-gray-600"></i>
+            <button
+              type="button"
+              className="rounded-[2px] p-2 transition-colors hover:bg-black/[0.04]"
+            >
+              <i className="ri-more-2-fill text-xl text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={() => handleEdit(original)}>
-              <i className="ri-edit-line mr-2"></i> Edit
+              <i className="ri-edit-line mr-2" /> Edit
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setDeleteId(original.uuid)}
               className="text-destructive"
             >
-              <i className="ri-delete-bin-line mr-2"></i> Delete
+              <i className="ri-delete-bin-line mr-2" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -97,17 +100,39 @@ const CategoryManager = () => {
 
   return (
     <div className="w-full">
-      <ListToolbar
-        actions={<Button text="Add Category" theme="default" type="button" onClick={handleOpenModal} />}
-      >
-        <p className="text-sm text-muted-foreground">Group products into categories for reporting and the POS grid.</p>
-      </ListToolbar>
-      <DataGrid
-        columns={columns}
-        data={data?.data || []}
-        isLoading={isLoading}
-        {...tableProps(data?.meta, data?.data?.length)}
+      <PageHeader
+        title="Categories"
+        actions={
+          <Button type="button" size="sm" onClick={handleOpenModal}>
+            Add Category
+          </Button>
+        }
       />
+
+      {isLoading ? (
+        <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">
+          Loading…
+        </Panel>
+      ) : rows.length === 0 ? (
+        <EmptyState
+          title="No categories yet"
+          action={
+            <Button type="button" size="sm" onClick={handleOpenModal}>
+              Add Category
+            </Button>
+          }
+        />
+      ) : (
+        <Panel className="overflow-hidden p-0">
+          <DataGrid
+            columns={columns}
+            data={rows}
+            isLoading={false}
+            {...tableProps(data?.meta, rows.length)}
+          />
+        </Panel>
+      )}
+
       <Sheet
         open={modalOpen}
         onOpenChange={(open) => {
@@ -119,20 +144,17 @@ const CategoryManager = () => {
       >
         <SheetContent
           side="left"
-          className="flex h-full w-full flex-col bg-white p-0 sm:max-w-[420px]"
+          className="flex h-full w-full flex-col bg-white p-0"
         >
-          <SheetHeader className="border-b border-black/10 bg-white px-4 py-4">
+          <SheetHeader className="border-b border-black/10 bg-white px-6 py-5">
             <SheetTitle>
               {editMode ? 'Edit Category' : 'Add Category'}
             </SheetTitle>
-            <SheetDescription className="text-black/70">
-              Create and manage product categories.
-            </SheetDescription>
           </SheetHeader>
           <form
             id="category-form-sheet"
             onSubmit={handleSubmit(onSubmit)}
-            className="flex-1 space-y-4 overflow-y-auto bg-white px-4 py-4"
+            className="flex-1 space-y-4 overflow-y-auto bg-white px-6 py-5"
           >
             <Input
               label="Name"
@@ -150,20 +172,20 @@ const CategoryManager = () => {
               errors={errors.description}
             />
           </form>
-          <SheetFooter className="mt-0 border-t border-black/10 px-4 py-3">
-            <Button
+          <SheetFooter className="mt-0 border-t border-black/10 px-6 py-3">
+            <ButtonLegacy
               text="Cancel"
               type="button"
               theme="gray"
               onClick={closeCategorySheet}
             />
-            <Button
+            <ButtonLegacy
               text={
                 createCategory.isPending
                   ? 'Saving...'
                   : editMode
-                  ? 'Save Changes'
-                  : 'Save'
+                    ? 'Save Changes'
+                    : 'Save'
               }
               type="button"
               onClick={handleSubmit(onSubmit)}
@@ -172,20 +194,22 @@ const CategoryManager = () => {
           </SheetFooter>
         </SheetContent>
       </Sheet>
-      {/* Delete confirmation modal */}
+
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 transition-opacity duration-300">
-          <div className="bg-white shadow-lg p-8 w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
-            <h3 className="text-xl font-medium mb-4">Delete Category</h3>
-            <p>Are you sure you want to delete this category?</p>
-            <div className="flex justify-end gap-2 mt-6">
-              <Button
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="dashboard-panel w-full max-w-md p-8">
+            <h3 className="mb-4 text-xl font-medium tracking-tight">Delete Category</h3>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete this category?
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <ButtonLegacy
                 text="Cancel"
                 type="button"
                 theme="gray"
                 onClick={() => setDeleteId(null)}
               />
-              <Button
+              <ButtonLegacy
                 text="Delete"
                 type="button"
                 theme="red"

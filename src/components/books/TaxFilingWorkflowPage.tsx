@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -83,7 +82,8 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
   return (
     <RootLayout>
       <PageContainer>
-        <ListToolbar
+        <PageHeader
+          title={mode === 'prepare' ? 'Prepare tax filing' : 'Submit tax filing'}
           actions={
             <>
               <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
@@ -101,13 +101,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
               </Button>
             </>
           }
-        >
-          <p className="text-sm text-muted-foreground">
-            {mode === 'prepare'
-              ? 'Select a filing and prepare it before submission.'
-              : 'Select a prepared filing to submit.'}
-          </p>
-        </ListToolbar>
+        />
 
         <div className="mt-4">
           {error ? (
@@ -152,7 +146,6 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
           <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>New tax filing</SheetTitle>
-              <SheetDescription>Jurisdiction and period.</SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-4">
               {(
@@ -188,7 +181,6 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
           <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>{mode === 'prepare' ? 'Prepare filing' : 'Submit filing'}</SheetTitle>
-              <SheetDescription>{selected ? rowId(selected) : ''}</SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-2 text-sm">
               {COLUMNS.map((c) => (

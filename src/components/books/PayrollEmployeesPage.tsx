@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
 import { useCreateEmployee, useGetEmployees } from '@/app/(routes)/accounting/employees/hooks';
 import {
   createEmployeeSchema,
@@ -15,7 +15,6 @@ import Input from '@/components/input';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -80,7 +79,8 @@ export function PayrollEmployeesPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <ListToolbar
+        <PageHeader
+          title="Employees"
           actions={
             <>
               <Button
@@ -97,7 +97,8 @@ export function PayrollEmployeesPage() {
               </Button>
             </>
           }
-        >
+        />
+        <ListToolbar>
           <input
             type="search"
             value={searchInput}
@@ -150,9 +151,6 @@ export function PayrollEmployeesPage() {
           <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-md">
             <SheetHeader>
               <SheetTitle>New employee</SheetTitle>
-              <SheetDescription>
-                Creates via payroll-expense API (not duplicated in Potta).
-              </SheetDescription>
             </SheetHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
               <Input

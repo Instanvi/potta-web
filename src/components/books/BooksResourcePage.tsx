@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -211,7 +210,8 @@ export function BooksResourcePage({
   return (
     <RootLayout>
       <PageContainer>
-        <ListToolbar
+        <PageHeader
+          title={title}
           actions={
             <>
               <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -222,7 +222,8 @@ export function BooksResourcePage({
               </Button>
             </>
           }
-        >
+        />
+        <ListToolbar>
           <input
             type="search"
             value={search}
@@ -241,7 +242,14 @@ export function BooksResourcePage({
           ) : loading ? (
             <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">Loading…</Panel>
           ) : rows.length === 0 ? (
-            <EmptyState title={`No ${title.toLowerCase()} yet`} description="Create one with New." />
+            <EmptyState
+              title={`No ${title.toLowerCase()} yet`}
+              action={
+                <Button type="button" size="sm" onClick={openCreate}>
+                  New
+                </Button>
+              }
+            />
           ) : (
             <Panel className="overflow-x-auto p-0">
               <table className="w-full min-w-[640px] text-left text-sm">
@@ -281,7 +289,6 @@ export function BooksResourcePage({
           <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>New {title}</SheetTitle>
-              <SheetDescription>Fill in the fields and save.</SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-4">
               {fields.map((f) => (
@@ -307,10 +314,7 @@ export function BooksResourcePage({
         <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
           <SheetContent side="left" className="bg-white">
             <SheetHeader>
-              <SheetTitle>{title} detail</SheetTitle>
-              <SheetDescription>
-                {selected ? rowId(selected) || 'Record' : 'Record'}
-              </SheetDescription>
+              <SheetTitle>{title}</SheetTitle>
             </SheetHeader>
             <div className="mt-6 space-y-4">
               {fields.map((f) => (

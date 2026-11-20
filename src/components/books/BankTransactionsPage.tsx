@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
@@ -127,7 +126,8 @@ export function BankTransactionsPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <ListToolbar
+        <PageHeader
+          title="Bank transactions"
           actions={
             <>
               <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
@@ -145,7 +145,8 @@ export function BankTransactionsPage() {
               </Button>
             </>
           }
-        >
+        />
+        <ListToolbar>
           <input
             type="search"
             value={search}
@@ -203,7 +204,6 @@ export function BankTransactionsPage() {
           <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>New bank transaction</SheetTitle>
-              <SheetDescription>Add a line for matching later.</SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-4">
               {FIELDS.map((f) => (
@@ -233,7 +233,6 @@ export function BankTransactionsPage() {
           <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>Match transaction</SheetTitle>
-              <SheetDescription>{detail ? rowId(detail) : ''}</SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-3 text-sm">
               {COLUMNS.map((c) => (
