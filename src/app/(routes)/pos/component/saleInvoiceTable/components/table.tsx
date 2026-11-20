@@ -1,22 +1,14 @@
 'use client';
 import React, { useEffect, useContext } from 'react';
+import type { ColumnDef } from '@tanstack/react-table';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from './orderSummary';
+import { computeLine, computeTotals, lineDiscount, type SaleLineItem } from '@potta/app/(routes)/pos/utils/sale';
 
-// Import or define the LineItem type
-export type DiscountType = 'PERCENTAGE' | 'FIXED' | 'NONE';
+type Row = { row: { original: LineItem } };
 
-export type LineItem = {
-  description: string;
-  quantity: number;
-  discountCap: number;
-  discountType: DiscountType;
-  unitPrice: number;
-  taxRate: number;
-  discountRate?: number;
-  productId: string;
-};
+type LineItem = SaleLineItem & { stock?: number | null };
 
 const TableOPS = () => {
   const context = useContext(ContextData);
@@ -30,71 +22,14 @@ const TableOPS = () => {
   };
 
   const calculateTotalPrice = () => {
-    if (
-      !context?.data ||
-      !Array.isArray(context.data) ||
-      context.data.length === 0
-    ) {
-      // Initialize with zeros if data is not available or empty
-      context?.setOrderSummary?.({
-        subtotal: 0,
-        tax: 0,
-        discount: context?.orderSummary?.discount || 0,
-        itemDiscounts: 0,
-        total: 0,
-      });
-      return;
-    }
-
-    const calculatedSubtotal = context.data.reduce(
-      (acc: number, item: LineItem) => {
-        const price = Number(item.unitPrice);
-        const quantity = Number(item.quantity);
-        return acc + price * quantity;
-      },
-      0
-    );
-
-    // Calculate tax based on each item's tax rate
-    const calculatedTax = context.data.reduce((acc: number, item: LineItem) => {
-      const price = Number(item.unitPrice);
-      const quantity = Number(item.quantity);
-      const taxRate = Number(item.taxRate) / 100; // Assuming taxRate is stored as percentage
-      return acc + price * quantity * taxRate;
-    }, 0);
-
-    // Calculate item discounts
-    const itemDiscounts = context.data.reduce((acc: number, item: LineItem) => {
-      const price = Number(item.unitPrice);
-      const quantity = Number(item.quantity);
-      const discountRate = Number(item.discountRate || 0);
-
-      let discount = 0;
-      if (item.discountType === 'PERCENTAGE') {
-        discount = price * quantity * (discountRate / 100);
-        // Apply discount cap if needed
-        if (item.discountCap > 0 && discount > item.discountCap) {
-          discount = item.discountCap;
-        }
-      } else if (item.discountType === 'FIXED') {
-        discount = discountRate * quantity;
-      }
-
-      return acc + discount;
-    }, 0);
-
-    // Calculate final total with current order-level discount from context
-    const orderDiscount = context.orderSummary?.discount || 0;
-    const totalDiscount = itemDiscounts + orderDiscount;
-    const calculatedTotal = calculatedSubtotal + calculatedTax - totalDiscount;
-
-    // Update order summary in context
+    const items: LineItem[] = Array.isArray(context?.data) ? context.data : [];
+    const totals = computeTotals(items, context?.orderSummary?.discount || 0);
     context?.setOrderSummary?.({
-      subtotal: calculatedSubtotal,
-      tax: calculatedTax,
-      discount: orderDiscount,
-      itemDiscounts: itemDiscounts,
-      total: calculatedTotal,
+      subtotal: totals.subtotal,
+      tax: totals.tax,
+      discount: totals.discount,
+      itemDiscounts: totals.itemDiscounts,
+      total: totals.total,
     });
   };
 
@@ -110,10 +45,8 @@ const TableOPS = () => {
         return prevData.map((item: LineItem) => {
           if (item.productId === productId) {
             const newQuantity = item.quantity + change;
-            if (newQuantity < 1) {
-              alert('Minimum quantity is 1');
-              return item;
-            }
+            if (newQuantity < 1) return item;
+            if (item.stock != null && newQuantity > item.stock) return item;
             return { ...item, quantity: newQuantity };
           }
           return item;
@@ -122,37 +55,18 @@ const TableOPS = () => {
     }
   };
 
-  const calculateItemDiscount = (item: LineItem): number => {
-    const price = Number(item.unitPrice);
-    const quantity = Number(item.quantity);
-    const discountRate = Number(item.discountRate || 0);
-
-    if (item.discountType === 'NONE') return 0;
-
-    let discount = 0;
-    if (item.discountType === 'PERCENTAGE') {
-      discount = price * quantity * (discountRate / 100);
-      // Apply discount cap if needed
-      if (item.discountCap > 0 && discount > item.discountCap) {
-        discount = item.discountCap;
-      }
-    } else if (item.discountType === 'FIXED') {
-      discount = discountRate * quantity;
-    }
-
-    return discount;
-  };
+  const calculateItemDiscount = (item: LineItem): number => lineDiscount(item);
 
   const columns = [
     {
       accessorKey: 'description',
       header: 'Name',
-      cell: ({ row: { original } }) => original.description,
+      cell: ({ row: { original } }: Row) => original.description,
     },
     {
       accessorKey: 'quantity',
       header: 'Quantity',
-      cell: ({ row: { original } }) => (
+      cell: ({ row: { original } }: Row) => (
         <div className="flex space-x-1 items-center">
           <button
             onClick={() => handleQuantityChange(original.productId, -1)}
@@ -179,40 +93,28 @@ const TableOPS = () => {
     {
       accessorKey: 'unitPrice',
       header: 'Price',
-      cell: ({ row: { original } }) => {
+      cell: ({ row: { original } }: Row) => {
         const price = Number(original.unitPrice);
-        return isNaN(price) ? '0.00' : `$${price.toFixed(2)}`;
+        return isNaN(price) ? '0.00' : price.toFixed(2);
       },
     },
     {
       accessorKey: 'discount',
       header: 'Discount',
-      cell: ({ row: { original } }) => {
+      cell: ({ row: { original } }: Row) => {
         const discount = calculateItemDiscount(original);
-        return isNaN(discount) ? '0.00' : `$${discount.toFixed(2)}`;
+        return isNaN(discount) ? '0.00' : discount.toFixed(2);
       },
     },
     {
       accessorKey: 'total',
       header: 'Total',
-      cell: ({ row: { original } }) => {
-        const price = Number(original.unitPrice);
-        const quantity = Number(original.quantity);
-        const discount = calculateItemDiscount(original);
-        const taxAmount = price * quantity * (original.taxRate / 100);
-
-        if (isNaN(price) || isNaN(quantity)) {
-          return '$0.00';
-        }
-
-        const subtotal = price * quantity + taxAmount - discount;
-        return `$${subtotal.toFixed(2)}`;
-      },
+      cell: ({ row: { original } }: Row) => `${computeLine(original).total.toFixed(2)} XAF`,
     },
     {
       accessorKey: 'actions',
       header: '',
-      cell: ({ row: { original } }) => (
+      cell: ({ row: { original } }: Row) => (
         <button
           className="text-red-500 hover:text-red-400"
           onClick={() => deleteItem(original.productId)}
@@ -232,10 +134,10 @@ const TableOPS = () => {
               Cart Items
             </h3>
             <div className="">
-              <DataGrid
-                showHeight={true}
-                columns={columns}
+              <DataGrid<LineItem>
+                columns={columns as ColumnDef<LineItem>[]}
                 data={Array.isArray(context?.data) ? context.data : []}
+                showPagination={false}
               />
             </div>
           </div>

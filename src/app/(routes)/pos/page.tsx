@@ -3,15 +3,13 @@ import React from 'react';
 import SaleInvoiceTable from './component/saleInvoiceTable';
 import SaleInvoiceCard from './component/saleInvoiceCard';
 
-import Print from './component/print/page';
+import Print from './component/print';
 import RootLayout from '../layout';
-import { Toaster } from 'sonner';
 import HeldOrders from './component/footer';
 
 const POS = () => {
   return (
     <RootLayout>
-      <Toaster />
       <div className="h-full min-h-0 overflow-hidden">
         <div className="h-[85vh] p-3 flex w-full">
           <div className="w-[60%]">

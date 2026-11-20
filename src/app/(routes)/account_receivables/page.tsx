@@ -1,17 +1,18 @@
 'use client';
-import React, { useContext } from 'react';
 import RootLayout from '../layout';
-import { ContextData } from '@potta/components/providers/DataProvider';
-import ARMainDashboard from './components/ARMainDashboard';
+import ArApDashboard from '../_shared/ArApDashboard';
+import { PageContainer, PageHeader } from '../_shared/states';
 
-const AccountReceivablesDashboard = () => {
-  const context = useContext(ContextData);
+export default function AccountReceivablesPage() {
   return (
     <RootLayout>
-      <div className={`${context?.layoutMode === 'sidebar' ? 'pl-8' : 'pl-5'}`}>
-        <ARMainDashboard type="ar" />
-      </div>
+      <PageContainer>
+        <PageHeader
+          title="Receivables dashboard"
+          description="What customers owe, what is overdue and what was collected in the period."
+        />
+        <ArApDashboard side="ar" />
+      </PageContainer>
     </RootLayout>
   );
-};
-export default AccountReceivablesDashboard;
+}

@@ -1,20 +1,34 @@
-"use client"
-import React from 'react';
-import AssetFilters from './components/filters';
-import AssetTable from './components/table';
-import RootLayout from '../../layout';
+'use client';
 
-const AssetsPage = () => {
+import { BooksResourcePage } from '@/components/books/BooksResourcePage';
+
+export default function Page() {
   return (
-    <RootLayout>
-      <div className="pl-10 pr-5">
-        <div className="p-6">
-          <AssetFilters />
-          <AssetTable />
-        </div>
-      </div>
-    </RootLayout>
+    <BooksResourcePage
+      resourcePath="fixed-asset"
+      title="Fixed asset"
+      columns={[
+        { key: 'name', label: 'Name' },
+        { key: 'assetNumber', label: 'Asset #' },
+        { key: 'status', label: 'Status' },
+        { key: 'purchaseCost', label: 'Cost' },
+        { key: 'purchaseDate', label: 'Purchase date' },
+      ]}
+      fields={[
+        { key: 'name', label: 'Name' },
+        { key: 'assetNumber', label: 'Asset number' },
+        { key: 'purchaseCost', label: 'Purchase cost', type: 'number' },
+        { key: 'salvageValue', label: 'Salvage value', type: 'number' },
+        { key: 'usefulLifeMonths', label: 'Useful life (months)', type: 'number' },
+        { key: 'purchaseDate', label: 'Purchase date', type: 'date' },
+        { key: 'assetAccountId', label: 'Asset account', type: 'account' },
+        { key: 'depreciationExpenseAccountId', label: 'Depreciation expense account', type: 'account' },
+        { key: 'accumulatedDepreciationAccountId', label: 'Accumulated depreciation account', type: 'account' },
+        { key: 'notes', label: 'Notes', type: 'textarea' },
+      ]}
+      actions={[
+        { label: 'Run depreciation', action: 'depreciate', confirm: true },
+      ]}
+    />
   );
-};
-
-export default AssetsPage;
+}

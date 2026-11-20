@@ -20,6 +20,8 @@ interface SelectProps {
   isDisabled?: boolean;
   SelectClass?: string;
   error?: string; // Add error prop
+  /** Shown when nothing is selected; defaults to `name`. */
+  placeholder?: string;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -36,6 +38,7 @@ const Select: React.FC<SelectProps> = ({
   labelClass,
   isDisabled = false,
   error,
+  placeholder,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -56,35 +59,39 @@ const Select: React.FC<SelectProps> = ({
     <>
       {label && (
         <div
-          className={`text-gray-900 text-lg font-medium mb-[4px] ${labelClass}`}
+          className={`mb-1 block text-sm font-normal text-foreground ${labelClass}`}
         >
           {label}
           {required && <span className=" text-red-500">*</span>}
         </div>
       )}
       <div
-        className={`relative  inline-block ${
-          border ? '' : 'border'
-        } w-full md:w-full ${SelectClass} ${error ? 'border-red-500' : ''}`}
+        className={`relative inline-block w-full md:w-full ${SelectClass} ${
+          border
+            ? ''
+            : error
+              ? 'border-0 border-b border-destructive'
+              : 'border-0 border-b border-black/15'
+        } rounded-t-[2px] rounded-b-none bg-white`}
       >
         <div
           onClick={toggleDropdown}
           tabIndex={isDisabled ? -1 : 0} // -1 removes from tab order when disabled
-          className={`${bg} relative ${
+          className={`${bg || 'bg-transparent'} relative ${
             isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-          } px-3 py-2.5 pr-8 ${
-            error
-              ? 'border-red-500 focus:ring-red-500 focus:border-red-500 focus:outline-none focus:ring-2'
-              : !outline && !isDisabled
-              ? 'focus:ring-green-500 focus:border-green-500 focus:outline-none focus:ring-2'
-              : ''
-          } w-full ${error ? 'border-2' : ''}`}
+          } flex h-10 items-center px-3 py-2 pr-8 text-sm leading-none outline-none focus-visible:border-primary ${
+            outline || isDisabled ? '' : 'focus-visible:ring-0'
+          } w-full`}
           aria-disabled={isDisabled}
         >
-          <span className="block truncate">
-            {options.find((option) => option.value === selectedValue)?.label ||
-              name}
-          </span>
+          {(() => {
+            const selected = options.find((option) => option.value === selectedValue)?.label;
+            return (
+              <span className={`block truncate ${selected ? '' : 'text-muted-foreground/70'}`}>
+                {selected || placeholder || name}
+              </span>
+            );
+          })()}
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <svg
               className={`h-5 w-5 transform transition-transform duration-200 ${
@@ -104,7 +111,7 @@ const Select: React.FC<SelectProps> = ({
 
         {!isDisabled && (
           <ul
-            className={`absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 ${
+            className={`absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-[2px] border border-black/10 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${
               isOpen ? 'block' : 'hidden'
             }`}
           >
@@ -112,7 +119,7 @@ const Select: React.FC<SelectProps> = ({
               <li
                 key={option.value}
                 onClick={() => handleOptionClick(option.value)}
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                className="cursor-pointer px-3 py-2 text-sm text-foreground hover:bg-brand-subtle"
               >
                 {option.label}
               </li>

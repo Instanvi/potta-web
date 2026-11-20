@@ -1,6 +1,7 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import React, { useState } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { DataTable } from '@potta/components/ui/data-table';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -12,11 +13,18 @@ import useGetAllProducts from '../../hooks/useGetAllProducts';
 import DeleteModal from './deleteModal';
 import ViewProductSlider from './slides/components/viewProduct';
 import { useInventory } from '../_utils/context';
-import { documentsApi } from '../_utils/api';
+import { productImageUrl, productImageUrls } from '../_utils/images';
+import { Can } from '@/components/auth/can';
 import Image from 'next/image';
 import ProductEditStepperModal from './ProductEditStepperModal';
+import { StatusBadge } from '../../../_shared/states';
+import { useServerPagination } from '@/hooks/use-server-pagination';
 
-const InventoryTable = () => {
+const InventoryTable = ({
+  onRowsChange,
+}: {
+  onRowsChange?: (rows: Product[]) => void;
+} = {}) => {
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState<string | null>(null);
   const [openUpdateModal, setOpenUpdateModal] = useState<string | null>(null);
@@ -24,17 +32,14 @@ const InventoryTable = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [productDetails, setproductDetails] = useState<Product | null>(null);
-  const { setSelectedProduct } = useInventory();
-  const [imageUrls, setImageUrls] = useState<{ [productId: string]: string }>(
-    {}
-  );
+  const { setSelectedProduct, setSelectedProducts } = useInventory();
 
   // Handle row click to view product details
-  const handleRowClick = (row: Product) => {
-    setSelectedProduct(row);
+  const handleRowClick = (row: any) => {
+    setSelectedProduct(row as Product);
   };
 
-  const columns = [
+  const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -42,14 +47,7 @@ const InventoryTable = () => {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 grid content-center ">
             <Image
-              src={
-                imageUrls[original.uuid] ||
-                (Array.isArray(original.documents) &&
-                original.documents.length > 0 &&
-                original.documents[0]?.url
-                  ? original.documents[0].url
-                  : '/images/placeholder.png')
-              }
+              src={productImageUrl(original)}
               alt=""
               width={60}
               height={60}
@@ -57,6 +55,14 @@ const InventoryTable = () => {
             />
           </div>
           <p className="mt-0.5">{original.name}</p>
+          {original.payProductId && (
+            <span title={`Managed in Pay · ${original.payProductId}`}>
+              <StatusBadge tone="success">Pay</StatusBadge>
+            </span>
+          )}
+          {original.hasVariations && (
+            <StatusBadge tone="neutral">Variations</StatusBadge>
+          )}
         </div>
       ),
     },
@@ -139,12 +145,14 @@ const InventoryTable = () => {
     {
       accessorKey: 'inventoryLevel',
       header: 'Inventory',
-      cell: ({ row: { original } }) => <div>{original.inventoryLevel}</div>,
+      cell: ({ row: { original } }) => (
+        <div>{original.stockTotal ?? original.inventoryLevel}</div>
+      ),
     },
     {
       accessorKey: 'reorderPoint',
       header: 'Reorder Point',
-      cell: () => <div className="">355</div>,
+      cell: ({ row: { original } }) => <div>{original.reorderPoint ?? 0}</div>,
     },
     {
       accessorKey: 'actions',
@@ -165,105 +173,78 @@ const InventoryTable = () => {
             >
               <i className="ri-eye-line mr-2"></i> View Details
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setOpenUpdateModal(original.uuid);
-                setproductDetails({
-                  ...original,
-                  cost: Number(original.cost),
-                  salesPrice: Number(original.salesPrice),
-                  images: Array.isArray(original.documents)
-                    ? original.documents
-                        .filter(
-                          (doc: any) =>
-                            doc.mimeType && doc.mimeType.startsWith('image')
-                        )
-                        .map((doc: any) => doc.url)
-                    : [],
-                });
-                setIsEditOpen(true);
-              }}
-            >
-              <i className="ri-edit-line mr-2"></i> Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                setOpenDeleteModal(original.uuid);
-                setIsDeleteOpen(true);
-              }}
-              className="text-red-600"
-            >
-              <i className="ri-delete-bin-line mr-2"></i> Delete
-            </DropdownMenuItem>
+            <Can resource="Item" action="update">
+              <DropdownMenuItem
+                onClick={() => {
+                  setOpenUpdateModal(original.uuid);
+                  setproductDetails({
+                    ...original,
+                    cost: Number(original.cost),
+                    salesPrice: Number(original.salesPrice),
+                    images: productImageUrls(original),
+                  });
+                  setIsEditOpen(true);
+                }}
+              >
+                <i className="ri-edit-line mr-2"></i> {original.payProductId ? 'Managed in Pay' : 'Edit'}
+              </DropdownMenuItem>
+            </Can>
+            {!original.payProductId && (
+              <Can resource="Item" action="remove">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenDeleteModal(original.uuid);
+                    setIsDeleteOpen(true);
+                  }}
+                  className="text-destructive"
+                >
+                  <i className="ri-delete-bin-line mr-2"></i> Delete
+                </DropdownMenuItem>
+              </Can>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const { filters } = useInventory();
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [filters.search, filters.productType, filters.sort],
+  });
+  const [sortBy, sortOrder] = (filters.sort || 'createdAt:ASC').split(':') as [
+    Filter['sortBy'],
+    Filter['sortOrder'],
+  ];
 
   const filter: Filter = {
     page,
     limit,
     search: filters.search,
     productType:
-      filters.productType !== 'ALL' ? filters.productType : undefined,
-    sort: filters.sort,
+      filters.productType !== 'ALL'
+        ? (filters.productType as Filter['productType'])
+        : undefined,
+    sortBy,
+    sortOrder,
   };
-  const { data, isLoading, error, refetch } = useGetAllProducts(filter);
+  const { data, isLoading, refetch } = useGetAllProducts(filter);
+  const rows = React.useMemo(() => data?.data || [], [data]);
 
-  // Fetch signed URLs for product images
-  useEffect(() => {
-    const fetchSignedUrls = async () => {
-      if (!data?.data) return;
-      // Collect all document IDs for products with images
-      const docIdMap: { [productId: string]: string } = {};
-      data.data.forEach((product: Product) => {
-        if (
-          Array.isArray(product.documents) &&
-          product.documents.length > 0 &&
-          product.documents[0]?.uuid
-        ) {
-          docIdMap[product.uuid] = product.documents[0].uuid;
-        }
-      });
-      const docIds = Object.values(docIdMap);
-      if (docIds.length === 0) return;
-      try {
-        const res = await documentsApi.bulkDownload(docIds);
-        // Map productId to signed URL
-        const urlMap: { [productId: string]: string } = {};
-        let i = 0;
-        for (const [productId, docId] of Object.entries(docIdMap)) {
-          urlMap[productId] = res.urls[i] || '';
-          i++;
-        }
-        setImageUrls(urlMap);
-      } catch (e) {
-        // ignore
-      }
-    };
-    fetchSignedUrls();
-  }, [data?.data]);
+  React.useEffect(() => {
+    onRowsChange?.(data?.data || []);
+  }, [data?.data, onRowsChange]);
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-  const handlePerRowsChange = (newLimit: number, newPage: number) => {
-    setLimit(newLimit);
-    setPage(newPage); // Reset page when changing rows per page
-  };
   return (
-    <div className="mt-10">
-      <div></div>
-      <DataGrid
+    <div>
+      <DataTable
         columns={columns}
-        data={data?.data || []}
+        data={rows}
         isLoading={isLoading}
         onRowClick={handleRowClick}
+        onSelectionChange={(selected) => setSelectedProducts(selected as Product[])}
+        {...tableProps(data?.meta, rows.length)}
       />
       {openDeleteModal && (
         <DeleteModal

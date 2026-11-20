@@ -24,6 +24,8 @@ import {
 } from '@potta/components/ui/table';
 import { DataTablePagination } from '@potta/components/ui/data-table-pagination';
 import { cn } from '@potta/lib/utils';
+import { TableSkeleton } from '@potta/components/ui/loaders';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface DataTableProps<TData> {
   columns?: ColumnDef<TData>[];
@@ -45,6 +47,8 @@ interface DataTableProps<TData> {
   onPaginationChange?: OnChangeFn<PaginationState>;
   /** Total rows on server (for pagination footer when manualPagination). */
   totalRows?: number;
+  /** Called with the selected rows whenever the selection changes. */
+  onSelectionChange?: (rows: TData[]) => void;
 }
 
 export function DataTable<TData>({
@@ -65,6 +69,7 @@ export function DataTable<TData>({
   pagination: controlledPagination,
   onPaginationChange: controlledOnPaginationChange,
   totalRows: serverTotalRows,
+  onSelectionChange,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -150,24 +155,20 @@ export function DataTable<TData>({
     },
   });
 
+  const onSelectionChangeRef = React.useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
+  React.useEffect(() => {
+    onSelectionChangeRef.current?.(table.getSelectedRowModel().rows.map((r) => r.original));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection, data]);
+
   const tableLoading = isLoading || loading;
 
   if (tableLoading) {
     return (
       <div className="mt-5">
         {progressComponent || (
-          <div className="animate-pulse">
-            <div className="h-[40px] w-full border-b border-black/10 bg-[#ecf8f4]" />
-            <div className="space-y-3">
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="flex space-x-4 p-4">
-                  {resolvedColumns.map((_, colIndex) => (
-                    <div key={colIndex} className="h-4 w-full bg-black/10" />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <TableSkeleton rows={Math.min(pageSize || 8, 10)} columns={Math.min(Math.max(resolvedColumns.length, 3), 7)} />
         )}
       </div>
     );
@@ -176,34 +177,35 @@ export function DataTable<TData>({
   return (
     <div
       className={cn(
-        'flex flex-col overflow-hidden border border-black/10 bg-white',
+        'flex flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-white',
         className
       )}
     >
       <Table>
-        <TableHeader className="bg-[#ecf8f4] [&_tr]:border-b [&_tr]:border-black/10">
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="border-0 hover:bg-transparent">
+            <TableRow
+              key={headerGroup.id}
+              className="border-t-0 border-b border-black/10 bg-zinc-50 hover:bg-zinc-50"
+            >
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   className={cn(
-                    'bg-[#ecf8f4] text-black',
+                    'h-11 bg-zinc-50 px-4 text-sm font-normal tracking-normal text-black',
                     header.column.getCanSort() && 'cursor-pointer select-none'
                   )}
                   onClick={header.column.getToggleSortingHandler()}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                    {{
-                      asc: '🔼',
-                      desc: '🔽',
-                    }[header.column.getIsSorted() as string] ?? null}
+                    {header.column.getIsSorted() === 'asc' && <ChevronUp className="size-3.5 text-muted-foreground" />}
+                    {header.column.getIsSorted() === 'desc' && <ChevronDown className="size-3.5 text-muted-foreground" />}
                   </div>
                 </TableHead>
               ))}
@@ -217,13 +219,14 @@ export function DataTable<TData>({
                 key={row.id}
                 data-state={row.getIsSelected() ? 'selected' : undefined}
                 className={cn(
+                  'border-0 border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.02]',
                   onRowClick && 'cursor-pointer',
-                  row.getIsSelected() && 'bg-[#154406]/8'
+                  row.getIsSelected() && 'bg-muted hover:bg-muted'
                 )}
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="px-4 py-3 text-sm">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -233,9 +236,9 @@ export function DataTable<TData>({
             <TableRow>
               <TableCell
                 colSpan={resolvedColumns.length || 1}
-                className="h-24 text-center text-sm font-normal text-black"
+                className="h-32 text-center text-sm font-normal text-muted-foreground"
               >
-                No data found.
+                No results.
               </TableCell>
             </TableRow>
           )}

@@ -1,18 +1,13 @@
-import axios from '@instanvi/utilities';
-import { AuthSessionResponse } from '@/types/auth';
-
-const authApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL!;
+import { authClient } from '@/config/axios.config';
+import type { GetSessionResponse } from '@/types/auth';
 
 export const authService = {
-  async authSession() {
-    const res = await axios.post<AuthSessionResponse>(
-      `${authApiUrl}/get-session`,
-      {}
-    );
+  async getSession(): Promise<GetSessionResponse> {
+    const res = await authClient.post<GetSessionResponse>('/get-session', {});
     return res.data;
   },
 
   async logout(): Promise<void> {
-    await axios.post(`${authApiUrl}/auth/sign-out`, {});
+    await authClient.post('/auth/sign-out', {});
   },
 };

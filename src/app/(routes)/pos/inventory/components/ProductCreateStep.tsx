@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Select from '@potta/components/select';
 import Inventory from './slides/components/create_product/components/inventory';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { ProductPayload, productSchema } from '../_utils/validation';
 import useGetAllProductCategories from '../_hooks/useGetAllProductCategories';
 import useCreateProduct from '../_hooks/useCreateProduct';

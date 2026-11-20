@@ -1,5 +1,5 @@
-import axios from 'config/axios.config';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createPurchaseOrder } from '../../utils/api';
 
 interface PurchaseOrderData {
   orderDate: string;
@@ -26,18 +26,15 @@ interface PurchaseOrderData {
 
 interface CreatePurchaseOrderArgs {
   data: PurchaseOrderData;
-  userId: string;
-  branchId: string;
+  userId?: string;
+  branchId?: string;
 }
 
 export default function useCreatePurchaseOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ data, userId, branchId }: CreatePurchaseOrderArgs) => {
-      const response = await axios.post('/purchase-order/create', data, {});
-      return response.data;
-    },
+    mutationFn: ({ data }: CreatePurchaseOrderArgs) => createPurchaseOrder(data),
     onSuccess: () => {
       // Invalidate and refetch purchase orders
       queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });

@@ -1,0 +1,20 @@
+---
+description: Potta web scope, folder layout and where new code goes
+alwaysApply: true
+---
+
+# Potta web structure
+
+Potta web is the **POS + Books** frontend. Its only backend is `potta-backend` (POS sync, accounting, invoicing, purchase orders, vendor portal, cashbook, bank accounts, vouchers, master data). Payroll, expenses, budgets, procurement, payments collection and notifications belong to other Instanvi apps; do not add screens or API calls for them here.
+
+- Routes live in `src/app/(routes)/<feature>/`. Each feature keeps its own:
+  - `utils/api.ts` (or `_utils/api.ts`): an object of async functions returning `res.data`
+  - `hooks/` (or `_hooks/`): one react-query hook per file, or `hooks/index.ts` for a small feature
+  - `components/`: feature-only components
+  - `page.tsx`: `'use client'`, wrapped in `<RootLayout>` from `src/app/(routes)/layout`
+- Shared UI: `src/components/*` (custom), `src/components/shadcn/*`, `src/components/ui/*`. Reuse before adding new primitives.
+- Shell: `src/app/(routes)/layout/**` (navbar, right rail) and `src/app/sidebar/**`. Menu items come from `src/lib/navigation.ts`; never hardcode a sidebar link elsewhere.
+- Auth/session code: `src/auth.ts`, `src/auth.config.ts`, `src/proxy.ts`, `src/components/auth/*`, `src/store/use-auth-context-store.ts`.
+- Imports: `@potta/*` and `@/*` both map to `src/*`; the API client is imported as `config/axios.config` (existing convention).
+- Never put a `page.tsx` inside a `components/` folder (it becomes a route).
+- Run `npm run typecheck` before declaring work done; the build ignores type errors, so the typecheck is the gate.

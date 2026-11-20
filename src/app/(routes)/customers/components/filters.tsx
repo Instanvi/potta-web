@@ -1,101 +1,54 @@
 'use client';
-import Button from '@potta/components/button';
 import Search from '@potta/components/search';
-import Select from '@potta/components/select';
 import React, { useState } from 'react';
 import SliderCustomer from './customerSlider';
 import BulkSlider from './bulkSlider';
-import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@potta/components/shadcn/dropdown';
+import { ListToolbar } from '../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 
-const Filter = () => {
-  const [selectedValue, setSelectedValue] = useState('All Time'); // Set your default value here
-  const [selectedValue2, setSelectedValue2] = useState('pending'); // Set your default value here
+interface FilterProps {
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  rows?: any[];
+}
 
-  const handleChange = (value: string) => {
-    setSelectedValue(value);
-  };
-  const handleChange2 = (value: string) => {
-    setSelectedValue2(value);
-  };
+const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [] }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <div className="w-full flex justify-between ">
-      <div className="flex space-x-2 w-[50%]">
-        <div className="w-1/2">
-          <Search />
-        </div>
-        {/* <div className="flex mt-4 w-[40%] space-x-2">
-          <div className="flex h-[47px] pt-3 w-full px-2 border">
-            <p className="text-[17px] -mt-1">Filter&nbsp;: </p>
-            <div className="-mt-3">
-              <Select
-                border={true}
-                options={[
-                  { label: 'All', value: 'all' },
-                  { label: 'Pending', value: 'pending' },
-                  { label: 'Paid', value: 'paid' },
-                ]}
-                selectedValue={selectedValue2}
-                onChange={handleChange2}
-                bg=" " // Add your desired background class here
-              />
-            </div>
-          </div>
-          <div className="flex h-[47px] py-3.5  w-full px-2 border">
-            <p className="text-[17px] -mt-1">Date&nbsp;: </p>
-            <div className="-mt-3">
-              <Select
-                border={true}
-                options={[
-                  { label: 'All Time', value: 'All Time' },
-                  { label: 'Yesterday', value: 'Yesterday' },
-                ]}
-                selectedValue={selectedValue}
-                onChange={handleChange}
-                bg=" " // Add your desired background class here
-              />
-            </div>
-          </div>
-        </div> */}
-      </div>
-      <div className=" w-1/2 flex items-center justify-end">
-        <div className="flex justify-end">
-          <div className="w-fit justify-end flex">
-            <Button
-              type={'button'}
-              text="Export"
-              color
-              icon={
-                <Image
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                  src="/images/export.svg"
-                  alt="Export"
-                />
-              }
-              theme="lightBlue"
+    <>
+      <ListToolbar
+        actions={
+          <>
+            <ExportButton
+              filename="customers"
+              rows={rows}
+              columns={[
+                {
+                  key: 'name',
+                  header: 'Customer Name',
+                  value: (row) =>
+                    `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim(),
+                },
+                { key: 'phone', header: 'Telephone' },
+                { key: 'email', header: 'Email' },
+                { key: 'type', header: 'Type' },
+                { key: 'status', header: 'Status' },
+              ]}
             />
-          </div>
-          <div className="w-fit ml-2">
-            <DropdownMenu
-              open={isDropdownOpen}
-              onOpenChange={setIsDropdownOpen}
-            >
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="px-4 py-2.5 bg-[#005D1F] text-white hover:bg-green-900 flex items-center gap-2"
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  type="button"
+                  className="flex items-center gap-2 whitespace-nowrap rounded-[2px] bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-hover"
                 >
                   <i className="ri-file-add-line"></i>
                   New Customer
@@ -125,12 +78,19 @@ const Filter = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-          <SliderCustomer open={isCreateOpen} setOpen={setIsCreateOpen} />
-          <BulkSlider open={isUploadOpen} setOpen={setIsUploadOpen} />
-        </div>
-      </div>
-    </div>
+          </>
+        }
+      >
+        <Search
+          placeholder="Search customers by name, email or phone..."
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          onClear={() => onSearchChange('')}
+        />
+      </ListToolbar>
+      <SliderCustomer open={isCreateOpen} setOpen={setIsCreateOpen} />
+      <BulkSlider kind="customer" open={isUploadOpen} setOpen={setIsUploadOpen} />
+    </>
   );
 };
 

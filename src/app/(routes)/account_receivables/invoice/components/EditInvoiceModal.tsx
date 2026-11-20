@@ -10,7 +10,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import Left from '../new/components/left';
 import PdfView from '../new/components/pdfview';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface LineItem {
   uuid: string;
@@ -245,7 +245,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                   opacity: showPreview ? 1 : 0,
                 }}
               >
-                <div className="h-[92.7vh] overflow-y-auto bg-[#F2F2F2]">
+                <div className="h-[92.7vh] overflow-y-auto bg-main-bg">
                   {/* Only render PdfView when preview is showing for performance */}
                   {showPreview && <PdfView />}
                 </div>

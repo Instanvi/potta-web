@@ -5,7 +5,7 @@ import VendorInvoiceForm from './components/VendorInvoiceForm';
 import { PurchaseOrderDetails } from './types';
 import PottaLoader from '@potta/components/pottaloader';
 import useGetVendorPurchaseOrder from './hooks/useGetVendorPurchaseOrder';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const VendorPortal = () => {
   const searchParams = useSearchParams();
@@ -60,7 +60,7 @@ const VendorPortal = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-main-bg flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-medium text-gray-800 mb-2">
@@ -74,7 +74,7 @@ const VendorPortal = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-main-bg flex items-center justify-center">
         <PottaLoader size="lg" />
       </div>
     );
@@ -82,7 +82,7 @@ const VendorPortal = () => {
 
   if (error || !purchaseOrder) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-main-bg flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-6xl mb-4">❌</div>
           <h1 className="text-2xl font-medium text-gray-800 mb-2">
@@ -97,7 +97,7 @@ const VendorPortal = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-main-bg">
       <VendorInvoiceForm
         token={token}
         purchaseOrder={purchaseOrder}

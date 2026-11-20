@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Slider from '@potta/components/slideover';
 import Text from '@potta/components/textDisplay';
 import { useGetOneVoucher } from '../_hooks/hooks';
+import { PageLoader } from '@potta/components/ui/loaders';
 
 interface VoucherDetailsProps {
   voucherId: string;
@@ -101,9 +102,7 @@ const ViewVoucherSlider: React.FC<VoucherDetailsProps> = ({
       buttonText="View Voucher"
     >
       {isLoading && (
-        <div className="flex justify-center items-center py-10 h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-        </div>
+        <PageLoader compact />
       )}
 
       {error && (

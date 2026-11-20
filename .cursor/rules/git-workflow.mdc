@@ -1,0 +1,11 @@
+---
+description: Branching and pushing for potta-web
+alwaysApply: true
+---
+
+# Git workflow
+
+- Feature work happens on `feat/<topic>` branches (POS + Books slimming lives on `feat/pos-books-web`). `main` deploys production and `staging` deploys staging through `.github/workflows`.
+- Only commit or push when the user asks. Push the current branch with `git push origin HEAD`; never force-push `main` or `staging`.
+- Before committing: `npm run typecheck` and `npm run lint` on the files you changed.
+- Never commit `.env*` files except `.env.example`.

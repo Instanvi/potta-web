@@ -1,0 +1,17 @@
+---
+description: How Potta web calls potta-backend and the IdP (axios client, react-query keys, endpoints)
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# API requests
+
+- Always `import axios from 'config/axios.config'` (potta-backend) or `import { authClient } from '@/config/axios.config'` (IdP). Never import `axios` from the package for app calls and never build URLs from `process.env.NEXT_PUBLIC_API_BASE_URL`.
+- The client adds `Authorization`, `x-location-id` and `x-organization-id`, and handles 401 (hub re-login) and stale-location 403s. Never set these headers by hand.
+- Paths are relative to the `/api` base, e.g. `axios.post('/invoice/filter', ...)`. Check the route exists in potta-backend (`src/modules/**/**.controller.ts`) before calling it; there is no `/bills`, `/budgets`, `/payments`, `/search`, `/documents` or `/procurement` anymore.
+- List endpoints in potta-backend are usually `POST /<resource>/filter` with paging in the query string; details are `GET /<resource>/details/:id`.
+- React Query:
+  - One key factory per feature, e.g. `export const cashbookKeys = { all: ['cashbook'] as const, list: (p) => ['cashbook', 'list', p] as const }`.
+  - Mutations invalidate by prefix (`queryClient.invalidateQueries({ queryKey: cashbookKeys.all })`) and toast success/error with Sonner.
+  - Use the single `QueryClient` from `AppProviders`; never create another `QueryClient` in a layout or page.
+- Show backend validation messages: `error.response?.data?.message` (string or string[]).

@@ -6,7 +6,7 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 // import Calculator from "@/app/(routes)/calculator/page";
 import OtherMethod from './components/otherPayment';
 
-import ModalPrint from '../print/page';
+import ModalPrint from '../print';
 import CashPayment from './components/cashPayment';
 import Calculator from './components/calculator';
 const SaleInvoiceTable = () => {

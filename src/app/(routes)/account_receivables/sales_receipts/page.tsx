@@ -2,23 +2,19 @@
 
 import React from 'react';
 import RootLayout from '../../layout';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import { PageContainer, PageHeader } from '../../_shared/states';
 import SaleTable from './components/table';
 
-const Files = () => {
-  const context = React.useContext(ContextData);
-
-  return (
-    <RootLayout>
-      <div
-        className={`${
-          context?.layoutMode === 'sidebar' ? 'pl-16 !mt-4' : 'pl-5 !mt-4'
-        } pr-5 w-full mt-10`}
-      >
-        <SaleTable />
-      </div>
-    </RootLayout>
-  );
-};
+const Files = () => (
+  <RootLayout>
+    <PageContainer>
+      <PageHeader
+        title="Sales receipts"
+        description="Sales paid on the spot, with the customer, payment method and amount received."
+      />
+      <SaleTable />
+    </PageContainer>
+  </RootLayout>
+);
 
 export default Files;

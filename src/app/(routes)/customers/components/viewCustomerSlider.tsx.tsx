@@ -14,7 +14,7 @@ import { CustomerPayload, customerSchema } from '../utils/validations';
 import Notes from './note';
 import Tax from './tax';
 import useCreateCustomer from '../hooks/useCreateCustomer';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import Text from '@potta/components/textDisplay';
 import useGetOneCustomer from '../hooks/useGetOneCustomer';
 import { PhoneFlag } from './table';

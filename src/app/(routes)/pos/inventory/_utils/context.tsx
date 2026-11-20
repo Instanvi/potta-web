@@ -1,9 +1,12 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { Product } from './types';
 
 interface InventoryContextType {
   selectedProduct: Product | null;
   setSelectedProduct: (product: Product | null) => void;
+  /** Rows ticked in the inventory table. */
+  selectedProducts: Product[];
+  setSelectedProducts: (products: Product[]) => void;
   filters: {
     search: string;
     productType: string;
@@ -24,6 +27,12 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProducts, setSelectedProductsState] = useState<Product[]>([]);
+  const setSelectedProducts = useCallback((products: Product[]) => {
+    setSelectedProductsState((prev) =>
+      prev.length === products.length && prev.every((p, i) => p.uuid === products[i]?.uuid) ? prev : products
+    );
+  }, []);
   const [filters, setFilters] = useState({
     search: '',
     productType: 'ALL',
@@ -35,6 +44,8 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         selectedProduct,
         setSelectedProduct,
+        selectedProducts,
+        setSelectedProducts,
         filters,
         setFilters,
       }}

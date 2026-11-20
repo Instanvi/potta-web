@@ -1,7 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import useGetUser from '../app/(routes)/auth/hooks/useGetUser';
-import PottaLoader from '@potta/components/pottaloader';
+import { PageLoader } from '@potta/components/ui/loaders';
 
 interface UserDataLoaderProps {
   children: React.ReactNode;
@@ -19,11 +19,7 @@ const UserDataLoader: React.FC<UserDataLoaderProps> = ({ children }) => {
 
   // Show loading state while user data is being fetched
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <PottaLoader size="lg" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // Once user data is loaded, render children

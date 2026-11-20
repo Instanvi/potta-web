@@ -1,21 +1,20 @@
 'use client';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import RootLayout from '../layout';
 import TableAccount from './components/table';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import { PageContainer, PageHeader } from '../_shared/states';
 
 const Account = () => {
-  const context = useContext(ContextData);
   return (
     <RootLayout>
-      <div
-        className={`h-full overflow-hidden ${
-          context?.layoutMode === 'sidebar' ? 'px-14' : 'px-5'
-        }`}
-      >
+      <PageContainer>
+        <PageHeader
+          title="Chart of accounts"
+          description="OHADA accounts with their current balances. Codes are generated from the parent account."
+        />
         <TableAccount />
-      </div>
+      </PageContainer>
     </RootLayout>
   );
 };

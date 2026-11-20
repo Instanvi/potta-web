@@ -25,24 +25,6 @@
       ],
       "@potta/*": [
         "./src/*"
-      ],
-      "@instanvi/core": [
-        "src/lib/instanvi/core/index.ts"
-      ],
-      "@instanvi/core/server": [
-        "src/lib/instanvi/core/server.ts"
-      ],
-      "@instanvi/ui-components": [
-        "src/lib/instanvi/ui-components/index.ts"
-      ],
-      "@instanvi/ui-components/server": [
-        "src/lib/instanvi/ui-components/server.ts"
-      ],
-      "@instanvi/utilities": [
-        "src/lib/instanvi/utilities/index.ts"
-      ],
-      "@instanvi/utilities/server": [
-        "src/lib/instanvi/utilities/server.ts"
       ]
     },
     "plugins": [

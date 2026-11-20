@@ -1,22 +1,18 @@
 'use client';
-import React from 'react';
 import RootLayout from '../layout';
-import APMainDashboard from './components/APMainDashboard';
-import { ContextData } from '@potta/components/providers/DataProvider';
+import ArApDashboard from '../_shared/ArApDashboard';
+import { PageContainer, PageHeader } from '../_shared/states';
 
-const AccountPayablesPage = () => {
-  const context = React.useContext(ContextData);
-
+export default function AccountPayablesPage() {
   return (
     <RootLayout>
-      <div
-        className={`${
-          context?.layoutMode === 'sidebar' ? 'pl-16' : 'pl-5'
-        } bg-gray-50 min-h-[92vh] pr-5 w-full pt-6`}
-      >
-        <APMainDashboard type="ap" />
-      </div>
+      <PageContainer>
+        <PageHeader
+          title="Payables dashboard"
+          description="What you owe vendors, what is overdue and what was paid in the period."
+        />
+        <ArApDashboard side="ap" />
+      </PageContainer>
     </RootLayout>
   );
-};
-export default AccountPayablesPage;
+}

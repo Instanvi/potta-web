@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import axios from 'config/axios.config';
 
 
 interface GetVendorsParams {
@@ -11,7 +11,7 @@ export default function useGetAllVendors(params: GetVendorsParams) {
   return useQuery({
     queryKey: ['vendors', params],
     queryFn: async () => {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/vendors`, {
+      const response = await axios.post(`/vendor/filter`, null, {
         params: {
           page: params.page,
           limit: params.limit,

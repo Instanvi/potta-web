@@ -1,74 +1,52 @@
 'use client';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
-import Select from '@potta/components/select';
 import React, { useState } from 'react';
 import AddBankAccountSlideover from './AddBankAccountSlideover';
+import { ListToolbar } from '../../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
 
-const Filter = () => {
-  const [selectedValue, setSelectedValue] = useState('All Time'); // Set your default value here
-  const [selectedValue2, setSelectedValue2] = useState('pending'); // Set your default value here
+interface FilterProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  rows?: Array<{
+    bank_name?: string;
+    account_name?: string;
+    account_type?: string;
+    account_number?: string;
+    card_number?: string;
+    currency?: string;
+    current_balance?: number | string;
+  }>;
+}
+
+const Filter: React.FC<FilterProps> = ({ search, onSearchChange, rows = [] }) => {
   const [slideoverOpen, setSlideoverOpen] = useState(false);
-
-  const handleChange = (value: string) => {
-    setSelectedValue(value);
-  };
-  const handleChange2 = (value: string) => {
-    setSelectedValue2(value);
-  };
 
   return (
     <>
-      <div className="w-full flex justify-between my-4 ">
-        <div className="flex space-x-2 w-[50%]">
-          <div className=" w-[50%]">
-            <Search />
-          </div>
-          <div className="flex w-[50%] space-x-2">
-            <div className="flex items-center gap-2 ">
-              <label className="text-sm font-medium whitespace-nowrap">
-                Filter:
-              </label>
-              <Select
-                options={[
-                  { label: 'All', value: 'all' },
-                  { label: 'Pending', value: 'pending' },
-                  { label: 'Paid', value: 'paid' },
-                ]}
-                selectedValue={selectedValue2}
-                onChange={handleChange2}
-                bg=""
-              />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium whitespace-nowrap">
-                Date:
-              </label>
-              <Select
-                options={[
-                  { label: 'All Time', value: 'All Time' },
-                  { label: 'Yesterday', value: 'Yesterday' },
-                  { label: 'Last 7 Days', value: 'Last 7 Days' },
-                  { label: 'Last 30 Days', value: 'Last 30 Days' },
-                ]}
-                selectedValue={selectedValue}
-                onChange={handleChange}
-                bg=""
-              />
-            </div>
-          </div>
-        </div>
-        <div className=" w-[30%] flex justify-end">
-          <div className="flex w-fit gap-4 items-center  ">
-            <Button
-              type={'button'}
-              color
-              text="Export"
-              icon={<img src="/images/export.svg" />}
-              theme="lightBlue"
+      <ListToolbar
+        actions={
+          <>
+            <ExportButton
+              filename="bank-accounts"
+              rows={rows}
+              columns={[
+                { key: 'bank_name', header: 'Bank' },
+                { key: 'account_name', header: 'Account name' },
+                { key: 'account_type', header: 'Type' },
+                {
+                  key: 'account_number',
+                  header: 'Number',
+                  value: (row) =>
+                    row.account_type === 'Bank_Account'
+                      ? row.account_number ?? ''
+                      : row.card_number ?? '',
+                },
+                { key: 'currency', header: 'Currency' },
+                { key: 'current_balance', header: 'Balance' },
+              ]}
             />
-
             <Button
               type={'button'}
               text="Add Bank Account"
@@ -76,81 +54,18 @@ const Filter = () => {
               theme="default"
               onClick={() => setSlideoverOpen(true)}
             />
-          </div>
-        </div>
-      </div>
-      <AddBankAccountSlideover
-        open={slideoverOpen}
-        setOpen={setSlideoverOpen}
-      />
+          </>
+        }
+      >
+        <Search
+          placeholder="Search by bank name"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          onClear={() => onSearchChange('')}
+        />
+      </ListToolbar>
+      <AddBankAccountSlideover open={slideoverOpen} setOpen={setSlideoverOpen} />
     </>
-  );
-};
-
-const BankAccountDetailsFilter = () => {
-  const [selectedValue, setSelectedValue] = useState('All Time');
-  const [selectedValue2, setSelectedValue2] = useState('all');
-
-  const handleChange = (value: string) => {
-    setSelectedValue(value);
-  };
-  const handleChange2 = (value: string) => {
-    setSelectedValue2(value);
-  };
-
-  return (
-    <div className="w-full flex justify-between my-4 ">
-      <div className="flex space-x-2 w-[50%]">
-        <div className=" w-[50%]">
-          <Search />
-        </div>
-        <div className="flex w-[50%] space-x-2">
-          <div className="flex items-center gap-2 ">
-            <label className="text-sm font-medium whitespace-nowrap">
-              Filter:
-            </label>
-            <Select
-              options={[
-                { label: 'All', value: 'all' },
-                { label: 'Active', value: 'active' },
-                { label: 'Dormant', value: 'dormant' },
-              ]}
-              selectedValue={selectedValue2}
-              onChange={handleChange2}
-              bg=""
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium whitespace-nowrap">
-              Date:
-            </label>
-            <Select
-              options={[
-                { label: 'All Time', value: 'All Time' },
-                { label: 'Yesterday', value: 'Yesterday' },
-                { label: 'Last 7 Days', value: 'Last 7 Days' },
-                { label: 'Last 30 Days', value: 'Last 30 Days' },
-              ]}
-              selectedValue={selectedValue}
-              onChange={handleChange}
-              bg=""
-            />
-          </div>
-        </div>
-      </div>
-      <div className=" w-[30%] flex justify-end">
-        <div className="flex w-fit gap-4 items-center  ">
-          <Button
-            type={'button'}
-            color
-            text="Export"
-            icon={<img src="/images/export.svg" />}
-            theme="lightBlue"
-          />
-        </div>
-      </div>
-    </div>
   );
 };
 

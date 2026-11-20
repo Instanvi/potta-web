@@ -2,33 +2,72 @@
 import Button from '@potta/components/button';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
-import ProductStepperModal from './ProductStepperModal';
-import { CustomSheet } from '@potta/components/ui/sheet';
-import { Proportions, SquareStack } from 'lucide-react';
+import { SquareStack } from 'lucide-react';
+import { ArrowsClockwise, Plus } from '@phosphor-icons/react';
 import RestockModal from './slides/components/restock';
+import ProductStepperModal from './ProductStepperModal';
 import { useInventory } from '../_utils/context';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import useImportProductsCsv from '../_hooks/useImportProductsCsv';
+import useImportFromPay from '../_hooks/useImportFromPay';
+import { PayImportResult } from '../_utils/payImportApi';
+import { Can } from '@/components/auth/can';
+import { ListToolbar } from '../../../_shared/states';
+import { ExportButton } from '@/components/export-button';
+import type { Product } from '../_utils/types';
 
-const Filter = () => {
-  const { selectedProduct, filters, setFilters } = useInventory();
+const summarize = (r: PayImportResult) =>
+  [
+    `${r.received} in Pay`,
+    r.created && `${r.created} new`,
+    r.updated && `${r.updated} updated`,
+    r.linked && `${r.linked} linked`,
+    r.disabled && `${r.disabled} disabled`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+const issueList = (issues: PayImportResult['skipped']) =>
+  issues
+    .slice(0, 5)
+    .map((i) => `${i.name || i.payProductId}: ${i.reason}`)
+    .join('\n') + (issues.length > 5 ? `\n…and ${issues.length - 5} more` : '');
+
+type ItemKind = 'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS';
+
+const ITEM_KINDS: { value: ItemKind; label: string; hint: string }[] = [
+  { value: 'INVENTORY', label: 'Inventory item', hint: 'Stocked goods with quantities' },
+  { value: 'NON_INVENTORY', label: 'Non-inventory item', hint: 'Services or untracked goods' },
+  { value: 'ASSEMBLY', label: 'Assembly', hint: 'Built from other items' },
+  { value: 'SIMPLEGROUPS', label: 'Group', hint: 'Items sold together' },
+];
+
+/** Items are created here or arrive with "Sync from Pay"; Pay-linked items stay read-only. */
+const productTypeLabel = (product: Product) => {
+  if (product.structure === 'ASSEMBLY') return 'Assembly';
+  if (product.structure === 'SIMPLEGROUPS') return 'Group';
+  if (product.type === 'NON_INVENTORY') return 'Non-Inventory';
+  return 'Inventory';
+};
+
+const Filter = ({ rows = [] }: { rows?: Product[] }) => {
+  const { filters, setFilters } = useInventory();
 
   const [selectedValue, setSelectedValue] = useState(filters.sort);
   const [searchValue, setSearchValue] = useState(filters.search);
-  const [selectedProductType, setSelectedProductType] = useState(
-    filters.productType
-  );
-  const [isStepperOpen, setIsStepperOpen] = useState(false);
-  const [stepperProductType, setStepperProductType] = useState<
-    'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS'
-  >('INVENTORY');
+  const [selectedProductType, setSelectedProductType] = useState(filters.productType);
   const [isRestockOpen, setIsRestockOpen] = useState(false);
-  const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false);
-  const [isImportingCsv, setIsImportingCsv] = useState(false);
-  const csvInputRef = React.useRef<HTMLInputElement | null>(null);
-  const importCsvMutation = useImportProductsCsv();
+  const [isKindMenuOpen, setIsKindMenuOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createKind, setCreateKind] = useState<ItemKind>('INVENTORY');
+  const importFromPay = useImportFromPay();
+
+  const startCreate = (kind: ItemKind) => {
+    setCreateKind(kind);
+    setIsKindMenuOpen(false);
+    setIsCreateOpen(true);
+  };
 
   const handleChange = (value: string) => {
     setSelectedValue(value);
@@ -38,10 +77,6 @@ const Filter = () => {
   const handleProductTypeChange = (value: string) => {
     setSelectedProductType(value);
     setFilters({ ...filters, productType: value });
-  };
-
-  const handleRestock = () => {
-    setIsRestockOpen(true);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,41 +89,23 @@ const Filter = () => {
     setFilters({ ...filters, search: '' });
   };
 
-  const handleOpenCsvPicker = () => {
-    csvInputRef.current?.click();
-  };
-
-  const handleCsvSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      toast.error('Please select a valid CSV file.');
-      e.target.value = '';
-      return;
-    }
-
+  const handleSyncFromPay = async () => {
     try {
-      setIsImportingCsv(true);
-      await importCsvMutation.mutateAsync({ file });
-      toast.success('Products import started successfully.');
+      const result = await importFromPay.mutateAsync(undefined);
+      toast.success('Products synced from Pay', { description: summarize(result) });
+      if (result.skipped.length) {
+        toast.error(`${result.skipped.length} product(s) could not be synced`, {
+          description: issueList(result.skipped),
+        });
+      }
+      if (result.warnings.length) {
+        toast.warning(`${result.warnings.length} product(s) synced with warnings`, {
+          description: issueList(result.warnings),
+        });
+      }
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          'Failed to import CSV file.'
-      );
-    } finally {
-      setIsImportingCsv(false);
-      e.target.value = '';
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to sync products from Pay.');
     }
-  };
-
-  const handleSelectCreateType = (
-    type: 'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS'
-  ) => {
-    setStepperProductType(type);
-    setIsCreateSheetOpen(false);
-    setIsStepperOpen(true);
   };
 
   const filterConfig = [
@@ -123,121 +140,119 @@ const Filter = () => {
 
   return (
     <>
-      <div className="w-full flex justify-between items-center overflow-visible">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search inventory..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4 relative">
-          <input
-            ref={csvInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="hidden"
-            onChange={handleCsvSelected}
-          />
-          <Button
-            type={'button'}
-            color
-            text="Adjust"
-            icon={<Proportions />}
-            theme="lightBlue"
-          />
-          <Button
-            type={'button'}
-            color
-            text="Restock"
-            icon={<SquareStack />}
-            theme="lightBlue"
-            onClick={handleRestock}
-            disabled={!selectedProduct}
-          />
-          <Button
-            type={'button'}
-            color
-            text={isImportingCsv ? 'Importing...' : 'Import CSV'}
-            icon={<img src="/images/export.svg" />}
-            theme="lightBlue"
-            onClick={handleOpenCsvPicker}
-            disabled={isImportingCsv}
-          />
-          <button
-            type="button"
-            className="flex items-center gap-2 bg-[#005D1F] px-4 py-2.5 text-white hover:bg-green-900"
-            onClick={() => setIsCreateSheetOpen(true)}
-          >
-            <i className="ri-file-add-line" />
-            New Item
-          </button>
-        </div>
-      </div>
-
-      <CustomSheet
-        open={isCreateSheetOpen}
-        onOpenChange={setIsCreateSheetOpen}
-        side="left"
-        heading="Create Products/Service"
-        footer={<></>}
+      <ListToolbar
+        className="mb-2"
+        actions={
+          <>
+            <ExportButton
+              filename="inventory"
+              rows={rows}
+              columns={[
+                { key: 'name', header: 'Name' },
+                { key: 'sku', header: 'Sku' },
+                {
+                  key: 'category',
+                  header: 'Category',
+                  value: (row) =>
+                    row.category && typeof row.category === 'object'
+                      ? (row.category as { name?: string }).name ?? ''
+                      : String(row.category || ''),
+                },
+                {
+                  key: 'productType',
+                  header: 'Product Type',
+                  value: (row) => productTypeLabel(row),
+                },
+                {
+                  key: 'tax',
+                  header: 'Tax',
+                  value: (row) =>
+                    row.tax && typeof row.tax === 'object'
+                      ? (row.tax as { name?: string }).name ?? ''
+                      : String(row.tax || ''),
+                },
+                { key: 'cost', header: 'Cost' },
+                { key: 'salesPrice', header: 'Sale Price' },
+                {
+                  key: 'inventoryLevel',
+                  header: 'Inventory',
+                  value: (row) =>
+                    String(row.stockTotal ?? row.inventoryLevel ?? ''),
+                },
+                {
+                  key: 'reorderPoint',
+                  header: 'Reorder Point',
+                  value: (row) => String(row.reorderPoint ?? 0),
+                },
+              ]}
+            />
+            <Can resource="Item" action="restock">
+              <Button
+                type="button"
+                text="Restock"
+                icon={<SquareStack className="h-4 w-4" />}
+                theme="outline"
+                onClick={() => setIsRestockOpen(true)}
+              />
+            </Can>
+            <Can resource="Item" action="create">
+              <Button
+                type="button"
+                text={importFromPay.isPending ? 'Syncing…' : 'Sync from Pay'}
+                icon={<ArrowsClockwise size={16} className={importFromPay.isPending ? 'animate-spin' : ''} />}
+                theme="outline"
+                onClick={handleSyncFromPay}
+                disabled={importFromPay.isPending}
+              />
+            </Can>
+            <Can resource="Item" action="create">
+              <div className="relative">
+                <Button
+                  type="button"
+                  text="New item"
+                  icon={<Plus size={16} />}
+                  theme="default"
+                  onClick={() => setIsKindMenuOpen((open) => !open)}
+                />
+                {isKindMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsKindMenuOpen(false)} />
+                    <div className="absolute right-0 z-50 mt-2 w-64 border border-black/10 bg-white py-1 shadow-lg">
+                      {ITEM_KINDS.map((kind) => (
+                        <button
+                          key={kind.value}
+                          type="button"
+                          className="block w-full px-4 py-2 text-left hover:bg-gray-50"
+                          onClick={() => startCreate(kind.value)}
+                        >
+                          <span className="block text-sm font-medium">{kind.label}</span>
+                          <span className="block text-xs text-muted-foreground">{kind.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </Can>
+          </>
+        }
       >
-        <div className="mx-auto mt-8 w-full max-w-xl space-y-4">
-          <button
-            type="button"
-            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
-            onClick={() => handleSelectCreateType('INVENTORY')}
-          >
-            <span>Inventory Item</span>
-            <i className="ri-arrow-right-line text-lg" />
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
-            onClick={() => handleSelectCreateType('NON_INVENTORY')}
-          >
-            <span>Non Inventory Item</span>
-            <i className="ri-arrow-right-line text-lg" />
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
-            onClick={() => handleSelectCreateType('ASSEMBLY')}
-          >
-            <span>Assembly Item</span>
-            <i className="ri-arrow-right-line text-lg" />
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center justify-between border border-black/10 bg-white px-5 py-4 text-left text-base font-normal text-black hover:bg-black/[0.02]"
-            onClick={() => handleSelectCreateType('SIMPLEGROUPS')}
-          >
-            <span>Groups Item</span>
-            <i className="ri-arrow-right-line text-lg" />
-          </button>
-        </div>
-      </CustomSheet>
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onSearchClear={handleSearchClear}
+          searchPlaceholder="Search inventory..."
+          filters={filterConfig}
+          className="p-0"
+        />
+      </ListToolbar>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Create items here, or bring them in with Sync from Pay. Items linked to Pay are edited in Pay.
+      </p>
 
-      <ProductStepperModal
-        open={isStepperOpen}
-        setOpen={setIsStepperOpen}
-        productType={stepperProductType}
-        onComplete={() => {
-          setIsStepperOpen(false);
-          // Optionally refresh the product list
-        }}
-      />
       {typeof window !== 'undefined' &&
-        createPortal(
-          <RestockModal open={isRestockOpen} setOpen={setIsRestockOpen} />,
-          document.body
-        )}
+        createPortal(<RestockModal open={isRestockOpen} setOpen={setIsRestockOpen} />, document.body)}
+      <ProductStepperModal open={isCreateOpen} setOpen={setIsCreateOpen} productType={createKind} />
     </>
   );
 };

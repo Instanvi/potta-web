@@ -8,11 +8,13 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import Select from '@potta/components/select';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { Customer } from '../../../../customers/utils/types';
 import * as Yup from 'yup';
-import { toast } from 'react-hot-toast'; // Assuming you have a toast library
+import { toast } from 'sonner'; // Assuming you have a toast library
 import { useCreateSalesReceipt } from '../../hooks/useCreateReceipt';
 import { SalesReceiptPayload } from '../../../utils/validation';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -72,9 +74,7 @@ interface SaleReceiptDto {
 
 const Left = () => {
   const context = useContext(ContextData);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    string | null
-  >(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const { data, isLoading: customersLoading } = useGetAllCustomers({
     page: 1,
     limit: 100,
@@ -187,23 +187,17 @@ const Left = () => {
     }));
   };
 
-  const handlePaymentMethodClick = (option: string) => {
-    // If clicking the same option, don't deselect it
-    if (selectedPaymentMethod === option) {
-      return;
-    }
+  const handlePaymentMethodChange = (value: string) => {
+    setSelectedPaymentMethod(value);
 
-    setSelectedPaymentMethod(option);
-
-    // Clear payment method error if it exists
     if (errors.paymentMethod) {
       setErrors((prev) => ({ ...prev, paymentMethod: undefined }));
     }
 
-    // Update context data with single payment method
     context?.setData((prevData: any) => ({
       ...prevData,
-      payment_method: [option], // Array with single value
+      payment_method: value,
+      paymentMethod: value,
     }));
   };
 
@@ -268,34 +262,13 @@ const Left = () => {
       return sum + itemTotal + itemTax;
     }, 0);
 
-    // Map the internal payment method values to the exact string literals required by the schema
-    let paymentMethod:
-      | 'Credit Card'
-      | 'Bank Transfer'
-      | 'ACH Transfer'
-      | 'Other';
-
-    switch (selectedPaymentMethod) {
-      case 'creditCard':
-        paymentMethod = 'Credit Card';
-        break;
-      case 'bankTransfer':
-        paymentMethod = 'Bank Transfer';
-        break;
-      case 'achTransfer':
-        paymentMethod = 'ACH Transfer';
-        break;
-      default:
-        paymentMethod = 'Other';
-    }
-
     // Create the sales receipt data using the SalesReceiptPayload type from your validation schema
     const saleReceiptData: SalesReceiptPayload = {
       saleDate: date,
       totalAmount: totalAmount,
       paymentReference: paymentReference,
       notes: note,
-      paymentMethod: paymentMethod,
+      paymentMethod: selectedPaymentMethod,
       receiptNumber: invoiceNumber,
       discountAmount: 0, // Add default or actual value if available
       customerId: customerName, // Using the customer UUID as customerId
@@ -331,11 +304,8 @@ const Left = () => {
   // Helper function to render required field marker
   const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
 
-  // Define the new payment methods
-  const paymentMethods = ['creditCard', 'bankTransfer', 'achTransfer', 'other'];
-
   return (
-    <div className="max-w-5xl min-w-5xl px-2 overflow-y-auto scroll bg-white  ">
+    <div className="max-w-5xl min-w-5xl overflow-y-auto scroll bg-white px-2">
       <div className="w-full grid grid-cols-4 gap-4">
         <div>
           <Select
@@ -351,24 +321,14 @@ const Left = () => {
           />
         </div>
         <div className={`${errors.saleDate ? 'error-field' : ''}`}>
-          <Input
-            type="date"
-            label={
-              <>
-                Sale Date
-                <RequiredMark />
-              </>
-            }
+          <DatePicker
+            label="Sale Date"
+            required
             name="saleDate"
             value={date}
-            onchange={(e) =>
-              handleInputChange(
-                'saleDate',
-                typeof e === 'string' ? e : e.target.value
-              )
-            }
+            onChange={(value) => handleInputChange('saleDate', value)}
             placeholder="Select sale date"
-            errors={errors.saleDate ? { message: errors.saleDate } : undefined}
+            error={errors.saleDate}
           />
         </div>
         <div className={`${errors.receiptNumber ? 'error-field' : ''}`}>
@@ -459,48 +419,12 @@ const Left = () => {
       </div>
 
       <hr className="my-5" />
-      <h3 className="text-lg font-medium my-2">
-        Payment Methods
-        <RequiredMark />
-      </h3>
-      <div className={`my-5 ${errors.paymentMethod ? 'error-field' : ''}`}>
-        <div className="grid grid-cols-2 gap-4">
-          {paymentMethods.map((option) => (
-            <div
-              key={option}
-              onClick={() => handlePaymentMethodClick(option)}
-              className={`p-4 border cursor-pointer hover:border-green-500 hover:text-green-500 ${
-                selectedPaymentMethod === option
-                  ? 'border-green-500 text-green-500'
-                  : errors.paymentMethod && formSubmitted
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-              }`}
-            >
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedPaymentMethod === option}
-                  onChange={() => handlePaymentMethodClick(option)}
-                  className="mr-2 text-xl text-white accent-green-700"
-                  name="paymentMethod"
-                />
-                <span>
-                  {option === 'creditCard'
-                    ? 'Credit Card'
-                    : option === 'bankTransfer'
-                    ? 'Bank Transfer'
-                    : option === 'achTransfer'
-                    ? 'ACH Transfer'
-                    : 'Other'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-        {errors.paymentMethod && (
-          <p className="text-red-500 text-sm mt-1">{errors.paymentMethod}</p>
-        )}
+      <div className="my-5 max-w-md">
+        <PaymentMethodSelect
+          value={selectedPaymentMethod}
+          onChange={handlePaymentMethodChange}
+          error={errors.paymentMethod}
+        />
       </div>
       <div className={`${errors.paymentReference ? 'error-field' : ''}`}>
         <Input

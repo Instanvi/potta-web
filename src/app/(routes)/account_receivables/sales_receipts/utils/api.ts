@@ -8,10 +8,28 @@ export const salesApi = {
     const result = await axios.post(`/sales-receipt/create`, data);
     return result?.data;
   },
-  getAll: async (filter:Record<string, any> = {}) => {
-    const queryParams = new URLSearchParams(filter).toString();
-    const result= await axios.post(`/sales-receipt/filter?${queryParams}`);
-    return result.data
+  getAll: async ({
+    page,
+    limit,
+    sortBy = 'createdAt',
+    sortOrder = 'DESC',
+    paymentMethod,
+    search,
+    saleFrom,
+    saleTo,
+  }: Filters) => {
+    const body = paymentMethod ? { paymentMethod } : {};
+    const params: Record<string, string | number> = {
+      page,
+      limit,
+      sortBy: `${sortBy}:${sortOrder}`,
+    };
+    if (search) params.search = search;
+    if (saleFrom && saleTo) {
+      params['filter.saleDate'] = `$btw:${saleFrom},${saleTo}`;
+    }
+    const result = await axios.post('/sales-receipt/filter', body, { params });
+    return result.data;
   },
   getOne: async ( receipt_id: string) => {
     const result = await axios.get(`/sales-receipt/details/${receipt_id}`);

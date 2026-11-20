@@ -1,35 +1,36 @@
 'use client';
-import React, { useState, useMemo, useEffect } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+
+import React, { useMemo, useState, useCallback } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import moment from 'moment';
-import toast from 'react-hot-toast';
-import { DataTable } from '@potta/components/ui/data-table';
-
-import { IFilter } from '../_utils/types';
+import { ColumnDef } from '@tanstack/react-table';
+import { DateRangePicker } from '@potta/components/ui/date-picker';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
-  MoreVertical,
-  CheckCircle,
-  XCircle,
-  Clock,
-  FileText,
-} from 'lucide-react';
-import useGetAllInvoice from '../_hooks/useGetAllInvoice';
-import useApproveInvoice from '../_hooks/useApproveInvoice';
-import { useInvoiceFilter } from '../_context/InvoiceFilterContext';
+  DocumentMasterDetail,
+  DocumentListPanel,
+  DocumentListRow,
+} from '@potta/components/document-master-detail';
 import Button from '@potta/components/button';
-import ModalInvoice from './modal';
 import DynamicFilter from '@potta/components/dynamic-filter';
+import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
+import { InlineLoader } from '@potta/components/ui/loaders';
+import { IFilter } from '../_utils/types';
+import useGetAllInvoice from '../_hooks/useGetAllInvoice';
+import { useInvoiceFilter } from '../_context/InvoiceFilterContext';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@potta/components/shadcn/dropdown';
-import InvoiceViewModal from './InvoiceViewModal';
-import DeleteConfirmModal from './DeleteConfirmModal';
-import EditInvoiceModal from './EditInvoiceModal';
+  InvoiceDetailPanel,
+  InvoiceDetailPreview,
+} from './InvoiceDetailPanel';
+import DataGrid from './DataGrid';
 
-// Define types based on the API response
+const startOfLocalDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+const endOfLocalDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+
 interface LineItem {
   uuid: string;
   description: string;
@@ -64,8 +65,6 @@ interface Invoice {
   paymentTerms: string | null;
   paymentReference: string | null;
   lineItems: LineItem[];
-  rfqId?: string | null;
-  spendRequestId?: string | null;
   customer: {
     firstName: string;
     lastName: string;
@@ -74,308 +73,83 @@ interface Invoice {
   } | null;
 }
 
+const statusClass = (status: string) => {
+  switch (status.toUpperCase()) {
+    case 'PAID':
+    case 'APPROVED':
+      return 'text-green-700';
+    case 'OVERDUE':
+    case 'REJECTED':
+      return 'text-red-600';
+    case 'ISSUED':
+      return 'text-yellow-700';
+    default:
+      return 'text-muted-foreground';
+  }
+};
+
+const customerLabel = (invoice: Invoice) =>
+  invoice.customer
+    ? `${invoice.customer.firstName} ${invoice.customer.lastName}`
+    : invoice.notes || 'No customer';
+
 const InvoiceTable = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedId = searchParams.get('id');
+
   const [searchValue, setSearchValue] = useState('');
-  const [sortBy, setSortBy] = useState('createdAt:DESC');
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Use shared filter context
-  const { dateRange, statusFilter, setStatusFilter } = useInvoiceFilter();
-
-  // Modal states
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [invoiceToEdit, setInvoiceToEdit] = useState<Invoice | null>(null);
+  const { dateRange, setDateRange, statusFilter, setStatusFilter } =
+    useInvoiceFilter();
+  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
+  const issuedFrom = dateRange?.from
+    ? startOfLocalDay(dateRange.from).toISOString()
+    : undefined;
+  const issuedTo = dateRange?.from
+    ? endOfLocalDay(dateRange.to ?? dateRange.from).toISOString()
+    : undefined;
+  const { page, limit, setPagination, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [statusFilter, debouncedSearch, issuedFrom, issuedTo],
+  });
 
   const filter: IFilter = {
     limit,
     page,
     sortOrder: 'DESC',
     sortBy: 'createdAt',
+    status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
+    search: debouncedSearch || undefined,
+    issuedFrom,
+    issuedTo,
   };
 
-  const { data, isLoading, error } = useGetAllInvoice(filter);
-  const approveInvoiceMutation = useApproveInvoice();
+  const { data, isLoading, error, refetch } = useGetAllInvoice(filter);
 
-  // Cleanup modal states when component unmounts
-  useEffect(() => {
-    return () => {
-      setViewModalOpen(false);
-      setEditModalOpen(false);
-      setDeleteModalOpen(false);
-      setSelectedInvoice(null);
-      setInvoiceToEdit(null);
-      setInvoiceToDelete(null);
-    };
-  }, []);
+  const filteredData = useMemo(
+    () =>
+      (data?.data ?? []).filter(
+        (invoice: Invoice) => invoice.invoiceType !== 'PROFORMA_INVOICE'
+      ),
+    [data?.data]
+  );
 
-  // Filter data based on search, status, and date range
-  const filteredData = useMemo(() => {
-    if (!data?.data) return [];
+  const selectedFromList = useMemo(
+    () => filteredData.find((row: Invoice) => row.uuid === selectedId) ?? null,
+    [filteredData, selectedId]
+  );
 
-    // Filter to show only regular invoices (not proforma invoices)
-    let filtered = data.data.filter(
-      (invoice: Invoice) => invoice.invoiceType !== 'PROFORMA_INVOICE'
-    );
-
-    // Filter by status
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(
-        (invoice: Invoice) =>
-          invoice.status.toLowerCase() === statusFilter.toLowerCase()
-      );
-    }
-
-    // Filter by date range (from context)
-    if (dateRange?.from && dateRange?.to) {
-      filtered = filtered.filter((invoice: Invoice) => {
-        const invoiceDate = new Date(invoice.issuedDate);
-
-        // Create date objects for comparison (ignore time)
-        const invoiceDateOnly = new Date(
-          invoiceDate.getFullYear(),
-          invoiceDate.getMonth(),
-          invoiceDate.getDate()
-        );
-        const fromDateOnly = new Date(
-          dateRange.from!.getFullYear(),
-          dateRange.from!.getMonth(),
-          dateRange.from!.getDate()
-        );
-        const toDateOnly = new Date(
-          dateRange.to!.getFullYear(),
-          dateRange.to!.getMonth(),
-          dateRange.to!.getDate()
-        );
-
-        console.log('Table filtering invoice:', {
-          invoiceId: invoice.invoiceId,
-          issuedDate: invoice.issuedDate,
-          invoiceDateOnly: invoiceDateOnly.toISOString(),
-          fromDateOnly: fromDateOnly.toISOString(),
-          toDateOnly: toDateOnly.toISOString(),
-          isInRange:
-            invoiceDateOnly >= fromDateOnly && invoiceDateOnly <= toDateOnly,
-        });
-
-        return invoiceDateOnly >= fromDateOnly && invoiceDateOnly <= toDateOnly;
-      });
-    }
-
-    // Filter by search value
-    if (searchValue) {
-      const searchLower = searchValue.toLowerCase();
-      filtered = filtered.filter(
-        (invoice: Invoice) =>
-          invoice.invoiceId.toLowerCase().includes(searchLower) ||
-          (invoice.code && invoice.code.toLowerCase().includes(searchLower)) ||
-          invoice.notes.toLowerCase().includes(searchLower) ||
-          (invoice.customer &&
-            `${invoice.customer.firstName} ${invoice.customer.lastName}`
-              .toLowerCase()
-              .includes(searchLower))
-      );
-    }
-
-    return filtered;
-  }, [data?.data, statusFilter, dateRange, searchValue]);
-
-  const getStatusInfo = (status: string, dueDate?: string) => {
-    const statusUpper = status.toUpperCase();
-    const dueDateMoment = dueDate ? moment(dueDate) : null;
-    const today = moment();
-
-    switch (statusUpper) {
-      case 'DRAFT':
-        return {
-          primary: 'Draft',
-          secondary: 'Not issued',
-          className: 'text-gray-600',
-        };
-      case 'ISSUED':
-        return {
-          primary: 'Issued',
-          secondary: 'Pending approval',
-          className: 'text-yellow-600',
-        };
-      case 'OVERDUE':
-        return {
-          primary: 'Overdue',
-          secondary: dueDateMoment
-            ? `Due ${dueDateMoment.format('MMM DD')}`
-            : 'Past due',
-          className: 'text-red-500',
-        };
-      case 'PAID':
-        return {
-          primary: 'Paid',
-          secondary: 'Payment received',
-          className: 'text-green-500',
-        };
-      case 'APPROVED':
-        return {
-          primary: 'Approved',
-          secondary: 'Ready for payment',
-          className: 'text-green-600',
-        };
-      case 'REJECTED':
-        return {
-          primary: 'Rejected',
-          secondary: 'Not approved',
-          className: 'text-red-600',
-        };
-      case 'ARCHIVED':
-        return {
-          primary: 'Archived',
-          secondary: 'No longer active',
-          className: 'text-gray-500',
-        };
-      default:
-        return {
-          primary: status,
-          secondary: 'Unknown status',
-          className: 'text-gray-600',
-        };
-    }
-  };
-
-  const getResolutionStatus = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'PAID':
-        return {
-          status: 'Paid',
-          icon: <CheckCircle className="h-4 w-4" />,
-          className: 'bg-green-50 text-green-700 border-green-500',
-        };
-      case 'APPROVED':
-        return {
-          status: 'Approved',
-          icon: <CheckCircle className="h-4 w-4" />,
-          className: 'bg-green-50 text-green-700 border-green-500',
-        };
-      case 'REJECTED':
-        return {
-          status: 'Rejected',
-          icon: <XCircle className="h-4 w-4" />,
-          className: 'bg-red-50 text-red-700 border-red-500',
-        };
-      case 'OVERDUE':
-        return {
-          status: 'Overdue',
-          icon: <Clock className="h-4 w-4" />,
-          className: 'bg-orange-50 text-orange-700 border-orange-500',
-        };
-      case 'ISSUED':
-        return {
-          status: 'Pending',
-          icon: <Clock className="h-4 w-4" />,
-          className: 'bg-yellow-50 text-yellow-700 border-yellow-500',
-        };
-      case 'DRAFT':
-        return {
-          status: 'Draft',
-          icon: <FileText className="h-4 w-4" />,
-          className: 'bg-gray-50 text-gray-700 border-gray-500',
-        };
-      default:
-        return {
-          status: 'Unknown',
-          icon: <FileText className="h-4 w-4" />,
-          className: 'bg-gray-50 text-gray-700 border-gray-500',
-        };
-    }
-  };
-
-  const formatDate = (date: string) => {
-    const momentDate = moment(date);
-    const today = moment();
-
-    if (momentDate.isSame(today, 'day')) {
-      return 'Today';
-    } else if (momentDate.isSame(today.clone().subtract(1, 'day'), 'day')) {
-      return 'Yesterday';
-    } else if (momentDate.isAfter(today.clone().subtract(7, 'days'))) {
-      return momentDate.format('dddd'); // Day name for recent dates
-    } else {
-      return momentDate.format('MMM DD, YYYY'); // Full date for older dates
-    }
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleSearchClear = () => {
-    setSearchValue('');
-  };
-
-  const handleApproveInvoice = async (invoiceId: string) => {
-    const loadingToast = toast.loading('Approving invoice...');
-    try {
-      await approveInvoiceMutation.mutateAsync(invoiceId);
-      toast.success('Invoice approved successfully!', { id: loadingToast });
-    } catch (error: any) {
-      console.error('Failed to approve invoice:', error);
-      toast.error(
-        error?.response?.data?.message || 'Failed to approve invoice',
-        {
-          id: loadingToast,
-        }
-      );
-    }
-  };
-
-  const handleViewInvoice = (invoice: Invoice) => {
-    // Ensure proper state initialization for animation
-    setSelectedInvoice(invoice);
-    // Small delay to ensure state is set before opening modal
-    setTimeout(() => {
-      setViewModalOpen(true);
-    }, 10);
-  };
-
-  const handleEditInvoice = (invoice: Invoice) => {
-    // Ensure proper state initialization for animation
-    setInvoiceToEdit(invoice);
-    // Small delay to ensure state is set before opening modal
-    setTimeout(() => {
-      setEditModalOpen(true);
-    }, 10);
-  };
-
-  const handleDeleteInvoice = (invoice: Invoice) => {
-    // Ensure proper state initialization for animation
-    setInvoiceToDelete(invoice);
-    // Small delay to ensure state is set before opening modal
-    setTimeout(() => {
-      setDeleteModalOpen(true);
-    }, 10);
-  };
-
-  const confirmDeleteInvoice = async () => {
-    if (!invoiceToDelete) return;
-
-    const loadingToast = toast.loading('Deleting invoice...');
-    try {
-      // TODO: Implement delete API call
-      console.log('Deleting invoice:', invoiceToDelete.uuid);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast.success('Invoice deleted successfully!', { id: loadingToast });
-    } catch (error) {
-      console.error('Failed to delete invoice:', error);
-      toast.error('Failed to delete invoice. Please try again.', {
-        id: loadingToast,
-      });
-    }
-  };
+  const setSelectedId = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (id) params.set('id', id);
+      else params.delete('id');
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   const filterConfig = [
     {
@@ -397,220 +171,264 @@ const InvoiceTable = () => {
     },
   ];
 
-  const columns: ColumnDef<Invoice>[] = [
-    {
-      accessorKey: 'issuedDate',
-      header: 'Date',
-      cell: ({ row: { original } }) => (
-        <div className="text-sm text-gray-600">
-          {formatDate(original.issuedDate)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'customer',
-      header: 'Customer',
-      cell: ({ row: { original } }) => {
-        if (original.customer) {
-          return (
-            <div className="text-sm font-medium">
-              {`${original.customer.firstName} ${original.customer.lastName}`}
-            </div>
-          );
-        }
-        return (
-          <div className="text-sm font-medium text-gray-500">
-            {original.invoiceType === 'PROFORMA_INVOICE'
-              ? original.code || 'Proforma Invoice'
-              : 'N/A'}
-          </div>
-        );
+  const columns: ColumnDef<Invoice>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'invoiceNumber',
+        header: 'Invoice',
+        cell: ({ row: { original } }) => (
+          <span className="font-medium text-foreground">
+            {original.invoiceNumber || original.invoiceId}
+          </span>
+        ),
       },
-    },
-    {
-      accessorKey: 'invoiceId',
-      header: 'ID',
-      cell: ({ row: { original } }) => (
-        <div className="text-sm text-gray-500">{original.invoiceId}</div>
-      ),
-    },
-    {
-      accessorKey: 'notes',
-      header: 'Title',
-      cell: ({ row: { original } }) => (
-        <div className="text-sm">{original.notes || 'No title'}</div>
-      ),
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row: { original } }) => {
-        const statusInfo = getStatusInfo(original.status, original.dueDate);
-        return (
-          <div className="flex flex-col">
-            <div className={`text-sm font-medium ${statusInfo.className}`}>
-              {statusInfo.primary}
-            </div>
-            <div className="text-xs text-gray-400">{statusInfo.secondary}</div>
-          </div>
-        );
+      {
+        id: 'customer',
+        header: 'Customer',
+        cell: ({ row: { original } }) => (
+          <span className="truncate">{customerLabel(original)}</span>
+        ),
       },
-    },
-    {
-      accessorKey: 'invoiceTotal',
-      header: 'Amount',
-      cell: ({ row: { original } }) => (
-        <div className="text-sm">
-          XAF{' '}
-          {original.invoiceTotal.toLocaleString(undefined, {
-            maximumFractionDigits: 2,
-          })}
-        </div>
-      ),
-    },
-    {
-      id: 'resolution',
-      header: 'Resolution',
-      cell: ({ row: { original } }) => {
-        const resolution = getResolutionStatus(original.status);
-        return (
-          <div className="border-r pr-4 flex justify-center">
-            <div
-              className={`flex items-center gap-2 px-3 py-2 border  ${resolution.className}`}
+      {
+        accessorKey: 'issuedDate',
+        header: 'Issued',
+        cell: ({ row: { original } }) => (
+          <span>{moment(original.issuedDate).format('MMM DD, YYYY')}</span>
+        ),
+      },
+      {
+        accessorKey: 'dueDate',
+        header: 'Due',
+        cell: ({ row: { original } }) => (
+          <span>{moment(original.dueDate).format('MMM DD, YYYY')}</span>
+        ),
+      },
+      {
+        accessorKey: 'invoiceTotal',
+        header: 'Total',
+        cell: ({ row: { original } }) => (
+          <span className="tabular-nums">
+            {Number(original.invoiceTotal).toLocaleString(undefined, {
+              maximumFractionDigits: 0,
+            })}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row: { original } }) => (
+          <span className={statusClass(original.status)}>{original.status}</span>
+        ),
+      },
+    ],
+    []
+  );
+
+  const { pageCount } = tableProps(data?.meta, data?.data?.length);
+
+  const list = (
+    <DocumentListPanel
+      header={
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedId(null)}
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
-              {resolution.icon}
-              <span className="text-sm font-medium">{resolution.status}</span>
-            </div>
+              <i className="ri-arrow-left-line" />
+              All invoices
+            </button>
+            <Link
+              href="/account_receivables/invoice/new"
+              className="inline-flex size-8 items-center justify-center rounded-[2px] bg-primary text-primary-foreground hover:bg-primary/90"
+              aria-label="Create invoice"
+              title="Create invoice"
+            >
+              <i className="ri-add-line text-lg" />
+            </Link>
           </div>
-        );
-      },
-    },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row: { original } }) => {
-        const isIssued = original.status.toUpperCase() === 'ISSUED';
-
-        return (
-          <div className="flex justify-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-1 hover:bg-gray-100 rounded">
-                  <MoreVertical size={16} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleViewInvoice(original)}>
-                  View Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleEditInvoice(original)}>
-                  Edit Invoice
-                </DropdownMenuItem>
-                {isIssued && (
-                  <DropdownMenuItem
-                    onClick={() => handleApproveInvoice(original.uuid)}
-                    disabled={approveInvoiceMutation.isPending}
-                  >
-                    {approveInvoiceMutation.isPending
-                      ? 'Approving...'
-                      : 'Approve Invoice'}
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => {
-                    console.log('Download PDF for:', original.invoiceId);
-                    toast.success('PDF download started!');
-                  }}
-                >
-                  Download PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleDeleteInvoice(original)}
-                  className="text-red-600 focus:text-red-700"
-                >
-                  Delete Invoice
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
-    },
-  ];
-
-  return (
-    <div className="">
-      <div className="flex justify-between items-center w-full">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
           <DynamicFilter
             searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search invoices by customer, ID, or title..."
+            onSearchChange={(e) => setSearchValue(e.target.value)}
+            onSearchClear={() => setSearchValue('')}
+            searchPlaceholder="Search…"
             filters={filterConfig}
-            className="p-0 bg-transparent"
+            orientation="stack"
+            className="p-0"
           />
+          <DateRangePicker
+            valueType="date"
+            className="w-full"
+            placeholder="Issued: all dates"
+            clearable
+            value={dateRange ?? {}}
+            onChange={(range) =>
+              setDateRange(
+                range.from ? { from: range.from, to: range.to } : undefined
+              )
+            }
+          />
+        </>
+      }
+      footer={
+        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <button
+            type="button"
+            className="rounded-[2px] px-2 py-1 hover:bg-accent disabled:opacity-40"
+            disabled={page <= 1}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                pageIndex: Math.max(0, prev.pageIndex - 1),
+              }))
+            }
+          >
+            Prev
+          </button>
+          <span>
+            {page}/{pageCount || 1}
+          </span>
+          <button
+            type="button"
+            className="rounded-[2px] px-2 py-1 hover:bg-accent disabled:opacity-40"
+            disabled={page >= (pageCount || 1)}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                pageIndex: prev.pageIndex + 1,
+              }))
+            }
+          >
+            Next
+          </button>
         </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4">
-          <Button
-            text={'Export'}
-            icon={<i className="ri-upload-2-line"></i>}
-            theme="lightBlue"
-            type={'button'}
-            color={true}
-          />
-          <Button
-            text={'Create Invoice'}
-            icon={<i className="ri-file-add-line"></i>}
-            theme="default"
-            type={'button'}
-            onClick={() => {
-              setIsOpen(true);
-            }}
-          />
+      }
+    >
+      {error ? (
+        <div className="p-3">
+          <ErrorState error={error} onRetry={() => refetch()} />
         </div>
-      </div>
+      ) : isLoading ? (
+        <div className="flex justify-center py-10">
+          <InlineLoader label="Loading…" />
+        </div>
+      ) : filteredData.length === 0 ? (
+        <p className="px-3 py-8 text-center text-sm text-muted-foreground">
+          No invoices found
+        </p>
+      ) : (
+        filteredData.map((invoice: Invoice) => (
+          <DocumentListRow
+            key={invoice.uuid}
+            selected={invoice.uuid === selectedId}
+            onClick={() => setSelectedId(invoice.uuid)}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span className="truncate text-sm font-medium text-foreground">
+                {customerLabel(invoice)}
+              </span>
+              <span className="shrink-0 text-sm tabular-nums text-foreground">
+                {Number(invoice.invoiceTotal).toLocaleString(undefined, {
+                  maximumFractionDigits: 0,
+                })}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="truncate text-muted-foreground">
+                {invoice.invoiceNumber || invoice.invoiceId}
+              </span>
+              <span className={statusClass(invoice.status)}>{invoice.status}</span>
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              {moment(invoice.issuedDate).format('MMM DD, YYYY')}
+            </span>
+          </DocumentListRow>
+        ))
+      )}
+    </DocumentListPanel>
+  );
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        isLoading={isLoading}
-        withRowSelection
-      />
-
-      {/* Modals */}
-      <ModalInvoice isOpen={isOpen} setIsOpen={setIsOpen} />
-
-      <InvoiceViewModal
-        open={viewModalOpen}
-        setOpen={setViewModalOpen}
-        invoice={selectedInvoice}
-      />
-
-      <DeleteConfirmModal
-        open={deleteModalOpen}
-        setOpen={setDeleteModalOpen}
-        onConfirm={confirmDeleteInvoice}
-        invoiceId={invoiceToDelete?.invoiceId || ''}
-        customerName={
-          invoiceToDelete && invoiceToDelete.customer
-            ? `${invoiceToDelete.customer.firstName} ${invoiceToDelete.customer.lastName}`
-            : invoiceToDelete?.invoiceType === 'PROFORMA_INVOICE'
-            ? 'Proforma Invoice'
-            : 'No Customer'
+  if (selectedId) {
+    return (
+      <DocumentMasterDetail
+        className="min-h-0 flex-1"
+        selectedId={selectedId}
+        list={list}
+        detail={
+          <InvoiceDetailPanel invoiceId={selectedId} fallback={selectedFromList} />
         }
-        amount={invoiceToDelete?.invoiceTotal || 0}
-        isLoading={false} // TODO: Add delete mutation loading state
+        preview={
+          <InvoiceDetailPreview invoiceId={selectedId} fallback={selectedFromList} />
+        }
+        previewLabel="Invoice preview"
+        previewDownloadTitle={
+          selectedFromList?.invoiceNumber ||
+          selectedFromList?.invoiceId ||
+          'Invoice'
+        }
       />
+    );
+  }
 
-      <EditInvoiceModal
-        open={editModalOpen}
-        setOpen={setEditModalOpen}
-        invoice={invoiceToEdit}
-      />
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-4 bg-main-bg p-4 md:p-5">
+      <ListToolbar
+        actions={
+          <Link href="/account_receivables/invoice/new">
+            <Button
+              text="New invoice"
+              icon={<i className="ri-add-line" />}
+              theme="default"
+              type="button"
+            />
+          </Link>
+        }
+      >
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={(e) => setSearchValue(e.target.value)}
+          onSearchClear={() => setSearchValue('')}
+          searchPlaceholder="Search invoices…"
+          filters={filterConfig}
+          className="p-0"
+        />
+        <DateRangePicker
+          valueType="date"
+          className="w-auto min-w-[240px]"
+          placeholder="Issued: all dates"
+          clearable
+          value={dateRange ?? {}}
+          onChange={(range) =>
+            setDateRange(
+              range.from ? { from: range.from, to: range.to } : undefined
+            )
+          }
+        />
+      </ListToolbar>
+
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : !isLoading && filteredData.length === 0 ? (
+        <EmptyState
+          title="No invoices yet"
+          description="Create an invoice to bill a customer."
+          action={
+            <Link href="/account_receivables/invoice/new">
+              <Button text="New invoice" type="button" theme="default" />
+            </Link>
+          }
+        />
+      ) : (
+        <DataGrid
+          columns={columns}
+          data={filteredData}
+          onRowClick={(row) => setSelectedId(row.uuid)}
+          isLoading={isLoading}
+          {...tableProps(data?.meta, data?.data?.length)}
+        />
+      )}
     </div>
   );
 };

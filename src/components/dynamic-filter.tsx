@@ -2,6 +2,7 @@ import React from 'react';
 import Search from './search';
 import CustomSelect from '@potta/app/(routes)/account_receivables/invoice/components/CustomSelect';
 import SearchableSelect from './searchableSelect';
+import { cn } from '@potta/lib/utils';
 
 interface FilterOption {
   label: string;
@@ -28,6 +29,8 @@ interface DynamicFilterProps {
   searchPlaceholder?: string;
   filters: FilterConfig[];
   className?: string;
+  /** Stack controls vertically (narrow side panels). Default is row on md+. */
+  orientation?: 'row' | 'stack';
 }
 
 const DynamicFilter: React.FC<DynamicFilterProps> = ({
@@ -37,14 +40,26 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   searchPlaceholder = 'Search...',
   filters,
   className = '',
+  orientation = 'row',
 }) => {
+  const stacked = orientation === 'stack';
+
   return (
     <div
-      className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 px-0 ${className}`}
+      className={cn(
+        'flex p-4 px-0',
+        stacked ? 'flex-col gap-2' : 'flex-row flex-wrap items-center gap-3',
+        className
+      )}
     >
-      <div className="flex flex-1 items-center gap-4 min-w-0">
+      <div
+        className={cn(
+          'flex min-w-0 flex-1',
+          stacked ? 'flex-col gap-2' : 'flex-row flex-wrap items-center gap-3'
+        )}
+      >
         {onSearchChange && (
-          <div className="w-full max-w-md">
+          <div className={cn(stacked ? 'w-full' : 'min-w-[16rem] max-w-md flex-1')}>
             <Search
               placeholder={searchPlaceholder}
               value={searchValue}
@@ -55,7 +70,13 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
           </div>
         )}
         {filters.map((filter) => (
-          <div key={filter.key} className="flex items-center gap-2">
+          <div
+            key={filter.key}
+            className={cn(
+              'flex items-center gap-2',
+              stacked ? 'w-full' : 'shrink-0'
+            )}
+          >
             {filter.icon}
             {filter.isSearchable ? (
               <SearchableSelect
@@ -63,7 +84,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
                 selectedValue={filter.value}
                 onChange={filter.onChange}
                 placeholder={filter.label}
-                className={filter.selectClassName}
+                className={cn(filter.selectClassName, stacked && 'w-full')}
                 loadOptions={filter.loadOptions}
                 minInputLength={filter.minInputLength}
               />

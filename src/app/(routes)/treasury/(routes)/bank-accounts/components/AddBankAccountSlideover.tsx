@@ -8,7 +8,7 @@ import { MonthYearInput } from '@potta/components/customDatePicker';
 import CardNumberInput from '@potta/components/CardNumberInput';
 import { useCreateBankAccount } from '../hooks/useCreateBankAccount';
 import { createBankAccountSchema } from '../utils/validation';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { accountsApi } from '@potta/app/(routes)/accounting/utils/api';
 
 const accountTypeOptions = [

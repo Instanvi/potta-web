@@ -2,7 +2,7 @@ import Button from '@potta/components/button';
 import Modal from '@potta/components/modal';
 import { useState } from 'react';
 
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import useDeleteProduct from '../_hooks/useDeleteProduct';
 interface DeleteProps {
   productID: string;

@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
@@ -11,21 +12,23 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { MoreVertical } from 'lucide-react';
 
-import Search from '@potta/components/search';
-
 import Button from '@potta/components/button';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { ErrorState, ListToolbar } from '../../../_shared/states';
+import { exportRows } from '@/lib/export-file';
 
 import useGetAllPurchaseOrders from '../hooks/useGetAllPurchaseOrders';
 import useApprovePurchaseOrder from '../hooks/useApprovePurchaseOrder';
 import useDeletePurchaseOrder from '../hooks/useDeletePurchaseOrder';
-import Slider from '@potta/components/slideover';
-import PurchaseOrderPage from '../new/page';
 import PurchaseOrderViewModal from './PurchaseOrderViewModal';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { IOption } from '@potta/app/(routes)/policies/utils/types';
-import toast from 'react-hot-toast';
-import { useSearchVendors } from '@potta/app/(routes)/policy/hooks/policyHooks';
-import { PoliciesApi } from '@potta/app/(routes)/policy/utils/api';
+import useGetAllVendors from '../new/hooks/useGetAllVendors';
+import { toast } from 'sonner';
+interface IOption {
+  value: string;
+  label: string;
+}
 
 // Define types for purchase order
 interface PurchaseOrder {
@@ -51,33 +54,36 @@ interface ApiResponse {
 }
 
 const InvoiceTable = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [vendorFilter, setVendorFilter] = useState<string>('all');
-  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<
     string | null
   >(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [statusFilter, vendorFilter, debouncedSearch],
+  });
+
   const filter = {
     limit,
     page,
     sortBy: ['createdAt:DESC'],
+    status: statusFilter === 'all' ? undefined : statusFilter,
+    vendorId: vendorFilter === 'all' ? undefined : vendorFilter,
+    search: debouncedSearch || undefined,
   };
 
-  const { data, isLoading, error } = useGetAllPurchaseOrders(filter);
+  const { data, isLoading, error, refetch } = useGetAllPurchaseOrders(filter);
   const approveMutation = useApprovePurchaseOrder();
   const deleteMutation = useDeletePurchaseOrder();
 
-  // Get all vendors for the select dropdown - use a search term that will return all vendors
-  const { data: vendorsData, isLoading: vendorsLoading } =
-    useSearchVendors('tech');
-
-  console.log('Vendors data:', vendorsData);
+  const { data: vendorsData, isLoading: vendorsLoading } = useGetAllVendors({ page: 1, limit: 100 });
 
   // Search and filter handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,21 +102,6 @@ const InvoiceTable = () => {
     setVendorFilter(value);
   };
 
-  // Handle modal closing when purchase order is created
-  useEffect(() => {
-    const handleCloseModal = () => {
-      setIsOpen(false);
-      // Reset form data when modal is closed
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('resetPurchaseOrderForm'));
-      }
-    };
-
-    window.addEventListener('closePurchaseOrderModal', handleCloseModal);
-    return () => {
-      window.removeEventListener('closePurchaseOrderModal', handleCloseModal);
-    };
-  }, []);
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -194,27 +185,20 @@ const InvoiceTable = () => {
     );
   };
 
-  // Create dynamic filter options
+  // Only the backend PurchaseOrderStatus enum values; others fail the enum cast server-side.
   const statusOptions: IOption[] = [
     { value: 'all', label: 'All Status' },
     { value: 'PENDING', label: 'Pending' },
     { value: 'APPROVED', label: 'Approved' },
     { value: 'SHIPPED', label: 'Shipped' },
-    { value: 'REJECTED', label: 'Rejected' },
-    { value: 'DRAFT', label: 'Draft' },
   ];
 
-  // For now, let's use hardcoded vendor options to test if the dropdown works
   const vendorOptions: IOption[] = [
     { value: 'all', label: 'All Vendors' },
-    { value: 'Tech Supplies Cameroon', label: 'Tech Supplies Cameroon' },
-    { value: 'Home & Garden Pro', label: 'Home & Garden Pro' },
-    { value: 'Advanced Fashion', label: 'Advanced Fashion' },
-    { value: 'Office Solutions Cameroon', label: 'Office Solutions Cameroon' },
-    { value: 'Global Electronics SARL', label: 'Global Electronics SARL' },
+    ...((vendorsData?.data ?? []) as { uuid?: string; name?: string }[])
+      .filter((v) => !!v.uuid && !!v.name)
+      .map((v) => ({ value: v.uuid as string, label: v.name as string })),
   ];
-
-  console.log('Vendor options:', vendorOptions);
 
   // Filter configuration for DynamicFilter
   const filterConfig = [
@@ -236,34 +220,6 @@ const InvoiceTable = () => {
     },
   ];
 
-  // Filter data based on selected filters and search
-  const filteredData = React.useMemo(() => {
-    if (!data?.data) return [];
-
-    return data.data.filter((purchaseOrder: PurchaseOrder) => {
-      // Status filter
-      const statusMatch =
-        statusFilter === 'all' || purchaseOrder.status === statusFilter;
-
-      // Vendor filter
-      const vendorMatch =
-        vendorFilter === 'all' ||
-        purchaseOrder.salePerson?.name === vendorFilter;
-
-      // Search filter (frontend only)
-      const searchMatch =
-        !searchValue ||
-        purchaseOrder.orderNumber
-          .toLowerCase()
-          .includes(searchValue.toLowerCase()) ||
-        purchaseOrder.salePerson?.name
-          .toLowerCase()
-          .includes(searchValue.toLowerCase());
-
-      return statusMatch && vendorMatch && searchMatch;
-    });
-  }, [data?.data, statusFilter, vendorFilter, searchValue]);
-
   const columns: ColumnDef<PurchaseOrder>[] = [
     {
       accessorKey: 'orderNumber',
@@ -283,7 +239,7 @@ const InvoiceTable = () => {
       accessorKey: 'orderDate',
       header: 'Order Date',
       cell: ({ row }) => (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           {formatDate(row.original.orderDate)}
         </div>
       ),
@@ -292,7 +248,7 @@ const InvoiceTable = () => {
       accessorKey: 'requiredDate',
       header: 'Required Date',
       cell: ({ row }) => (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-muted-foreground">
           {formatDate(row.original.requiredDate)}
         </div>
       ),
@@ -372,87 +328,78 @@ const InvoiceTable = () => {
     },
   ];
 
-  if (error) {
-    return (
-      <div className="mt-10">
-        <div className="flex justify-between items-center w-full mb-4">
-          <div className="flex-1">
-            <DynamicFilter
-              searchValue={searchValue}
-              onSearchChange={handleSearchChange}
-              onSearchClear={handleSearchClear}
-              searchPlaceholder="Search purchase orders..."
-              filters={filterConfig}
-              className="p-0 bg-transparent"
-            />
-          </div>
-          <div className="flex items-center space-x-2 ml-4">
+  return (
+    <div ref={containerRef}>
+      <ListToolbar
+        actions={
+          <>
             <Button
-              text={'Create PurchaseOrder'}
+              text={'Export'}
+              icon={<i className="ri-upload-2-line"></i>}
+              theme="lightBlue"
+              type={'button'}
+              color={true}
+              onClick={() =>
+                void exportRows({
+                  filename: 'purchase-orders',
+                  rows: (data?.data ?? []) as PurchaseOrder[],
+                  columns: [
+                    { key: 'orderNumber', header: 'Order number' },
+                    {
+                      key: 'salePerson',
+                      header: 'Vendor',
+                      value: (row) => row.salePerson?.name || '',
+                    },
+                    {
+                      key: 'orderDate',
+                      header: 'Order date',
+                      value: (row) =>
+                        row.orderDate ? new Date(row.orderDate).toLocaleDateString() : '',
+                    },
+                    {
+                      key: 'requiredDate',
+                      header: 'Required date',
+                      value: (row) =>
+                        row.requiredDate
+                          ? new Date(row.requiredDate).toLocaleDateString()
+                          : '',
+                    },
+                    { key: 'status', header: 'Status' },
+                    { key: 'orderTotal', header: 'Total' },
+                  ],
+                })
+              }
+            />
+            <Button
+              text={'Create Purchase Order'}
               icon={<i className="ri-file-add-line"></i>}
               theme="default"
               type={'button'}
-              onClick={() => setIsOpen(true)}
+              onClick={() => router.push('/account_payables/purchase/new')}
             />
-          </div>
-        </div>
-        <div className="min-h-60 items-center flex justify-center">
-          <p className="text-red-600  text-center">
-            An Error occured while fetching purchase orders please try again
-            later
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="" ref={containerRef}>
-      <div className="flex justify-between items-center w-full mb-4">
-        {/* Left side - Dynamic Filter */}
-        <div className="flex-1">
-          <DynamicFilter
-            searchValue={searchValue}
-            onSearchChange={handleSearchChange}
-            onSearchClear={handleSearchClear}
-            searchPlaceholder="Search purchase orders by order number or vendor..."
-            filters={filterConfig}
-            className="p-0 bg-transparent"
-          />
-        </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex items-center space-x-2 ml-4">
-          <Button
-            text={'Export'}
-            icon={<i className="ri-upload-2-line"></i>}
-            theme="lightBlue"
-            type={'button'}
-            color={true}
-          />
-          <Button
-            text={'Create PurchaseOrder'}
-            icon={<i className="ri-file-add-line"></i>}
-            theme="default"
-            type={'button'}
-            onClick={() => setIsOpen(true)}
-          />
-        </div>
-      </div>
-
-      <DataGrid data={filteredData} columns={columns} loading={isLoading} />
-
-      {/* Create Purchase Order Modal */}
-      <Slider
-        open={isOpen}
-        setOpen={setIsOpen}
-        edit={false}
-        title="Create Purchase Order"
+          </>
+        }
       >
-        <div className="w-full mx-auto">
-          <PurchaseOrderPage />
-        </div>
-      </Slider>
+        <DynamicFilter
+          searchValue={searchValue}
+          onSearchChange={handleSearchChange}
+          onSearchClear={handleSearchClear}
+          searchPlaceholder="Search by order number, vendor or notes..."
+          filters={filterConfig}
+          className="p-0"
+        />
+      </ListToolbar>
+
+      {error ? (
+        <ErrorState error={error} onRetry={() => refetch()} />
+      ) : (
+        <DataGrid
+          data={(data?.data ?? []) as PurchaseOrder[]}
+          columns={columns}
+          loading={isLoading}
+          {...tableProps(data?.meta, data?.data?.length)}
+        />
+      )}
 
       {/* Purchase Order View Modal */}
       <PurchaseOrderViewModal

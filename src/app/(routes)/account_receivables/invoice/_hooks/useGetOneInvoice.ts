@@ -5,6 +5,7 @@ const useGetOneInvoice = (invoice_id: string) => {
   return useQuery({
     queryKey: ['get-one-invoicing', invoice_id],
     queryFn: () => invoiceApi.getOne(invoice_id),
+    enabled: Boolean(invoice_id),
   });
 };
 

@@ -1,491 +1,296 @@
 'use client';
-import React, { useState, useEffect, useContext, useRef } from 'react';
 
-import Sidebar from './components/Sidebar';
-import SearchBar from './components/SearchBar';
-import { reportCategories, reportData } from './utils/dummyData';
-import { ReportCategoryId, ReportCategory, Report } from './utils/types';
-import { ContextData } from '@potta/components/providers/DataProvider';
-import { reportCharts } from './components/DashboardSampleCards';
-import ReportChartCard from './components/ReportChartCard';
+import { Suspense, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { CaretDown, CaretRight, Star } from '@phosphor-icons/react';
+import { useSearchParams } from 'next/navigation';
+
 import RootLayout from '../layout';
-import ApiDebugTest from './analytics/ApiDebugTest';
-import AnalyticsChartCard from './analytics/AnalyticsChartCard';
-import KpiCard from './components/KpiCard';
-import FPATabFilter from './components/FPATabFilter';
+import { PageContainer, PageHeader } from '../_shared/states';
+import { Can, useCan } from '@/components/auth/can';
+import { useAuthContextStore } from '@/store/use-auth-context-store';
 import {
-  pottaAnalyticsService,
-  KpiCategory,
-  KpiDefinition,
-} from '../../../services/analyticsService';
-import SearchableSelect from '../../../components/searchableSelect';
+  DEFAULT_FAVOURITE_IDS,
+  REPORT_CATEGORIES,
+  type ReportDef,
+  type ReportScopeMode,
+} from '@/lib/reports-catalog';
+import { cn } from '@/lib/utils';
+import { PanelCard, PanelCardContent, PanelCardHeader } from '@/components/ui/panel-card';
+import { Input } from '@/components/shadcn/input';
+import { Button } from '@/components/shadcn/button';
 
-const ReportsPage: React.FC = () => {
-  const context = useContext(ContextData);
-  const [activeTab, setActiveTab] = useState<ReportCategory['id']>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredReports, setFilteredReports] = useState<Report[]>([]);
-  const [isGlobalSearch, setIsGlobalSearch] = useState(true); // Default to global search
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [initialOpenSubmenu, setInitialOpenSubmenu] = useState<
-    string | undefined
-  >(undefined);
+const FAV_KEY = 'potta.report.favourites';
 
-  // FP&A Tab Filter State
-  const [fpaActiveTab, setFpaActiveTab] = useState<
-    'time' | 'geography' | 'orgcharts'
-  >('time');
-  const [timeCycleTab, setTimeCycleTab] = useState('Monthly');
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dateRange, setDateRange] = useState({
-    start: new Date(),
-    end: new Date(),
-  });
-  const [selectedRegion, setSelectedRegion] = useState('North Region');
-  const [selectedVillage, setSelectedVillage] = useState('Village A');
-  const [selectedTown, setSelectedTown] = useState('Town A');
-  const [selectedLocation, setSelectedLocation] = useState('Head Office');
-  const [selectedDepartment, setSelectedDepartment] = useState('Finance');
+function loadFavourites(): string[] {
+  if (typeof window === 'undefined') return [...DEFAULT_FAVOURITE_IDS];
+  try {
+    const raw = localStorage.getItem(FAV_KEY);
+    if (!raw) return [...DEFAULT_FAVOURITE_IDS];
+    const parsed = JSON.parse(raw) as string[];
+    return Array.isArray(parsed) ? parsed : [...DEFAULT_FAVOURITE_IDS];
+  } catch {
+    return [...DEFAULT_FAVOURITE_IDS];
+  }
+}
 
-  // KPI State
-  const [availableKpis, setAvailableKpis] = useState<KpiDefinition[]>([]);
-  const [kpiCategories, setKpiCategories] = useState<KpiCategory[]>([]);
-  const [selectedKpiCategory, setSelectedKpiCategory] =
-    useState<string>('financial');
+function ReportRow({
+  report,
+  favourite,
+  onToggleFavourite,
+}: {
+  report: ReportDef;
+  favourite: boolean;
+  onToggleFavourite: () => void;
+}) {
+  const href = report.live && report.href ? report.href : `/reports/view/${report.id}`;
+  return (
+    <div className="group flex items-center gap-2 border-b border-neutral-50 py-2.5 last:border-b-0">
+      <Link href={href} className="min-w-0 flex-1 text-sm text-foreground hover:text-primary">
+        {report.title}
+        {!report.live ? (
+          <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground">Soon</span>
+        ) : null}
+      </Link>
+      <button
+        type="button"
+        aria-label={favourite ? 'Remove favourite' : 'Add favourite'}
+        onClick={onToggleFavourite}
+        className="rounded-[2px] p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+      >
+        <Star className="size-4" weight={favourite ? 'fill' : 'regular'} />
+      </button>
+    </div>
+  );
+}
 
-  // Ensure selected category exists in available categories
-  useEffect(() => {
-    if (
-      kpiCategories.length > 0 &&
-      !kpiCategories.some((cat) => cat.name === selectedKpiCategory)
-    ) {
-      setSelectedKpiCategory(kpiCategories[0].name);
-    }
-  }, [kpiCategories, selectedKpiCategory]);
-
-  // Get all reports
-  const getAllReports = (): Report[] => {
-    return Object.values(reportData).flat();
-  };
-
-  // Get reports for the active tab
-  const getActiveReports = (): Report[] => {
-    if (activeTab === 'all') {
-      return getAllReports();
-    }
-    return [];
-  };
-
-  // Filter reports based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredReports(getActiveReports());
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-
-    // If global search is enabled, search across all reports
-    const reportsToSearch = isGlobalSearch
-      ? getAllReports()
-      : getActiveReports();
-
-    const filtered = reportsToSearch.filter(
-      (report) =>
-        report.title.toLowerCase().includes(query) ||
-        report.description.toLowerCase().includes(query)
-    );
-
-    setFilteredReports(filtered);
-  }, [searchQuery, activeTab, isGlobalSearch]);
-
-  // When tab changes and no search is active, reset filtered reports
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredReports(getActiveReports());
-    }
-  }, [activeTab]);
-
-  // Load KPI data
-  useEffect(() => {
-    const loadKpiData = async () => {
-      try {
-        const [kpisResponse, categoriesResponse] = await Promise.all([
-          pottaAnalyticsService.kpi.getAvailableKpis(),
-          pottaAnalyticsService.kpi.getKpiCategories(),
-        ]);
-
-        // Set the data from the API responses
-        setAvailableKpis(kpisResponse.kpis || []);
-        setKpiCategories(categoriesResponse.categories || []);
-      } catch (error) {
-        console.error('Error loading KPI data:', error);
-        // Set fallback categories if API fails
-        const fallbackCategories: KpiCategory[] = [
-          { name: 'financial', display_name: 'Financial' },
-          { name: 'sales_revenue', display_name: 'Sales Revenue' },
-          { name: 'human_capital', display_name: 'Human Capital' },
-          { name: 'marketing', display_name: 'Marketing' },
-          {
-            name: 'inventory_supply_chain',
-            display_name: 'Inventory Supply Chain',
-          },
-          { name: 'project_costing', display_name: 'Project Costing' },
-          {
-            name: 'planning_performance',
-            display_name: 'Planning Performance',
-          },
-        ];
-        setKpiCategories(fallbackCategories);
-        setAvailableKpis([]);
-      }
-    };
-
-    loadKpiData();
-  }, []);
-
-  const handleClearSearch = () => {
-    setSearchQuery('');
-  };
-
-  // Get the active tab category info
-  const activeTabInfo = reportCategories.find((cat) => cat.id === activeTab);
-
-  const handleSubmenuClick = (submenuId: string) => {
-    const el = cardRefs.current[submenuId];
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  // Check if current tab should show FP&A filters
-  const shouldShowFpaFilters = [
-    'financial_analytics',
-    'revenue_analytics',
-    'expense_analytics',
-    'budget_analytics',
-    'cashflow',
-    'revenue',
-    'sales',
-    'human_capital',
-    'sales_inventory',
-  ].includes(activeTab);
-
-  // Check if current tab should show KPI section
-  const shouldShowKpiSection = [
-    'financial_analytics',
-    'revenue_analytics',
-    'expense_analytics',
-    'human_capital',
-    'sales_inventory',
-  ].includes(activeTab);
-
-  // Use actual KPI data from API or fallback to sample data
-  const displayKpis =
-    availableKpis.length > 0
-      ? availableKpis.filter((kpi) => kpi.category === selectedKpiCategory)
-      : [
-          {
-            name: 'customer_acquisition_cost',
-            display_name: 'Customer Acquisition Cost (CAC)',
-            category: 'sales_revenue',
-          },
-          {
-            name: 'sales_growth_rate',
-            display_name: 'Sales Growth Rate',
-            category: 'sales_revenue',
-          },
-          {
-            name: 'revenue_per_employee',
-            display_name: 'Revenue Per Employee',
-            category: 'human_capital',
-          },
-          {
-            name: 'headcount_growth_rate',
-            display_name: 'Headcount Growth Rate',
-            category: 'human_capital',
-          },
-        ];
+function CategoryBlock({
+  title,
+  description,
+  reports,
+  favourites,
+  onToggleFavourite,
+  defaultOpen = true,
+}: {
+  title: string;
+  description?: string;
+  reports: ReportDef[];
+  favourites: Set<string>;
+  onToggleFavourite: (id: string) => void;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const mid = Math.ceil(reports.length / 2);
+  const left = reports.slice(0, mid);
+  const right = reports.slice(mid);
 
   return (
-    <RootLayout>
-      <div className="pl-8 flex h-[92vh]">
-        {/* Vertical Sidebar */}
-        <Sidebar
-          reportCategories={reportCategories}
-          activeTab={activeTab}
-          setActiveTab={(id) => setActiveTab(id as any)}
-          onSubmenuClick={handleSubmenuClick}
-          initialOpenSubmenu={initialOpenSubmenu}
+    <PanelCard>
+      <button
+        type="button"
+        className="flex w-full items-start justify-between gap-4 border-b border-neutral-50 p-6 text-left"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div className="min-w-0">
+          <h3 className="flex items-center gap-2 text-lg font-medium text-black">
+            {open ? <CaretDown className="size-4 shrink-0" /> : <CaretRight className="size-4 shrink-0" />}
+            {title}
+          </h3>
+          {description ? <p className="mt-1 text-sm text-black/70">{description}</p> : null}
+        </div>
+      </button>
+      {open ? (
+        <PanelCardContent className="pt-2">
+          <div className="grid gap-x-8 sm:grid-cols-2">
+            <div>
+              {left.map((r) => (
+                <ReportRow
+                  key={r.id}
+                  report={r}
+                  favourite={favourites.has(r.id)}
+                  onToggleFavourite={() => onToggleFavourite(r.id)}
+                />
+              ))}
+            </div>
+            <div>
+              {right.map((r) => (
+                <ReportRow
+                  key={r.id}
+                  report={r}
+                  favourite={favourites.has(r.id)}
+                  onToggleFavourite={() => onToggleFavourite(r.id)}
+                />
+              ))}
+            </div>
+          </div>
+        </PanelCardContent>
+      ) : null}
+    </PanelCard>
+  );
+}
+
+function ReportsHub() {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const { canAccess } = useCan();
+  const locationId = useAuthContextStore((s) => s.locationId);
+  const hierarchy = useAuthContextStore((s) => s.hierarchy);
+  const assignments = useAuthContextStore((s) => s.organizationAssignments);
+  const activeLocation = useMemo(() => {
+    if (hierarchy?.location?.id === locationId) return hierarchy.location;
+    return assignments.find((a) => a.location?.id === locationId)?.location ?? hierarchy?.location;
+  }, [hierarchy, assignments, locationId]);
+
+  const canOrgWide = canAccess('Report', 'view-organization') || canAccess('Ledger', 'view-organization');
+  const [scope, setScope] = useState<ReportScopeMode>('branch');
+  const [query, setQuery] = useState('');
+  const [favourites, setFavourites] = useState<string[]>(() => loadFavourites());
+  const favSet = useMemo(() => new Set(favourites), [favourites]);
+
+  function toggleFavourite(id: string) {
+    setFavourites((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  const filteredCategories = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return REPORT_CATEGORIES.map((cat) => ({
+      ...cat,
+      reports: q
+        ? cat.reports.filter((r) => r.title.toLowerCase().includes(q))
+        : cat.reports,
+    })).filter((cat) => cat.reports.length > 0);
+  }, [query]);
+
+  const favouriteReports = useMemo(() => {
+    const byId = new Map(REPORT_CATEGORIES.flatMap((c) => c.reports).map((r) => [r.id, r]));
+    return favourites.map((id) => byId.get(id)).filter(Boolean) as ReportDef[];
+  }, [favourites]);
+
+  const showOnlyFavourites = tab === 'favourites';
+
+  return (
+    <PageContainer>
+      <PageHeader
+        title="Reports"
+        description="Financial and operational reports. Scoped to your branch unless you can view the whole organization."
+      />
+
+      <PanelCard className="mb-4">
+        <PanelCardHeader
+          title="Find reports"
+          description="Search the catalog or switch branch vs organization scope."
+          action={
+            <span
+              className={cn(
+                'rounded-[2px] px-2 py-1 text-xs',
+                scope === 'organization' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {scope === 'organization' ? 'Organization' : 'Branch'} data
+            </span>
+          }
         />
-
-        {/* Main Content - Only this section scrolls */}
-        <main className="flex-1 px-4 py-4 overflow-y-auto h-full">
-          {/* Search bar and heading */}
-          <div className="flex flex-col md:flex-row gap-4 w-full md:w-2/3 mb-4 ">
-            <SearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              handleClearSearch={handleClearSearch}
+        <PanelCardContent className="flex flex-wrap items-end gap-3 pt-0">
+          <div className="min-w-[220px] flex-1 max-w-md">
+            <label className="mb-1 block text-sm font-medium text-foreground">Search</label>
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Type report name here"
             />
           </div>
-
-          {/* Tab title heading */}
-          <div className="mb-3 mt-2">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-medium text-gray-800">
-                {activeTabInfo?.label || 'Reports'}
-              </h1>
-            </div>
+          <div className="w-full max-w-xs">
+            <label className="mb-1 block text-sm font-medium text-foreground">Scope</label>
+            <select
+              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm text-foreground outline-none focus-visible:border-primary"
+              value={canOrgWide ? scope : 'branch'}
+              disabled={!canOrgWide}
+              onChange={(e) => setScope(e.target.value as ReportScopeMode)}
+            >
+              <option value="branch">
+                Branch{activeLocation?.name ? `: ${activeLocation.name}` : ''}
+              </option>
+              <option value="organization">Organization-wide</option>
+            </select>
           </div>
+          {!canOrgWide ? (
+            <p className="w-full text-xs text-muted-foreground">Org-wide locked (needs permission)</p>
+          ) : null}
+          <div className="flex gap-2">
+            <Button asChild variant={showOnlyFavourites ? 'outline' : 'default'} size="sm">
+              <Link href="/reports">All reports</Link>
+            </Button>
+            <Button asChild variant={showOnlyFavourites ? 'default' : 'outline'} size="sm">
+              <Link href="/reports?tab=favourites">Favourites</Link>
+            </Button>
+          </div>
+        </PanelCardContent>
+      </PanelCard>
 
-          {/* FP&A Tab Filter - Show only for FP&A related tabs */}
-          {shouldShowFpaFilters && (
-            <FPATabFilter
-              activeTab={fpaActiveTab}
-              setActiveTab={setFpaActiveTab}
-              timeCycleTab={timeCycleTab}
-              setTimeCycleTab={setTimeCycleTab}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-              selectedRegion={selectedRegion}
-              setSelectedRegion={setSelectedRegion}
-              selectedVillage={selectedVillage}
-              setSelectedVillage={setSelectedVillage}
-              selectedTown={selectedTown}
-              setSelectedTown={setSelectedTown}
-              selectedLocation={selectedLocation}
-              setSelectedLocation={setSelectedLocation}
-              selectedDepartment={selectedDepartment}
-              setSelectedDepartment={setSelectedDepartment}
-            />
-          )}
+      <div className="space-y-4">
+        {!showOnlyFavourites || favouriteReports.length > 0 ? (
+          <CategoryBlock
+            title="Favourites"
+            description="Reports you star for quick access"
+            reports={
+              showOnlyFavourites
+                ? favouriteReports
+                : favouriteReports.filter((r) => !query || r.title.toLowerCase().includes(query.toLowerCase()))
+            }
+            favourites={favSet}
+            onToggleFavourite={toggleFavourite}
+          />
+        ) : null}
 
-          {/* KPI Section */}
-          {shouldShowKpiSection && (
-            <div className="mb-8">
-              {/* <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-medium text-gray-900">
-                  Key Performance Indicators
-                </h2>
-                <div className="flex items-center gap-2">
-                  <SearchableSelect
-                    options={kpiCategories.map((category) => ({
-                      value: category.name,
-                      label: category.display_name,
-                    }))}
-                    selectedValue={selectedKpiCategory}
-                    onChange={setSelectedKpiCategory}
-                    placeholder="Select KPI Category"
-                    isDisabled={kpiCategories.length === 0}
-                    label="Category:"
-                    labelClass="text-sm font-medium text-gray-700"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {displayKpis.map((kpi: any) => (
-                  <KpiCard
-                    key={kpi.name}
-                    kpiName={kpi.name}
-                    displayName={kpi.display_name}
-                    category={kpi.category}
-                    timeGranularity={timeCycleTab.toLowerCase() as any}
-                    useMockData={true}
-                  />
-                ))}
-              </div> */}
-            </div>
-          )}
-
-          {/* Reports grid with more dummy chart cards */}
-          {activeTab === 'api_debug' ? (
-            <ApiDebugTest />
-          ) : [
-              'revenue_analytics',
-              'expense_analytics',
-              'financial_analytics',
-              'human_capital',
-              'sales_inventory',
-            ].includes(activeTab) ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-              {activeTabInfo?.submenus?.map((submenu) => {
-                const analyticsSubmenu = submenu as any;
-                return (
-                  <div
-                    key={submenu.id}
-                    id={`card-${submenu.id}`}
-                    ref={(el) => {
-                      cardRefs.current[submenu.id] = el;
-                    }}
-                  >
-                    <AnalyticsChartCard
-                      title={submenu.label}
-                      description={`${submenu.label} analytics data`}
-                      factName={analyticsSubmenu.factName || 'revenue'}
-                      metrics={analyticsSubmenu.metrics || ['total_revenue']}
-                      dimensions={analyticsSubmenu.dimensions || ['time']}
-                      chartType="bar"
-                      module={analyticsSubmenu.module || 'finance'}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          ) : activeTab === 'all' ? (
-            <div className="flex flex-col gap-8">
-              {/* Finance Module Fragment */}
-              <div className="pb-6 mb-6 border-b border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium text-black">
-                    Finance Analytics
-                  </h2>
-                  <button
-                    className="text-green-700 font-medium underline hover:underline text-sm px-3 py-1"
-                    onClick={() => {
-                      setActiveTab('financial_analytics' as ReportCategoryId);
-                      setInitialOpenSubmenu('financial_analytics');
-                      setTimeout(() => setInitialOpenSubmenu(undefined), 100);
-                    }}
-                  >
-                    View All
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                  <AnalyticsChartCard
-                    title="Revenue Overview"
-                    description="Total revenue analytics data"
-                    factName="revenue"
-                    metrics={['total_revenue']}
-                    dimensions={['time']}
-                    chartType="bar"
-                    module="finance"
-                  />
-                  <AnalyticsChartCard
-                    title="Revenue by Customer"
-                    description="Revenue breakdown by customer"
-                    factName="revenue"
-                    metrics={['total_revenue']}
-                    dimensions={['time', 'customer']}
-                    chartType="bar"
-                    module="finance"
-                  />
-                </div>
-              </div>
-
-              {/* Human Capital Module Fragment */}
-              <div className="pb-6 mb-6 border-b border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium text-black">
-                    Human Capital Analytics
-                  </h2>
-                  <button
-                    className="text-green-700 font-medium underline hover:underline text-sm px-3 py-1"
-                    onClick={() => {
-                      setActiveTab('human_capital' as ReportCategoryId);
-                      setInitialOpenSubmenu('human_capital');
-                      setTimeout(() => setInitialOpenSubmenu(undefined), 100);
-                    }}
-                  >
-                    View All
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                  <AnalyticsChartCard
-                    title="Headcount Overview"
-                    description="Total headcount analytics data"
-                    factName="headcount"
-                    metrics={['headcount']}
-                    dimensions={['time']}
-                    chartType="bar"
-                    module="human_capital"
-                  />
-                  <AnalyticsChartCard
-                    title="Headcount by Role"
-                    description="Headcount breakdown by role"
-                    factName="headcount"
-                    metrics={['headcount']}
-                    dimensions={['time', 'role']}
-                    chartType="bar"
-                    module="human_capital"
-                  />
-                </div>
-              </div>
-
-              {/* Sales & Inventory Module Fragment */}
-              <div className="pb-6 mb-6 border-b border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-medium text-black">
-                    Sales & Inventory Analytics
-                  </h2>
-                  <button
-                    className="text-green-700 font-medium underline hover:underline text-sm px-3 py-1"
-                    onClick={() => {
-                      setActiveTab('sales_inventory' as ReportCategoryId);
-                      setInitialOpenSubmenu('sales_inventory');
-                      setTimeout(() => setInitialOpenSubmenu(undefined), 100);
-                    }}
-                  >
-                    View All
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                  <AnalyticsChartCard
-                    title="Sales Overview"
-                    description="Total sales analytics data"
-                    factName="units_sold"
-                    metrics={['total_units_sold', 'total_revenue']}
-                    dimensions={['time']}
-                    chartType="bar"
-                    module="sales_inventory"
-                  />
-                  <AnalyticsChartCard
-                    title="Sales by Product"
-                    description="Sales breakdown by product"
-                    factName="units_sold"
-                    metrics={['total_units_sold', 'total_revenue']}
-                    dimensions={['time', 'product']}
-                    chartType="bar"
-                    module="sales_inventory"
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-              {activeTabInfo?.submenus?.map((submenu) => {
-                const chartConfig = (reportCharts as any)[submenu.chartKey];
-                return (
-                  <div
-                    key={submenu.id}
-                    id={`card-${submenu.id}`}
-                    ref={(el) => {
-                      cardRefs.current[submenu.id] = el;
-                    }}
-                  >
-                    {chartConfig ? (
-                      <ReportChartCard
-                        title={chartConfig.title}
-                        description={chartConfig.description}
-                        chartType={chartConfig.chartType}
-                        data={chartConfig.data}
-                        options={chartConfig.options}
-                        summary={chartConfig.summary}
-                      />
-                    ) : (
-                      <div className="border border-dashed border-green-300 p-8 text-center text-gray-400">
-                        {submenu.label} (No chart config)
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </main>
+        {!showOnlyFavourites
+          ? filteredCategories.map((cat) => (
+              <CategoryBlock
+                key={cat.id}
+                title={cat.title}
+                description={`${cat.reports.length} report${cat.reports.length === 1 ? '' : 's'}`}
+                reports={cat.reports}
+                favourites={favSet}
+                onToggleFavourite={toggleFavourite}
+              />
+            ))
+          : null}
       </div>
+    </PageContainer>
+  );
+}
+
+export default function ReportsPage() {
+  return (
+    <RootLayout>
+      <Suspense fallback={<PageContainer><p className="text-sm text-muted-foreground">Loading reports…</p></PageContainer>}>
+        <Can
+          resource="Ledger"
+          action={['view-balance-sheet', 'view-income-statement', 'view-entries']}
+          fallback={
+            <Can
+              resource="Report"
+              action={['view', 'view-organization']}
+              fallback={
+                <Can resource="GeneralLedger" action={['view-balance-sheet', 'income-statement', 'view-all']}>
+                  <ReportsHub />
+                </Can>
+              }
+            >
+              <ReportsHub />
+            </Can>
+          }
+        >
+          <ReportsHub />
+        </Can>
+      </Suspense>
     </RootLayout>
   );
-};
-
-export default ReportsPage;
+}

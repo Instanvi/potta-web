@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const Calculator: React.FC = () => {
   const [input, setInput] = useState<string>('');
