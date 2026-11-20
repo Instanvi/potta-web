@@ -855,54 +855,42 @@ const Left = ({
                   errors={errors.notes}
                 />
               </div>
-              <DocumentSectionTitle>
-                Payment method <RequiredMark />
-              </DocumentSectionTitle>
-              <div
-                className={`grid grid-cols-2 gap-2 sm:grid-cols-3 ${errors.paymentMethod ? 'error-field' : ''}`}
-              >
-                {[
-                  'Credit Card',
-                  'Bank Transfer',
-                  'ACH Transfer',
-                  'Mobile Money',
-                  'Cash',
-                  'Credit',
-                  'Other',
-                ].map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => handlePaymentMethodClick(option)}
-                    className={`flex items-center gap-2 rounded-[2px] border px-3 py-2.5 text-left text-sm transition-colors ${
-                      selectedPaymentMethod === option
-                        ? 'border-primary bg-brand-subtle text-primary'
-                        : errors.paymentMethod && formSubmitted
-                          ? 'border-red-500'
-                          : 'border-black/10 hover:border-black/20'
-                    }`}
-                  >
-                    <Checkbox
-                      id={`payment-${option}`}
-                      label={option}
-                      checked={selectedPaymentMethod === option}
-                      onChange={() => handlePaymentMethodClick(option)}
-                    />
-                  </button>
-                ))}
-              </div>
-              {errors.paymentMethod && (
-                <p className="mt-2 text-sm text-red-500">{errors.paymentMethod}</p>
-              )}
-              <div className={errors.paymentReference ? 'error-field' : ''}>
-                <Input
-                  type="text"
-                  label="Payment reference"
-                  name="paymentReference"
-                  value={paymentReference}
-                  onchange={(e: any) => handleInputChange('paymentReference', e.target.value)}
-                  errors={errors.paymentReference}
-                />
+              <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-main-bg/40 p-4">
+                <div className={errors.paymentMethod ? 'error-field' : ''}>
+                  <Select
+                    label="Payment method"
+                    required
+                    options={[
+                      { label: 'Credit Card', value: 'Credit Card' },
+                      { label: 'Bank Transfer', value: 'Bank Transfer' },
+                      { label: 'ACH Transfer', value: 'ACH Transfer' },
+                      { label: 'Mobile Money', value: 'Mobile Money' },
+                      { label: 'Cash', value: 'Cash' },
+                      { label: 'Credit', value: 'Credit' },
+                      { label: 'Other', value: 'Other' },
+                    ]}
+                    selectedValue={selectedPaymentMethod}
+                    onChange={(value: string) => handlePaymentMethodClick(value)}
+                    bg="bg-white"
+                    placeholder="Select payment method"
+                    error={errors.paymentMethod}
+                  />
+                  {errors.paymentMethod && (
+                    <p className="mt-2 text-sm text-red-500">{errors.paymentMethod}</p>
+                  )}
+                </div>
+                <div className={errors.paymentReference ? 'error-field' : ''}>
+                  <Input
+                    type="text"
+                    label="Payment reference"
+                    name="paymentReference"
+                    value={paymentReference}
+                    onchange={(e: any) =>
+                      handleInputChange('paymentReference', e.target.value)
+                    }
+                    errors={errors.paymentReference}
+                  />
+                </div>
               </div>
             </div>
             <div className="lg:col-span-5">
