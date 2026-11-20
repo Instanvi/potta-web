@@ -67,7 +67,7 @@ function CatalogCreateSheet({
 }) {
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="right" className="flex w-full flex-col">
+      <SheetContent side="left" className="flex w-full flex-col">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>

@@ -70,7 +70,7 @@ export default function AuditLogDetailSheet({ log, onClose }: { log: AuditLog | 
 
   return (
     <Sheet open={Boolean(log)} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-4xl">
+      <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-4xl">
         {log ? (
           <div className="space-y-6">
             <SheetHeader className="pr-8">

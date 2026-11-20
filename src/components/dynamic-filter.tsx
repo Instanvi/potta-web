@@ -47,21 +47,19 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
   return (
     <div
       className={cn(
-        'flex gap-2 p-4 px-0',
-        stacked
-          ? 'flex-col'
-          : 'flex-col md:flex-row md:items-center md:justify-between md:gap-4',
+        'flex p-4 px-0',
+        stacked ? 'flex-col gap-2' : 'flex-row flex-wrap items-center gap-3',
         className
       )}
     >
       <div
         className={cn(
           'flex min-w-0 flex-1',
-          stacked ? 'flex-col gap-2' : 'flex-row flex-wrap items-center gap-4'
+          stacked ? 'flex-col gap-2' : 'flex-row flex-wrap items-center gap-3'
         )}
       >
         {onSearchChange && (
-          <div className={cn('w-full', !stacked && 'max-w-md')}>
+          <div className={cn(stacked ? 'w-full' : 'min-w-[16rem] max-w-md flex-1')}>
             <Search
               placeholder={searchPlaceholder}
               value={searchValue}
@@ -74,7 +72,10 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
         {filters.map((filter) => (
           <div
             key={filter.key}
-            className={cn('flex items-center gap-2', stacked && 'w-full')}
+            className={cn(
+              'flex items-center gap-2',
+              stacked ? 'w-full' : 'shrink-0'
+            )}
           >
             {filter.icon}
             {filter.isSearchable ? (

@@ -21,8 +21,8 @@ export default function Page() {
         { key: 'isActive', label: 'Active', type: 'checkbox' },
         { key: 'nextRunDate', label: 'Next run date', type: 'date' },
         { key: 'endDate', label: 'End date', type: 'date' },
-        { key: 'customerId', label: 'Customer ID' },
-        { key: 'vendorId', label: 'Vendor ID' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
+        { key: 'vendorId', label: 'Vendor', type: 'vendor' },
         { key: 'templatePayload', label: 'Template payload (JSON)', type: 'json' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
       ]}

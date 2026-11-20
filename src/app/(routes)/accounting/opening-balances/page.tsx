@@ -14,7 +14,7 @@ export default function Page() {
       ]}
       fields={[
         { key: 'asOfDate', label: 'As of date', type: 'date' },
-        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+        { key: 'lines', label: 'Line items', type: 'lines' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
       ]}
       actions={[{ label: 'Post opening balance', action: 'post', confirm: true }]}

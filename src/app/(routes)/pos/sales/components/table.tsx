@@ -4,7 +4,6 @@ import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { Icon } from '@iconify/react';
-import { CloudDownload, FileDown } from 'lucide-react';
 import ViewReceiptSlider from './viewSlider';
 import DeleteModal from './deleteModal';
 import Button from '@potta/components/button';
@@ -186,8 +185,10 @@ const SaleTable = () => {
       accessorKey: 'customer',
       header: 'Customer',
       cell: ({ row: { original } }) => (
-        <div className="">
-          {original.customer.firstName} {original.customer.lastName}
+        <div className="truncate">
+          {original.customer
+            ? `${original.customer.firstName} ${original.customer.lastName}`.trim()
+            : 'Walk-in'}
         </div>
       ),
     },
@@ -195,34 +196,22 @@ const SaleTable = () => {
       accessorKey: 'paymentMethod',
       header: 'Method',
       cell: ({ row: { original } }) => (
-        <div className="">{original.paymentMethod}</div>
+        <div className="">{original.paymentMethod || '—'}</div>
       ),
     },
     {
       accessorKey: 'notes',
       header: 'Memo',
       cell: ({ row: { original } }) => (
-        <div className="">{original.notes || '-'}</div>
+        <div className="max-w-[14rem] truncate">{original.notes || '—'}</div>
       ),
-    },
-    {
-      accessorKey: 'balance',
-      header: 'Balance',
-      cell: () => <div className="">XAF 0</div>,
     },
     {
       accessorKey: 'totalAmount',
       header: 'Total',
       cell: ({ row: { original } }) => (
-        <div className="">XAF {original.totalAmount.toLocaleString()}</div>
-      ),
-    },
-    {
-      id: 'download',
-      header: '',
-      cell: () => (
-        <div className="">
-          <FileDown />
+        <div className="tabular-nums">
+          XAF {Number(original.totalAmount || 0).toLocaleString()}
         </div>
       ),
     },
@@ -238,36 +227,42 @@ const SaleTable = () => {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: '',
       cell: ({ row: { original } }) => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-gray-100 rounded-md">
-                <i className="ri-more-2-fill text-gray-600"></i>
+              <button
+                type="button"
+                className="rounded-[2px] p-2 hover:bg-black/[0.04]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <i className="ri-more-2-fill text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setOpenViewModal(original.uuid);
                   setReceiptDetails(original);
                   setIsViewOpen(true);
                 }}
                 className="cursor-pointer"
               >
-                <i className="ri-eye-line mr-2"></i>
+                <i className="ri-eye-line mr-2" />
                 View
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setOpenDeleteModal(original.uuid);
                   setReceiptDetails(original);
                   setIsDeleteOpen(true);
                 }}
                 className="cursor-pointer text-destructive"
               >
-                <i className="ri-delete-bin-line mr-2"></i>
+                <i className="ri-delete-bin-line mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -280,13 +275,14 @@ const SaleTable = () => {
   const receiptsData: ResponseSalesReceipt[] = data?.data || [];
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <ListToolbar
+        className="items-center"
         actions={
           <>
             <Button
               text={'Export'}
-              icon={<img src="/images/export.svg" />}
+              icon={<img src="/images/export.svg" alt="" />}
               theme="lightBlue"
               type={'button'}
               color={true}
@@ -335,7 +331,7 @@ const SaleTable = () => {
           onSearchClear={handleSearchClear}
           searchPlaceholder="Search receipts by customer, ID, or memo..."
           filters={filterConfig}
-          className="p-0"
+          className="w-full p-0"
         />
       </ListToolbar>
 

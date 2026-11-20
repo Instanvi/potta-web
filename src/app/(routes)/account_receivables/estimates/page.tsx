@@ -15,11 +15,11 @@ export default function Page() {
         { key: 'total', label: 'Total' },
       ]}
       fields={[
-        { key: 'customerId', label: 'Customer ID' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'issueDate', label: 'Issue date', type: 'date' },
         { key: 'expiryDate', label: 'Expiry date', type: 'date' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
-        { key: 'lines', label: 'Lines (JSON)', type: 'json' },
+        { key: 'lines', label: 'Line items', type: 'lines' },
       ]}
       actions={[
         { label: 'Convert to sales order', action: 'convert-to-sales-order', confirm: true },

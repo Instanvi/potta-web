@@ -26,9 +26,20 @@ import {
   rowId,
 } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
+import SearchableSelect from '@/components/searchableSelect';
+import { customerApi } from '@/app/(routes)/customers/utils/api';
+import { BooksLinesEditor } from '@/components/books/BooksLinesEditor';
 
 export type BooksColumn = { key: string; label: string };
-export type BooksField = { key: string; label: string; type?: string };
+export type BooksField = {
+  key: string;
+  label: string;
+  /**
+   * text | number | textarea | checkbox | date |
+   * customer | estimate | vendor | lines | json
+   */
+  type?: string;
+};
 export type BooksAction = { label: string; action: string; confirm?: boolean };
 
 export type BooksResourcePageProps = {
@@ -48,12 +59,12 @@ function coerceFormValue(type: string | undefined, raw: string): unknown {
     return Number.isFinite(n) ? n : raw;
   }
   if (type === 'checkbox' || type === 'boolean') return raw === 'true' || raw === 'on';
-  if (type === 'json') {
+  if (type === 'json' || type === 'lines') {
     if (!raw.trim()) return undefined;
     try {
       return JSON.parse(raw);
     } catch {
-      throw new Error('Invalid JSON');
+      throw new Error(type === 'lines' ? 'Invalid line items' : 'Invalid JSON');
     }
   }
   return raw === '' ? undefined : raw;
@@ -132,7 +143,8 @@ export function BooksResourcePage({
       const next: Record<string, string> = {};
       for (const f of fields) {
         const v = record?.[f.key];
-        if (f.type === 'json') next[f.key] = v != null ? JSON.stringify(v, null, 2) : '';
+        if (f.type === 'json' || f.type === 'lines')
+          next[f.key] = v != null ? JSON.stringify(v) : '';
         else if (f.type === 'checkbox' || f.type === 'boolean') next[f.key] = v ? 'true' : 'false';
         else next[f.key] = v == null ? '' : String(v);
       }
@@ -292,7 +304,7 @@ export function BooksResourcePage({
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="right" className="bg-white">
+          <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>New {title}</SheetTitle>
             </SheetHeader>
@@ -318,7 +330,7 @@ export function BooksResourcePage({
         </Sheet>
 
         <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
-          <SheetContent side="right" className="bg-white">
+          <SheetContent side="left" className="bg-white">
             <SheetHeader>
               <SheetTitle>{title}</SheetTitle>
             </SheetHeader>
@@ -371,6 +383,19 @@ function FieldInput({
   onChange: (v: string) => void;
 }) {
   const type = field.type || 'text';
+  if (type === 'lines') {
+    return <BooksLinesEditor label={field.label} value={value} onChange={onChange} />;
+  }
+  if (type === 'customer' || type === 'estimate' || type === 'vendor') {
+    return (
+      <EntitySelectField
+        entity={type}
+        label={field.label}
+        value={value}
+        onChange={onChange}
+      />
+    );
+  }
   if (type === 'textarea' || type === 'json') {
     return (
       <label className="block space-y-1">
@@ -419,6 +444,89 @@ function FieldInput({
         placeholder={field.label}
       />
     </label>
+  );
+}
+
+function EntitySelectField({
+  entity,
+  label,
+  value,
+  onChange,
+}: {
+  entity: 'customer' | 'estimate' | 'vendor';
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [options, setOptions] = useState<{ value: string; label: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        if (entity === 'customer') {
+          const data = await customerApi.getAll({ page: 1, limit: 100 });
+          const rows = extractBooksRows(data);
+          if (!cancelled) {
+            setOptions(
+              rows.map((row) => ({
+                value: String(row.uuid ?? ''),
+                label:
+                  [row.firstName, row.lastName].filter(Boolean).join(' ').trim() ||
+                  String(row.email ?? row.customerId ?? row.uuid ?? 'Customer'),
+              }))
+            );
+          }
+          return;
+        }
+        if (entity === 'vendor') {
+          const data = await booksApi.list('vendor', {}, { page: 1, limit: 100 });
+          const rows = extractBooksRows(data);
+          if (!cancelled) {
+            setOptions(
+              rows.map((row) => ({
+                value: String(row.uuid ?? ''),
+                label: String(row.name ?? row.vendorName ?? row.uuid ?? 'Vendor'),
+              }))
+            );
+          }
+          return;
+        }
+        const data = await booksApi.list('estimate', {}, { page: 1, limit: 100, sortBy: 'createdAt:DESC' });
+        const rows = extractBooksRows(data);
+        if (!cancelled) {
+          setOptions(
+            rows.map((row) => ({
+              value: String(row.uuid ?? ''),
+              label:
+                String(row.code ?? row.estimateNumber ?? row.uuid ?? 'Estimate') +
+                (row.total != null ? ` · ${row.total}` : ''),
+            }))
+          );
+        }
+      } catch {
+        if (!cancelled) setOptions([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [entity]);
+
+  return (
+    <SearchableSelect
+      label={label}
+      required={entity === 'customer'}
+      options={options}
+      selectedValue={value}
+      onChange={onChange}
+      placeholder={loading ? 'Loading…' : `Select ${label.toLowerCase()}`}
+      isDisabled={loading}
+    />
   );
 }
 

@@ -17,7 +17,7 @@ export default function Page() {
       fields={[
         { key: 'title', label: 'Title' },
         { key: 'proposalId', label: 'Proposal ID' },
-        { key: 'customerId', label: 'Customer ID' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'startDate', label: 'Start date', type: 'date' },
         { key: 'endDate', label: 'End date', type: 'date' },

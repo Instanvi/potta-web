@@ -148,7 +148,7 @@ export function PayrollEmployeesPage() {
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+          <SheetContent side="left" className="w-full overflow-y-auto sm:max-w-md">
             <SheetHeader>
               <SheetTitle>New employee</SheetTitle>
             </SheetHeader>
