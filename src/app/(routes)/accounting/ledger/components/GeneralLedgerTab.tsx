@@ -149,7 +149,7 @@ const GeneralLedgerTab = () => {
           className="w-full max-w-sm"
         />
         <select
-          className="h-10 w-44 shrink-0 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-zinc-50 px-3 text-sm leading-none text-foreground shadow-none outline-none transition-colors focus-visible:border-primary focus-visible:ring-0"
+          className="h-10 w-44 shrink-0 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm leading-none text-foreground shadow-none outline-none transition-colors focus-visible:border-primary focus-visible:ring-0"
           value={sourceFilter}
           onChange={(e) => setSourceFilter(e.target.value)}
           aria-label="Filter by source"
