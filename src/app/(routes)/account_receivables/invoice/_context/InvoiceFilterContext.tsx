@@ -23,7 +23,10 @@ interface InvoiceFilterProviderProps {
 export const InvoiceFilterProvider: React.FC<InvoiceFilterProviderProps> = ({
   children,
 }) => {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+  });
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   return (

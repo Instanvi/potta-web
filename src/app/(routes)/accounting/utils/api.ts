@@ -1,6 +1,6 @@
 import axios from 'config/axios.config';
 import { AxiosResponse } from 'axios';
-import { accountPayload } from './validations';
+import { accountPayload, accountUpdatePayload } from './validations';
 
 //
 interface AccountsQueryParams {
@@ -51,12 +51,15 @@ export const accountsApi = {
 
   // Get accounts by type
   getByType: async (type: string, search?: string) => {
+    // Using the filter parameter to filter by account type
     const queryParams = new URLSearchParams();
 
-    // ParsedQuery only keeps filters shaped column:operator:value
-    queryParams.append('filter', `type:$eq:${type.toUpperCase()}`);
+    // Add filter for account type
+    queryParams.append('filter', `type:${type}`);
 
+    // Add additional search term if provided
     if (search && search.trim() !== '') {
+      queryParams.append('searchBy', 'name,code');
       queryParams.append('search', search);
     }
 
@@ -91,6 +94,18 @@ export const accountsApi = {
     return result.data;
   },
 
+  // Update an existing account
+  update: async (accountId: string, data: accountUpdatePayload) => {
+    const result = await axios.put(`/accounting/accounts/${accountId}`, data);
+    return result.data;
+  },
+
+  // Delete an account
+  delete: async (accountId: string) => {
+    const result = await axios.delete(`/accounting/accounts/${accountId}`);
+    return result.data;
+  },
+
   // Get account balance
   getBalance: async (accountId: string) => {
     const result = await axios.get(`/accounting/ledger/account/${accountId}/balance`);
@@ -117,16 +132,6 @@ export const accountsApi = {
     const result = await axios.get(
       `/accounting/ledger/account/${accountId}/period-balance?${queryParams}`
     );
-    return result.data;
-  },
-
-  /** Idempotent OHADA chart seed for the current org. */
-  seedAccounts: async (): Promise<{
-    ok: boolean;
-    seeded: boolean;
-    reason: 'already_seeded' | 'seeded_now';
-  }> => {
-    const result = await axios.post('/accounting/seed-accounts');
     return result.data;
   },
 };

@@ -1,7 +1,5 @@
 import React from 'react';
 import { FieldError, UseFormRegister } from 'react-hook-form';
-import { FIELD_TEXTAREA } from '@/lib/field-styles';
-import { cn } from '@/lib/utils';
 
 type Props = {
   label?: string;
@@ -24,24 +22,29 @@ const TextArea: React.FC<Props> = ({
   errors,
   register,
   value,
+  height,
   onchange,
   disabled,
 }) => {
-  const message =
-    typeof errors === 'string' ? errors : errors && 'message' in errors ? errors.message : undefined;
-
   return (
-    <div className={cn('w-full', className)}>
-      {label && <span className="mb-3 text-sm font-medium text-foreground">{label}</span>}
+    <div className={`w-full ${className}`}>
+      {label && <span className="mb-3 text-gray-900 font-medium">{label}</span>}
       <textarea
         value={value}
         placeholder={placeholder}
         {...(register ? register(name) : {})}
         onChange={onchange}
         disabled={disabled}
-        className={cn(FIELD_TEXTAREA, 'mt-2', message && 'border-destructive')}
+        className={`w-full ${
+          height ? 'py-1.5' : 'py-2.5'
+        } px-4 border border-gray-200 rounded-[2px] outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+          disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+        }
+   `}
       />
-      {message ? <small className="col-span-2 text-red-500">{message}</small> : null}
+      {errors ? (
+        <small className="col-span-2 text-red-500">{errors?.message}</small>
+      ) : null}
     </div>
   );
 };

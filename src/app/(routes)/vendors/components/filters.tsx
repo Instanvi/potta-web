@@ -1,12 +1,8 @@
 'use client';
 import Button from '@potta/components/button';
-import { Can } from '@/components/auth/can';
 import React, { useState } from 'react';
 import SliderVendor from './vendorSlider';
-import BulkSlider from '@potta/app/(routes)/customers/components/bulkSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { ListToolbar } from '../../_shared/states';
-import { ExportButton } from '@/components/export-button';
 
 interface FilterProps {
   searchValue: string;
@@ -16,7 +12,6 @@ interface FilterProps {
   onStatusFilterChange: (value: string) => void;
   kycFilter: string;
   onKycFilterChange: (value: string) => void;
-  rows?: any[];
 }
 
 const Filter: React.FC<FilterProps> = ({
@@ -27,9 +22,7 @@ const Filter: React.FC<FilterProps> = ({
   onStatusFilterChange,
   kycFilter,
   onKycFilterChange,
-  rows = [],
 }) => {
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const filterConfig = [
     {
       key: 'status',
@@ -52,7 +45,8 @@ const Filter: React.FC<FilterProps> = ({
       options: [
         { label: 'All KYC', value: 'all' },
         { label: 'Verified', value: 'verified' },
-        { label: 'Unverified', value: 'unverified' },
+        { label: 'Pending (KYC Started)', value: 'pending' },
+        { label: 'Not Initialized', value: 'not_initialized' },
       ],
       value: kycFilter,
       onChange: onKycFilterChange,
@@ -61,57 +55,33 @@ const Filter: React.FC<FilterProps> = ({
   ];
 
   return (
-    <>
-    <ListToolbar
-      actions={
-        <>
-          <ExportButton
-            filename="vendors"
-            rows={rows}
-            columns={[
-              { key: 'name', header: 'Vendor/ Company Name' },
-              { key: 'phone', header: 'Telephone' },
-              { key: 'email', header: 'Email' },
-              { key: 'status', header: 'Status' },
-              {
-                key: 'isKYCVerified',
-                header: 'KYC Status',
-                value: (row) => (row.isKYCVerified ? 'Verified' : 'Unverified'),
-              },
-              { key: 'industry', header: 'Industry' },
-              {
-                key: 'openingBalance',
-                header: 'Balance',
-                value: (row) =>
-                  row.openingBalance != null
-                    ? `${row.currency ?? ''}${row.openingBalance}`
-                    : 'N/A',
-              },
-            ]}
+    <div className="w-full mb-4">
+      <div className="flex justify-between items-center w-full">
+        {/* Left side - Dynamic Filter */}
+        <div className="flex-1">
+          <DynamicFilter
+            searchValue={searchValue}
+            onSearchChange={onSearchChange}
+            onSearchClear={onSearchClear}
+            searchPlaceholder="Search vendors by name, email, or phone..."
+            filters={filterConfig}
+            className="p-0 bg-transparent"
           />
-          <Can resource="Vendor" action="create">
-            <Button
-              text="Import"
-              type="button"
-              theme="gray"
-              onClick={() => setIsUploadOpen(true)}
-            />
-            <SliderVendor />
-          </Can>
-        </>
-      }
-    >
-      <DynamicFilter
-        searchValue={searchValue}
-        onSearchChange={onSearchChange}
-        onSearchClear={onSearchClear}
-        searchPlaceholder="Search vendors by name, email, or phone..."
-        filters={filterConfig}
-        className="p-0"
-      />
-    </ListToolbar>
-      <BulkSlider kind="vendor" open={isUploadOpen} setOpen={setIsUploadOpen} />
-    </>
+        </div>
+
+        {/* Right side - Action Buttons */}
+        <div className="flex items-center space-x-2 ml-4">
+          <Button
+            text={'Export'}
+            icon={<img src="/images/export.svg" />}
+            theme="lightBlue"
+            type={'button'}
+            color={true}
+          />
+          <SliderVendor />
+        </div>
+      </div>
+    </div>
   );
 };
 

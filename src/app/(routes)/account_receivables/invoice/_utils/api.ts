@@ -1,5 +1,5 @@
 import axios from 'config/axios.config';
-import { IFilter, RecordInvoicePaymentPayload } from './types';
+import { IFilter } from './types';
 import { IInvoicePayload } from './valididation';
 
 export const invoiceApi = {
@@ -7,27 +7,11 @@ export const invoiceApi = {
     const result = await axios.post(`/invoice/create`, data);
     return result?.data;
   },
-  getAll: async ({
-    page,
-    limit,
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
-    status,
-    search,
-    issuedFrom,
-    issuedTo,
-  }: IFilter) => {
-    const body = status ? { status } : {};
-    const params: Record<string, string | number> = {
-      page,
-      limit,
-      sortBy: `${sortBy}:${sortOrder}`,
-    };
-    if (search) params.search = search;
-    if (issuedFrom && issuedTo) {
-      params['filter.issuedDate'] = `$btw:${issuedFrom},${issuedTo}`;
-    }
-    const result = await axios.post('/invoice/filter', body, { params });
+  getAll: async (filter: IFilter) => {
+    const data = {};
+    const result = await axios.post('/invoice/filter', data, {
+      params: { ...filter },
+    });
     return result?.data;
   },
   getOne: async (invoice_id: string) => {
@@ -47,16 +31,14 @@ export const invoiceApi = {
     const result = await axios.put(`/invoice/${invoice_id}/approve`);
     return result?.data;
   },
-  reject: async (invoice_id: string, reason: string) => {
-    const result = await axios.put(`/invoice/${invoice_id}/reject`, { reason });
+  addLineItem: async (invoiceId: string, user_id: string, data: unknown) => {
+    const result = await axios.post(`/invoice/${invoiceId}/lineItem`, data, {
+      params: { user_id },
+    });
     return result?.data;
   },
-  pay: async (invoice_id: string, data: RecordInvoicePaymentPayload) => {
-    const result = await axios.post(`/invoice/${invoice_id}/pay`, data);
-    return result?.data;
-  },
-  addLineItems: async (invoiceId: string, lineItems: unknown[]) => {
-    const result = await axios.post(`/invoice/${invoiceId}/lineItems`, lineItems);
+  testApi: async () => {
+    const result = await axios.get('/invoice/test');
     return result?.data;
   },
   removeLineItem: async (invoiceId: string, lineItemId: string) => {
@@ -65,13 +47,8 @@ export const invoiceApi = {
     );
     return result?.data;
   },
-  getByCustomer: async (
-    customerId: string,
-    params: { page?: number; limit?: number } = {}
-  ) => {
-    const result = await axios.get(`/invoice/customer/${customerId}`, {
-      params,
-    });
+  getAllCustomers: async (invoice_id: string): Promise<unknown> => {
+    const result = await axios.get('/invoice/customer/' + invoice_id);
     return result?.data;
   },
 };

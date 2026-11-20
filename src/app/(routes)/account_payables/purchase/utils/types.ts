@@ -4,9 +4,6 @@ export interface PurchaseOrderFilter {
   sortBy?: string[];
   search?: string;
   searchBy?: string[];
-  /** Sent in the request body; the backend uses it as the `where` clause. */
-  status?: string;
-  vendorId?: string;
 }
 
 export interface CreatePurchaseOrderData {

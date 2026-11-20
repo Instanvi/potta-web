@@ -2,7 +2,7 @@ import Button from "@potta/components/button";
 import Modal from "@potta/components/modal";
 import { useState } from "react";
 import {useDeleteVoucher} from "../_hooks/hooks";
-import { toast } from 'sonner';
+import toast from "react-hot-toast";
 
 interface DeleteProps {
   voucherID: string;

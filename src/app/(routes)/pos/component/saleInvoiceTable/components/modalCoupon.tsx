@@ -2,7 +2,7 @@ import Button from '@potta/components/button'
 import Input from '@potta/components/input'
 import Modal from '@potta/components/modal'
 import React, { useState } from 'react'
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 interface CouponModalProps {
   open?: boolean;
@@ -37,10 +37,10 @@ const ModalCoupon: React.FC<CouponModalProps> = ({
       'SAVE50': 50
     };
 
-    const discountAmount = validCoupons[couponCode.trim().toUpperCase()];
+    const discountAmount = validCoupons[couponCode];
     if (discountAmount) {
       onApplyCoupon?.(discountAmount);
-      toast.success(`Coupon applied: ${discountAmount} XAF off`);
+      toast.success(`Coupon applied: ${discountAmount}% off`);
       setIsOpen(false);
       setCouponCode('');
       setError('');

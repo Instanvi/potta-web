@@ -4,9 +4,7 @@ import { productApi } from '../_utils/api';
 interface RestockPayload {
   productId: string;
   quantity: number;
-  /** Cost per unit for this delivery; updates the weighted average cost. */
-  cost?: number;
-  variationId?: string;
+  userId: string;
 }
 
 const useRestockProduct = () => {

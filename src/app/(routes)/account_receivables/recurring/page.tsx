@@ -1,19 +1,23 @@
 'use client';
 
-import RootLayout from '../../layout';
 import InvoiceTableComponents from './components/table';
-import { PageContainer, PageHeader } from '../../_shared/states';
 
-const Invoice = () => (
-  <RootLayout>
-    <PageContainer>
-      <PageHeader
-        title="Recurring invoices"
-        description="Invoices that are issued to customers on a repeating schedule."
-      />
-      <InvoiceTableComponents />
-    </PageContainer>
-  </RootLayout>
-);
+import { useState } from 'react';
+const Invoice = () => {
+  return (
+    <div className=" px-14">
+      {/* <CustomInput />
+      <CustomSelect
+        options={options}
+        value={selectedValue}
+        onChange={setSelectedValue}
+        placeholder="Choose an option"
+      /> */}
+      <div className="">
+        <InvoiceTableComponents />
+      </div>
+    </div>
+  );
+};
 
 export default Invoice;

@@ -1,5 +1,15 @@
-import { redirect } from 'next/navigation';
+'use client';
+import React from 'react';
+import CustomerContent from '../../../../components/shared/CustomerContent';
+import RootLayout from '../../layout';
 
-export default function ReceivableCustomersRedirect() {
-  redirect('/account_receivables/contacts?type=customers');
-}
+const InvoiceCustomers = () => {
+  return (
+    <RootLayout>
+      <div className="w-full">
+        <CustomerContent />
+      </div>
+    </RootLayout>
+  );
+};
+export default InvoiceCustomers;

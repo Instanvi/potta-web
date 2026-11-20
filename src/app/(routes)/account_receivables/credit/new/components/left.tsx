@@ -8,12 +8,11 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import Select from '@potta/components/select';
-import { DatePicker } from '@potta/components/ui/date-picker';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
-import { Can } from '@/components/auth/can';
+import TextArea from '@potta/components/textArea';
 
-import { useRouter } from 'next/navigation';
-import { useCreateCreditNote } from '../../_hooks';
+import toast from 'react-hot-toast';
+import useCreateCreditNote from '../hooks/useCreateCredit';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -89,6 +88,8 @@ const Left = () => {
   }, [customers, customerName, context, selectedCustomer]);
 
   const handleInputChange = (key: string, value: any) => {
+    console.log(`Changing ${key} to:`, value);
+
     // Clear error for this field if it exists
     if (errors[key as keyof ValidationErrors]) {
       setErrors((prev) => ({ ...prev, [key]: undefined }));
@@ -135,7 +136,6 @@ const Left = () => {
   };
 
   const mutation = useCreateCreditNote();
-  const router = useRouter();
   const handleSaveCreditNote = () => {
     setFormSubmitted(true);
 
@@ -152,21 +152,30 @@ const Left = () => {
 
     const contextData = context?.data || {};
 
-    mutation.mutate(
-      {
-        payload: {
-          customerId: customerName,
-          issueDate,
-          creditAmount: Number(contextData.creditAmount),
-          reason: contextData.reason,
-          invoceId: contextData.invoiceId,
-          salesPersonId: '',
-          notes: note,
-        },
-        invoiceId: contextData.invoiceId,
+    const creditNoteData = {
+      customerId: customerName,
+      issueDate: issueDate,
+      creditAmount: contextData.creditAmount,
+      reason: contextData.reason,
+      invoiceId: contextData.invoiceId,
+      salesPersonId: '532e5da0-204f-4417-95e0-f26a13c62e39', // Add actual salesperson if available
+      notes: note,
+    };
+
+    console.log('Credit Note Data:', creditNoteData);
+    mutation.mutate(creditNoteData, {
+      onSuccess: () => {
+        toast.success('Credit note created successfully');
+        // You can add navigation or other actions here after successful creation
+        // For example: router.push('/invoice/credit');
       },
-      { onSuccess: () => router.push('/account_receivables/credit') }
-    );
+      onError: (error: any) => {
+        toast.error(
+          `Failed to create credit note: ${error.message || 'Unknown error'}`
+        );
+        console.error('Error creating credit note:', error);
+      },
+    });
   };
 
   // Helper function to render required field marker
@@ -189,14 +198,26 @@ const Left = () => {
           />
         </div>
         <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-          <DatePicker
-            label="Issue Date"
-            required
+          <Input
+            type="date"
+            label={
+              <>
+                Issue Date
+                <RequiredMark />
+              </>
+            }
             name="issueDate"
             value={issueDate}
-            onChange={(value) => handleInputChange('issueDate', value)}
+            onchange={(e) =>
+              handleInputChange(
+                'issueDate',
+                typeof e === 'string' ? e : e.target.value
+              )
+            }
             placeholder="Select issue date"
-            error={errors.issueDate}
+            errors={
+              errors.issueDate ? { message: errors.issueDate } : undefined
+            }
           />
         </div>
       </div>
@@ -213,6 +234,7 @@ const Left = () => {
               options={customerOptions}
               value={selectedCustomer}
               onChange={(option: Option | null) => {
+                console.log('SearchSelect onChange called with:', option);
                 setSelectedCustomer(option);
                 handleInputChange('customerName', option?.value || '');
               }}
@@ -269,14 +291,12 @@ const Left = () => {
       ></textarea>
 
       <div className="mt-5 w-full flex justify-end">
-        <Can resource="CreditNote" action="create">
-          <Button
-            text="Save Credit Note"
-            onClick={handleSaveCreditNote}
-            type="button"
-            isLoading={mutation.isPending}
-          />
-        </Can>
+        <Button
+          text="Save Credit Note"
+          onClick={handleSaveCreditNote}
+          type="button"
+          isLoading={mutation.isPending}
+        />
       </div>
       <SliderCustomer
         open={isAddCustomerDrawer}

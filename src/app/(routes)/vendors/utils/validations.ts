@@ -127,6 +127,8 @@ export const vendorSchema = yup.object().shape({
     .min(0, 'Credit limit must be positive'),
   
   notes: yup.string(),
+  // KYC initialization option
+  initializeKYC: yup.boolean().default(false),
 });
 
 export const updateVendorSchema = yup.object().shape({

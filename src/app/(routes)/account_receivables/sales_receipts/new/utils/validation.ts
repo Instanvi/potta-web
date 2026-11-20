@@ -1,5 +1,8 @@
 import * as Yup from 'yup';
 
+// Define the payment method options
+const paymentMethodOptions = ['Credit Card', 'Bank Transfer', 'ACH Transfer', 'Other', 'mtnMobileMoney', 'orangeMoney', 'bankTransfer', 'other'];
+
 // Define the discount type options
 const discountTypeOptions = ['FlatRate', 'Percentage', 'PercentageWithCap'];
 
@@ -22,7 +25,7 @@ totalAmount: Yup.number().positive('Total amount must be positive').required('To
 paymentReference: Yup.string(),
 notes: Yup.string(),
 paymentMethod: Yup.string()
-  .max(64, 'Payment method code is too long')
+  .oneOf(paymentMethodOptions, 'Invalid payment method')
   .required('Payment method is required'),
 receiptNumber: Yup.string().required('Receipt number is required'),
 discountAmount: Yup.number().min(0, 'Discount amount must be non-negative').required('Discount amount is required'),

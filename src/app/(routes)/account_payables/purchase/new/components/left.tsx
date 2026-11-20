@@ -9,10 +9,10 @@ import useGetAllVendors from '@potta/app/(routes)/vendors/hooks/useGetAllVendors
 import Select from '@potta/components/select';
 import Checkbox from '@potta/components/checkbox';
 
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import TextArea from '@potta/components/textArea';
 import useCreatePurchaseOrder from '../hooks/useCreatePurchase';
-import { DatePicker } from '@potta/components/ui/date-picker';
+import { DateInput } from '@potta/components/customDatePicker';
 import { useRouter } from 'next/navigation';
 import {
   validatePurchaseOrderForm,
@@ -373,26 +373,24 @@ const Left = () => {
         <div className="  ">
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className={`${errors.orderDate ? 'error-field' : ''}`}>
-              <DatePicker
-                valueType="date"
+              <DateInput
                 label={'Order Date'}
                 name="orderDate"
-                value={orderDate ? new Date(orderDate) : null}
+                value={orderDate ? new Date(orderDate) : undefined}
                 onChange={(date) =>
                   handleInputChange('orderDate', date ? date.toISOString() : '')
                 }
                 placeholder="Select order date"
                 required
-                error={errors.orderDate}
+                errors={errors.orderDate as any}
               />
             </div>
 
             <div className={`${errors.requiredDate ? 'error-field' : ''}`}>
-              <DatePicker
-                valueType="date"
+              <DateInput
                 label={'Due Date'}
                 name="requiredDate"
-                value={requiredDate ? new Date(requiredDate) : null}
+                value={requiredDate ? new Date(requiredDate) : undefined}
                 onChange={(date) =>
                   handleInputChange(
                     'requiredDate',
@@ -401,8 +399,7 @@ const Left = () => {
                 }
                 placeholder="Select required date"
                 required
-                min={orderDate ? new Date(orderDate) : undefined}
-                error={errors.requiredDate}
+                errors={errors.requiredDate as any}
               />
             </div>
           </div>

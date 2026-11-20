@@ -24,7 +24,6 @@ import {
   Banknote,
   Tag,
 } from 'lucide-react';
-import { InlineLoader } from '@potta/components/ui/loaders';
 
 interface VendorDetailsProps {
   vendorId: string;
@@ -181,7 +180,12 @@ const ViewVendorSlider: React.FC<VendorDetailsProps> = ({
     >
       <div className="w-full max-w-7xl mx-auto">
         {isLoading && (
-          <InlineLoader label="Loading vendor details…" className="py-12" />
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <span className="ml-2 text-gray-600">
+              Loading vendor details...
+            </span>
+          </div>
         )}
 
         {error && (

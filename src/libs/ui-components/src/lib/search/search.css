@@ -1,0 +1,7 @@
+
+.search-parent:focus-within {
+  border: 1px solid #237804!important;
+}
+.search-parent:focus-within .ri-search-line {
+  color: #237804;
+}

@@ -1,10 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
-import { useServerPagination } from '@/hooks/use-server-pagination';
-import { useDebouncedValue } from '@/hooks/use-debounced-value';
-import { ErrorState, ListToolbar } from '../../../_shared/states';
-import { exportRows } from '@/lib/export-file';
 import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
@@ -73,16 +68,6 @@ type ResponseSalesReceipt = {
   }>;
 };
 
-/** 'YYYY-MM-DD' -> ISO instant of that local day's first/last millisecond. */
-const localDayBoundary = (day: string, edge: 'start' | 'end') => {
-  const [y, m, d] = day.split('-').map(Number);
-  return (
-    edge === 'start'
-      ? new Date(y, m - 1, d, 0, 0, 0, 0)
-      : new Date(y, m - 1, d, 23, 59, 59, 999)
-  ).toISOString();
-};
-
 const SaleTable = () => {
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState<string | null>(null);
@@ -95,40 +80,24 @@ const SaleTable = () => {
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
-  const [methodFilter, setMethodFilter] = useState('all');
-  const [dateRange, setDateRange] = useState<DateRangeValue>({});
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt:DESC');
 
-  const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
-  const saleFrom = dateRange.from
-    ? localDayBoundary(dateRange.from, 'start')
-    : undefined;
-  const saleTo = dateRange.from
-    ? localDayBoundary(dateRange.to || dateRange.from, 'end')
-    : undefined;
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
 
-  const { page, limit, tableProps } = useServerPagination({
-    pageSize: 20,
-    resetOn: [methodFilter, sortBy, debouncedSearch, saleFrom, saleTo],
-  });
-
-  const [sortColumn, sortOrder] = sortBy.split(':') as [
-    NonNullable<Filters['sortBy']>,
-    NonNullable<Filters['sortOrder']>,
-  ];
+  // Set up filter state with pagination
   const filter: Filters = {
     limit,
     page,
-    sortBy: sortColumn,
-    sortOrder,
-    paymentMethod: methodFilter !== 'all' ? methodFilter : undefined,
-    search: debouncedSearch || undefined,
-    saleFrom,
-    saleTo,
+    sortOrder: 'ASC',
+    sortBy: 'createdAt',
   };
 
   // Fetch receipts data using the hook
-  const { data, isLoading, error, refetch } = useGetAllSalesReceipts(filter);
+  const { data, isLoading, error } = useGetAllSalesReceipts(filter);
 
   const handleRowClick = (row: ResponseSalesReceipt) => {
     setOpenViewModal(row.uuid);
@@ -145,20 +114,30 @@ const SaleTable = () => {
 
   const filterConfig = [
     {
-      key: 'method',
-      label: 'Method',
+      key: 'status',
+      label: 'Status',
       options: [
-        { label: 'All Methods', value: 'all' },
-        { label: 'Cash', value: 'CASH' },
-        { label: 'Mobile Money', value: 'MOBILE_MONEY' },
-        { label: 'Bank Transfer', value: 'BANK_TRANSFER' },
-        { label: 'Credit Card', value: 'CREDIT_CARD' },
-        { label: 'Digital Wallet', value: 'DIGITAL_WALLET' },
-        { label: 'Credit', value: 'CREDIT' },
-        { label: 'Other', value: 'OTHER' },
+        { label: 'All Status', value: 'all' },
+        { label: 'Pending', value: 'pending' },
+        { label: 'Paid', value: 'paid' },
+        { label: 'Completed', value: 'completed' },
       ],
-      value: methodFilter,
-      onChange: setMethodFilter,
+      value: statusFilter,
+      onChange: setStatusFilter,
+      selectClassName: 'min-w-[120px]',
+    },
+    {
+      key: 'date',
+      label: 'Date',
+      options: [
+        { label: 'All Time', value: 'all' },
+        { label: 'Today', value: 'today' },
+        { label: 'Yesterday', value: 'yesterday' },
+        { label: 'This Week', value: 'this_week' },
+        { label: 'This Month', value: 'this_month' },
+      ],
+      value: dateFilter,
+      onChange: setDateFilter,
       selectClassName: 'min-w-[140px]',
     },
     {
@@ -167,18 +146,15 @@ const SaleTable = () => {
       options: [
         { label: 'Newest First', value: 'createdAt:DESC' },
         { label: 'Oldest First', value: 'createdAt:ASC' },
-        { label: 'Sale date (newest)', value: 'saleDate:DESC' },
-        { label: 'Sale date (oldest)', value: 'saleDate:ASC' },
-        { label: 'Amount (high to low)', value: 'totalAmount:DESC' },
-        { label: 'Amount (low to high)', value: 'totalAmount:ASC' },
+        { label: 'Sale Date', value: 'saleDate:DESC' },
+        { label: 'Amount High to Low', value: 'totalAmount:DESC' },
+        { label: 'Amount Low to High', value: 'totalAmount:ASC' },
       ],
       value: sortBy,
       onChange: setSortBy,
       selectClassName: 'min-w-[140px]',
     },
   ];
-
-  const receiptsData: ResponseSalesReceipt[] = data?.data ?? [];
 
   const columns: ColumnDef<ResponseSalesReceipt>[] = [
     {
@@ -200,9 +176,7 @@ const SaleTable = () => {
       header: 'Customer',
       cell: ({ row: { original } }) => (
         <div className="">
-          {original.customer
-            ? `${original.customer.firstName} ${original.customer.lastName}`
-            : 'Walk-in'}
+          {original.customer.firstName} {original.customer.lastName}
         </div>
       ),
     },
@@ -248,8 +222,8 @@ const SaleTable = () => {
         const status = 'Closed';
         return (
           <div className="border-r pr-4 flex justify-center">
-            <div className="flex w-full items-center gap-3 border border-primary/40 bg-brand-subtle px-3 py-2 text-primary">
-              <div className="flex size-4 items-center justify-center rounded-full bg-primary text-white">
+            <div className="flex items-center gap-3  w-full px-3 py-2 border border-green-500 bg-green-50 text-green-700">
+              <div className="flex items-center justify-center text-white bg-green-700 rounded-full size-4">
                 <Icon icon="material-symbols:check" width="20" height="20" />
               </div>
               {status}
@@ -299,83 +273,70 @@ const SaleTable = () => {
     },
   ];
 
-  return (
-    <>
-      <ListToolbar
-        actions={
-          <>
-            <Button
-              text={'Export'}
-              icon={<img src="/images/export.svg" />}
-              theme="lightBlue"
-              type={'button'}
-              onClick={() =>
-                void exportRows({
-                  filename: 'sales-receipts',
-                  rows: receiptsData,
-                  columns: [
-                    { key: 'receiptNumber', header: 'Receipt' },
-                    {
-                      key: 'saleDate',
-                      header: 'Date',
-                      value: (row) =>
-                        row.saleDate ? new Date(row.saleDate).toLocaleDateString() : '',
-                    },
-                    {
-                      key: 'customer',
-                      header: 'Customer',
-                      value: (row) =>
-                        row.customer
-                          ? `${row.customer.firstName} ${row.customer.lastName}`.trim()
-                          : '',
-                    },
-                    { key: 'paymentMethod', header: 'Method' },
-                    { key: 'notes', header: 'Memo' },
-                    { key: 'totalAmount', header: 'Total' },
-                    { key: 'paymentReference', header: 'Reference' },
-                  ],
-                })
-              }
-            />
-            <Link href={'/account_receivables/sales_receipts/new'}>
-              <Button
-                text={'Create Sale'}
-                icon={<i className="ri-file-add-line"></i>}
-                theme="default"
-                type={'button'}
-              />
-            </Link>
-          </>
-        }
-      >
+  // Error handling
+  if (error) {
+    return (
+      <div className="mt-4">
         <DynamicFilter
           searchValue={searchValue}
           onSearchChange={handleSearchChange}
           onSearchClear={handleSearchClear}
           searchPlaceholder="Search receipts by customer, ID, or memo..."
           filters={filterConfig}
-          className="p-0"
-        />
-        <DateRangePicker
-          className="w-auto min-w-[240px]"
-          placeholder="Sale date: all"
-          clearable
-          value={dateRange}
-          onChange={setDateRange}
-        />
-      </ListToolbar>
+        />  
+        <div className="min-h-60 items-center flex justify-center">
+          <p className="text-red-600 text-center">
+            An error occurred while fetching receipts. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-      {error ? (
-        <ErrorState error={error} onRetry={() => refetch()} />
-      ) : (
-        <DataGrid
-          columns={columns}
-          data={receiptsData}
-          onRowClick={handleRowClick}
-          isLoading={isLoading}
-          {...tableProps(data?.meta, data?.data?.length)}
-        />
-      )}
+  // Use the fetched data or an empty array if data is not available
+  const receiptsData = data?.data || [];
+
+  return (
+    <div className="">
+      <div className="flex justify-between items-center w-full">
+        {/* Left side - Dynamic Filter */}
+        <div className="flex-1">
+          <DynamicFilter
+            searchValue={searchValue}
+            onSearchChange={handleSearchChange}
+            onSearchClear={handleSearchClear}
+            searchPlaceholder="Search receipts by customer, ID, or memo..."
+            filters={filterConfig}
+            className="p-0 bg-transparent"
+          />
+        </div>
+
+        {/* Right side - Action Buttons */}
+        <div className="flex items-center space-x-2 ml-4">
+          <Button
+            text={'Export'}
+            icon={<img src="/images/export.svg" />}
+            theme="lightBlue"
+            type={'button'}
+            color={true}
+          />
+          <Link href={'/account_receivables/sales_receipts/new'}>
+            <Button
+              text={'Create Sale'}
+              icon={<i className="ri-file-add-line"></i>}
+              theme="default"
+              type={'button'}
+            />
+          </Link>
+        </div>
+      </div>
+
+      <DataGrid
+        columns={columns}
+        data={receiptsData}
+        onRowClick={handleRowClick}
+        isLoading={isLoading}
+      />
 
       {/* Add your modal components here when implemented */}
 
@@ -393,7 +354,7 @@ const SaleTable = () => {
           setOpen={setIsViewOpen}
         />
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { productCategoryApi } from '../_utils/api';
 import useGetAllProductCategories from './useGetAllProductCategories';
 import useCreateProductCategory from './useCreateProductCategory';
 import { productCategorySchema } from '../_utils/validation';
-import { useServerPagination } from '@/hooks/use-server-pagination';
 
 export function useProductCategoryManager() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -14,8 +13,7 @@ export function useProductCategoryManager() {
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const { page, limit, tableProps } = useServerPagination({ pageSize: 20 });
-  const { data, isLoading } = useGetAllProductCategories({ page, limit });
+  const { data, isLoading } = useGetAllProductCategories();
   const createCategory = useCreateProductCategory();
   const queryClient = useQueryClient();
 
@@ -103,7 +101,6 @@ export function useProductCategoryManager() {
     setDeleteId,
     data,
     isLoading,
-    tableProps,
     register,
     handleSubmit,
     setValue,

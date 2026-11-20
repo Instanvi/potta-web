@@ -1,5 +1,21 @@
-import { redirect } from 'next/navigation';
+import React from 'react';
 
-export default function VendorsRedirect() {
-  redirect('/contacts?type=vendors');
-}
+import Boxes from './components/boxes';
+import TableComponents from './components/table';
+import RootLayout from '../layout';
+
+const Vendors = () => {
+  return (
+    <RootLayout>
+      <div className="px-14 py-5">
+        <div>
+          <Boxes />
+        </div>
+        <div>
+          <TableComponents />
+        </div>
+      </div>
+    </RootLayout>
+  );
+};
+export default Vendors;

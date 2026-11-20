@@ -5,19 +5,47 @@ export type Filter = {
   sortBy?: 'updatedAt' | 'createdAt';
   sortOrder?: 'ASC' | 'DESC';
   search?: string;
-  productType?: 'INVENTORY' | 'NON_INVENTORY' | 'ASSEMBLY' | 'SIMPLEGROUPS';
 };
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-import type { DiscountType, PaymentMethod, SaleLineItem, SalePayload } from './sale';
+// Enum Types
+export const PaymentMethods = ['Credit Card', 'Bank Transfer', 'ACH Transfer', 'Other'] as const;
+export type PaymentMethod = typeof PaymentMethods[number];
 
-export type { DiscountType, PaymentMethod } from './sale';
-export { DISCOUNT_TYPES as DiscountTypes, PAYMENT_METHOD_VALUES as PaymentMethods } from './sale';
+export const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
+export type DiscountType = typeof DiscountTypes[number];
 
-export type LineItem = SaleLineItem;
+// Line Item Type
+export type LineItem = {
+  description: string;
+  quantity: number;
+  discountCap: number;
+  discountType: DiscountType;
+  unitPrice: number;
+  taxRate: number;
+  discountRate?: number;
+  productId: string;
+};
 
-export type SalesReceipt = SalePayload;
+// Sales Receipt Type
+export type SalesReceipt = {
+  saleDate: string;
+  totalAmount: number;
+  paymentReference?: string;
+  notes?: string;
+  paymentMethod: PaymentMethod;
+  receiptNumber?: string;
+  discountAmount: number;
+  customerId: string;
+  salePerson: string;
+  lineItems: LineItem[];
+};
+
+// Optional: Type for unregistered customer sales
+export type UnregisteredSalesReceipt = Omit<SalesReceipt, 'customerId'> & {
+  customerId?: string;
+};
 
 // Response Types
 export type SalesReceiptResponse = {
@@ -53,12 +81,36 @@ export type SalesReceiptFilter = {
   customerId?: string;
   salePerson?: string;
 };
-export type {
-  Product,
-  ProductResponse,
-  ProductVariation,
-  PackagePrice,
-  Unit,
-  ProductModifier,
-  InventoryMovement,
-} from '../inventory/_utils/types';
+export type Product = {
+  uuid: string,
+  createdAt: string,
+  createdBy: string,
+  updatedBy: string | null,
+  deletedAt: string | null,
+  updatedAt: string | null,
+  productId: string,
+  name: string,
+  description: string,
+  unitOfMeasure: string,
+  cost: number,
+  sku: string,
+  inventoryLevel: number,
+  salesPrice: number,
+  taxable: boolean,
+  taxRate: number,
+  category: string,
+  images: null,
+  status: string,
+
+}
+
+
+export type ProductResponse = {
+  data: Product[],
+  meta: {
+    itemsPerPage: number,
+    totalItems: number,
+    currentPage: number,
+    totalPages: number
+  }
+}

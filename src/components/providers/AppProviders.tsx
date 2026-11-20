@@ -3,10 +3,10 @@
 import { SessionProvider } from 'next-auth/react';
 import { DataProvider } from './DataProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
+import { Toaster } from 'react-hot-toast';
 import { HeroUIProvider } from '@heroui/react';
-import { SessionTokenSync } from '@potta/components/auth/session-token-sync';
-import { AuthContextHydrator } from '@potta/components/auth/auth-context-hydrator';
+import UserDataLoader from '@potta/components/UserDataLoader';
+import { ThreadEventsProvider } from './ThreadEventsProvider';
 import { useState } from 'react';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -15,10 +15,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30 * 1000,
-            gcTime: 5 * 60 * 1000,
-            retry: 1,
-            refetchOnWindowFocus: false,
+            staleTime: 60 * 1000,
           },
         },
       })
@@ -26,14 +23,14 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider>
-      <SessionTokenSync />
-      <AuthContextHydrator />
       <QueryClientProvider client={queryClient}>
         <DataProvider>
-          <HeroUIProvider>
-            <Toaster position="top-center" richColors closeButton />
-            {children}
-          </HeroUIProvider>
+          <ThreadEventsProvider>
+            <HeroUIProvider>
+              <Toaster position="top-center" />
+              {children}
+            </HeroUIProvider>
+          </ThreadEventsProvider>
         </DataProvider>
       </QueryClientProvider>
     </SessionProvider>

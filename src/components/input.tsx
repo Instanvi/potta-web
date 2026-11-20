@@ -1,7 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FieldError, UseFormRegister } from 'react-hook-form';
-import { FIELD_INPUT, SHEET_FIELD_INPUT } from '@/lib/field-styles';
-import { cn } from '@/lib/utils';
 
 // Create a custom error type that can handle both FieldError and simple message objects
 type CustomError = FieldError | { message: string };
@@ -24,8 +22,6 @@ type Props = {
   disabled?: boolean;
   min?: number;
   max?: number;
-  /** Full light outline for white sheet backgrounds. */
-  outlined?: boolean;
 };
 
 const Input: React.FC<Props> = ({
@@ -46,7 +42,6 @@ const Input: React.FC<Props> = ({
   disabled,
   min,
   max,
-  outlined,
 }) => {
   // Get register props if register is provided
   const registerProps = register ? register(name) : {};
@@ -59,7 +54,7 @@ const Input: React.FC<Props> = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <span className={`mb-1 block text-sm font-normal text-foreground ${labelClass}`}>
+        <span className={`mb-3 text-gray-900 font-medium ${labelClass}`}>
           {label}
           {required && <span className=" text-red-500">*</span>}
         </span>
@@ -74,13 +69,12 @@ const Input: React.FC<Props> = ({
         value={value}
         {...inputProps}
         placeholder={placeholder}
-        className={cn(
-          outlined ? SHEET_FIELD_INPUT : FIELD_INPUT,
-          'mt-2',
-          height ? 'h-9' : 'h-10',
-          errors ? 'border-destructive' : '',
-          inputClass,
-        )}
+        className={`w-full ${inputClass} ${height ? 'py-1.5' : 'py-2.5'} ${
+          errors
+            ? 'focus:ring-red-500 border-red-500'
+            : 'focus:ring-green-500 border-gray-200'
+        }   px-4 border border-gray-200 rounded-[0px] outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+   `}
       />
       {errors ? (
         <small className="col-span-2 text-red-500">

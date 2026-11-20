@@ -1,282 +1,354 @@
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import MyDropzone from '@potta/components/dropzone';
+import Select from '@potta/components/select';
+import React, { useContext, useState, useEffect } from 'react';
+import Inventory from './components/inventory';
+import Unit from './components/units';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import * as yup from 'yup';
+
+import Notes from './components/notes';
+import Attachments from './components/attachments';
 import Button from '@potta/components/button';
+import { ContextData } from '@potta/components/providers/DataProvider';
 import Input from '@potta/components/input';
 import Checkbox from '@potta/components/checkbox';
-import Select from '@potta/components/select';
-import TextArea from '@potta/components/textArea';
-import { UpdateProductSchema } from '../../../../_utils/validation';
-import useUpdateProduct from '../../../../_hooks/useUpdateProduct';
-import { productImageUrls } from '../../../../_utils/images';
-import { apiErrorMessage } from '../../../../../utils/sale';
+import { Controller, useForm } from 'react-hook-form';
 import {
-  CategoryField,
-  FieldHint,
-  FormSection,
-  MarginHint,
-  STATUS_OPTIONS,
-  TaxField,
-  UNIT_OPTIONS,
-} from '../../../fields/ItemFormFields';
-import CatalogPeripheralsEditor, {
-  catalogDraftFromProduct,
-  catalogDraftToPayload,
-} from '../../../CatalogPeripheralsEditor';
-
-type UpdateProductForm = yup.InferType<typeof UpdateProductSchema>;
-
-const toForm = (product: any): UpdateProductForm => ({
-  name: product?.name ?? '',
-  description: product?.description ?? '',
-  unitOfMeasure: product?.unitOfMeasure ?? 'Pieces',
-  cost: Number(product?.cost ?? 0),
-  sku: product?.sku ?? '',
-  inventoryLevel: Number(product?.inventoryLevel ?? 0),
-  reorderPoint: Number(product?.reorderPoint ?? 0),
-  salesPrice: Number(product?.salesPrice ?? 0),
-  taxable: !!product?.taxable,
-  categoryId: product?.category?.uuid ?? product?.categoryId ?? '',
-  taxId: product?.tax?.uuid ?? product?.taxId ?? '',
-  images: productImageUrls(product),
-  status: product?.status ?? 'enabled',
-  type: product?.type === 'NON_INVENTORY' ? 'NON_INVENTORY' : 'INVENTORY',
-});
+  ProductPayload,
+  productSchema,
+  UpdateProductPayload,
+  UpdateProductSchema,
+} from '../../../../_utils/validation';
+import useCreateProduct from '../../../../_hooks/useCreateProduct';
+import toast from 'react-hot-toast';
+import useUpdateProduct from '../../../../_hooks/useUpdateProduct';
+import Slider from '@potta/components/slideover';
+import TextArea from '@potta/components/textArea';
+import * as yup from 'yup';
+import useGetAllProductCategories from '../../../../_hooks/useGetAllProductCategories';
+import { ProductCategory } from '../../../../_utils/types';
+import { documentsApi } from '../../../../_utils/api';
+import Image from 'next/image';
 
 interface EditProductProps {
-  product: any;
-  productId: string;
-  onSuccess?: () => void;
+  product: ProductPayload | null; // Existing product data
+  productId: string; // ID of the product to be edited
+  onSuccess?: () => void; // Called after successful update
 }
 
-const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess }) => {
-  const [images, setImages] = useState<string[]>(productImageUrls(product));
-  const [catalog, setCatalog] = useState(() => catalogDraftFromProduct(product));
+const EditProduct: React.FC<EditProductProps> = ({
+  product,
+  productId,
+  onSuccess,
+}) => {
+  const [data, setData] = useState('inventory');
+  const context = useContext(ContextData);
+  const [images, setImages] = useState<string[]>(product?.images || []);
+  const [signedImageUrls, setSignedImageUrls] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isDirty },
+    formState: { errors },
     reset,
     setValue,
-    watch,
-  } = useForm<UpdateProductForm>({
+  } = useForm<yup.InferType<typeof UpdateProductSchema>>({
     resolver: yupResolver(UpdateProductSchema),
-    defaultValues: toForm(product),
+    defaultValues: product
+      ? {
+          name: product.name,
+          description: product.description,
+          unitOfMeasure: product.unitOfMeasure,
+          cost: product.cost,
+          sku: product.sku,
+          inventoryLevel: product.inventoryLevel,
+          salesPrice: product.salesPrice,
+          taxable: product.taxable,
+          categoryId: product.category?.uuid ?? '',
+          images: product.images || [],
+          status: product.status ?? 'disabled',
+        }
+      : {
+          name: '',
+          description: '',
+          unitOfMeasure: '',
+          cost: 0,
+          sku: '',
+          inventoryLevel: 0,
+          salesPrice: 0,
+          taxable: false,
+          categoryId: '',
+          images: [],
+          status: 'disabled',
+        },
   });
-
   useEffect(() => {
     setValue('images', images);
+    console.log('EditProduct images:', images);
   }, [images, setValue]);
 
+  // Fetch signed image URLs for product.documents
   useEffect(() => {
-    setCatalog(catalogDraftFromProduct(product));
+    async function fetchSignedUrls() {
+      if (!product || !Array.isArray(product.documents)) {
+        setSignedImageUrls([]);
+        return;
+      }
+      const imageDocs = product.documents.filter(
+        (doc: any) => doc.mimeType && doc.mimeType.startsWith('image')
+      );
+      if (imageDocs.length === 0) {
+        setSignedImageUrls([]);
+        return;
+      }
+      const ids = imageDocs.map((doc: any) => doc.uuid);
+      try {
+        const res = await documentsApi.bulkDownload(ids);
+        setSignedImageUrls(res.urls || []);
+      } catch {
+        setSignedImageUrls([]);
+      }
+    }
+    fetchSignedUrls();
   }, [product]);
 
+  const handleRemoveImage = (idx: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const ProductStatusEnum = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'schedule', label: 'Schedule' },
+    { value: 'complete', label: 'Complete' },
+    { value: 'enabled', label: 'Enabled' },
+    { value: 'disabled', label: 'Disabled' },
+    { value: 'available', label: 'Available' },
+    { value: 'expired', label: 'Expired' },
+    { value: 'taken', label: 'Taken' },
+  ];
+
   const mutation = useUpdateProduct(productId);
-  const taxable = watch('taxable');
-  const [cost, salesPrice] = watch(['cost', 'salesPrice']);
-  const isInventory = watch('type') !== 'NON_INVENTORY';
-
-  const statusOptions = STATUS_OPTIONS.some((o) => o.value === product?.status) || !product?.status
-    ? STATUS_OPTIONS
-    : [...STATUS_OPTIONS, { label: String(product.status), value: String(product.status) }];
-
-  const onSubmit = (data: UpdateProductForm) => {
-    if (data.taxable && !data.taxId) {
-      toast.error('Choose the tax to apply, or untick "Charge tax".');
-      return;
-    }
-    const { categoryId, taxId, ...rest } = data;
-    const payload = {
-      ...rest,
-      ...(categoryId ? { categoryId } : {}),
-      ...(data.taxable && taxId ? { taxId } : {}),
-      images,
-      status: data.status || 'enabled',
-      ...catalogDraftToPayload(catalog),
+  const onSubmit = (data: yup.InferType<typeof UpdateProductSchema>) => {
+    // Map categoryID uuid back to the full object for API if needed
+    const selectedCategory =
+      (categoriesData?.data || []).find(
+        (cat: ProductCategory) => cat.uuid === data.categoryID
+      ) || null;
+    const cleanPayload = {
+      ...data,
+      category: selectedCategory,
+      images: data.images || [],
+      status: data.status || 'disabled',
     };
-    mutation.mutate(payload, {
+    // Remove unwanted fields
+    delete cleanPayload.categoryID;
+
+    mutation.mutate(cleanPayload, {
       onSuccess: () => {
-        toast.success(`"${data.name}" updated`);
-        onSuccess?.();
+        toast.success('Product Updated successfully!');
+        reset();
+        if (onSuccess) onSuccess();
       },
-      onError: (error) => toast.error(`Could not update the item: ${apiErrorMessage(error)}`),
+      onError: (error) => {
+        toast.error('Failed to Update product');
+      },
     });
   };
 
+  const { data: categoriesData } = useGetAllProductCategories();
+  const categoryOptions = (categoriesData?.data || []).map(
+    (cat: ProductCategory) => ({
+      label: cat.name,
+      value: cat.uuid,
+    })
+  );
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full w-full flex-col">
-      <div className="flex-1 space-y-4 p-6 pb-24">
-        <FormSection title="Basics" description="How the item is named and grouped.">
-          <div className="md:col-span-2">
-            <Input label="Item name" type="text" name="name" register={register} errors={errors.name} required />
-          </div>
-          <div>
-            <Input label="SKU / code" type="text" name="sku" register={register} errors={errors.sku} required />
-            <FieldHint>Unique code used on receipts, barcodes and stock counts.</FieldHint>
-          </div>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="relative w-full max-w-6xl mx-auto p-8 pt-3"
+    >
+      <div className="w-full">
+        <Input
+          label="Product Name"
+          type="text"
+          name="name"
+          placeholder="Enter Product name"
+          register={register}
+          errors={errors.name}
+          required
+        />
+      </div>
+      <div className="w-full grid mt-5 grid-cols-2 gap-2">
+        <div className="w-full">
           <Controller
-            name="categoryId"
-            control={control}
-            render={({ field }) => (
-              <CategoryField value={field.value || ''} onChange={field.onChange} error={errors.categoryId?.message} />
-            )}
-          />
-          <Controller
-            name="unitOfMeasure"
+            name="categoryID"
             control={control}
             render={({ field }) => (
               <Select
-                label="Unit of measure"
-                options={UNIT_OPTIONS}
-                selectedValue={field.value || 'Pieces'}
-                onChange={field.onChange}
+                options={categoryOptions}
+                selectedValue={String(field.value ?? '')}
+                onChange={(val) => field.onChange(String(val))}
                 bg="bg-white"
-                name="unitOfMeasure"
+                name="Select Category"
+                label="Category"
+                required
               />
             )}
           />
-          <div>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  label="Status"
-                  options={statusOptions}
-                  selectedValue={field.value}
-                  onChange={field.onChange}
-                  bg="bg-white"
-                  name="status"
-                  required
-                />
-              )}
-            />
-            <FieldHint>Disabled items stay in the books but cannot be sold.</FieldHint>
-          </div>
-          <div className="md:col-span-2">
-            <TextArea
-              label="Description"
-              name="description"
-              placeholder="Optional details shown on invoices and receipts"
-              register={register}
-              errors={errors.description}
-              height
-            />
-          </div>
-        </FormSection>
-
-        <FormSection title="Pricing and tax" description="What the item costs you and what customers pay.">
-          <div>
-            <Input label="Cost price" type="number" name="cost" register={register} errors={errors.cost} required min={0} />
-            <FieldHint>What you pay per unit. Used for cost of goods sold.</FieldHint>
-          </div>
-          <div>
-            <Input
-              label="Selling price"
-              type="number"
-              name="salesPrice"
-              register={register}
-              errors={errors.salesPrice}
-              required
-              min={0}
-            />
-            <MarginHint cost={cost} price={salesPrice} />
-          </div>
-          <div className="md:col-span-2">
-            <Controller
-              name="taxable"
-              control={control}
-              render={({ field }) => (
-                <Checkbox id="edit-taxable" label="Charge tax on this item" checked={!!field.value} onChange={field.onChange} />
-              )}
-            />
-          </div>
-          {taxable && (
-            <Controller
-              name="taxId"
-              control={control}
-              render={({ field }) => (
-                <TaxField value={field.value || ''} onChange={field.onChange} error={errors.taxId?.message} />
-              )}
-            />
-          )}
-        </FormSection>
-
-        {isInventory && (
-          <FormSection title="Stock" description="Quantity on hand and when to restock.">
-            <div>
-              <Input
-                label="Stock on hand"
-                type="number"
-                name="inventoryLevel"
-                register={register}
-                errors={errors.inventoryLevel}
-                min={0}
-              />
-              <FieldHint>To record a purchase, use Restock so the cost is tracked.</FieldHint>
-            </div>
-            <div>
-              <Input
-                label="Reorder point"
-                type="number"
-                name="reorderPoint"
-                register={register}
-                errors={errors.reorderPoint}
-                min={0}
-              />
-              <FieldHint>You are warned when stock falls to this level.</FieldHint>
-            </div>
-          </FormSection>
-        )}
-
-        <CatalogPeripheralsEditor value={catalog} onChange={setCatalog} />
-
-        {images.length > 0 && (
-          <section className="rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-            <h3 className="mb-3 text-sm font-semibold">Images</h3>
-            <div className="flex flex-wrap gap-2">
-              {images.map((url, idx) => (
-                <div key={url + idx} className="relative">
+        </div>
+        <div className="w-full">
+          <Input
+            label="Cost"
+            type="number"
+            name="cost"
+            placeholder="Enter Product Cost"
+            register={register}
+            errors={errors.cost}
+            required
+          />
+        </div>
+      </div>
+      <div className="w-full mt-5">
+        <TextArea
+          label="Description"
+          name="description"
+          placeholder="Product Description.."
+          register={register}
+          errors={errors.description}
+          height={true}
+        />
+      </div>
+      <div className="mt-5 grid grid-cols-2 gap-5">
+        <div>
+          {/* Display signed images */}
+          {signedImageUrls.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {signedImageUrls.map((url, idx) => (
+                <div key={idx} className="relative group">
                   <Image
                     src={url}
-                    width={160}
-                    height={160}
-                    alt={`Item image ${idx + 1}`}
-                    className="h-20 w-20 border object-cover"
+                    width={2000}
+                    height={2000}
+                    alt={`Product image ${idx + 1}`}
+                    className="h-20 w-20 object-cover  border"
                   />
                   <button
                     type="button"
-                    aria-label="Remove image"
-                    className="absolute right-1 top-1 rounded-full bg-white/90 px-1 text-red-500"
-                    onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}
+                    className="absolute top-1 right-1 rounded-full p-1 text-red-500 "
+                    onClick={() => handleRemoveImage(idx)}
                   >
-                    <i className="ri-close-line" />
+                    <i className="ri-close-line"></i>
                   </button>
                 </div>
               ))}
             </div>
-            <FieldHint>Add more images in the next step.</FieldHint>
-          </section>
+          )}
+          <Input
+            type={'text'}
+            label={'SKU'}
+            placeholder="Enter SKU"
+            name={'sku'}
+            register={register}
+            errors={errors.sku}
+            required
+          />
+        </div>
+        <div className="w-full">
+          <Input
+            type={'number'}
+            label={'Sales Price'}
+            placeholder="760"
+            name={'salesPrice'}
+            register={register}
+            errors={errors.salesPrice}
+            required
+          />
+          <div className="mt-6 flex flex-col items-start ">
+            <Checkbox
+              label="Taxable"
+              name="taxable"
+              control={control}
+              errors={errors.taxable}
+              required
+            />
+          </div>
+          {/* <div className="mt-6">
+            <Input
+              type={'number'}
+              label={'Tax Rate'}
+              placeholder="Enter tax rate"
+              name={'taxRate'}
+              register={register}
+              errors={errors.taxRate}
+            />
+          </div> */}
+        </div>
+      </div>
+      <div className="mt-5">
+        <Controller
+          name="status"
+          control={control}
+          render={({ field }) => (
+            <Select
+              options={ProductStatusEnum}
+              selectedValue={field.value}
+              onChange={field.onChange}
+              bg="bg-white"
+              name="Select Status"
+              label="Status"
+              required
+            />
+          )}
+        />
+      </div>
+      <div className="mt-12">
+        <div className="flex ">
+          <div
+            onClick={() => setData('inventory')}
+            className={`px-4 py-2 bg-green-50 cursor-pointer ${
+              data == 'inventory' &&
+              'border-b-2 border-green-500 text-green-500'
+            }`}
+          >
+            <p>Inventory</p>
+          </div>
+        </div>
+        {data == 'inventory' && (
+          <Inventory control={control} register={register} errors={errors} />
         )}
       </div>
-
-      <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
-        <Button
-          text="Reset"
-          type="button"
-          theme="outline"
-          disabled={!isDirty}
-          onClick={() => {
-            reset(toForm(product));
-            setImages(productImageUrls(product));
-          }}
-        />
-        <Button text="Save changes" type="submit" isLoading={mutation.isPending} />
+      <div className="flex-grow" />
+      <div className="text-center md:text-right  md:flex  space-x-4 mt-8 justify-center p-4">
+        <div className="flex gap-2 w-full 
+        w justify-between">
+          <Button
+            text="Cancel"
+            type="button"
+            theme="danger"
+            onClick={() =>
+              reset(
+                product || {
+                  name: '',
+                  description: '',
+                  unitOfMeasure: '',
+                  cost: 0,
+                  sku: '',
+                  inventoryLevel: 0,
+                  salesPrice: 0,
+                  taxable: false,
+                  categoryId: '',
+                  images: [],
+                  status: 'disabled',
+                }
+              )
+            }
+          />
+          <Button
+            text={'Update Item'}
+            type={'submit'}
+            isLoading={mutation.isPending}
+          />
+        </div>
       </div>
     </form>
   );

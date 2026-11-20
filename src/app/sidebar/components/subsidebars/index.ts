@@ -1,0 +1,14 @@
+export { default as SidebarsPayment } from "../payments";
+export { default as SidebarsExpenses } from "../expenses";
+export { default as SidebarsInvoicing } from "../invoicing";
+export { default as SidebarsPOS } from "../POS";
+export { default as SidebarsTaxation } from "../taxation";
+export { default as SidebarsPayroll } from "../payroll";
+export { default as SidebarsAccounts } from "../accounts";
+export { default as SidebarsHome } from "../home";
+export { default as SidebarsVoucher } from "../voucher";
+export { default as SidebarsBankAccounts } from "../bankAccounts";
+export { default as SidebarsSettings } from "../settings";
+export { default as SidebarsReports } from "../reports";
+export { default as SidebarsTreasury } from "../treasury";
+export { default as SidebarsFiles } from "../files";

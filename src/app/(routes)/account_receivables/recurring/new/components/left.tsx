@@ -11,9 +11,8 @@ import Select from '@potta/components/select';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import { set } from 'react-hook-form';
 import TextArea from '@potta/components/textArea';
-import { DatePicker } from '@potta/components/ui/date-picker';
 
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
 
 // Define Option interface to match the one in SearchSelect component
@@ -392,26 +391,47 @@ const Left = () => {
         </div>
 
         <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-          <DatePicker
-            label="Issued Date"
-            required
+          <Input
+            type="date"
+            label={
+              <>
+                Issued Date
+                <RequiredMark />
+              </>
+            }
             name="issueDate"
             value={issueDate}
-            onChange={(value) => handleInputChange('issueDate', value)}
+            onchange={(e) =>
+              handleInputChange(
+                'issueDate',
+                typeof e === 'string' ? e : e.target.value
+              )
+            }
             placeholder="Select issue date"
-            error={errors.issueDate}
+            errors={
+              errors.issueDate ? { message: errors.issueDate } : undefined
+            }
           />
         </div>
         <div className={`${errors.dueDate ? 'error-field' : ''}`}>
-          <DatePicker
-            label="Due Date"
-            required
+          <Input
+            type="date"
+            label={
+              <>
+                Due Date
+                <RequiredMark />
+              </>
+            }
             name="dueDate"
             value={dueDate}
-            min={issueDate || undefined}
-            onChange={(value) => handleInputChange('dueDate', value)}
+            onchange={(e) =>
+              handleInputChange(
+                'dueDate',
+                typeof e === 'string' ? e : e.target.value
+              )
+            }
             placeholder="Select due date"
-            error={errors.dueDate}
+            errors={errors.dueDate ? { message: errors.dueDate } : undefined}
           />
         </div>
       </div>
@@ -438,14 +458,26 @@ const Left = () => {
             )}
           </div>
           <div className={`${errors.startDate ? 'error-field' : ''}`}>
-            <DatePicker
-              label="Start Date"
-              required
+            <Input
+              type="date"
+              label={
+                <>
+                  Start Date
+                  <RequiredMark />
+                </>
+              }
               name="startDate"
               value={startDate}
-              onChange={(value) => handleInputChange('startDate', value)}
+              onchange={(e) =>
+                handleInputChange(
+                  'startDate',
+                  typeof e === 'string' ? e : e.target.value
+                )
+              }
               placeholder="Select start date"
-              error={errors.startDate}
+              errors={
+                errors.startDate ? { message: errors.startDate } : undefined
+              }
             />
           </div>
         </div>
@@ -475,15 +507,26 @@ const Left = () => {
 
           {isEndDateOption ? (
             <div className={`${errors.endDate ? 'error-field' : ''}`}>
-              <DatePicker
-                label="End Date"
-                required
+              <Input
+                type="date"
+                label={
+                  <>
+                    End Date
+                    <RequiredMark />
+                  </>
+                }
                 name="endDate"
                 value={endDate}
-                min={startDate || undefined}
-                onChange={(value) => handleInputChange('endDate', value)}
+                onchange={(e) =>
+                  handleInputChange(
+                    'endDate',
+                    typeof e === 'string' ? e : e.target.value
+                  )
+                }
                 placeholder="Select end date"
-                error={errors.endDate}
+                errors={
+                  errors.endDate ? { message: errors.endDate } : undefined
+                }
               />
             </div>
           ) : (

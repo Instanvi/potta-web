@@ -71,7 +71,7 @@ interface VendorUpdateApiPayload {
 import Notes from './note';
 import Tax from './tax';
 import useUpdateVendor from '../hooks/useUpdateVendor';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 interface EditVendorProps {
   vendor: VendorFormData | null; // Existing vendor data

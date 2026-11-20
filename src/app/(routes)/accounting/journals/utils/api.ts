@@ -1,24 +1,20 @@
 import axios from 'config/axios.config';
-import { CreateJournalPayload, Journal, JournalFilter, JournalResponse } from './types';
+import { Journal, JournalFilter, JournalResponse } from './types';
 
 export const journalApi = {
-  getAll: async ({ page = 1, limit = 20, search }: JournalFilter = {}): Promise<JournalResponse> => {
-    const params: Record<string, string | number> = { page, limit, sortBy: 'date:DESC' };
-    if (search?.trim()) params.search = search.trim();
-    const result = await axios.get('/accounting/journal-entries', { params });
-    if (Array.isArray(result.data)) {
-      return {
-        data: result.data,
-        meta: {
-          itemsPerPage: result.data.length,
-          totalItems: result.data.length,
-          currentPage: 1,
-          totalPages: 1,
-          sortBy: [['date', 'DESC']],
-        },
-        links: { current: '' },
-      };
-    }
+  getAll: async (filter: JournalFilter = {}) => {
+    const queryParams = new URLSearchParams();
+
+    if (filter.page) queryParams.append('page', filter.page.toString());
+    if (filter.limit) queryParams.append('limit', filter.limit.toString());
+    if (filter.search) queryParams.append('search', filter.search);
+    if (filter.type) queryParams.append('type', filter.type);
+    if (filter.dateFrom) queryParams.append('startDate', filter.dateFrom);
+    if (filter.dateTo) queryParams.append('endDate', filter.dateTo);
+
+    const result = await axios.get(
+      `/ledgers/general?${queryParams.toString()}`
+    );
     return result.data as JournalResponse;
   },
 
@@ -27,18 +23,26 @@ export const journalApi = {
     return result.data as Journal;
   },
 
-  create: async (data: CreateJournalPayload) => {
+  create: async (data: Omit<Journal, 'uuid' | 'createdAt' | 'updatedAt'>) => {
     const result = await axios.post('/accounting/journal-entries', data);
     return result.data as Journal;
   },
 
+  update: async (
+    journalId: string,
+    data: Partial<Omit<Journal, 'uuid' | 'createdAt' | 'updatedAt'>>
+  ) => {
+    const result = await axios.put(
+      `/accounting/journal-entries/${journalId}`,
+      data
+    );
+    return result.data as Journal;
+  },
+
   delete: async (journalId: string) => {
-    const result = await axios.delete(`/accounting/${journalId}`);
+    const result = await axios.delete(
+      `/accounting/journal-entries/${journalId}`
+    );
     return result.data;
   },
-};
-
-export const journalKeys = {
-  all: ['get-all-journals'] as const,
-  list: (filter: JournalFilter = {}) => ['get-all-journals', 'entries', filter] as const,
 };

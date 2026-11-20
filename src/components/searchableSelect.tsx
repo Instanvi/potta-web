@@ -55,46 +55,45 @@ type SearchableSelectProps =
 const customStyles = {
   control: (provided: any, state: any, { error }: { error?: string }) => ({
     ...provided,
-    // Match Talk/Potta underline inputs: zinc field, bottom border only, no focus ring.
-    borderWidth: '0 0 1px 0',
-    borderStyle: 'solid',
-    borderColor: error ? '#e5181b' : state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
-    boxShadow: 'none',
-    borderRadius: '2px 2px 0 0',
-    paddingTop: '0',
-    paddingBottom: '0',
-    paddingLeft: '0.25rem',
-    paddingRight: '0.25rem',
-    backgroundColor: state.isDisabled ? 'rgba(0,0,0,0.04)' : '#fafafa',
+    borderColor: error
+      ? '#ef4444' // Tailwind red-500
+      : state.isFocused
+      ? '#22c55e'
+      : '#e5e7eb',
+    boxShadow: state.isFocused ? '0 0 0 2px #22c55e' : 'none',
+    borderRadius: '0px',
+    paddingTop: '0.25rem',
+    paddingBottom: '0.25rem',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+    backgroundColor: state.isDisabled ? '#f9fafb' : 'white',
     minHeight: '40px',
     outline: 'none',
     '&:hover': {
-      borderColor: error ? '#e5181b' : state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
+      borderColor: error ? '#ef4444' : state.isFocused ? '#22c55e' : '#d1d5db',
     },
   }),
   option: (provided: any, state: any) => ({
     ...provided,
     backgroundColor: state.isSelected
-      ? '#0b5d1e'
+      ? '#22c55e'
       : state.isFocused
-      ? '#f1faf7'
+      ? '#bbf7d0'
       : undefined,
-    color: state.isSelected ? 'white' : '#111111',
-    fontSize: '0.875rem',
+    color: state.isSelected ? 'white' : '#374151',
     '&:active': {
-      backgroundColor: '#0b5d1e',
-      color: 'white',
+      backgroundColor: '#22c55e',
     },
   }),
   placeholder: (provided: any) => ({
     ...provided,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: '0.875rem',
+    color: '#9ca3af',
+    fontSize: '1rem',
   }),
   singleValue: (provided: any) => ({
     ...provided,
-    color: '#111111',
-    fontSize: '0.875rem',
+    color: '#374151',
+    fontSize: '1rem',
   }),
   menu: (provided: any) => ({
     ...provided,
@@ -124,7 +123,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return (
       <div className="w-full">
         {label && (
-          <label className={`mb-3 block text-base font-medium text-foreground ${labelClass}`}>
+          <label className={`block mb-2 ${labelClass} !font-medium`}>
             {label} {required && <span className="text-red-500">*</span>}
           </label>
         )}
@@ -182,7 +181,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className={`mb-3 block text-base font-medium text-foreground ${labelClass}`}>
+        <label className={`block mb-2 ${labelClass} !font-medium`}>
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}

@@ -8,8 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import DocumentWorkspace from '@potta/components/document-workspace';
-import { DataProvider } from '@potta/components/providers/DataProvider';
+import RootLayout from '../../../layout';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -37,10 +36,8 @@ const NewSalesReciept = () => {
   // Determine if the preview button should be shown
   const shouldShowPreviewButton = !showPreview || leftPanelSize > 95;
 
-  // Own provider: this form keeps its state in `data`, which would otherwise clobber the till's cart.
   return (
-    <DocumentWorkspace title="New Sale" closeHref="/pos/sales">
-      <DataProvider>
+    <RootLayout>
       <div className="max-h-[92.7vh] relative">
         {/* Preview toggle button with fade transition */}
         <div
@@ -52,7 +49,7 @@ const NewSalesReciept = () => {
         >
           <button
             onClick={togglePreview}
-            className="flex items-center rounded-[2px] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center "
           >
             <i
               className={`${
@@ -71,7 +68,11 @@ const NewSalesReciept = () => {
               defaultSize={showPreview ? 50 : 100}
               style={{ transition: 'flex-basis 300ms ease-in-out' }}
             >
-              <div className="flex h-[92.7vh] justify-center bg-white p-4 md:p-5">
+              <div
+                className={`py-8 pl-14 h-[92.7vh] flex justify-center ${
+                  showPreview ? 'pl-5' : 'pl-14'
+                }`}
+              >
                 <Left />
               </div>
             </ResizablePanel>
@@ -93,7 +94,7 @@ const NewSalesReciept = () => {
                 opacity: showPreview ? 1 : 0,
               }}
             >
-              <div className="h-[92.7vh] overflow-hidden bg-white">
+              <div className="h-[92.7vh] bg-[#F2F2F2] overflow-hidden">
                 {/* Only render PdfView when preview is showing for performance */}
                 {showPreview && <PdfView />}
               </div>
@@ -101,8 +102,7 @@ const NewSalesReciept = () => {
           </ResizablePanelGroup>
         </div>
       </div>
-      </DataProvider>
-    </DocumentWorkspace>
+    </RootLayout>
   );
 };
 

@@ -7,16 +7,10 @@ export const invoiceApi = {
     const result = await axios.post(`/invoice/create`, data);
     return result?.data;
   },
-  getAll: async ({
-    page,
-    limit,
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
-    status,
-  }: IFilter) => {
-    const body = status ? { status } : {};
-    const result = await axios.post('/invoice/filter', body, {
-      params: { page, limit, sortBy: `${sortBy}:${sortOrder}` },
+  getAll: async (filter: IFilter) => {
+    const data = {}
+    const result = await axios.post('/invoice/filter',data, {
+      params: { ...filter },
     });
     return result?.data;
   },
@@ -33,8 +27,14 @@ export const invoiceApi = {
     const result = await axios.delete(`/invoice/${invoice_id}`);
     return result?.data;
   },
-  addLineItems: async (invoiceId: string, lineItems: unknown[]) => {
-    const result = await axios.post(`/invoice/${invoiceId}/lineItems`, lineItems);
+  addLineItem: async (invoiceId: string, user_id: string, data: unknown) => {
+    const result = await axios.post(`/invoice/${invoiceId}/lineItem`, data, {
+      params: { user_id },
+    });
+    return result?.data;
+  },
+  testApi:async()=>{
+    const result = await axios.get('/invoice/test');
     return result?.data;
   },
   removeLineItem: async (invoiceId: string, lineItemId: string) => {
@@ -43,13 +43,8 @@ export const invoiceApi = {
     );
     return result?.data;
   },
-  getByCustomer: async (
-    customerId: string,
-    params: { page?: number; limit?: number } = {}
-  ) => {
-    const result = await axios.get(`/invoice/customer/${customerId}`, {
-      params,
-    });
+  getAllCustomers: async (invoice_id: string): Promise<unknown> => {
+    const result = await axios.get('/invoice/customer/' + invoice_id);
     return result?.data;
   },
 };

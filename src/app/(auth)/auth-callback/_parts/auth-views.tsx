@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Button from "@/components/button";
 import { AuthError, AuthErrorHandler, MAX_RETRIES } from "./types";
-import { AppSpinner } from '@potta/components/ui/loaders';
 
 interface ErrorViewProps {
   error: AuthError;
@@ -102,8 +101,11 @@ export function AuthLoadingView() {
           className="h-8 w-auto object-contain transition-opacity"
         />
 
-        <AppSpinner size={36} />
-        <p className="text-sm text-black/60">Signing you in…</p>
+        <div className="relative">
+          <div className="w-10 h-10 border-2 border-gray-100 rounded-full" />
+          <div className="absolute inset-0 w-10 h-10 border-2 border-[#2E7D32] border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="text-sm text-gray-400 animate-pulse">Synchronizing your experience...</p>
       </div>
     </div>
   );

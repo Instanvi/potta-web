@@ -28,14 +28,10 @@ SheetOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const sheetVariants = {
   right:
-    "inset-y-0 right-0 h-full border-l bg-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right",
+    "inset-y-0 right-0 h-full w-full border-l bg-white sm:max-w-lg data-[state=open]:animate-in data-[state=closed]:animate-out",
   left:
-    "inset-y-0 left-0 h-full border-r bg-white data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-left data-[state=closed]:slide-out-to-left",
+    "inset-y-0 left-0 h-full w-full border-r bg-white sm:max-w-lg data-[state=open]:animate-in data-[state=closed]:animate-out",
 };
-
-/** Every sheet is half the screen (full width on phones); applied last so callers' width classes can't override it. */
-const SHEET_WIDTH =
-  "!w-full !max-w-full rounded-none sm:!w-1/2 sm:!max-w-[50vw]";
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
@@ -45,20 +41,19 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(({ side = "left", className, children, ...props }, ref) => (
+>(({ side = "right", className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 flex h-full flex-col bg-white p-6 shadow-lg transition ease-in-out",
+        "fixed z-50 p-6 shadow-lg transition ease-in-out",
         sheetVariants[side],
-        className,
-        SHEET_WIDTH
+        className
       )}
       {...props}
     >
-      <DialogPrimitive.Close className="absolute right-4 top-4 z-10 rounded-[2px] opacity-70 hover:opacity-100">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -72,23 +67,14 @@ const SheetHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn("flex shrink-0 flex-col space-y-1.5 text-left", className)}
-    {...props}
-  />
+  <div className={cn("flex flex-col space-y-1.5 text-left", className)} {...props} />
 );
 
 const SheetFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "mt-auto flex shrink-0 items-center justify-end gap-2 pt-6",
-      className
-    )}
-    {...props}
-  />
+  <div className={cn("mt-6 flex items-center justify-end gap-2", className)} {...props} />
 );
 
 const SheetTitle = React.forwardRef<
@@ -97,10 +83,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn(
-      "text-xl font-medium tracking-tight text-foreground",
-      className
-    )}
+    className={cn("text-lg font-medium text-gray-900", className)}
     {...props}
   />
 ));
@@ -112,7 +95,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-gray-500", className)}
     {...props}
   />
 ));
@@ -139,7 +122,7 @@ function CustomSheet({
   heading,
   description,
   children,
-  side = "left",
+  side = "right",
   footer,
   cancelText = "Cancel",
   confirmText = "Save",
@@ -149,17 +132,13 @@ function CustomSheet({
 }: CustomSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side={side} className="bg-white">
+      <SheetContent side={side}>
         <SheetHeader>
           <SheetTitle>{heading}</SheetTitle>
-          {description ? (
-            <SheetDescription>{description}</SheetDescription>
-          ) : null}
+          {description ? <SheetDescription>{description}</SheetDescription> : null}
         </SheetHeader>
 
-        <div className="mt-6 min-h-0 flex-1 overflow-y-auto bg-white">
-          {children}
-        </div>
+        <div className="mt-6">{children}</div>
 
         <SheetFooter>
           {footer ?? (

@@ -1,177 +1,186 @@
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import React, { useState, ChangeEvent } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import Input from '@potta/components/input';
 import Button from '@potta/components/button';
+import { Product } from '../../../../_utils/types';
 import Slider from '@potta/components/slideover';
 import SearchableSelect from '@potta/components/searchableSelect';
-import { apiErrorMessage } from '@potta/app/(routes)/pos/utils/sale';
-import { Product, ProductVariation } from '../../../../_utils/types';
-import { productApi } from '../../../../_utils/api';
-import { useInventory } from '../../../../_utils/context';
 import useGetAllProducts from '../../../../_hooks/useGetAllProducts';
 import useRestockProduct from '../../../../_hooks/useRestockProduct';
-import { FIELD_INPUT, FIELD_SELECT } from '@/lib/field-styles';
-import { FieldHint } from '../../../fields/ItemFormFields';
+import { ContextData } from '@potta/components/providers/DataProvider';
+import { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { Option } from '@potta/components/searchableSelect';
+
+const restockSchema = yup.object().shape({
+  quantity: yup
+    .number()
+    .required('Quantity is required')
+    .min(1, 'Quantity must be at least 1')
+    .typeError('Must be a number'),
+  productId: yup.string().required('Product is required'),
+});
+
+type RestockFormData = {
+  quantity: number;
+  productId: string;
+};
 
 interface RestockModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
-const inputClass = `mt-2 ${FIELD_INPUT}`;
-const selectClass = `mt-2 ${FIELD_SELECT}`;
-
-/** Records stock received: quantity plus the unit cost paid, which updates the weighted average cost. */
 const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
-  const { selectedProduct: tableSelection } = useInventory();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { data: products } = useGetAllProducts({ limit: 100, page: 1 });
-  const restock = useRestockProduct();
+  const restockMutation = useRestockProduct();
+  const context = useContext(ContextData);
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [variationId, setVariationId] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [unitCost, setUnitCost] = useState('');
-  const [detail, setDetail] = useState<Product | null>(null);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<RestockFormData>({
+    resolver: yupResolver(restockSchema),
+    defaultValues: {
+      quantity: 0,
+      productId: '',
+    },
+  });
 
-  useEffect(() => {
-    if (!open) return;
-    setProduct(tableSelection ?? null);
-    setVariationId('');
-    setQuantity('');
-    setUnitCost(tableSelection ? String(Number(tableSelection.cost ?? 0)) : '');
-  }, [open, tableSelection]);
-
-  useEffect(() => {
-    if (!product?.uuid) {
-      setDetail(null);
+  const onSubmit = async (data: RestockFormData) => {
+    if (!selectedProduct) {
+      console.log('Missing required data:', {
+        selectedProduct,
+        userId: context?.users?.uuid || '73a5fc80-3de0-4f70-a35c-8bb93f07b1a1',
+      });
       return;
     }
-    productApi.getOne(product.uuid).then(setDetail);
-  }, [product?.uuid]);
 
-  const stocked = (products?.data ?? []).filter((p) => p.type !== 'NON_INVENTORY');
-  const qty = Number(quantity);
-  const cost = Number(unitCost);
-  const qtyValid = Number.isInteger(qty) && qty >= 1;
-  const costValid = unitCost === '' || (Number.isFinite(cost) && cost >= 0);
-  const current = Number(product?.inventoryLevel ?? 0);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!product) return toast.error('Choose the item you received');
-    if (!qtyValid) return toast.error('Quantity must be a whole number of at least 1');
-    if (!costValid) return toast.error('Unit cost must be 0 or more');
     try {
-      await restock.mutateAsync({
-        productId: product.uuid,
-        quantity: qty,
-        ...(unitCost !== '' ? { cost } : {}),
-        ...(variationId ? { variationId } : {}),
+      console.log('Submitting restock with data:', {
+        productId: selectedProduct.uuid,
+        quantity: data.quantity,
+        userId: context?.users?.uuid || '73a5fc80-3de0-4f70-a35c-8bb93f07b1a1',
       });
-      toast.success(`${qty} × ${product.name} added to stock`);
+
+      setIsSubmitting(true);
+      const result = await restockMutation.mutateAsync({
+        productId: selectedProduct.uuid,
+        quantity: data.quantity,
+        userId: context?.users?.uuid || '73a5fc80-3de0-4f70-a35c-8bb93f07b1a1',
+      });
+
+      console.log('Restock successful:', result);
+      toast.success('Product restocked successfully!');
+      reset();
       setOpen(false);
+      setSelectedProduct(null);
     } catch (error) {
-      toast.error(`Could not restock: ${apiErrorMessage(error)}`);
+      console.error('Error restocking product:', error);
+      toast.error('Failed to restock product. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Slider open={open} setOpen={setOpen} edit title="Restock item">
-      <form onSubmit={submit} className="flex min-h-full w-full max-w-3xl flex-col">
-        <div className="flex-1 space-y-4 p-6 pb-24">
-          <section className="space-y-4 rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-            <div>
-              <SearchableSelect
-                label="Item received"
-                options={stocked.map((p) => ({ value: p.uuid, label: p.sku ? `${p.name} (${p.sku})` : p.name }))}
-                selectedValue={product?.uuid ?? ''}
-                onChange={(value: string) => {
-                  const next = stocked.find((p) => p.uuid === value) ?? null;
-                  setProduct(next);
-                  setUnitCost(next ? String(Number(next.cost ?? 0)) : '');
-                }}
-              />
-              <FieldHint>Only stocked (inventory) items can be restocked.</FieldHint>
-            </div>
-            {(detail?.variations?.length ?? 0) > 0 && (
+    <Slider
+      open={open}
+      setOpen={setOpen}
+      edit={true}
+      buttonText={'Restock Product'}
+      title={'Restock Product'}
+    >
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="relative h-screen w-full max-w-4xl"
+      >
+        <div className="space-y-4 p-4">
+          <div>
+            <Controller
+              name="productId"
+              control={control}
+              render={({ field }) => (
+                <SearchableSelect
+                  label="Select Product"
+                  options={
+                    products?.data.map((product) => ({
+                      value: product.uuid,
+                      label: product.name,
+                    })) || []
+                  }
+                  selectedValue={field.value}
+                  onChange={(value: string) => {
+                    field.onChange(value);
+                    const product = products?.data.find(
+                      (p) => p.uuid === value
+                    );
+                    setSelectedProduct(product || null);
+                  }}
+                  error={errors.productId?.message}
+                />
+              )}
+            />
+          </div>
+
+          {selectedProduct && (
+            <div className="bg-gray-50  rounded-lg space-y-4">
               <div>
-                <label className="text-sm font-medium">Variation</label>
-                <select
-                  className={selectClass}
-                  value={variationId}
-                  onChange={(e) => setVariationId(e.target.value)}
-                >
-                  <option value="">Product stock</option>
-                  {detail!.variations!.map((v: ProductVariation) => (
-                    <option key={v.uuid} value={v.uuid}>
-                      {v.name || v.sku} ({v.inventoryLevel})
-                    </option>
-                  ))}
-                </select>
+                <p className="text-sm font-medium text-gray-700">
+                  Product Details
+                </p>
+                <p className="text-sm text-gray-500">
+                  Name: {selectedProduct.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  SKU: {selectedProduct.sku}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Current Stock: {selectedProduct.inventoryLevel}
+                </p>
               </div>
-            )}
 
-            {product && (
-              <>
-                <div className="grid grid-cols-3 gap-3 rounded-[2px] bg-brand-subtle/50 p-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">On hand</p>
-                    <p className="font-medium tabular-nums">{current}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Current unit cost</p>
-                    <p className="font-medium tabular-nums">{Number(product.cost ?? 0).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">After restock</p>
-                    <p className="font-medium tabular-nums">{qtyValid ? current + qty : '—'}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <label className="block">
-                    <span className="text-sm font-medium">
-                      Quantity received<span className="text-red-500">*</span>
-                    </span>
-                    <input
-                      className={inputClass}
+              <div>
+                <Controller
+                  name="quantity"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      label="Quantity to Add"
                       type="number"
-                      min={1}
-                      step={1}
-                      placeholder="e.g. 24"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
+                      name="quantity"
+                      placeholder="Enter quantity"
+                      value={field.value}
+                      onchange={(e: ChangeEvent<HTMLInputElement>) => {
+                        const value =
+                          e.target.value === '' ? '' : parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                      errors={errors.quantity}
                     />
-                    {quantity !== '' && !qtyValid && (
-                      <small className="text-red-500">Whole number of at least 1</small>
-                    )}
-                  </label>
-                  <label className="block">
-                    <span className="text-sm font-medium">Unit cost paid</span>
-                    <input
-                      className={inputClass}
-                      type="number"
-                      min={0}
-                      placeholder="Cost per unit"
-                      value={unitCost}
-                      onChange={(e) => setUnitCost(e.target.value)}
-                    />
-                    <FieldHint>Updates the item&apos;s average cost.</FieldHint>
-                  </label>
-                </div>
-
-                {qtyValid && costValid && unitCost !== '' && (
-                  <p className="text-sm text-muted-foreground">
-                    Stock value received: <span className="font-medium text-foreground">{(qty * cost).toLocaleString()}</span>
-                  </p>
-                )}
-              </>
-            )}
-          </section>
+                  )}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
-          <Button text="Cancel" type="button" theme="outline" onClick={() => setOpen(false)} />
-          <Button text="Add to stock" type="submit" isLoading={restock.isPending} disabled={!product || !qtyValid} />
+        <div className="flex-grow" />
+        <div className="text-center md:text-right md:flex space-x-4 fixed bottom-0 left-0 right-0 justify-center bg-white  border-t">
+          <div className="flex gap-2 w-full p-4 justify-end">
+            <Button
+              text={isSubmitting ? 'Restocking...' : 'Restock'}
+              type="submit"
+              isLoading={isSubmitting}
+              disabled={!selectedProduct}
+            />
+          </div>
         </div>
       </form>
     </Slider>

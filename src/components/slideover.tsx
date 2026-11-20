@@ -1,6 +1,6 @@
 'use client';
 import { ReactNode, useState, FC, useEffect } from 'react';
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Button from './button';
 
@@ -179,17 +179,13 @@ const Slider: FC<props> = ({
         onClose={() => setOpen(false)}
         className="relative z-50 overflow-x-hidden"
       >
-        <DialogBackdrop
-          transition
-          className="fixed inset-0 bg-black/40 transition-opacity duration-300 data-[closed]:opacity-0"
-        />
+        <div className="fixed inset-0" />
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            {/* Every slide-over opens from the left at half the screen (full width on phones). */}
-            <div className="pointer-events-none fixed inset-y-0 left-0 flex w-full sm:w-1/2">
+            <div className="pointer-events-none fixed inset-x-0 top-0 flex max-h-full bg-gray-500 bg-opacity-75 transition-opacity justify-center">
               <DialogPanel
                 transition
-                className="pointer-events-auto h-screen w-full transform border-r border-black/[0.08] bg-white shadow-xl transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+                className="pointer-events-auto border-b max-w-screen h-screen w-full transform transition duration-500 ease-in-out data-[closed]:-translate-y-full sm:duration-500"
                 style={noPanelScroll ? { overflowY: 'visible' } : {}}
               >
                 <div
@@ -204,7 +200,7 @@ const Slider: FC<props> = ({
                       }`}
                     >
                       <div className="flex-1 flex gap-10 items-end">
-                        <DialogTitle className="text-base !font-medium text-foreground sm:text-lg">
+                        <DialogTitle className="text-xl !font-medium text-gray-900">
                           {title}
                         </DialogTitle>
                         {/* Tabs */}
@@ -215,9 +211,9 @@ const Slider: FC<props> = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-4 text-muted-foreground duration-500 ease-in-out ${
+                                className={`px-4  text-gray-500 duration-500 ease-in-out ${
                                   activeTab === tab.id &&
-                                  'border-b-2 border-primary text-primary font-medium'
+                                  'border-b-2 border-[#154406] text-[#154406] font-medium'
                                 } cursor-pointer flex items-center`}
                               >
                                 <p>{tab.label}</p>
@@ -231,7 +227,7 @@ const Slider: FC<props> = ({
                           <button
                             type="button"
                             onClick={() => setOpen(false)}
-                            className="relative rounded-[2px] text-muted-foreground hover:text-foreground focus:outline-none focus:ring-[3px] focus:ring-ring/30"
+                            className="relative rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                           >
                             <span className="absolute -inset-2.5" />
                             <span className="sr-only">Close panel</span>
@@ -242,7 +238,7 @@ const Slider: FC<props> = ({
                     </div>
                   </div>
                   <div
-                    className={`mt-6 flex flex-1 overflow-y-auto custom-scrollbar justify-center bg-white px-4 sm:px-6 ${sliderContentClass}`}
+                    className={` mt-6 flex-1 px-4 sm:px-6 overflow-y-auto flex custom-scrollbar justify-center ${sliderContentClass}`}
                   >
                     {tabs && tabs.length > 0
                       ? tabs.find((tab) => tab.id === activeTab)?.content ||

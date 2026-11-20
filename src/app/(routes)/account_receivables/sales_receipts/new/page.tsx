@@ -8,7 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import DocumentWorkspace from '@potta/components/document-workspace';
+import RootLayout from '../../../layout';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(false);
@@ -37,7 +37,7 @@ const NewSalesReciept = () => {
   const shouldShowPreviewButton = !showPreview || leftPanelSize > 95;
 
   return (
-    <DocumentWorkspace title="Sales receipt" closeHref="/account_receivables/sales_receipts">
+    <RootLayout>
       <div className="max-h-[92.7vh] relative">
         {/* Preview toggle button with fade transition */}
         <div
@@ -49,7 +49,7 @@ const NewSalesReciept = () => {
         >
           <button
             onClick={togglePreview}
-            className="flex items-center bg-primary px-4 py-2 text-white hover:bg-brand-hover"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center "
           >
             <i
               className={`${
@@ -68,7 +68,11 @@ const NewSalesReciept = () => {
               defaultSize={showPreview ? 50 : 100}
               style={{ transition: 'flex-basis 300ms ease-in-out' }}
             >
-              <div className="flex h-[92.7vh] justify-center overflow-y-auto bg-white p-4 md:p-5">
+              <div
+                className={`py-8 pl-14 h-[92.7vh] flex justify-center ${
+                  showPreview ? 'pl-5' : 'pl-14'
+                }`}
+              >
                 <Left />
               </div>
             </ResizablePanel>
@@ -90,7 +94,7 @@ const NewSalesReciept = () => {
                 opacity: showPreview ? 1 : 0,
               }}
             >
-              <div className="h-[92.7vh] overflow-hidden bg-white">
+              <div className="h-[92.7vh] bg-[#F2F2F2] overflow-hidden">
                 {/* Only render PdfView when preview is showing for performance */}
                 {showPreview && <PdfView />}
               </div>
@@ -98,7 +102,7 @@ const NewSalesReciept = () => {
           </ResizablePanelGroup>
         </div>
       </div>
-    </DocumentWorkspace>
+    </RootLayout>
   );
 };
 

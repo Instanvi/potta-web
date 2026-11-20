@@ -28,29 +28,24 @@ export function DataTablePagination<TData>({
   const end = Math.min((pageIndex + 1) * pageSize, totalRows);
 
   return (
-    <div className="flex flex-col gap-3 border-t border-black/10 bg-card px-4 py-3 md:flex-row md:items-center md:justify-between">
-      <div className="flex flex-wrap items-center gap-2 text-sm font-normal text-muted-foreground">
-        <span>Rows</span>
-        <div className="inline-flex overflow-hidden rounded-[2px] border border-input bg-background">
+    <div className="flex flex-col gap-3 border-t border-black/10 bg-white px-4 py-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center gap-2 text-sm font-normal text-black">
+        <span>Show</span>
+        <select
+          value={pageSize}
+          onChange={(event) => table.setPageSize(Number(event.target.value))}
+          className="border border-black/15 bg-white px-2 py-1 text-sm text-black"
+        >
           {pageSizeOptions.map((size) => (
-            <button
-              key={size}
-              type="button"
-              onClick={() => table.setPageSize(size)}
-              className={`h-8 min-w-9 px-2.5 text-sm transition-colors ${
-                pageSize === size
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-foreground hover:bg-accent'
-              }`}
-              aria-pressed={pageSize === size}
-            >
+            <option key={size} value={size}>
               {size}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
+        <span>entries</span>
       </div>
 
-      <div className="text-sm font-normal text-muted-foreground">
+      <div className="text-sm font-normal text-black">
         Showing {start} to {end} of {totalRows} entries
       </div>
 
@@ -59,7 +54,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
-          className="inline-flex size-8 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="p-2 text-black hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronsLeft size={16} />
         </button>
@@ -67,7 +62,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="inline-flex size-8 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="p-2 text-black hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronLeft size={16} />
         </button>
@@ -75,7 +70,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="inline-flex size-8 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="p-2 text-black hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronRight size={16} />
         </button>
@@ -83,7 +78,7 @@ export function DataTablePagination<TData>({
           type="button"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
-          className="inline-flex size-8 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+          className="p-2 text-black hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronsRight size={16} />
         </button>

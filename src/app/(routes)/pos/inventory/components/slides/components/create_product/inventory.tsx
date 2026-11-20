@@ -9,12 +9,14 @@ import TextArea from '@potta/components/textArea';
 import Slider from '@potta/components/slideover';
 import { ProductPayload, productSchema } from '../../../../_utils/validation';
 import useCreateProduct from '../../../../_hooks/useCreateProduct';
-import { toast } from 'sonner';
+import useUploadImage from '../../../../_hooks/useUploadFile';
+import toast from 'react-hot-toast';
 import Inventory from './components/inventory';
 import ImageUploader from '../../../imageUploader';
+import { productApi } from '../../../../_utils/api';
 import useGetAllProductCategories from '../../../../_hooks/useGetAllProductCategories';
 import Select from '@potta/components/select';
-import useGetAllProducts from '../../../../../hooks/useGetAllProducts';
+import useGetAllProducts from '../../../../hooks/useGetAllProducts';
 
 // Component Selector Component
 const ComponentSelector: React.FC<{

@@ -1,9 +1,17 @@
-'use client';
 import React from 'react';
 
+import RootLayout from '@potta/app/(routes)/layout';
 import TableComponents from '@potta/app/(routes)/vendors/components/table';
 
-/** Vendor list (toolbar + table); the page supplies RootLayout > PageContainer and the padding. */
-const VendorContent = () => <TableComponents />;
+const VendorContent = () => {
+  return (
+   
+      <div className="px-14 py-5">
+        <div>
+          <TableComponents />
+        </div>
+      </div>
 
+  );
+};
 export default VendorContent;

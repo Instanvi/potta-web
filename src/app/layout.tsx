@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="font-sans bg-[var(--main-bg)] antialiased">
+      <body className="font-sans bg-[#F8F9FA] antialiased">
         <Suspense fallback={null}>
           <AppProviders>{children}</AppProviders>
         </Suspense>

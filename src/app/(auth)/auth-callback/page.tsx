@@ -10,9 +10,8 @@ import {
 import { signIn, useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { EncryptionUtils, AuthPayload } from "@/lib/security";
-import { setAccessToken } from "@/lib/access-token";
-import { useAuthContextStore } from "@/store/use-auth-context-store";
-import { hydrateAuthContext } from "@/components/auth/auth-context-hydrator";
+import { usePermissionStore } from "@/lib/store/permission-store";
+import { useGetAuthSession } from "@/hooks/use-permission";
 import {
   AuthStatus,
   AuthError,
@@ -36,7 +35,17 @@ function AuthCallbackContent() {
 
   const superAppUrl =
     process.env.NEXT_PUBLIC_SUPER_APP_URL || "http://localhost:3000";
-  const storeSession = useAuthContextStore((s) => s.sessionReady && !!s.organizationId);
+  const { setSession, session: storeSession } = usePermissionStore();
+
+  const { mutateAsync: fetchAuthSession } = useGetAuthSession({
+    onSuccess: (data) => {
+      console.log("Auth session fetched successfully:", data);
+      setSession(data);
+    },
+    onError: (error) => {
+      console.error("Auth session fetch error:", error);
+    },
+  });
 
   const payloadStr = searchParams.get("payload");
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -142,12 +151,11 @@ function AuthCallbackContent() {
           return false;
         }
 
-        // 3. Hydrate org, permissions and location from the IdP
+        // 3. Fetch Session
         try {
-          setAccessToken(credentials.token);
-          if (attempt === 1) useAuthContextStore.getState().clear();
-          await hydrateAuthContext();
+          await fetchAuthSession();
         } catch (e) {
+          console.error("Failed to fetch session:", e);
           const isRetryable = attempt < MAX_RETRIES;
           if (isRetryable) {
             await new Promise((r) => setTimeout(r, RETRY_DELAY * attempt));
@@ -179,7 +187,7 @@ function AuthCallbackContent() {
         return false;
       }
     },
-    [payloadStr, callbackUrl, clearAuthTimeout, sessionStatus, storeSession],
+    [payloadStr, callbackUrl, fetchAuthSession, clearAuthTimeout, sessionStatus, storeSession],
   );
 
   useLayoutEffect(() => {

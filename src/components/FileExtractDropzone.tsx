@@ -85,12 +85,12 @@ const FileExtractDropzone: React.FC<FileExtractDropzoneProps> = ({
   }, [handleDragOver, handleDragLeave, handleDrop]);
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col">
+    <div className="relative">
       <div
         className={
           dragActive
-            ? 'pointer-events-none flex min-h-0 flex-1 flex-col filter blur-sm transition-all duration-300 ease-in-out'
-            : 'flex min-h-0 flex-1 flex-col transition-all duration-300 ease-in-out'
+            ? 'pointer-events-none filter blur-sm transition-all duration-300 ease-in-out'
+            : 'transition-all duration-300 ease-in-out'
         }
       >
         {children}

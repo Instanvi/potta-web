@@ -1,5 +1,16 @@
-import { redirect } from 'next/navigation';
+"use client"
+import React from 'react'
+import VendorContent from '../../../../components/shared/VendorContent'
+import RootLayout from '../../layout'
 
-export default function PayableVendorsRedirect() {
-  redirect('/account_payables/contacts?type=vendors');
+const POSVendor = () => {
+    return (
+      <RootLayout>
+
+        <div className="w-full">
+            <VendorContent />
+        </div>
+      </RootLayout>
+    )
 }
+export default POSVendor

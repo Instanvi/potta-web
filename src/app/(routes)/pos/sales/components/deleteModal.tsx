@@ -2,8 +2,10 @@ import Button from "@potta/components/button";
 import Modal from "@potta/components/modal";
 import { useState } from "react";
 
-import { toast } from 'sonner';
+import toast from "react-hot-toast";
 import { useDeleteSalesReceipt } from "../hooks/useDeleteReceipt";
+import Receipt from '../../../receipt/page';
+
 interface DeleteProps {
   recieptID: string;
   open?: boolean;  // Optional controlled open state

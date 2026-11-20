@@ -1,12 +1,35 @@
-export const ACCOUNT_TYPES = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'] as const;
+import { Currency } from 'lucide-react';
+import * as yup from 'yup';
+const currencyOptions = ['USD', 'EUR', 'XAF'];
+const statusOptions = ['active', 'inactive'];
+const accountSchema = yup.object().shape({
+  code: yup.string().required('Code is required'),
+  name: yup.string().required('Name is required'),
+  type: yup.string().required('Account type is required'),
+  parentCode: yup.string().optional(),
+  currency: yup
+    .string()
+    .required('currency is required')
+    .oneOf([...currencyOptions], 'Invalid discount type'),
+  openingBalance: yup.number().typeError('Must be a number').optional(),
+});
 
-export type AccountType = (typeof ACCOUNT_TYPES)[number];
+const accountUpdateSchema = yup.object().shape({
+  code: yup.string().required('Code is required'),
+  name: yup.string().required('Name is required'),
+  type: yup.string().required('Account type is required'),
+  parentCode: yup.string().optional(),
+  currency: yup
+    .string()
+    .required('currency is required')
+    .oneOf([...currencyOptions], 'Invalid discount type'),
+  openingBalance: yup.number().typeError('Must be a number').optional(),
+  status: yup
+    .string()
+    .required('Status is required')
+    .oneOf([...statusOptions], 'Invalid status type'),
+});
 
-/** Body of POST /accounting/accounts (potta-backend CreateAccountRequestDTO). */
-export interface accountPayload {
-  name: string;
-  type: AccountType;
-  initialBalance: number;
-  code?: string;
-  parentId?: string;
-}
+export type accountPayload = yup.InferType<typeof accountSchema>;
+
+export type accountUpdatePayload = yup.InferType<typeof accountUpdateSchema>;

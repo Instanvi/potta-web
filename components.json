@@ -4,13 +4,13 @@
   "rsc": true,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.js",
-    "css": "src/app/globals.css",
+    "config": "apps/potta/tailwind.config.js",
+    "css": "apps/potta/src/styles/globals.css",
     "baseColor": "slate",
     "cssVariables": true
   },
   "aliases": {
-    "components": "@potta/components",
-    "utils": "@potta/lib/utils"
+    "components": "@potta/src/components",
+    "utils": "@potta/src/lib"
   }
 }

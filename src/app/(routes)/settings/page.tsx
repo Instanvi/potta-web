@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { Separator } from '@potta/components/shadcn/seperator';
-import { PageContainer, PageHeader } from '../_shared/states';
 
 const SettingsPage = () => {
   const context = useContext(ContextData);
@@ -30,9 +29,11 @@ const SettingsPage = () => {
   };
 
   return (
-    <PageContainer>
-      <PageHeader title="Settings" description="Navigation layout and display preferences for this browser." />
-      <div className="space-y-6">
+    <div
+      className={`p-6 py-3 space-y-6 ${
+        context?.layoutMode === 'sidebar' && 'pl-10'
+      }  bg-white min-h-screen`}
+    >
       {/* Layout Settings */}
       <Card className="">
         <CardHeader>
@@ -74,7 +75,7 @@ const SettingsPage = () => {
               <div
                 className={`border-2  p-4 transition-all duration-200 cursor-pointer ${
                   context?.layoutMode === 'sidebar'
-                    ? 'border-primary bg-brand-subtle'
+                    ? 'border-green-500 bg-green-50/30'
                     : 'border-slate-200 bg-slate-50'
                 }`}
                 onClick={() => handleLayoutChange('sidebar')}
@@ -83,7 +84,7 @@ const SettingsPage = () => {
                   <Sidebar className="h-3 w-3" />
                   Sidebar Layout
                   {context?.layoutMode === 'sidebar' && (
-                    <span className="text-primary text-xs">(Current)</span>
+                    <span className="text-green-600 text-xs">(Current)</span>
                   )}
                 </div>
                 <div
@@ -126,7 +127,7 @@ const SettingsPage = () => {
               <div
                 className={`border-2  p-4 transition-all duration-200 cursor-pointer ${
                   context?.layoutMode === 'navbar'
-                    ? 'border-primary bg-brand-subtle'
+                    ? 'border-green-500 bg-green-50/30'
                     : 'border-slate-200 bg-slate-50'
                 }`}
                 onClick={() => handleLayoutChange('navbar')}
@@ -135,7 +136,7 @@ const SettingsPage = () => {
                   <Monitor className="h-3 w-3" />
                   Navbar Layout
                   {context?.layoutMode === 'navbar' && (
-                    <span className="text-primary text-xs">(Current)</span>
+                    <span className="text-green-600 text-xs">(Current)</span>
                   )}
                 </div>
                 <div
@@ -230,7 +231,7 @@ const SettingsPage = () => {
             <Switch
               checked={true}
               disabled
-              className="data-[state=checked]:bg-primary"
+              className="data-[state=checked]:bg-green-600"
             />
           </div>
 
@@ -246,7 +247,7 @@ const SettingsPage = () => {
             <Switch
               checked={true}
               disabled
-              className="data-[state=checked]:bg-primary"
+              className="data-[state=checked]:bg-green-600"
             />
           </div>
         </CardContent>
@@ -281,8 +282,7 @@ const SettingsPage = () => {
           </Button>
         </CardContent>
       </Card>
-      </div>
-    </PageContainer>
+    </div>
   );
 };
 

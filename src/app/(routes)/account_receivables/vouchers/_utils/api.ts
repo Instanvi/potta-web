@@ -6,21 +6,12 @@ export const vouchersApi = {
     const result = await axios.post(`/vouchers`, data);
     return result?.data;
   },
-  getAll: async ({
-    page,
-    limit,
-    sortBy = 'createdAt',
-    sortOrder = 'DESC',
-    search,
-  }: Filter) => {
+  getAll: async (filter: Filter) => {
+    const data = {}
     const result = await axios.get('/vouchers/all', {
-      params: {
-        page,
-        limit,
-        sortBy: `${sortBy}:${sortOrder}`,
-        ...(search ? { search } : {}),
-      },
+      params: { ...filter },
     });
+    console.log('result',result)
     return result?.data;
   },
   getOne: async (voucher_id: string) => {

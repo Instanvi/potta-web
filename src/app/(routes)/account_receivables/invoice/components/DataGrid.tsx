@@ -1,4 +1,4 @@
-import { ColumnDef, OnChangeFn, PaginationState } from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import React from 'react';
 import { DataTable } from '@potta/components/ui/data-table';
 
@@ -13,23 +13,34 @@ interface IDataGrid<T> {
   pageSize?: number;
   pageSizeOptions?: number[];
   showPagination?: boolean;
-  withRowSelection?: boolean;
-  onSelectionChange?: (rows: T[]) => void;
-  /** Server-side pagination (spread `useServerPagination().tableProps(meta)`). */
-  manualPagination?: boolean;
-  pageCount?: number;
-  pagination?: PaginationState;
-  onPaginationChange?: OnChangeFn<PaginationState>;
-  totalRows?: number;
 }
 
 const DataGrid = <T,>({
+  columns,
+  column,
+  data,
+  loading,
+  isLoading,
+  progressComponent,
+  onRowClick,
   pageSize = 10,
-  pageSizeOptions = [10, 20, 50, 100],
+  pageSizeOptions = [5, 10, 20, 50, 100],
   showPagination = true,
-  ...rest
-}: IDataGrid<T>) => (
-  <DataTable pageSize={pageSize} pageSizeOptions={pageSizeOptions} showPagination={showPagination} {...rest} />
-);
+}: IDataGrid<T>) => {
+  return (
+    <DataTable
+      columns={columns}
+      column={column}
+      data={data}
+      isLoading={isLoading}
+      loading={loading}
+      progressComponent={progressComponent}
+      onRowClick={onRowClick}
+      pageSize={pageSize}
+      pageSizeOptions={pageSizeOptions}
+      showPagination={showPagination}
+    />
+  );
+};
 
 export default DataGrid;

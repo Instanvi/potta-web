@@ -2,31 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Shared Instanvi tokens (same values as instanvi-payroll-expense-fe app/globals.css). */
-:root {
-  --main-bg: #f7f7f8;
-  --brand: #0b5d1e;
-  --brand-hover: #094c18;
-  --brand-light: #a3e46b;
-  --brand-light-foreground: #0b3d12;
-  --brand-subtle: #f1faf7;
-  --radius: 0.25rem;
-  /* Match Talk card elevation */
-  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06);
-}
-
-@layer components {
-  /* Talk-aligned main card surface used across Potta content blocks. */
-  .dashboard-panel {
-    @apply rounded-md border-0 bg-white;
-    box-shadow: var(--shadow-card);
-  }
-
-  .shadow-card {
-    box-shadow: var(--shadow-card) !important;
-  }
-}
-
 /* Inter (same as the hub): regular (400) for body/UI copy; medium/semibold only for hierarchy */
 @layer base {
   html {
@@ -35,7 +10,7 @@
   }
 
   h1 {
-    @apply font-medium tracking-tight;
+    @apply font-semibold tracking-tight;
   }
 
   h2,
@@ -64,7 +39,7 @@
   }
 
   th {
-    @apply font-normal;
+    @apply font-medium;
   }
 
   /* Sonner sets its own system font stack on the toaster. */
@@ -108,7 +83,7 @@
 }
 
 body {
-  @apply text-base font-normal antialiased text-foreground;
+  @apply text-base font-normal antialiased text-black;
   font-family: var(--font-inter), 'Inter', ui-sans-serif, system-ui, sans-serif;
   background-color: #ffffff;
 }
@@ -212,25 +187,25 @@ body {
 }
 
 .ps-active {
-  background: var(--brand) !important;
+  background: #154406 !important;
   color: white !important;
 }
 
 .active-parent {
-  background: var(--brand) !important;
+  background: #154406 !important;
   color: white !important;
 }
 
 .active-parent:hover {
-  background: var(--brand) !important;
+  background: #154406 !important;
 }
 
 .active-parent .ps-menu-button:hover {
-  background: var(--brand) !important;
+  background: #154406 !important;
 }
 
 .ps-menu-button.active-parent:hover {
-  background: var(--brand) !important;
+  background: #154406 !important;
 }
 
 /* Hover effect for submenu items */
@@ -429,13 +404,13 @@ body {
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-thumb {
-  background: rgb(0 0 0 / 0.18) !important;
+  background: #22c55e !important;
   border-radius: 3px !important;
-  border: none !important;
+  border: 1px solid #e6f9ed !important;
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
-  background: rgb(0 0 0 / 0.3) !important;
+  background: #16a34a !important;
 }
 
 :not(.scrollbar-hide)::-webkit-scrollbar-track {
@@ -445,14 +420,14 @@ body {
 
 /* Firefox */
 html {
-  scrollbar-color: rgb(0 0 0 / 0.18) transparent !important;
+  scrollbar-color: #22c55e #F9F9F9 !important;
   scrollbar-width: thin !important;
 }
 
 /* Ensure all scrollable elements use the custom scrollbar */
 *:not(.scrollbar-hide) {
   scrollbar-width: thin !important;
-  scrollbar-color: rgb(0 0 0 / 0.18) transparent !important;
+  scrollbar-color: #22c55e #F9F9F9 !important;
 }
 
 /* Additional specificity for webkit browsers */
@@ -462,13 +437,13 @@ html {
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-thumb {
-  background: rgb(0 0 0 / 0.18) !important;
+  background: #22c55e !important;
   border-radius: 3px !important;
-  border: none !important;
+  border: 1px solid #e6f9ed !important;
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
-  background: rgb(0 0 0 / 0.3) !important;
+  background: #16a34a !important;
 }
 
 *:not(.scrollbar-hide)::-webkit-scrollbar-track {

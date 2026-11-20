@@ -2,21 +2,45 @@
 export type Filters = {
   limit: number;
   page: number;
-  sortBy?: 'updatedAt' | 'createdAt' | 'saleDate' | 'totalAmount';
+  sortBy?: 'updatedAt' | 'createdAt';
   sortOrder?: 'ASC' | 'DESC';
   search?: string;
-  /** nestjs-paginate range on saleDate, e.g. "$btw:2026-11-01T00:00:00.000Z,2026-11-09T23:59:59.999Z". */
-  'filter.saleDate'?: string;
 };
 // UUID Regex Pattern
 export const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-import type { PaymentMethod } from '../../utils/sale';
-import type { SalesReceipt } from '../../utils/types';
+// Enum Types
+export const PaymentMethods = ['Credit Card', 'Bank Transfer', 'ACH Transfer', 'Other'] as const;
+export type PaymentMethod = typeof PaymentMethods[number];
 
-export type { DiscountType, PaymentMethod } from '../../utils/sale';
-export type { LineItem, SalesReceipt } from '../../utils/types';
-export { DiscountTypes, PaymentMethods } from '../../utils/types';
+export const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
+export type DiscountType = typeof DiscountTypes[number];
+
+// Line Item Type
+export type LineItem = {
+  description: string;
+  quantity: number;
+  discountCap: number;
+  discountType: DiscountType;
+  unitPrice: number;
+  taxRate: number;
+  discountRate?: number;
+  productId: string;
+};
+
+// Sales Receipt Type
+export type SalesReceipt = {
+  saleDate: string;
+  totalAmount: number;
+  paymentReference?: string;
+  notes?: string;
+  paymentMethod: PaymentMethod;
+  receiptNumber?: string;
+  discountAmount: number;
+  customerId: string;
+  salePerson: string;
+  lineItems: LineItem[];
+};
 
 
 // Optional: Type for unregistered customer sales

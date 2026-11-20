@@ -5,8 +5,7 @@ import ProductUploadStep from './ProductUploadStep';
 import ProductSelectionStep from './ProductSelectionStep';
 import Button from '@potta/components/button';
 import useCreateProduct from '../_hooks/useCreateProduct';
-import { toast } from 'sonner';
-import { apiErrorMessage } from '../../utils/sale';
+import toast from 'react-hot-toast';
 
 interface ProductStepperModalProps {
   open: boolean;
@@ -87,6 +86,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
       components: components,
     };
 
+    console.log('Creating product with components:', finalProductData);
 
     // Call the create product API with components
     mutation.mutate(finalProductData, {
@@ -100,13 +100,14 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
           toast.error('Product created but no product ID was returned.');
           return;
         }
-        toast.success(`"${finalProductData?.name ?? 'Item'}" created`);
+        toast.success('Product created successfully!');
         setProductId(createdProductId);
         setProductData(finalProductData);
         setActive('confirm');
       },
       onError: (error) => {
-        toast.error(`Could not create the item: ${apiErrorMessage(error)}`);
+        console.error('Product creation error:', error);
+        toast.error('Failed to create product');
       },
     });
   };
@@ -130,13 +131,13 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
   const getStepTitle = () => {
     switch (productType) {
       case 'ASSEMBLY':
-        return 'New assembly';
+        return 'Assembly Product';
       case 'SIMPLEGROUPS':
-        return 'New group';
+        return 'Group Product';
       case 'NON_INVENTORY':
-        return 'New non-inventory item';
+        return 'Non-Inventory Item';
       default:
-        return 'New inventory item';
+        return 'Inventory Item';
     }
   };
 
@@ -169,14 +170,14 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
     >
       <div className="w-full flex min-h-[60vh]">
         {/* Stepper */}
-        <div className="w-40 shrink-0 space-y-5 border-r pr-4 pt-2 text-sm">
+        <div className="w-[12%] space-y-7 border-r">
           <div onClick={() => setActive('create')}>
             <p
               className={`whitespace-nowrap ${
                 active === 'create' && 'text-green-700 font-medium'
               } cursor-pointer text-left`}
             >
-              Details
+              Create Product
             </p>
           </div>
 
@@ -188,7 +189,9 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
                   'text-green-700 font-medium'
                 } cursor-pointer text-left`}
               >
-                {productType === 'ASSEMBLY' ? 'Components' : 'Group items'}
+                {productType === 'ASSEMBLY'
+                  ? 'Assemble Products'
+                  : 'Group Products'}
               </p>
             </div>
           )}
@@ -208,7 +211,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
                 !isUploadStepEnabled() ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              Images
+              Upload Images
             </p>
           </div>
         </div>
@@ -218,7 +221,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
           <div className="w-full overflow-auto">
             {active === 'create' && (
               <CreateProductForm
-                productType={productType === 'NON_INVENTORY' ? 'NON_INVENTORY' : 'INVENTORY'}
+                productType="INVENTORY"
                 structure={getStructure()}
                 isNonInventory={getIsNonInventory()}
                 onProductCreated={handleProductCreated}
@@ -240,7 +243,7 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
             {active === 'confirm' && productId && (
               <div className="p-8 flex flex-col items-center justify-center">
                 <h2 className="text-lg font-medium mb-4">
-                  Item created
+                  Product Created Successfully!
                 </h2>
                 <p className="mb-6 text-gray-600">
                   Would you like to add images to your product? This is

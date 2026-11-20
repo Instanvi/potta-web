@@ -1,46 +1,54 @@
 'use client';
-import React, { useState, useContext, useEffect, useMemo, useRef } from 'react';
-import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
+import Input from '@potta/components/input';
+import React, { useState, useContext, useEffect } from 'react';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import { Product } from '../../utils/types';
-import { posApi } from '../../utils/api';
-import { isStockTracked, productToLine, type SaleLineItem } from '../../utils/sale';
-import ProductChooser, { productNeedsChooser } from '@potta/components/product-lines/ProductChooser';
-import { toast } from 'sonner';
+import { Filter, Product } from '../../utils/types';
+import useGetAllProducts from '../../hooks/useGetAllProducts';
+import Image from 'next/image';
 import PottaLoader from '@potta/components/pottaloader';
-import { productImageUrl } from '../../inventory/_utils/images';
+import { documentsApi } from '../../inventory/_utils/api';
 
-type LineItem = SaleLineItem & { stock?: number | null };
+// LineItem interface as provided
+export type DiscountType = 'FlatRate' | 'Percentage' | 'PercentageWithCap';
 
-const PAGE_SIZE = 50;
+export type LineItem = {
+  description: string;
+  quantity: number;
+  discountCap: number;
+  discountType: DiscountType;
+  unitPrice: number;
+  taxRate: number;
+  discountRate?: number;
+  productId: string;
+};
 
-const categoryName = (category: unknown): string =>
-  typeof category === 'object' && category !== null
-    ? (category as { name: string }).name
-    : ((category as string) ?? 'Uncategorized');
+// Convert API Product type to MenuItem type
+const convertProductToMenuItem = (product: Product): MenuItem => ({
+  id: product.uuid,
+  name: product.name,
+  image: product.images || '/images/placeholder.png',
+  tax: product.taxRate,
+  category:
+    typeof product.category === 'object' && product.category !== null
+      ? product.category.name
+      : product.category,
+  quantity: 0,
+  price: product.salesPrice,
+  sku: product.sku,
+  stock: product.inventoryLevel,
+});
 
 interface MenuItem {
   id: string;
   name: string;
   image: string;
   category: string;
+  quantity: number;
   price: number;
   sku?: string;
-  /** null when the product is not stock-tracked (non-inventory, services). */
-  stock: number | null;
-  line: SaleLineItem;
+  stock?: number;
+  tax: number;
 }
-
-const toMenuItem = (product: Product): MenuItem => ({
-  id: product.uuid,
-  name: product.name,
-  image: productImageUrl(product as any),
-  category: categoryName(product.category),
-  price: Number(product.salesPrice),
-  sku: product.sku,
-  stock: isStockTracked(product) ? Number(product.inventoryLevel ?? 0) : null,
-  line: productToLine(product),
-});
 
 interface Category {
   id: string;
@@ -52,102 +60,113 @@ const SaleInvoiceCard = () => {
   const [activeId, setActiveId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [barcodeInput, setBarcodeInput] = useState<string>('');
-  const [chooserId, setChooserId] = useState<string | null>(null);
-  const barcodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingLookup = useRef<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [imageUrls, setImageUrls] = useState<{ [productId: string]: string }>(
+    {}
+  );
 
   const context = useContext(ContextData);
 
-  const {
-    data: productPages,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['get-all-product', 'pos-grid', searchTerm],
-    queryFn: ({ pageParam }) =>
-      posApi.getAll({
-        limit: PAGE_SIZE,
-        page: pageParam,
-        search: searchTerm,
-        sortBy: 'updatedAt',
-        sortOrder: 'DESC',
-      }),
-    initialPageParam: 1,
-    getNextPageParam: (last) =>
-      last?.meta && last.meta.currentPage < last.meta.totalPages ? last.meta.currentPage + 1 : undefined,
-    placeholderData: keepPreviousData,
-    staleTime: 1000 * 30,
-    refetchOnWindowFocus: false,
-  });
+  // Setup filter for API
+  const filter: Filter = {
+    limit: 50, // Adjust based on your needs
+    page: currentPage,
+    search: searchTerm,
+    sortBy: 'updatedAt',
+    sortOrder: 'DESC',
+  };
 
-  const products = useMemo(() => productPages?.pages.flatMap((p) => p?.data ?? []) ?? [], [productPages]);
-  const menus: MenuItem[] = products.map(toMenuItem);
+  // Fetch products using the hook
+  const { data: productData, isLoading, error } = useGetAllProducts(filter);
+
+  // Fetch signed URLs for product images
+  useEffect(() => {
+    const fetchSignedUrls = async () => {
+      if (!productData?.data) return;
+      // Collect all document IDs for products with images
+      const docIdMap: { [productId: string]: string } = {};
+      productData.data.forEach((product: any) => {
+        if (
+          Array.isArray(product.documents) &&
+          product.documents.length > 0 &&
+          product.documents[0]?.uuid
+        ) {
+          docIdMap[product.uuid] = product.documents[0].uuid;
+        }
+      });
+      const docIds = Object.values(docIdMap);
+      if (docIds.length === 0) return;
+      try {
+        const res = await documentsApi.bulkDownload(docIds);
+        // Map productId to signed URL
+        const urlMap: { [productId: string]: string } = {};
+        let i = 0;
+        for (const [productId, docId] of Object.entries(docIdMap)) {
+          urlMap[productId] = res.urls[i] || '';
+          i++;
+        }
+        setImageUrls(urlMap);
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchSignedUrls();
+  }, [productData?.data]);
+
+  // Convert API products to MenuItems
+  const menus =
+    productData?.data.map((product: any) => ({
+      id: product.uuid,
+      name: product.name,
+      image:
+        imageUrls[product.uuid] || product.images || '/images/placeholder.png',
+      tax: product.taxRate,
+      category:
+        typeof product.category === 'object' && product.category !== null
+          ? product.category.name
+          : product.category,
+      quantity: 0,
+      price: product.salesPrice,
+      sku: product.sku,
+      stock: product.inventoryLevel,
+    })) || [];
 
   // Extract unique categories from products
   useEffect(() => {
-    const categories = Array.from(new Set(products.map((product) => categoryName(product.category)))).map(
-      (name) => ({ id: name, name })
-    );
-    setSelected([{ id: '', name: 'All' }, ...categories]);
-  }, [products]);
+    if (productData?.data) {
+      const categories = Array.from(
+        new Set(
+          productData.data.map((product) =>
+            typeof product.category === 'object' && product.category !== null
+              ? product.category.name
+              : product.category
+          )
+        )
+      ).map((categoryName) => ({
+        id: categoryName,
+        name: categoryName,
+      }));
+      setSelected(categories);
 
-  useEffect(
-    () => () => {
-      if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
-    },
-    []
-  );
-
-  /** Codes not in the loaded pages are looked up on the server by sku. */
-  const lookupBarcode = async (code: string, notifyMissing: boolean) => {
-    if (pendingLookup.current === code) return;
-    pendingLookup.current = code;
-    try {
-      const res = await posApi.getAll({ page: 1, limit: 5, search: code });
-      const product = res?.data?.find((p) => p.sku === code);
-      if (product) {
-        addItem(toMenuItem(product));
-        setBarcodeInput((current) => (current === code ? '' : current));
-      } else if (notifyMissing) {
-        toast.error(`No product with code ${code}`);
+      // Set first category as active if none selected
+      if (!activeId && categories.length > 0) {
+        setActiveId(categories[0].id);
       }
-    } catch {
-      if (notifyMissing) toast.error('Could not look up that code. Please try again.');
-    } finally {
-      pendingLookup.current = null;
     }
-  };
-
-  const matchLoaded = (code: string) => {
-    const item = menus.find((item) => item.sku === code);
-    if (item) {
-      addItem(item);
-      setBarcodeInput('');
-    }
-    return !!item;
-  };
+  }, [productData?.data]);
 
   // Handle barcode scanner input
   const handleBarcodeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setBarcodeInput(value);
-    if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
 
-    const code = value.trim();
-    if (code.length >= 8 && !matchLoaded(code)) {
-      barcodeTimer.current = setTimeout(() => lookupBarcode(code, false), 300);
+    if (value.length >= 8) {
+      const item = menus.find((item) => item.sku === value);
+      if (item) {
+        addItem(item);
+        setBarcodeInput('');
+      }
     }
-  };
-
-  const handleBarcodeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    if (barcodeTimer.current) clearTimeout(barcodeTimer.current);
-    const code = barcodeInput.trim();
-    if (code && !matchLoaded(code)) lookupBarcode(code, true);
   };
 
   // Handle keyboard shortcuts
@@ -169,37 +188,45 @@ const SaleInvoiceCard = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  const isOutOfStock = (item: MenuItem) => item.stock !== null && item.stock <= 0;
+  // Convert MenuItem to LineItem with the required fields
+  const convertToLineItem = (menuItem: MenuItem): LineItem => ({
+    description: menuItem.name,
+    quantity: 1,
+    discountCap: 0,
+    discountType: 'FlatRate',
+    unitPrice: menuItem.price,
+    taxRate: menuItem.tax,
+    discountRate: 0,
+    productId: menuItem.id,
+  });
 
   const addItem = (itemToAdd: MenuItem) => {
-    if (isOutOfStock(itemToAdd)) {
-      toast.error(`${itemToAdd.name} is out of stock`);
+    if (itemToAdd.stock && itemToAdd.stock <= 0) {
+      // You could add a toast notification here for out of stock items
       return;
     }
 
-    const addLine = (line: SaleLineItem) => {
-      context?.setData((prevData: LineItem[]) => {
-        const key = line.lineKey ?? line.productId;
-        const existingItem = prevData?.find((item) => (item.lineKey ?? item.productId) === key);
-        if (existingItem) {
-          if (itemToAdd.stock !== null && existingItem.quantity >= itemToAdd.stock) {
-            toast.error(`Only ${itemToAdd.stock} ${itemToAdd.name} in stock`);
-            return prevData;
-          }
-          return prevData.map((item) =>
-            (item.lineKey ?? item.productId) === key ? { ...item, quantity: item.quantity + 1 } : item
-          );
+    context?.setData((prevData: LineItem[]) => {
+      const existingItem = prevData?.find(
+        (item) => item.productId === itemToAdd.id
+      );
+
+      if (existingItem) {
+        if (itemToAdd.stock && existingItem.quantity >= itemToAdd.stock) {
+          return prevData;
         }
-        const lineItem: LineItem = { ...line, stock: itemToAdd.stock };
-        return prevData?.length > 0 ? [...prevData, lineItem] : [lineItem];
-      });
-    };
-    const product = products.find((p) => p.uuid === itemToAdd.id);
-    if (product && productNeedsChooser(product)) {
-      setChooserId(product.uuid);
-      return;
-    }
-    addLine(itemToAdd.line);
+        return prevData.map((item) =>
+          item.productId === itemToAdd.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      // Convert to LineItem when adding new item
+      const lineItem = convertToLineItem(itemToAdd);
+
+      return prevData?.length > 0 ? [...prevData, lineItem] : [lineItem];
+    });
   };
 
   const handleActive = (id: string) => {
@@ -209,10 +236,15 @@ const SaleInvoiceCard = () => {
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   // Filter menu items based on active category
-  const filteredMenus = menus.filter((item) => !activeId || item.category === activeId);
+  const filteredMenus = menus.filter(
+    (item) =>
+      !activeId ||
+      item.category === selected.find((cat) => cat.id === activeId)?.name
+  );
 
   if (error) {
     return (
@@ -251,7 +283,6 @@ const SaleInvoiceCard = () => {
             name="barcode"
             value={barcodeInput}
             onChange={handleBarcodeInput}
-            onKeyDown={handleBarcodeKeyDown}
             autoComplete="off"
             className={`w-full py-2 px-4 border border-gray-200 rounded-[2px] outline-none mt-2 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500
    `}
@@ -288,9 +319,9 @@ const SaleInvoiceCard = () => {
               {filteredMenus.map((menuItem) => (
                 <div
                   key={menuItem.id}
-                  onClick={() => addItem(menuItem)}
+                  onClick={() => menuItem.stock > 0 && addItem(menuItem)}
                   className={`bg-white hover:border-green-100 hover:bg-green-300 hover:border cursor-pointer h-48 items-center flex flex-col justify-center relative max-w-48  ${
-                    isOutOfStock(menuItem) ? 'opacity-50' : ''
+                    menuItem.stock === 0 ? 'opacity-50' : ''
                   }`}
                 >
                   <img
@@ -305,28 +336,16 @@ const SaleInvoiceCard = () => {
                     }}
                   />
                   <p className=" text-gray-500 font-normal">{menuItem.name}</p>
-                  {isOutOfStock(menuItem) && (
+                  {menuItem.stock === 0 && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 text-white">
                       Out of Stock
                     </div>
                   )}
                   <div className=" text-lg font-medium text-gray-700">
-                    {menuItem.price.toFixed(2)} XAF
+                    ${menuItem.price}
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-          {!isLoading && hasNextPage && (
-            <div className="flex justify-center py-4">
-              <button
-                type="button"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="h-9 rounded-[2px] border border-input bg-background px-4 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-60"
-              >
-                {isFetchingNextPage ? 'Loading…' : 'Load more'}
-              </button>
             </div>
           )}
           {filteredMenus.length === 0 && searchTerm !== '' && !isLoading && (
@@ -343,23 +362,6 @@ const SaleInvoiceCard = () => {
           )}
         </div>
       </div>
-      <ProductChooser
-        productId={chooserId}
-        open={Boolean(chooserId)}
-        onClose={() => setChooserId(null)}
-        onConfirm={(line) => {
-          context?.setData((prevData: LineItem[]) => {
-            const key = line.lineKey ?? line.productId;
-            const existing = prevData?.find((item) => (item.lineKey ?? item.productId) === key);
-            if (existing) {
-              return prevData.map((item) =>
-                (item.lineKey ?? item.productId) === key ? { ...item, quantity: item.quantity + 1 } : item
-              );
-            }
-            return prevData?.length > 0 ? [...prevData, line] : [line];
-          });
-        }}
-      />
     </div>
   );
 };

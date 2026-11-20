@@ -1,59 +1,59 @@
+// src/app/dashboard/page.tsx (or your desired route)
 'use client';
 
-import { BooksTransactionsHub } from '@/components/books/BooksTransactionsHub';
+import * as React from 'react';
 
-export default function Page() {
+import { PaymentRequestDataTableWrapper } from './components/table';
+import Filter from './components/filters';
+import RootLayout from '../../layout';
+import { mockPaymentRequests } from '../budgets/details/utils/data';
+import { ContextData } from '@potta/components/providers/DataProvider';
+// Import your components and data
+
+// Import the NEW Table Wrapper Component
+
+export default function DashboardPage() {
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false); // Example loading state
+  const context = React.useContext(ContextData);
+  // Basic filtering example (can be expanded)
+  const filteredRequests = mockPaymentRequests.filter(
+    (req) =>
+      req.madeBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.madeTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Example: Simulate loading (replace with actual API call)
+  React.useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 1000); // Simulate 1 second load
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <BooksTransactionsHub
-      defaultTab="bills"
-      tabs={[
-        {
-          id: 'bills',
-          label: 'Bills',
-          path: 'bills',
-          listMode: 'get',
-          columns: [
-            { key: 'billNumber', label: 'Number' },
-            { key: 'status', label: 'Status' },
-            { key: 'total', label: 'Total' },
-            { key: 'dueDate', label: 'Due' },
-          ],
-        },
-        {
-          id: 'expenses',
-          label: 'Expenses',
-          path: 'expense/transactions',
-          listMode: 'payroll',
-          columns: [
-            { key: 'date', label: 'Date' },
-            { key: 'merchant', label: 'Merchant' },
-            { key: 'amount', label: 'Amount' },
-            { key: 'status', label: 'Status' },
-          ],
-        },
-        {
-          id: 'payments',
-          label: 'AP payments',
-          path: 'ap-payments',
-          columns: [
-            { key: 'paymentDate', label: 'Date' },
-            { key: 'amount', label: 'Amount' },
-            { key: 'vendorId', label: 'Vendor' },
-            { key: 'billId', label: 'Bill' },
-          ],
-        },
-        {
-          id: 'credits',
-          label: 'Credits',
-          path: 'supplier-credit',
-          columns: [
-            { key: 'vendorId', label: 'Vendor' },
-            { key: 'creditAmount', label: 'Amount' },
-            { key: 'status', label: 'Status' },
-            { key: 'issueDate', label: 'Issue date' },
-          ],
-        },
-      ]}
-    />
+    <RootLayout>
+      <div
+        className={`${
+          context?.layoutMode === 'sidebar' ? 'pl-16 !mt-4' : 'pl-5 !mt-4'
+        } bg-gray-50 min-h-[92vh] space-y-14 pr-5 w-full pt-6`}
+      >
+        {/* Top Row Cards (same as before) */}
+
+        {/* Action/Filter Row (same as before) */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-8">
+          {/* Search and Filters */}
+          <Filter />
+        </div>
+
+        {/* Payment Request Table - USE THE NEW WRAPPER */}
+        <div>
+          <PaymentRequestDataTableWrapper
+            requests={filteredRequests}
+            isLoading={isLoading}
+          />
+        </div>
+      </div>
+    </RootLayout>
   );
 }
