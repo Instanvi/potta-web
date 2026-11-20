@@ -54,7 +54,7 @@ export function DocumentWorkspace({
           </button>
         </div>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto bg-main-bg">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto bg-white">{children}</div>
       {footer != null && (
         <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-black/10 bg-white px-4 py-3 md:px-6">
           {footer}

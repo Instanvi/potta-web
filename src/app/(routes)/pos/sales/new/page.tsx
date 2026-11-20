@@ -71,7 +71,7 @@ const NewSalesReciept = () => {
               defaultSize={showPreview ? 50 : 100}
               style={{ transition: 'flex-basis 300ms ease-in-out' }}
             >
-              <div className="flex h-[92.7vh] justify-center p-4 md:p-5">
+              <div className="flex h-[92.7vh] justify-center bg-white p-4 md:p-5">
                 <Left />
               </div>
             </ResizablePanel>
@@ -93,7 +93,7 @@ const NewSalesReciept = () => {
                 opacity: showPreview ? 1 : 0,
               }}
             >
-              <div className="h-[92.7vh] overflow-hidden bg-main-bg">
+              <div className="h-[92.7vh] overflow-hidden bg-white">
                 {/* Only render PdfView when preview is showing for performance */}
                 {showPreview && <PdfView />}
               </div>

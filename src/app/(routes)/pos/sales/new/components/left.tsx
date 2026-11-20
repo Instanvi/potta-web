@@ -15,13 +15,13 @@ import { DatePicker } from '@potta/components/ui/date-picker';
 import { useCreateSalesReceipt } from '../../hooks/useCreateReceipt';
 import { SalesReceiptPayload } from '../../../utils/validation';
 import {
-  PAYMENT_METHODS,
   apiErrorMessage,
   buildSalePayload,
   productToLine,
   type PaymentMethod,
   type SaleLineItem,
 } from '../../../utils/sale';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -141,23 +141,17 @@ const Left = () => {
     }));
   };
 
-  const handlePaymentMethodClick = (option: string) => {
-    // If clicking the same option, don't deselect it
-    if (selectedPaymentMethod === option) {
-      return;
-    }
-
+  const handlePaymentMethodChange = (option: string) => {
     setSelectedPaymentMethod(option);
 
-    // Clear payment method error if it exists
     if (errors.paymentMethod) {
       setErrors((prev) => ({ ...prev, paymentMethod: undefined }));
     }
 
-    // Update context data with single payment method
     context?.setData((prevData: any) => ({
       ...prevData,
-      payment_method: [option], // Array with single value
+      payment_method: option,
+      paymentMethod: option,
     }));
   };
 
@@ -227,9 +221,6 @@ const Left = () => {
     });
   };
 
-
-  // Define the new payment methods
-  const paymentMethods = PAYMENT_METHODS;
 
   return (
     <div className="max-w-5xl min-w-5xl overflow-y-auto scroll bg-white px-2">
@@ -345,40 +336,12 @@ const Left = () => {
       </div>
 
       <hr className="my-5" />
-      <h3 className="text-lg font-medium my-2">
-        Payment Methods
-        <RequiredMark />
-      </h3>
-      <div className={`my-5 ${errors.paymentMethod ? 'error-field' : ''}`}>
-        <div className="grid grid-cols-2 gap-4">
-          {paymentMethods.map((option) => (
-            <div
-              key={option.value}
-              onClick={() => handlePaymentMethodClick(option.value)}
-              className={`p-4 border cursor-pointer hover:border-primary hover:text-primary ${
-                selectedPaymentMethod === option.value
-                  ? 'border-primary text-primary'
-                  : errors.paymentMethod && formSubmitted
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-              }`}
-            >
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedPaymentMethod === option.value}
-                  onChange={() => handlePaymentMethodClick(option.value)}
-                  className="mr-2 text-xl text-white accent-primary"
-                  name="paymentMethod"
-                />
-                <span>{option.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-        {errors.paymentMethod && (
-          <p className="text-red-500 text-sm mt-1">{errors.paymentMethod}</p>
-        )}
+      <div className="my-5 max-w-md">
+        <PaymentMethodSelect
+          value={selectedPaymentMethod || ''}
+          onChange={handlePaymentMethodChange}
+          error={errors.paymentMethod}
+        />
       </div>
       <div className={`${errors.paymentReference ? 'error-field' : ''}`}>
         <Input
@@ -386,7 +349,8 @@ const Left = () => {
           label={
             <>
               Payment Reference
-                          </>
+              <RequiredMark />
+            </>
           }
           name="paymentReference"
           value={paymentReference}

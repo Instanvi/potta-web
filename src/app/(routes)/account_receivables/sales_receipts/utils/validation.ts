@@ -3,14 +3,6 @@ import * as yup from 'yup';
 // UUID Regex Pattern
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-// Payment Method and Discount Type Enums
-const PaymentMethods = [
-  'Credit Card',
-  'Bank Transfer',
-  'ACH Transfer',
-  'Other',
-] as const;
 const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
 
 // Line Item Schema
@@ -59,7 +51,7 @@ const salesReceiptSchema = yup.object({
   paymentMethod: yup
     .string()
     .required('Payment method is required')
-    .oneOf(PaymentMethods, 'Invalid payment method'),
+    .max(64, 'Payment method code is too long'),
   receiptNumber: yup.string(),
   customerId: yup
     .string()
