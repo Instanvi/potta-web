@@ -18,6 +18,15 @@ import { useCreateBill } from '../../hooks';
 import { BillCurrency, PAYMENT_METHODS, PaymentMethod } from '../../utils/types';
 import { BillFormValues, billSchema, lineTotals } from '../validations/billValidation';
 import LineItemsEditor, { DEFAULT_TAX_RATE, emptyLine } from './LineItemsEditor';
+import {
+  DocumentBalanceDue,
+  DocumentFormCard,
+  DocumentFormFooter,
+  DocumentFormShell,
+  DocumentFooterLink,
+  DocumentSectionTitle,
+} from '@potta/components/document-form-layout';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
 
 const CURRENCIES: { value: BillCurrency; label: string }[] = [
   { value: 'XAF', label: 'XAF (FCFA)' },
@@ -150,11 +159,11 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
     );
   };
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className={inSheet ? "w-full pb-2" : "pb-24"}>
-      <div className={inSheet ? 'flex flex-col gap-6' : 'flex flex-col gap-8 xl:flex-row'}>
-        <div className="min-w-0 flex-1 space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+  const fields = (
+    <>
+      <DocumentFormCard flush={!inSheet}>
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
             <Controller
               control={control}
               name="vendorId"
@@ -171,7 +180,7 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
                     const vendorCurrency = CURRENCIES.find((c) => c.value === vendor?.currency)?.value;
                     if (vendorCurrency) setValue('currency', vendorCurrency);
                   }}
-                  placeholder={vendorsLoading ? 'Loading vendors...' : 'Select a vendor...'}
+                  placeholder={vendorsLoading ? 'Loading vendors…' : 'Select a vendor'}
                   isDisabled={vendorsLoading}
                   error={errors.vendorId?.message}
                 />
@@ -183,11 +192,11 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               render={({ field }) => (
                 <div>
                   <SearchableSelect
-                    label="Purchase order (optional)"
+                    label="Purchase order"
                     options={purchaseOrders.map((po) => ({
                       value: po.uuid,
                       label: `${po.orderNumber || po.purchaseOrderId || po.uuid.slice(0, 8)} · ${formatDate(
-                        po.orderDate
+                        po.orderDate,
                       )} · ${formatMoney(po.orderTotal, currency)}`,
                     }))}
                     selectedValue={field.value}
@@ -196,10 +205,10 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
                       !vendorId
                         ? 'Select a vendor first'
                         : ordersLoading
-                        ? 'Loading orders...'
-                        : purchaseOrders.length === 0
-                        ? 'No purchase orders for this vendor'
-                        : 'Link a purchase order...'
+                          ? 'Loading orders…'
+                          : purchaseOrders.length === 0
+                            ? 'No purchase orders'
+                            : 'Link a purchase order…'
                     }
                     isDisabled={!vendorId || purchaseOrders.length === 0}
                   />
@@ -210,25 +219,36 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
                       onClick={copyLinesFromOrder}
                       className="mt-1 text-sm font-medium text-primary hover:underline disabled:opacity-50"
                     >
-                      {copyingLines ? 'Copying lines...' : 'Copy line items from this order'}
+                      {copyingLines ? 'Copying lines…' : 'Copy lines from order'}
                     </button>
                   )}
                 </div>
               )}
             />
           </div>
+          <DocumentBalanceDue amount={formatMoney(summary.total, currency)} />
+        </div>
+      </DocumentFormCard>
 
-          <div className={inSheet ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 gap-4 md:grid-cols-4'}>
+      <DocumentFormCard flush={!inSheet}>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+          <div className="md:col-span-2">
             <Input
               type="text"
               name="vendorInvoiceNumber"
-              label="Vendor invoice no."
+              label="Bill no."
               placeholder="e.g. INV-0042"
               register={register}
               errors={errors.vendorInvoiceNumber}
             />
-            <FormDatePicker control={control} name="issueDate" label="Issue date" required />
+          </div>
+          <div className="md:col-span-2">
+            <FormDatePicker control={control} name="issueDate" label="Bill date" required />
+          </div>
+          <div className="md:col-span-2">
             <FormDatePicker control={control} name="dueDate" label="Due date" required min={issueDate} />
+          </div>
+          <div className="md:col-span-2">
             <Controller
               control={control}
               name="currency"
@@ -243,27 +263,23 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               )}
             />
           </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <Input
-                type="text"
-                name="expenseAccountCode"
-                label="Expense account"
-                required
-                register={register}
-                errors={errors.expenseAccountCode}
-              />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Debited when the bill is approved (601 purchases of goods, 605 other purchases, 622 rent...).
-              </p>
-            </div>
+          <div className="md:col-span-2">
+            <Input
+              type="text"
+              name="expenseAccountCode"
+              label="Expense account"
+              required
+              register={register}
+              errors={errors.expenseAccountCode}
+            />
+          </div>
+          <div className="md:col-span-2">
             <Controller
               control={control}
               name="paymentMethod"
               render={({ field }) => (
                 <Select
-                  label="Planned payment method"
+                  label="Payment method"
                   options={PAYMENT_METHODS.filter((m) => m.value !== 'CREDIT')}
                   selectedValue={field.value}
                   onChange={(v: PaymentMethod) => field.onChange(v)}
@@ -272,73 +288,126 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               )}
             />
           </div>
-
-          <div>
-            <h3 className="mb-2 text-lg font-medium text-foreground">
-              Line items <RequiredMark />
-            </h3>
-            <LineItemsEditor control={control} register={register} errors={errors} currency={currency} />
-          </div>
-
-          <TextArea
-            name="notes"
-            label="Notes"
-            placeholder="Internal notes about this bill"
-            register={register}
-            errors={errors.notes}
-          />
         </div>
+      </DocumentFormCard>
 
-        <aside className={inSheet ? 'w-full' : 'w-full shrink-0 xl:w-80'}>
-          <div className="dashboard-panel sticky top-4 p-5">
-            <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">Summary</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatMoney(summary.subtotal, currency)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Discounts</span>
-                <span>−{formatMoney(summary.discount, currency)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">VAT</span>
-                <span>{formatMoney(summary.tax, currency)}</span>
-              </div>
-              <div className="flex justify-between border-t border-black/10 pt-3 text-base font-medium">
-                <span>Total</span>
-                <span className="text-primary">{formatMoney(summary.total, currency)}</span>
-              </div>
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              The bill is saved as a draft. Approving it later posts Dr {expenseAccountCode || '601'}{' '}
-              expense + Dr 445 VAT / Cr vendor payable.
+      <DocumentFormCard flush={!inSheet}>
+        <DocumentSectionTitle>
+          Product / service lines <RequiredMark />
+        </DocumentSectionTitle>
+        <LineItemsEditor control={control} register={register} errors={errors} currency={currency} />
+      </DocumentFormCard>
+
+      <DocumentFormCard flush={!inSheet}>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <TextArea
+              name="notes"
+              label="Message on bill"
+              placeholder="Notes visible on this bill"
+              register={register}
+              errors={errors.notes}
+            />
+            <p className="mt-3 text-xs text-black/60">
+              Saved as a draft. Approving posts Dr {expenseAccountCode || '601'} expense + Dr 445 VAT / Cr
+              vendor payable.
             </p>
           </div>
-        </aside>
-      </div>
+          <div className="lg:col-span-5">
+            <div className="ml-auto w-full max-w-sm space-y-2 text-sm">
+              <div className="flex justify-between text-black/70">
+                <span>Subtotal</span>
+                <span className="tabular-nums text-foreground">
+                  {formatMoney(summary.subtotal, currency)}
+                </span>
+              </div>
+              <div className="flex justify-between text-black/70">
+                <span>Discounts</span>
+                <span className="tabular-nums text-foreground">
+                  −{formatMoney(summary.discount, currency)}
+                </span>
+              </div>
+              <div className="flex justify-between text-black/70">
+                <span>VAT</span>
+                <span className="tabular-nums text-foreground">
+                  {formatMoney(summary.tax, currency)}
+                </span>
+              </div>
+              <div className="flex justify-between border-t border-black/[0.08] pt-3 text-base font-medium">
+                <span>Total</span>
+                <span className="tabular-nums">{formatMoney(summary.total, currency)}</span>
+              </div>
+              <div className="flex justify-between pt-1 text-base font-medium">
+                <span>Balance due</span>
+                <span className="tabular-nums text-primary">
+                  {formatMoney(summary.total, currency)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DocumentFormCard>
+    </>
+  );
 
-      <div
-        className={
-          inSheet
-            ? 'sticky bottom-0 z-20 -mx-4 flex justify-end gap-3 border-t border-black/10 bg-white p-3 sm:-mx-6'
-            : 'fixed bottom-0 left-0 right-0 z-20 flex justify-end gap-3 border-t border-black/10 bg-white p-3 pr-20'
+  if (inSheet) {
+    return (
+      <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col gap-4 pb-2">
+        {fields}
+        <div className="sticky bottom-0 z-20 -mx-4 flex justify-between gap-3 border-t border-black/10 bg-white p-3 sm:-mx-6">
+          <Button
+            text="Cancel"
+            type="button"
+            theme="gray"
+            color
+            onClick={() => (onDone ? onDone() : router.push('/account_payables/bills'))}
+          />
+          <Button
+            text="Save bill"
+            type="submit"
+            isLoading={createBill.isPending}
+            disabled={createBill.isPending}
+          />
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <DocumentFormShell>{fields}</DocumentFormShell>
+      <DocumentFormFooter
+        left={
+          <ShadcnButton
+            type="button"
+            variant="outline"
+            className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            onClick={() => (onDone ? onDone() : router.push('/account_payables/bills'))}
+          >
+            Cancel
+          </ShadcnButton>
         }
-      >
-        <Button
-          text="Cancel"
-          type="button"
-          theme="gray"
-          color
-          onClick={() => (onDone ? onDone() : router.push('/account_payables/bills'))}
-        />
-        <Button
-          text="Save bill"
-          type="submit"
-          isLoading={createBill.isPending}
-          disabled={createBill.isPending}
-        />
-      </div>
+        center={
+          <DocumentFooterLink onClick={() => toast.info('Print / preview opens after save.')}>
+            Print or Preview
+          </DocumentFooterLink>
+        }
+        right={
+          <>
+            <ShadcnButton
+              type="submit"
+              variant="outline"
+              className="border-white/30 bg-white text-foreground hover:bg-white/90"
+              disabled={createBill.isPending}
+            >
+              {createBill.isPending ? 'Saving…' : 'Save'}
+            </ShadcnButton>
+            <ShadcnButton type="submit" disabled={createBill.isPending}>
+              {createBill.isPending ? 'Saving…' : 'Save and close'}
+            </ShadcnButton>
+          </>
+        }
+      />
     </form>
   );
 };
