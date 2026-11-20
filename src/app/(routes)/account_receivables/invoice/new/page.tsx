@@ -9,27 +9,22 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@potta/components/resizable';
-import DocumentWorkspace from '@potta/components/document-workspace';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { extractInvoiceFromFile } from './api/extractInvoice';
+import RootLayout from '../../../layout';
 
 const NewInvoiceInner = () => {
-  const [showPreview, setShowPreview] = useState(false);
-  const [leftPanelSize, setLeftPanelSize] = useState(100);
+  const [showPreview, setShowPreview] = useState(true);
   const searchParams = useSearchParams();
   const initialInvoiceType = searchParams.get('type');
   const [extracting, setExtracting] = useState(false);
   const context = useContext(ContextData);
 
-  // Extraction handler (real API)
   const extractInvoiceData = async (file: File) => {
     setExtracting(true);
     try {
-      // Call the extraction API utility
       const data = await extractInvoiceFromFile(file);
-      console.log('[EXTRACTED DATA]', data);
-      // Fill context with the extracted data
       if (context && context.setData) {
         context.setData((prev: any) => ({
           ...prev,
@@ -41,106 +36,65 @@ const NewInvoiceInner = () => {
       }
     } catch (err) {
       console.error('Extraction error:', err);
-      // Optionally show a toast or error message
     } finally {
       setExtracting(false);
     }
   };
 
-  // Toggle preview
-  const togglePreview = () => {
-    setShowPreview(!showPreview);
-  };
-
-  // Handle panel layout changes
-  const handleLayout = (sizes: number[]) => {
-    // Store the left panel size
-    if (sizes && sizes.length > 0) {
-      setLeftPanelSize(sizes[0]);
-
-      // If the left panel is almost full width and preview is showing,
-      // automatically hide the preview
-      if (sizes[0] > 95 && showPreview) {
-        setShowPreview(false);
-      }
-    }
-  };
-
-  // Determine if the preview button should be shown
-  const shouldShowPreviewButton = !showPreview || leftPanelSize > 95;
+  const togglePreview = () => setShowPreview((v) => !v);
 
   return (
     <FileExtractDropzone onExtract={extractInvoiceData} extracting={extracting}>
-      <div className="max-h-[92.7vh] relative">
-        {/* Preview toggle button with fade transition */}
-        <div
-          className={`absolute top-4 right-4 z-10 transition-opacity duration-300 ease-in-out ${
-            shouldShowPreviewButton
-              ? 'opacity-100'
-              : 'opacity-0 pointer-events-none'
-          }`}
-        >
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex h-11 shrink-0 items-center justify-between gap-3 bg-primary px-3 text-primary-foreground md:px-4">
+          <p className="truncate text-sm font-medium">New invoice</p>
           <button
+            type="button"
             onClick={togglePreview}
-            className="flex items-center bg-primary px-4 py-2 text-white hover:bg-brand-hover"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[2px] bg-white/15 px-3 text-sm text-white hover:bg-white/25"
           >
-            <i
-              className={`${
-                showPreview ? 'ri-eye-off-line' : 'ri-eye-line'
-              } mr-2`}
-            ></i>
-            {showPreview ? 'Hide Preview' : 'Show Preview'}
+            <i className={showPreview ? 'ri-eye-off-line' : 'ri-eye-line'} />
+            {showPreview ? 'Hide preview' : 'Show preview'}
           </button>
         </div>
 
-        {/* Use a wrapper div with transition for the entire panel group */}
-        <div className="transition-all duration-300 ease-in-out">
-          <ResizablePanelGroup direction="horizontal" onLayout={handleLayout}>
-            <ResizablePanel
-              minSize={50}
-              defaultSize={showPreview ? 50 : 100}
-              style={{ transition: 'flex-basis 300ms ease-in-out' }}
-            >
-              <div className="flex h-[92.7vh] justify-center overflow-y-auto p-4 md:p-5">
-                <Left initialInvoiceType={initialInvoiceType} />
-              </div>
-            </ResizablePanel>
+        <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
+          <ResizablePanel
+            minSize={40}
+            defaultSize={showPreview ? 58 : 100}
+            className="min-w-0"
+          >
+            <div className="h-full min-h-0 overflow-y-auto">
+              <Left
+                initialInvoiceType={initialInvoiceType}
+                onTogglePreview={togglePreview}
+                showPreview={showPreview}
+              />
+            </div>
+          </ResizablePanel>
 
-            {/* Always render the right panel but control its width with CSS */}
-            <ResizableHandle
-              withHandle
-              className={`transition-opacity duration-200 ease-in-out ${
-                showPreview ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
-            <ResizablePanel
-              minSize={0}
-              defaultSize={showPreview ? 50 : 0}
-              style={{
-                transition:
-                  'flex-basis 300ms ease-in-out, opacity 300ms ease-in-out',
-                flexBasis: showPreview ? '50%' : '0%',
-                opacity: showPreview ? 1 : 0,
-              }}
-            >
-              <div className="h-[92.7vh] overflow-y-auto bg-main-bg">
-                {/* Only render PdfView when preview is showing for performance */}
-                {showPreview && <PdfView />}
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
+          {showPreview ? (
+            <>
+              <ResizableHandle withHandle className="bg-transparent" />
+              <ResizablePanel minSize={25} defaultSize={42} className="min-w-0">
+                <div className="h-full min-h-0 overflow-y-auto border-l border-black/[0.06] bg-main-bg">
+                  <PdfView />
+                </div>
+              </ResizablePanel>
+            </>
+          ) : null}
+        </ResizablePanelGroup>
       </div>
     </FileExtractDropzone>
   );
 };
 
 const NewInvoice = () => (
-  <Suspense fallback={<div>Loading...</div>}>
-    <DocumentWorkspace title="Invoice" closeHref="/account_receivables/invoice">
+  <RootLayout>
+    <Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading…</div>}>
       <NewInvoiceInner />
-    </DocumentWorkspace>
-  </Suspense>
+    </Suspense>
+  </RootLayout>
 );
 
 export default NewInvoice;
