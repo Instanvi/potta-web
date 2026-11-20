@@ -82,6 +82,8 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
     path: '/home',
     permission: {
       anyOf: [
+        { resource: 'Dashboard', action: 'view' },
+        // Legacy fallbacks until roles are granted Dashboard:view
         { resource: 'Report', action: ['view', 'view-organization'] },
         { resource: 'Invoice', action: 'view-all' },
         { resource: 'Ledger', action: ['view-balance-sheet', 'view-entries'] },
@@ -92,6 +94,7 @@ export const ROUTE_PERMISSIONS: { path: string; permission: PermissionCheck }[] 
     path: '/dashboards',
     permission: {
       anyOf: [
+        { resource: 'Dashboard', action: 'view' },
         { resource: 'Report', action: ['view', 'view-organization'] },
         { resource: 'Invoice', action: 'view-all' },
         { resource: 'Ledger', action: ['view-balance-sheet', 'view-entries'] },
