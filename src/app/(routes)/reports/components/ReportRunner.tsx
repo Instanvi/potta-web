@@ -12,6 +12,7 @@ import { EmptyState, ErrorState, ListToolbar, LoadingState } from '../../_shared
 import { useReportRun } from '../hooks';
 import type { ReportColumn } from '../utils/api';
 import { ReportPageShell } from './ReportPageShell';
+import { loadReportScope } from '@/lib/reports-catalog';
 
 function formatCell(value: unknown, type: ReportColumn['type']) {
   if (value == null || value === '') return '—';
@@ -40,7 +41,8 @@ export function ReportRunner({
   const [search, setSearch] = useState('');
 
   const params = useMemo(() => {
-    if (mode === 'asOf') return { asOfDate, search: search || undefined };
+    const scope = loadReportScope();
+    if (mode === 'asOf') return { asOfDate, search: search || undefined, scope };
     if (mode === 'compare') {
       return {
         asOfDate,
@@ -48,6 +50,7 @@ export function ReportRunner({
         startDate: range.from,
         endDate: range.to,
         search: search || undefined,
+        scope,
       };
     }
     return {
@@ -55,6 +58,7 @@ export function ReportRunner({
       endDate: range.to,
       asOfDate: range.to || today(),
       search: search || undefined,
+      scope,
     };
   }, [mode, asOfDate, compareEnd, range, search]);
 
@@ -155,8 +159,12 @@ export function ReportRunner({
         ) : !data?.rows?.length ? (
           <EmptyState
             variant="plain"
-            title="No rows"
-            description="Nothing matched these filters for this report."
+            title={data?.notes?.length ? 'Report unavailable' : 'No rows'}
+            description={
+              data?.notes?.length
+                ? data.notes.join(' ')
+                : 'Nothing matched these filters for this report. Try another period or organization scope.'
+            }
           />
         ) : (
           <>

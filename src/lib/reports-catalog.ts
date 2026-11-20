@@ -59,7 +59,7 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
       { id: 'statement-list', title: 'Statement List', href: '/reports/view/statement-list', live: true },
       { id: 'terms-list', title: 'Terms List', href: '/reports/view/terms-list', live: true },
       { id: 'unbilled-charges', title: 'Unbilled charges', href: '/reports/view/unbilled-charges', live: true },
-      { id: 'unbilled-time', title: 'Unbilled time', href: '/reports/view/unbilled-time', live: true },
+      { id: 'unbilled-time', title: 'Unbilled time', href: '/reports/view/unbilled-time', live: false },
     ],
   },
   {
@@ -107,7 +107,7 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
       { id: 'sales-product-summary', title: 'Sales by Product/Service Summary', href: '/reports/view/sales-product-summary', live: true },
       { id: 'sales-product-detail', title: 'Sales by Product/Service Detail', href: '/reports/view/sales-product-detail', live: true },
       { id: 'payment-method-list', title: 'Payment Method List', href: '/reports/view/payment-method-list', live: true },
-      { id: 'time-by-customer', title: 'Time Activities by Customer Detail', href: '/reports/view/time-by-customer', live: true },
+      { id: 'time-by-customer', title: 'Time Activities by Customer Detail', href: '/reports/view/time-by-customer', live: false },
       { id: 'txn-by-customer', title: 'Transaction List by Customer', href: '/reports/view/txn-by-customer', live: true },
       { id: 'txn-by-tag', title: 'Transaction List by Tag Group', href: '/reports/view/txn-by-tag', live: true },
     ],
@@ -135,9 +135,9 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
     id: 'employees',
     title: 'Employees',
     reports: [
-      { id: 'employee-contact-list', title: 'Employee Contact List', href: '/reports/view/employee-contact-list', live: true },
-      { id: 'recent-time-activities', title: 'Recent/Edited Time Activities', href: '/reports/view/recent-time-activities', live: true },
-      { id: 'time-by-employee', title: 'Time Activities by Employee Detail', href: '/reports/view/time-by-employee', live: true },
+      { id: 'employee-contact-list', title: 'Employee Contact List', href: '/reports/view/employee-contact-list', live: false },
+      { id: 'recent-time-activities', title: 'Recent/Edited Time Activities', href: '/reports/view/recent-time-activities', live: false },
+      { id: 'time-by-employee', title: 'Time Activities by Employee Detail', href: '/reports/view/time-by-employee', live: false },
     ],
   },
   {
@@ -165,20 +165,22 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
     id: 'payroll',
     title: 'Payroll',
     reports: [
-      { id: 'payroll-employee-contact', title: 'Employee Contact List', href: '/reports/view/payroll-employee-contact', live: true },
-      { id: 'payroll-recent-time', title: 'Recent/Edited Time Activities', href: '/reports/view/payroll-recent-time', live: true },
-      { id: 'payroll-time-by-employee', title: 'Time Activities by Employee Detail', href: '/reports/view/payroll-time-by-employee', live: true },
+      { id: 'payroll-employee-contact', title: 'Employee Contact List', href: '/reports/view/payroll-employee-contact', live: false },
+      { id: 'payroll-recent-time', title: 'Recent/Edited Time Activities', href: '/reports/view/payroll-recent-time', live: false },
+      { id: 'payroll-time-by-employee', title: 'Time Activities by Employee Detail', href: '/reports/view/payroll-time-by-employee', live: false },
     ],
   },
   {
     id: 'time',
     title: 'Time',
     reports: [
-      { id: 'timesheet-by-employee', title: 'Timesheet Detail by Employee', href: '/reports/view/timesheet-by-employee', live: true },
-      { id: 'time-summary-pay-type', title: 'Time Summary by Pay Type', href: '/reports/view/time-summary-pay-type', live: true },
+      { id: 'timesheet-by-employee', title: 'Timesheet Detail by Employee', href: '/reports/view/timesheet-by-employee', live: false },
+      { id: 'time-summary-pay-type', title: 'Time Summary by Pay Type', href: '/reports/view/time-summary-pay-type', live: false },
     ],
   },
 ];
+
+const SCOPE_KEY = 'potta.report.scope';
 
 export function allReports(): ReportDef[] {
   return REPORT_CATEGORIES.flatMap((c) => c.reports);
@@ -186,4 +188,22 @@ export function allReports(): ReportDef[] {
 
 export function findReport(id: string): ReportDef | undefined {
   return allReports().find((r) => r.id === id);
+}
+
+export function loadReportScope(): ReportScopeMode {
+  if (typeof window === 'undefined') return 'branch';
+  try {
+    const raw = localStorage.getItem(SCOPE_KEY);
+    return raw === 'organization' ? 'organization' : 'branch';
+  } catch {
+    return 'branch';
+  }
+}
+
+export function saveReportScope(scope: ReportScopeMode) {
+  try {
+    localStorage.setItem(SCOPE_KEY, scope);
+  } catch {
+    /* ignore */
+  }
 }
