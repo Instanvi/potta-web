@@ -1,16 +1,12 @@
 'use client';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { PageContainer } from '../../_shared/states';
 import { CatalogList, ModifierCreateForm, loadModifiers } from '../catalog-lists';
 
 export default function ModifiersPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Modifiers"
-          description="Add-ons charged on top of an item. Create them here for the whole shop, or on a specific product."
-        />
         <ModifierCreateForm />
         <CatalogList
           queryKey="product-modifiers"

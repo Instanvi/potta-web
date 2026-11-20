@@ -210,7 +210,7 @@ function ReportsHub() {
           <div className="w-full max-w-xs">
             <label className="mb-1 block text-sm font-medium text-foreground">Scope</label>
             <select
-              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-zinc-50 px-3 text-sm text-foreground outline-none focus-visible:border-primary"
+              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm text-foreground outline-none focus-visible:border-primary"
               value={canOrgWide ? scope : 'branch'}
               disabled={!canOrgWide}
               onChange={(e) => setScope(e.target.value as ReportScopeMode)}

@@ -118,7 +118,7 @@ const TaxTable = () => {
   ];
 
   const filterSelectClass =
-    'h-10 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-zinc-50 px-3 text-sm text-foreground outline-none focus-visible:border-primary';
+    'h-10 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm text-foreground outline-none focus-visible:border-primary';
 
   return (
     <div className="flex flex-col gap-4">

@@ -1,16 +1,12 @@
 'use client';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { PageContainer } from '../../_shared/states';
 import { CatalogList, UnitCreateForm, loadUnits } from '../catalog-lists';
 
 export default function UnitsPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Units"
-          description="Sellable units for counting and packing items. Add them here or when you create an item."
-        />
         <UnitCreateForm />
         <CatalogList
           queryKey="units"

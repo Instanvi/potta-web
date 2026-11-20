@@ -1,6 +1,6 @@
 import RootLayout from '../../layout';
 import ContactsContent, { readContactType } from '../../../../components/shared/ContactsContent';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { PageContainer } from '../../_shared/states';
 
 export default async function ReceivableContactsPage({
   searchParams,
@@ -11,10 +11,6 @@ export default async function ReceivableContactsPage({
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Contacts"
-          description="People and businesses you invoice, plus the vendors you buy from."
-        />
         <ContactsContent initialType={readContactType(params.type)} />
       </PageContainer>
     </RootLayout>
