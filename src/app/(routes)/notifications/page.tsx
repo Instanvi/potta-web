@@ -25,7 +25,7 @@ import {
 } from '@/services/notifications.service';
 import { notificationVisual } from '@/lib/notification-visual';
 import { cn } from '@/lib/utils';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Tabs } from '../_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer, Tabs } from '../_shared/states';
 
 type Filter = 'all' | 'unread' | 'read';
 
@@ -134,10 +134,7 @@ export default function NotificationsPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Notifications"
-          description={`${unread} unread on this page · ${totalItems} total${isFetching && !isLoading ? ' · refreshing…' : ''}`}
-        />
+        
         <ListToolbar
           actions={
             <>

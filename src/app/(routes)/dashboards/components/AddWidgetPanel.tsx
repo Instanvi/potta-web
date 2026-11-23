@@ -31,7 +31,7 @@ function newId(prefix: string) {
 }
 
 const fieldClass =
-  'mt-1 w-full rounded-[2px] border border-black/10 bg-white px-2 py-1.5 text-sm';
+  'mt-1 w-full rounded-[2px] border border-black/10 bg-field px-2 py-1.5 text-sm';
 
 export function AddWidgetPanel({
   catalog,
@@ -168,7 +168,7 @@ export function AddWidgetPanel({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="flex flex-col gap-0 overflow-hidden p-0">
+      <SheetContent side="right" className="flex flex-col gap-0 overflow-hidden p-0">
         <SheetHeader className="border-b border-black/5 px-6 py-4">
           <SheetTitle>Add widget</SheetTitle>
           <SheetDescription>

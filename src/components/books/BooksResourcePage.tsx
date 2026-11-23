@@ -1,10 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shadcn/select';
 import {
   Sheet,
   SheetContent,
@@ -16,13 +23,13 @@ import {
   FIELD_INPUT,
   SHEET_FIELD_INPUT,
   SHEET_FIELD_LABEL,
+  SHEET_FIELD_SELECT,
   SHEET_FIELD_TEXTAREA,
 } from '@/lib/field-styles';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   booksApi,
   cellValue,
-  extractBooksRows,
   rowId,
 } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
@@ -34,17 +41,25 @@ import {
   loadBooksEntityOptions,
   loadPurchaseOrderForReceipt,
 } from '@/lib/books-entities';
+import { TableSkeleton } from '@/components/ui/loaders';
+import {
+  useBooksResourceCreate,
+  useBooksResourceList,
+  useBooksResourceRemove,
+  useBooksResourceUpdate,
+} from '@/hooks/use-books-resource';
 
 export type BooksColumn = { key: string; label: string };
 export type BooksField = {
   key: string;
   label: string;
   /**
-   * text | number | textarea | checkbox | date | lines | json |
+   * text | number | textarea | checkbox | date | lines | select | json |
    * customer | vendor | estimate | purchaseOrder | salesOrder |
    * invoice | bill | opportunity | lead | proposal | account
    */
   type?: string;
+  options?: { value: string; label: string }[];
 };
 
 const ENTITY_FIELD_TYPES = new Set<string>([
@@ -108,41 +123,36 @@ export function BooksResourcePage({
   actions = [],
   listParams,
 }: BooksResourcePageProps) {
-  const [rows, setRows] = useState<Record<string, unknown>[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
   const [search, setSearch] = useState('');
+  const [searchApplied, setSearchApplied] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [editForm, setEditForm] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
 
   const params = useMemo(
     () => ({ page: 1, limit: 50, sortBy: 'createdAt:DESC', ...listParams }),
     [listParams]
   );
+  const filter = useMemo(() => {
+    const f: Record<string, unknown> = {};
+    if (searchApplied.trim()) f.search = searchApplied.trim();
+    return f;
+  }, [searchApplied]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const filter: Record<string, unknown> = {};
-      if (search.trim()) filter.search = search.trim();
-      const data = await booksApi.list(resourcePath, filter, params);
-      setRows(extractBooksRows(data));
-    } catch (e) {
-      setError(e);
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [resourcePath, params, search]);
+  const listQuery = useBooksResourceList(resourcePath, filter, params);
+  const createMutation = useBooksResourceCreate(resourcePath);
+  const updateMutation = useBooksResourceUpdate(resourcePath);
+  const removeMutation = useBooksResourceRemove(resourcePath);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const rows = listQuery.data ?? [];
+  const loading = listQuery.isLoading;
+  const error = listQuery.error;
+  const saving =
+    createMutation.isPending || updateMutation.isPending || removeMutation.isPending;
+
+  const load = () => listQuery.refetch();
 
   const openCreate = () => {
     const initial: Record<string, string> = {};
@@ -180,34 +190,26 @@ export function BooksResourcePage({
   };
 
   const handleCreate = async () => {
-    setSaving(true);
     try {
       const payload = buildPayload(fields, form);
-      await booksApi.create(resourcePath, payload);
+      await createMutation.mutateAsync(payload);
       toast.success(`${title} created`);
       setCreateOpen(false);
-      await load();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || e?.message || `Failed to create ${title}`);
-    } finally {
-      setSaving(false);
+    } catch {
+      /* toast handled in hook */
     }
   };
 
   const handleUpdate = async () => {
     const id = selected ? rowId(selected) : '';
     if (!id) return;
-    setSaving(true);
     try {
       const payload = buildPayload(fields, editForm);
-      await booksApi.update(resourcePath, id, payload);
+      await updateMutation.mutateAsync({ id, body: payload });
       toast.success(`${title} updated`);
       setDetailOpen(false);
-      await load();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || e?.message || `Failed to update ${title}`);
-    } finally {
-      setSaving(false);
+    } catch {
+      /* toast handled in hook */
     }
   };
 
@@ -215,16 +217,12 @@ export function BooksResourcePage({
     const id = selected ? rowId(selected) : '';
     if (!id) return;
     if (!window.confirm(`Delete this ${title.toLowerCase()}?`)) return;
-    setSaving(true);
     try {
-      await booksApi.remove(resourcePath, id);
+      await removeMutation.mutateAsync(id);
       toast.success(`${title} deleted`);
       setDetailOpen(false);
-      await load();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || e?.message || `Failed to delete ${title}`);
-    } finally {
-      setSaving(false);
+    } catch {
+      /* toast handled in hook */
     }
   };
 
@@ -232,7 +230,6 @@ export function BooksResourcePage({
     const id = selected ? rowId(selected) : '';
     if (!id) return;
     if (act.confirm && !window.confirm(`${act.label}?`)) return;
-    setSaving(true);
     try {
       await booksApi.action(resourcePath, id, act.action);
       toast.success(`${act.label} succeeded`);
@@ -240,16 +237,13 @@ export function BooksResourcePage({
       await load();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || e?.message || `${act.label} failed`);
-    } finally {
-      setSaving(false);
     }
   };
 
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title={title}
+        <ListToolbar
           actions={
             <>
               <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -260,14 +254,13 @@ export function BooksResourcePage({
               </Button>
             </>
           }
-        />
-        <ListToolbar>
+        >
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') void load();
+              if (e.key === 'Enter') setSearchApplied(search);
             }}
             placeholder={`Search ${title.toLowerCase()}…`}
             className={cn(FIELD_INPUT, 'max-w-sm')}
@@ -278,7 +271,7 @@ export function BooksResourcePage({
           {error ? (
             <ErrorState error={error} onRetry={() => void load()} />
           ) : loading ? (
-            <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">Loading…</Panel>
+            <TableSkeleton rows={8} columns={Math.max(columns.length, 3)} />
           ) : rows.length === 0 ? (
             <EmptyState
               title={`No ${title.toLowerCase()} yet`}
@@ -324,7 +317,7 @@ export function BooksResourcePage({
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>New {title}</SheetTitle>
             </SheetHeader>
@@ -349,7 +342,7 @@ export function BooksResourcePage({
         </Sheet>
 
         <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>{title}</SheetTitle>
             </SheetHeader>
@@ -514,6 +507,26 @@ function FieldInput({
         value={value}
         onChange={onChange}
       />
+    );
+  }
+  if (type === 'select') {
+    const options = field.options ?? [];
+    return (
+      <label className="block space-y-1">
+        <span className={SHEET_FIELD_LABEL}>{field.label}</span>
+        <Select value={value || undefined} onValueChange={onChange}>
+          <SelectTrigger className={cn(SHEET_FIELD_SELECT, 'h-10')}>
+            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </label>
     );
   }
   if (type === 'textarea' || type === 'json') {

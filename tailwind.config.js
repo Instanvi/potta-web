@@ -55,6 +55,7 @@ module.exports = {
           subtle: 'var(--brand-subtle)',
         },
         'main-bg': 'var(--main-bg)',
+        field: 'var(--field-bg)',
         'table-head': 'var(--brand-subtle)',
         primary: {
           DEFAULT: '#0B5D1E',

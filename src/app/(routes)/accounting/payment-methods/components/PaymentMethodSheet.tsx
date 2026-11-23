@@ -66,7 +66,7 @@ const PaymentMethodSheet = ({ open, onOpenChange, editing, onCreated }: Props) =
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="flex w-full flex-col sm:max-w-md">
+      <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{editing ? 'Edit payment method' : 'Add payment method'}</SheetTitle>
         </SheetHeader>

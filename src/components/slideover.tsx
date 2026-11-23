@@ -185,11 +185,11 @@ const Slider: FC<props> = ({
         />
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            {/* Every slide-over opens from the left at half the screen (full width on phones). */}
-            <div className="pointer-events-none fixed inset-y-0 left-0 flex w-full sm:w-1/2">
+            {/* Every slide-over opens from the right at half the screen (full width on phones). */}
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex w-full sm:w-1/2">
               <DialogPanel
                 transition
-                className="pointer-events-auto h-screen w-full transform border-r border-black/[0.08] bg-white shadow-xl transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+                className="pointer-events-auto h-screen w-full transform border-l border-black/[0.08] bg-white shadow-xl transition duration-300 ease-in-out data-[closed]:translate-x-full"
                 style={noPanelScroll ? { overflowY: 'visible' } : {}}
               >
                 <div

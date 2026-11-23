@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { Separator } from '@potta/components/shadcn/seperator';
-import { PageContainer, PageHeader } from '../_shared/states';
+import { PageContainer } from '../_shared/states';
 
 const SettingsPage = () => {
   const context = useContext(ContextData);
@@ -31,7 +31,7 @@ const SettingsPage = () => {
 
   return (
     <PageContainer>
-      <PageHeader title="Settings" description="Navigation layout and display preferences for this browser." />
+      
       <div className="space-y-6">
       {/* Layout Settings */}
       <Card className="">

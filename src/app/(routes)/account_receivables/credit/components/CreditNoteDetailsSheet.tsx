@@ -29,7 +29,7 @@ const CreditNoteDetailsSheet = ({ creditNoteId, onClose }: Props) => {
 
   return (
     <Sheet open={!!creditNoteId} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="left" className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
             Credit note {data?.creditNoteId ? `· ${data.creditNoteId}` : ''}

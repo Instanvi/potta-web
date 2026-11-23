@@ -56,7 +56,7 @@ export function LocationSwitcher({ className }: { className?: string }) {
         <button
           type="button"
           className={cn(
-            'flex h-12 max-w-[220px] items-center justify-between gap-2 rounded-[2px] border border-black/[0.08] bg-white px-2.5 text-left hover:bg-gray-50',
+            'flex h-12 max-w-[220px] items-center justify-between gap-2 rounded-[2px] bg-transparent px-2.5 text-left hover:bg-black/[0.04]',
             className,
           )}
         >
@@ -64,7 +64,7 @@ export function LocationSwitcher({ className }: { className?: string }) {
             <MapPin weight="bold" className="size-3.5 shrink-0 text-green-700" />
             <span className="flex min-w-0 flex-col leading-none">
               <span className="truncate text-xs font-medium">{active?.name ?? 'All locations'}</span>
-              <span className="text-[10px] text-gray-500">Location context</span>
+              <span className="text-[10px] text-gray-500">Location</span>
             </span>
           </span>
           <CaretUpDown className="size-3.5 shrink-0 text-gray-500" />

@@ -2,8 +2,9 @@
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
 import Button from '@potta/components/button';
+import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 interface TableItem {
   name: string;
@@ -20,24 +21,6 @@ const PdfView = () => {
   const contextData = context?.data || {};
   const tableData: TableItem[] = contextData.table || [];
   const customerId = contextData.customerName; // Get customer ID from context
-
-  // User information is already loaded in AuthGuard and available in context
-  console.log('PDF View Context Data:', contextData);
-  console.log('User Permissions:', contextData.userPermissions);
-  console.log('Organization Info:', {
-    name: contextData.organizationName,
-    branch: contextData.branchName,
-    address: contextData.branchAddress,
-  });
-
-  // Get user role information
-  const userRole =
-    contextData.userPermissions?.[0]?.roleName ||
-    contextData.userRole ||
-    'User';
-  const userName = `${contextData.userFirstName || 'Abayo'} ${
-    contextData.userLastName || 'Joram'
-  }`;
 
   // State for invoice color
   const [invoiceColor, setInvoiceColor] = useState('#059669'); // Default green-700
@@ -169,35 +152,7 @@ const PdfView = () => {
         </div>
         <div className="p-5 space-y-16 bg-white">
           <div className="mt-5 w-full flex space-x-5">
-            <div className="flex w-[40%] space-x-2">
-              <h3 className="font-medium">From: </h3>
-              <div className="space-y-2 text-sm text-gray-600 flex-col">
-                <p className="font-medium">
-                  {contextData.organizationName ||
-                    contextData.companyName ||
-                    'Instanvi Inc'}
-                </p>
-                <p>{contextData.branchName || 'Headquarters'}</p>
-                <p>
-                  {contextData.branchAddress ||
-                    contextData.companyAddress ||
-                    'Quartre-etage, bonaberi, Douala'}
-                </p>
-                <p>
-                  {contextData.userEmail ||
-                    contextData.companyEmail ||
-                    'abayojoram696@gmail.com'}
-                </p>
-                <p>
-                  {contextData.userPhone ||
-                    contextData.companyPhone ||
-                    'No phone'}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Created by: {userName} ({userRole})
-                </p>
-              </div>
-            </div>
+            <DocumentSellerHeader className="w-[40%]" />
             <div className="flex space-x-2">
               <h3 className="font-medium">To: </h3>
               <div className="space-y-2 text-sm text-gray-600 flex-col">

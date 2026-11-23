@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "type": "prompt",
+        "prompt": "You just edited a Potta web file. If this is a page, form, list, sheet, or invoice/document preview, silently apply these standards on the next edit without asking the user: (1) ListToolbar keeps search and actions on one row; (2) form selects use shadcn Select; (3) sheets/slideovers open from the right; (4) inputs use bg-field / FIELD_* light grey, never white-on-white; (5) no duplicate PageHeader title/description when navbar already titles the page; (6) tables/layout use Skeleton not spinners; (7) API via TanStack custom hooks; (8) invoice seller branding from useOrganizationProfile / Auth org, never hardcoded Instanvi. Only mention a reminder if the edit clearly violates one of these.",
+        "timeout": 15
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/guard-main-pr.sh",
+        "matcher": "gh pr create|git push.*main"
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader, Tabs } from '../../_shared/states';
+import { PageContainer, Tabs } from '../../_shared/states';
 import EntityHealthPanel from './components/EntityHealthPanel';
 import FeedPanel from './components/FeedPanel';
 import MappingsPanel from './components/MappingsPanel';
@@ -25,10 +25,7 @@ const PosSyncPage = () => {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Desktop sync"
-          description="Monitor what the Potta POS desktop app has pushed and what it will pull."
-        />
+        
         <Can
           resource="Transactions"
           action="view"

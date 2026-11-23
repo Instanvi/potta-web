@@ -202,7 +202,7 @@ export function BankTransactionsPage() {
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>New bank transaction</SheetTitle>
             </SheetHeader>
@@ -241,7 +241,7 @@ export function BankTransactionsPage() {
         </Sheet>
 
         <Sheet open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>Match transaction</SheetTitle>
             </SheetHeader>

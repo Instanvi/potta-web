@@ -29,6 +29,7 @@ export interface User {
   organizationId?: string;
 }
 
+/** Slim org from `/get-session` (and nested on user). */
 export interface Organization {
   id: string;
   name: string;
@@ -44,6 +45,36 @@ export interface Organization {
   country?: string;
   slug?: string;
   logo?: string | null;
+  kycStatus?: string | null;
+  kycVerifiedAt?: string | null;
+  kycRejectionReason?: string | null;
+}
+
+/**
+ * Full org from Auth `GET /organizations/:id` — use for invoice/document seller branding.
+ * Session org is slim; address, tax, phone, etc. live here.
+ */
+export interface OrganizationProfile {
+  id: string;
+  name: string;
+  slug?: string;
+  logo?: string | null;
+  description?: string | null;
+  businessName?: string | null;
+  tradeName?: string | null;
+  registrationNumber?: string | null;
+  taxIdentificationNumber?: string | null;
+  website?: string | null;
+  businessEmail?: string | null;
+  businessPhone?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  province?: string | null;
+  postalCode?: string | null;
+  country?: string | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface Hierarchy {

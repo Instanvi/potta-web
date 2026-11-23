@@ -8,7 +8,8 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import Button from '@potta/components/button';
 import RecordHistory from '@potta/components/shared/RecordHistory';
 import { DocumentDetailChrome } from '@potta/components/document-master-detail';
-import { LoadingState, ErrorState } from '../../../_shared/states';
+import { ErrorState } from '../../../_shared/states';
+import { Skeleton } from '@potta/components/ui/loaders';
 import useApproveInvoice from '../_hooks/useApproveInvoice';
 import useGetOneInvoice from '../_hooks/useGetOneInvoice';
 import InvoicePdfPreview, { InvoicePreviewModel } from './InvoicePdfPreview';
@@ -48,7 +49,14 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
   const [editOpen, setEditOpen] = useState(false);
 
   if (isLoading && !fallback) {
-    return <LoadingState label="Loading invoice…" />;
+    return (
+      <div className="space-y-4 p-4" aria-busy="true">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
   }
 
   if ((error && !fallback) || !invoice) {

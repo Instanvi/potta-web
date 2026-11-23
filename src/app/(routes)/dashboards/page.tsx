@@ -11,7 +11,6 @@ import {
   ListToolbar,
   LoadingState,
   PageContainer,
-  PageHeader,
 } from '../_shared/states';
 import {
   useCreateDashboard,
@@ -46,18 +45,15 @@ export default function DashboardsListPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Dashboards"
-          description="Create layouts of KPIs and charts. Set one as your Home default."
+        <ListToolbar
           actions={
             <Button size="sm" onClick={onCreate} disabled={create.isPending}>
               {create.isPending ? 'Creating…' : 'New dashboard'}
             </Button>
           }
-        />
-        <ListToolbar>
+        >
           <input
-            className="h-9 w-full max-w-sm rounded-[2px] border border-black/10 bg-white px-3 text-sm"
+            className="h-9 w-full max-w-sm rounded-[2px] border border-black/10 bg-field px-3 text-sm"
             placeholder="Search dashboards"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Can, useCan } from '@/components/auth/can';
-import { EmptyState, PageContainer, PageHeader, Tabs } from '../../_shared/states';
+import { EmptyState, PageContainer, Tabs } from '../../_shared/states';
 import AuditLogsPanel from './components/AuditLogsPanel';
 import NotificationLogsPanel from './components/NotificationLogsPanel';
 
@@ -31,10 +31,7 @@ export default function AuditLogsPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Audit log"
-        description="Who changed what in your books, and which notifications Potta sent."
-      />
+      
       <Tabs tabs={TABS} value={active} onChange={setTab} />
 
       {active === 'audit' ? (

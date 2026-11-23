@@ -124,7 +124,7 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
 
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="left" className="w-full overflow-y-auto rounded-none sm:max-w-lg">
+      <SheetContent side="right" className="w-full overflow-y-auto rounded-none sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{isEdit ? 'Edit cashbook entry' : 'New cashbook entry'}</SheetTitle>
         </SheetHeader>
