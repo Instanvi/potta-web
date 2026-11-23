@@ -1,29 +1,28 @@
 /**
- * Shared Talk-aligned field surfaces for every Potta input, select and textarea.
- * Prefer `@/components/shadcn/input` / `Input` / `Select` when possible; use these
- * classes only for raw HTML controls inside dense editors.
- *
- * Fields use light grey (`bg-field`) on the page canvas and inside white sheets —
- * never pure white on white.
+ * One Potta field surface — light grey fill, full light outline, 2px radius.
+ * Use these everywhere (page canvas, sheets, document forms, search).
+ * Never pure white on white.
  */
 export const FIELD_INPUT =
-  'flex h-10 w-full min-w-0 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-field px-3 py-1.5 text-sm font-normal leading-none text-foreground shadow-none outline-none transition-colors placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50';
-
-export const FIELD_SELECT =
-  'flex h-10 w-full appearance-none rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-field px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50';
-
-export const FIELD_TEXTAREA =
-  'flex min-h-[80px] w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-field px-3 py-2 text-sm font-normal text-foreground shadow-none outline-none transition-colors placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50';
-
-/** Full light outline — use inside white sheets so fields stay visible. */
-export const SHEET_FIELD_INPUT =
   'flex h-10 w-full min-w-0 rounded-[2px] border border-black/15 bg-field px-3 py-1.5 text-sm font-normal leading-none text-foreground shadow-none outline-none transition-colors placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50';
 
-export const SHEET_FIELD_SELECT =
+export const FIELD_SELECT =
   'flex h-10 w-full appearance-none rounded-[2px] border border-black/15 bg-field px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50';
 
-export const SHEET_FIELD_TEXTAREA =
+export const FIELD_TEXTAREA =
   'flex min-h-[80px] w-full rounded-[2px] border border-black/15 bg-field px-3 py-2 text-sm font-normal text-foreground shadow-none outline-none transition-colors placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50';
 
-/** Black, legible form labels inside sheets. */
-export const SHEET_FIELD_LABEL = 'mb-1 block text-sm font-normal text-foreground';
+/** @deprecated Same as FIELD_* — kept so existing sheet imports keep working. */
+export const SHEET_FIELD_INPUT = FIELD_INPUT;
+export const SHEET_FIELD_SELECT = FIELD_SELECT;
+export const SHEET_FIELD_TEXTAREA = FIELD_TEXTAREA;
+
+/** Black, legible form labels. */
+export const FIELD_LABEL = 'mb-1 block text-sm font-normal text-foreground';
+
+/** @deprecated Same as FIELD_LABEL. */
+export const SHEET_FIELD_LABEL = FIELD_LABEL;
+
+/** Hide native number spinners so amount fields match text inputs. */
+export const FIELD_NO_SPIN =
+  '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
