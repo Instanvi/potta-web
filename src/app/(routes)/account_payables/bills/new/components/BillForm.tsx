@@ -1,5 +1,5 @@
 'use client';
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Controller,
@@ -24,7 +24,7 @@ import { formatMoney } from '../../../utils/format';
 import { useCreateBill } from '../../hooks';
 import { BillCurrency, PaymentMethod } from '../../utils/types';
 import { BillFormValues, billSchema, lineTotals } from '../validations/billValidation';
-import LineItemsEditor, { DEFAULT_TAX_RATE, emptyLine } from './LineItemsEditor';
+import LineItemsEditor, { DEFAULT_TAX_RATE } from './LineItemsEditor';
 import BillDraftPreview from './BillDraftPreview';
 import {
   DocumentBalanceDue,
@@ -58,7 +58,11 @@ interface BillFormProps {
   showPreview?: boolean;
   onTogglePreview?: () => void;
   /** When set, wraps form + preview under FormProvider for the split layout. */
-  renderSplit?: (form: ReactNode, preview: ReactNode) => ReactNode;
+  renderSplit?: (
+    form: ReactNode,
+    preview: ReactNode,
+    actions?: { onDownloadPdf?: () => void | Promise<void> },
+  ) => ReactNode;
 }
 
 const BillForm = ({
@@ -73,6 +77,10 @@ const BillForm = ({
   const createBill = useCreateBill();
   const { data: vendors = [], isLoading: vendorsLoading } = useVendorOptions();
   const [copyingLines, setCopyingLines] = useState(false);
+  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    setDownloadPdf(() => fn);
+  }, []);
 
   const methods = useForm<BillFormValues>({
     resolver: yupResolver(billSchema) as unknown as Resolver<BillFormValues>,
@@ -86,7 +94,7 @@ const BillForm = ({
       paymentMethod: 'BANK_TRANSFER',
       expenseAccountCode: '601',
       notes: '',
-      lineItems: [emptyLine()],
+      lineItems: [],
     },
   });
 
@@ -318,7 +326,7 @@ const BillForm = ({
         <DocumentSectionTitle>
           Product / service lines <RequiredMark />
         </DocumentSectionTitle>
-        <LineItemsEditor control={control} register={register} errors={errors} currency={currency} />
+        <LineItemsEditor control={control} errors={errors} currency={currency} />
       </DocumentFormCard>
 
       <DocumentFormCard flush={!inSheet}>
@@ -446,7 +454,11 @@ const BillForm = ({
   if (renderSplit) {
     return (
       <FormProvider {...methods}>
-        {renderSplit(formColumn, <BillDraftPreview vendors={vendors} />)}
+        {renderSplit(
+          formColumn,
+          <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />,
+          { onDownloadPdf: downloadPdf ?? undefined },
+        )}
       </FormProvider>
     );
   }

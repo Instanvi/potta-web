@@ -1,4 +1,5 @@
 'use client';
+import { Check } from '@phosphor-icons/react';
 import React, { useState } from 'react';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -8,7 +9,6 @@ import { exportRows } from '@/lib/export-file';
 import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { Icon } from '@iconify/react';
 import { CloudDownload, FileDown } from 'lucide-react';
 import ViewReceiptSlider from './viewSlider';
 import DeleteModal from './deleteModal';
@@ -250,7 +250,7 @@ const SaleTable = () => {
           <div className="border-r pr-4 flex justify-center">
             <div className="flex w-full items-center gap-3 border border-primary/40 bg-brand-subtle px-3 py-2 text-primary">
               <div className="flex size-4 items-center justify-center rounded-full bg-primary text-white">
-                <Icon icon="material-symbols:check" width="20" height="20" />
+                <Check size={20} weight="bold" />
               </div>
               {status}
             </div>

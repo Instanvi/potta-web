@@ -136,12 +136,15 @@ export function DocumentPreviewShell({
   title = 'Preview',
   downloadTitle,
   onClose,
+  onDownloadPdf,
   children,
   className,
 }: {
   title?: string;
   downloadTitle?: string;
   onClose?: () => void;
+  /** When set, used instead of HTML print-to-PDF (e.g. @react-pdf blob download). */
+  onDownloadPdf?: () => void | Promise<void>;
   children: ReactNode;
   className?: string;
 }) {
@@ -159,9 +162,10 @@ export function DocumentPreviewShell({
         <div className="flex shrink-0 items-center gap-1.5">
           <button
             type="button"
-            onClick={() =>
-              downloadPreviewAsPdf(contentRef.current, downloadTitle || title)
-            }
+            onClick={() => {
+              if (onDownloadPdf) void onDownloadPdf();
+              else downloadPreviewAsPdf(contentRef.current, downloadTitle || title);
+            }}
             className="inline-flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-2.5 text-xs font-medium text-foreground hover:bg-accent"
           >
             <i className="ri-download-2-line text-sm" />

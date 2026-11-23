@@ -1,5 +1,4 @@
 import React, { FC, useState } from 'react';
-import { Icon as Iconify } from '@iconify/react';
 import { cn } from '@potta/lib/utils';
 import useCloseOnOutsideClick from '@potta/hooks/useCloseOnOutsideClick';
 export type IOption = {

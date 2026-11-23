@@ -12,6 +12,7 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   output: 'standalone',
+  serverExternalPackages: ['@react-pdf/renderer'],
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if

@@ -1,9 +1,9 @@
 'use client';
+import { Check } from '@phosphor-icons/react';
 import React, { useState } from 'react';
 import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { Icon } from '@iconify/react';
 import ViewReceiptSlider from './viewSlider';
 import DeleteModal from './deleteModal';
 import Button from '@potta/components/button';
@@ -220,7 +220,7 @@ const SaleTable = () => {
       header: 'Resolution',
       cell: () => (
         <StatusBadge tone="success">
-          <Icon icon="material-symbols:check" width="14" height="14" />
+          <Check size={14} weight="bold" />
           Closed
         </StatusBadge>
       ),
