@@ -51,5 +51,15 @@ export function cellValue(row: Record<string, unknown>, key: string): string {
   }
   if (cur == null || cur === '') return '—';
   if (typeof cur === 'object') return JSON.stringify(cur);
+  if (typeof cur === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(cur)) {
+    const d = new Date(cur);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+  }
   return String(cur);
 }

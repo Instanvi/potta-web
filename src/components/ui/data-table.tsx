@@ -186,13 +186,13 @@ export function DataTable<TData>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}
-              className="border-t-0 border-b border-black/10 bg-zinc-50 hover:bg-zinc-50"
+              className="border-t-0 border-b border-black/10 bg-table-head hover:bg-table-head"
             >
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   className={cn(
-                    'h-11 bg-zinc-50 px-4 text-sm font-normal tracking-normal text-black',
+                    'h-11 bg-table-head px-4 text-sm font-normal tracking-normal text-black',
                     header.column.getCanSort() && 'cursor-pointer select-none'
                   )}
                   onClick={header.column.getToggleSortingHandler()}

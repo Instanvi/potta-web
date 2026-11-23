@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, Panel } from '@/app/(routes)/_shared/states';
+import { EmptyState, ErrorState, ListToolbar, PageContainer } from '@/app/(routes)/_shared/states';
+import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
 import {
   Select,
@@ -30,7 +31,6 @@ import { DatePicker } from '@/components/ui/date-picker';
 import {
   booksApi,
   type BooksResourceClient,
-  cellValue,
   rowId,
 } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
@@ -308,37 +308,11 @@ export function BooksResourcePage({
               }
             />
           ) : (
-            <Panel className="overflow-x-auto p-0">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-black/10 bg-white">
-                    {columns.map((c) => (
-                      <th key={c.key} className="px-4 py-3 font-medium text-muted-foreground">
-                        {c.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => {
-                    const id = rowId(row);
-                    return (
-                      <tr
-                        key={id || JSON.stringify(row)}
-                        className="cursor-pointer border-b border-black/10 hover:bg-black/[0.02]"
-                        onClick={() => void openDetail(row)}
-                      >
-                        {columns.map((c) => (
-                          <td key={c.key} className="px-4 py-3 text-foreground">
-                            {cellValue(row, c.key)}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </Panel>
+            <BooksListTable
+              columns={columns}
+              rows={rows}
+              onRowClick={(row) => void openDetail(row)}
+            />
           )}
         </div>
 

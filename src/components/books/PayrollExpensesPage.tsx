@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
 import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
+import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
-import { extractBooksRows, cellValue, rowId } from '@/lib/books-api';
+import { extractBooksRows } from '@/lib/books-api';
 import { payrollClient } from 'config/axios.config';
 import { cn } from '@/lib/utils';
 
@@ -97,30 +98,7 @@ export function PayrollExpensesPage() {
               description="Payroll expense API returned no rows, or the service is unreachable."
             />
           ) : (
-            <Panel className="overflow-x-auto p-0">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-black/10">
-                    {COLUMNS.map((c) => (
-                      <th key={c.key} className="px-4 py-3 font-medium text-muted-foreground">
-                        {c.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={rowId(row)} className="border-b border-black/10">
-                      {COLUMNS.map((c) => (
-                        <td key={c.key} className="px-4 py-3">
-                          {cellValue(row, c.key)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Panel>
+            <BooksListTable columns={COLUMNS} rows={rows} />
           )}
         </div>
       </PageContainer>

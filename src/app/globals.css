@@ -302,22 +302,7 @@ body {
   cursor: pointer;
 }
 
-/* TableStyles.css */
-.data-table-header {
-  background-color: #f0f0f0;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.data-table-header th {
-  border-top: 0.5px solid #ccc;
-  border-left: 0.5px solid #ccc;
-  border-right: 0.5px solid #ccc;
-}
-
-.data-table-body td {
-  border: 0.5px solid #ccc; /* Add border to each data cell */
-}
+/* Legacy DataTable CSS removed — use components/ui/data-table.tsx */
 
 .gPypsk {
   border-bottom: 0px solid #ccc !important;

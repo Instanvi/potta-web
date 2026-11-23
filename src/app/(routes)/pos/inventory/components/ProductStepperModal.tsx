@@ -166,10 +166,12 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
       setOpen={handleClose}
       edit={true}
       title={getStepTitle()}
+      noPanelScroll
+      sliderContentClass="!mt-0 !justify-start !px-0 min-h-0"
     >
-      <div className="w-full flex min-h-[60vh]">
+      <div className="flex h-full min-h-0 w-full">
         {/* Stepper */}
-        <div className="w-40 shrink-0 space-y-5 border-r pr-4 pt-2 text-sm">
+        <div className="w-40 shrink-0 space-y-5 border-r border-black/[0.08] px-4 pt-2 text-sm">
           <div onClick={() => setActive('create')}>
             <p
               className={`whitespace-nowrap ${
@@ -213,21 +215,21 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
           </div>
         </div>
 
-        {/* Content */}
-        <div className="w-full overflow-y-auto h-[calc(70vh)] pt-0 relative flex flex-col">
-          <div className="w-full overflow-auto">
-            {active === 'create' && (
-              <CreateProductForm
-                productType={productType === 'NON_INVENTORY' ? 'NON_INVENTORY' : 'INVENTORY'}
-                structure={getStructure()}
-                isNonInventory={getIsNonInventory()}
-                onProductCreated={handleProductCreated}
-                onCancel={handleClose}
-                key={`${productType}-${active}`} // Force re-render when productType changes
-              />
-            )}
+        {/* Content: scroll body, footer actions stay pinned */}
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+          {active === 'create' && (
+            <CreateProductForm
+              productType={productType === 'NON_INVENTORY' ? 'NON_INVENTORY' : 'INVENTORY'}
+              structure={getStructure()}
+              isNonInventory={getIsNonInventory()}
+              onProductCreated={handleProductCreated}
+              onCancel={handleClose}
+              key={`${productType}-${active}`}
+            />
+          )}
 
-            {active === 'components' && (
+          {active === 'components' && (
+            <div className="min-h-0 flex-1 overflow-y-auto">
               <ProductSelectionStep
                 productId="temp"
                 productType={productType as 'ASSEMBLY' | 'SIMPLEGROUPS'}
@@ -235,41 +237,39 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
                 onBack={() => setActive('create')}
                 productData={tempProductData}
               />
-            )}
+            </div>
+          )}
 
-            {active === 'confirm' && productId && (
-              <div className="p-8 flex flex-col items-center justify-center">
-                <h2 className="text-lg font-medium mb-4">
-                  Item created
-                </h2>
-                <p className="mb-6 text-gray-600">
-                  Would you like to add images to your product? This is
-                  optional.
-                </p>
-                <div className="flex gap-4">
-                  <Button
-                    type="button"
-                    text={'Add Images'}
-                    onClick={() => handleConfirm(true)}
-                  />
-
-                  <Button
-                    type="button"
-                    text={'Skip & Finish'}
-                    theme="gray"
-                    onClick={() => handleConfirm(false)}
-                  />
-                </div>
+          {active === 'confirm' && productId && (
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8">
+              <h2 className="mb-4 text-lg font-medium">Item created</h2>
+              <p className="mb-6 text-gray-600">
+                Would you like to add images to your product? This is optional.
+              </p>
+              <div className="flex gap-4">
+                <Button
+                  type="button"
+                  text={'Add Images'}
+                  onClick={() => handleConfirm(true)}
+                />
+                <Button
+                  type="button"
+                  text={'Skip & Finish'}
+                  theme="gray"
+                  onClick={() => handleConfirm(false)}
+                />
               </div>
-            )}
+            </div>
+          )}
 
-            {active === 'upload' && productId && (
+          {active === 'upload' && productId && (
+            <div className="min-h-0 flex-1 overflow-y-auto">
               <ProductUploadStep
                 productId={productId}
                 onComplete={handleUploadComplete}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </Slideover>

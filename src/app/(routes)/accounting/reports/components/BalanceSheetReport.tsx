@@ -23,7 +23,6 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
     <div className="flex flex-col gap-4">
       <DatePicker
         id="balanceSheetAsOf"
-        label="As of"
         className="w-52"
         value={asOfDate}
         onChange={(value) => setAsOfDate(value || today())}

@@ -130,8 +130,8 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full w-full flex-col">
-      <div className="flex-1 space-y-4 p-6 pb-24">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex h-full min-h-0 w-full flex-col">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6">
         <p className="text-sm text-muted-foreground">{STRUCTURE_COPY[structure]}</p>
 
         <FormSection title="Basics" description="How the item is named and grouped.">
@@ -287,7 +287,7 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         <CatalogPeripheralsEditor value={catalog} onChange={setCatalog} />
       </div>
 
-      <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
+      <div className="flex shrink-0 justify-end gap-3 border-t border-black/[0.08] bg-white px-6 py-4">
         {onCancel && <Button text="Cancel" type="button" theme="outline" onClick={onCancel} />}
         <Button
           text={structure === 'ASSEMBLY' ? 'Next: components' : structure === 'SIMPLEGROUPS' ? 'Next: group items' : 'Create item'}
