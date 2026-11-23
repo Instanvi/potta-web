@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 
@@ -14,13 +14,14 @@ import { DocumentPreviewShell } from '@potta/components/document-master-detail';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(true);
+  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
+    null,
+  );
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    setDownloadPdf(() => fn);
+  }, []);
 
-  // Toggle preview
-  const togglePreview = () => {
-    setShowPreview(!showPreview);
-  };
-
-  // Determine if the preview button should be shown
+  const togglePreview = () => setShowPreview((v) => !v);
 
   return (
     <DocumentWorkspace
@@ -40,51 +41,36 @@ const NewSalesReciept = () => {
         </>
       }
     >
-      <div className="max-h-[92.7vh] relative">
-{/* Use a wrapper div with transition for the entire panel group */}
-        <div className="transition-all duration-300 ease-in-out">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel
-              minSize={50}
-              defaultSize={showPreview ? 50 : 100}
-              style={{ transition: 'flex-basis 300ms ease-in-out' }}
-            >
-              <div className="flex h-[92.7vh] justify-center overflow-y-auto bg-white p-4 md:p-5">
-                <Left />
-              </div>
-            </ResizablePanel>
+      <div className="flex h-full min-h-0 flex-col bg-main-bg">
+        <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
+          <ResizablePanel
+            minSize={40}
+            defaultSize={showPreview ? 58 : 100}
+            className="min-w-0"
+          >
+            <div className="h-full min-h-0 overflow-y-auto bg-main-bg">
+              <Left />
+            </div>
+          </ResizablePanel>
 
-            {/* Always render the right panel but control its width with CSS */}
-            <ResizableHandle
-              withHandle
-              className={`transition-opacity duration-200 ease-in-out ${
-                showPreview ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
-            <ResizablePanel
-              minSize={0}
-              defaultSize={showPreview ? 50 : 0}
-              style={{
-                transition:
-                  'flex-basis 300ms ease-in-out, opacity 300ms ease-in-out',
-                flexBasis: showPreview ? '50%' : '0%',
-                opacity: showPreview ? 1 : 0,
-              }}
-            >
-              <div className="h-[92.7vh] overflow-hidden bg-white">
-                {showPreview && (
+          {showPreview ? (
+            <>
+              <ResizableHandle withHandle className="bg-transparent" />
+              <ResizablePanel minSize={25} defaultSize={42} className="min-w-0">
+                <div className="h-full min-h-0 overflow-hidden border-l border-black/[0.06] bg-main-bg">
                   <DocumentPreviewShell
                     title="Preview"
                     downloadTitle="Sales receipt"
                     onClose={() => setShowPreview(false)}
+                    onDownloadPdf={downloadPdf ?? undefined}
                   >
-                    <PdfView />
+                    <PdfView onRegisterDownload={registerDownload} />
                   </DocumentPreviewShell>
-                )}
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
+                </div>
+              </ResizablePanel>
+            </>
+          ) : null}
+        </ResizablePanelGroup>
       </div>
     </DocumentWorkspace>
   );

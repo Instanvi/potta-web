@@ -8,6 +8,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import Button from '@potta/components/button';
 import RecordHistory from '@potta/components/shared/RecordHistory';
 import { DocumentDetailChrome } from '@potta/components/document-master-detail';
+import { InvoicePdfDocument } from '@/components/documents/invoice-pdf-document';
 import { ErrorState } from '../../../_shared/states';
 import { Skeleton } from '@potta/components/ui/loaders';
 import ConfirmModal from '../../../_shared/ConfirmModal';
@@ -16,7 +17,12 @@ import useGetOneInvoice from '../_hooks/useGetOneInvoice';
 import useSendInvoice from '../_hooks/useSendInvoice';
 import InvoicePdfPreview, { InvoicePreviewModel } from './InvoicePdfPreview';
 import EditInvoiceModal from './EditInvoiceModal';
-import { downloadPreviewAsPdf } from '@/lib/print-preview';
+import {
+  formatOrgAddress,
+  orgDisplayName,
+  useOrganizationProfile,
+} from '@/hooks/use-organization-profile';
+import { downloadReactPdf } from '@/lib/download-react-pdf';
 
 /** Statuses that are considered posted / non-editable — use a credit note instead. */
 export const POSTED_INVOICE_STATUSES = [
@@ -49,6 +55,7 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
   const invoice = (data as InvoicePreviewModel & { uuid?: string; status?: string }) || fallback;
   const approveMutation = useApproveInvoice();
   const sendMutation = useSendInvoice();
+  const { data: org } = useOrganizationProfile();
   const [editOpen, setEditOpen] = useState(false);
   const [confirmSend, setConfirmSend] = useState(false);
 
@@ -170,17 +177,67 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
         theme="lightBlue"
         icon={<i className="ri-download-2-line" />}
         onClick={() => {
-          const el = document.querySelector(
-            '[data-document-preview]'
-          ) as HTMLElement | null;
-          if (!el) {
-            toast.message('Open Preview first, then download the PDF.');
-            return;
-          }
-          downloadPreviewAsPdf(
-            el,
-            invoice.invoiceNumber || invoice.invoiceId || 'Invoice'
-          );
+          void (async () => {
+            const lines = invoice.lineItems ?? [];
+            const subtotal = lines.reduce(
+              (sum, line) => sum + Number(line.unitPrice || 0) * Number(line.quantity || 0),
+              0,
+            );
+            const tax = Number(invoice.taxAmount ?? 0);
+            const customerName = invoice.customer
+              ? `${invoice.customer.firstName ?? ''} ${invoice.customer.lastName ?? ''}`.trim()
+              : '';
+            const filename =
+              invoice.invoiceNumber || invoice.invoiceId || 'invoice';
+            try {
+              await downloadReactPdf(
+                <InvoicePdfDocument
+                  title={invoice.invoiceType || 'Invoice'}
+                  invoiceNumber={invoice.invoiceNumber || invoice.invoiceId}
+                  issueDate={moment(invoice.issuedDate).format('MMM DD, YYYY')}
+                  dueDate={moment(invoice.dueDate).format('MMM DD, YYYY')}
+                  currency={invoice.currency || 'USD'}
+                  paymentMethod={invoice.paymentMethod || undefined}
+                  paymentReference={invoice.paymentReference || undefined}
+                  paymentTerms={invoice.paymentTerms || undefined}
+                  notes={invoice.notes || undefined}
+                  seller={{
+                    name: orgDisplayName(org) || 'Your organization',
+                    email: org?.businessEmail,
+                    phone: org?.businessPhone,
+                    addressLines: formatOrgAddress(org),
+                    logoUrl: org?.logo,
+                    registrationNumber: org?.registrationNumber,
+                    taxId: org?.taxIdentificationNumber,
+                  }}
+                  customer={
+                    invoice.customer
+                      ? {
+                          name: customerName || 'Customer',
+                          email: invoice.customer.email,
+                          phone: invoice.customer.phone,
+                          address: invoice.billingAddress || undefined,
+                        }
+                      : null
+                  }
+                  lines={lines.map((line) => ({
+                    description: line.description || 'Item',
+                    quantity: Number(line.quantity || 0),
+                    unitPrice: Number(line.unitPrice || 0),
+                    taxRate: Number(line.taxRate || 0),
+                    lineTotal: Number(line.totalAmount || 0),
+                  }))}
+                  subtotal={subtotal}
+                  tax={tax}
+                  total={Number(invoice.invoiceTotal || subtotal + tax)}
+                  draft={statusUpper === 'DRAFT'}
+                />,
+                `invoice-${filename}`,
+              );
+            } catch {
+              toast.error('Could not generate PDF');
+            }
+          })();
         }}
       />
     </>

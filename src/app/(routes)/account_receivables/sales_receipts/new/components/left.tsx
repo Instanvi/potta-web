@@ -394,19 +394,19 @@ const Left = () => {
                   isClearable
                   isSearchable
                 />
-                {errors.customerId && (
-                  <p className="mt-1 text-sm text-red-500">{errors.customerId}</p>
-                )}
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddCustomerDrawer(true)}
-                className="mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
                 aria-label="Add customer"
               >
                 <i className="ri-add-line text-xl" />
               </button>
             </div>
+            {errors.customerId ? (
+              <p className="mt-1 text-sm text-red-500">{errors.customerId}</p>
+            ) : null}
           </div>
         </DocumentFormCard>
 
