@@ -48,6 +48,7 @@ const Left = () => {
 
   // Use a ref to track if initial selection has been made
   const initialSelectionMade = useRef(false);
+  const currencySeeded = useRef(false);
 
   // Create customer options with proper typing
   const customerOptions: Option[] = customers.map((customer: Customer) => ({
@@ -57,6 +58,16 @@ const Left = () => {
       `Customer ${customer.customerId || customer.uuid.slice(0, 8)}`,
     value: customer.uuid,
   }));
+
+  // Seed default currency into context so totals match the Currency select
+  useEffect(() => {
+    if (currencySeeded.current || !context?.setData) return;
+    currencySeeded.current = true;
+    context.setData((prevData: any) => ({
+      ...prevData,
+      currency: prevData.currency || 'USD',
+    }));
+  }, [context]);
 
   // Set default customer only once when data first loads
   useEffect(() => {

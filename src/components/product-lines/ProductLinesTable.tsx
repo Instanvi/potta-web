@@ -77,7 +77,7 @@ function linesToRows(lines: DocumentLine[], prev: TableRow[]): TableRow[] {
 export default function ProductLinesTable() {
   const context = useContext(ContextData);
   const rows: TableRow[] = context?.data?.table || [];
-  const currency = context?.data?.currency || 'XAF';
+  const currency = context?.data?.currency || 'USD';
   const currencySymbol = getCurrencySymbol(currency);
 
   const lines = useMemo(() => rowsToLines(rows), [rows]);

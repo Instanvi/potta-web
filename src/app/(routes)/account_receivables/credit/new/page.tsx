@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 import {
@@ -16,6 +16,12 @@ import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 export default function NewCreditNotePage() {
   const [showPreview, setShowPreview] = useState(true);
   const [extracting, setExtracting] = useState(false);
+  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
+    null,
+  );
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    setDownloadPdf(() => fn);
+  }, []);
   const togglePreview = () => setShowPreview((v) => !v);
 
   const extractInvoiceData = async (_file: File) => {
@@ -62,8 +68,9 @@ export default function NewCreditNotePage() {
                       title="Preview"
                       downloadTitle="Credit note"
                       onClose={() => setShowPreview(false)}
+                      onDownloadPdf={downloadPdf ?? undefined}
                     >
-                      <PdfView />
+                      <PdfView onRegisterDownload={registerDownload} />
                     </DocumentPreviewShell>
                   </div>
                 </ResizablePanel>
