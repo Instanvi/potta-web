@@ -16,6 +16,7 @@ import useCreateInvoice from '../../_hooks/useCreateInvoice';
 import useUpdateInvoice from '../../_hooks/useUpdateInvoice';
 import SearchableSelect from '@potta/components/searchableSelect';
 import Checkbox from '@potta/components/checkbox';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 import {
   validateInvoiceForm,
   fieldSchemas,
@@ -217,27 +218,6 @@ const Left = ({
     }
   }
 
-  function mapPaymentMethodToApiValue(displayMethod: string): string {
-    switch (displayMethod) {
-      case 'Credit Card':
-        return 'CREDIT_CARD';
-      case 'Bank Transfer':
-        return 'BANK_TRANSFER';
-      case 'ACH Transfer':
-        return 'ACH_TRANSFER'; // Fixed typo: was ACH_TRANSAFER
-      case 'Mobile Money':
-        return 'MOBILE_MONEY';
-      case 'Cash':
-        return 'CASH';
-      case 'Credit':
-        return 'CREDIT';
-      case 'Other':
-        return 'OTHER';
-      default:
-        return 'OTHER';
-    }
-  }
-
   // If the initialInvoiceType changes (shouldn't, but for safety), update state
   useEffect(() => {
     if (initialInvoiceType) {
@@ -335,23 +315,17 @@ const Left = ({
     }));
   };
 
-  const handlePaymentMethodClick = (option: string) => {
-    // If clicking the same option, don't deselect it
-    if (selectedPaymentMethod === option) {
-      return;
-    }
+  const handlePaymentMethodChange = (code: string) => {
+    setSelectedPaymentMethod(code);
 
-    setSelectedPaymentMethod(option);
-
-    // Clear payment method error if it exists
     if (errors.paymentMethod) {
       setErrors((prev) => ({ ...prev, paymentMethod: undefined }));
     }
 
-    // Update context data with single payment method
     context?.setData((prevData: any) => ({
       ...prevData,
-      payment_method: [option], // Array with single value
+      payment_method: code,
+      paymentMethod: code,
     }));
   };
 
@@ -445,7 +419,7 @@ const Left = ({
       paymentTerms: paymentTerms,
       paymentReference: paymentReference, // or generate a unique reference
       notes: note,
-      paymentMethod: mapPaymentMethodToApiValue(selectedPaymentMethod), // Map to API value
+      paymentMethod: selectedPaymentMethod,
       invoiceNumber: invoiceNumber,
       // discountAmount: 0, // Add default or actual value if available
       customerId: customerName, // Using the customer UUID as customerId
@@ -745,7 +719,7 @@ const Left = ({
                 ]}
                 selectedValue={paymentTerms}
                 onChange={(value: any) => handleInputChange('paymentTerms', value)}
-                bg=""
+                bg="bg-white"
                 error={errors.paymentTerms}
               />
             </div>
@@ -791,7 +765,7 @@ const Left = ({
                 ]}
                 selectedValue={currency}
                 onChange={(value: any) => handleInputChange('currency', value)}
-                bg=""
+                bg="bg-white"
                 error={errors.currency}
               />
             </div>
@@ -825,7 +799,7 @@ const Left = ({
                 ]}
                 selectedValue={amountsAre}
                 onChange={(value: any) => setAmountsAre(value)}
-                bg=""
+                bg="bg-white"
               />
             </div>
           </div>
@@ -856,29 +830,11 @@ const Left = ({
                 />
               </div>
               <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-main-bg/40 p-4">
-                <div className={errors.paymentMethod ? 'error-field' : ''}>
-                  <Select
-                    label="Payment method"
-                    required
-                    options={[
-                      { label: 'Credit Card', value: 'Credit Card' },
-                      { label: 'Bank Transfer', value: 'Bank Transfer' },
-                      { label: 'ACH Transfer', value: 'ACH Transfer' },
-                      { label: 'Mobile Money', value: 'Mobile Money' },
-                      { label: 'Cash', value: 'Cash' },
-                      { label: 'Credit', value: 'Credit' },
-                      { label: 'Other', value: 'Other' },
-                    ]}
-                    selectedValue={selectedPaymentMethod}
-                    onChange={(value: string) => handlePaymentMethodClick(value)}
-                    bg="bg-white"
-                    placeholder="Select payment method"
-                    error={errors.paymentMethod}
-                  />
-                  {errors.paymentMethod && (
-                    <p className="mt-2 text-sm text-red-500">{errors.paymentMethod}</p>
-                  )}
-                </div>
+                <PaymentMethodSelect
+                  value={selectedPaymentMethod}
+                  onChange={handlePaymentMethodChange}
+                  error={errors.paymentMethod}
+                />
                 <div className={errors.paymentReference ? 'error-field' : ''}>
                   <Input
                     type="text"
@@ -889,6 +845,7 @@ const Left = ({
                       handleInputChange('paymentReference', e.target.value)
                     }
                     errors={errors.paymentReference}
+                    inputClass="!bg-white"
                   />
                 </div>
               </div>

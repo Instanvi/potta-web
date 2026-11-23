@@ -22,6 +22,11 @@ interface LocationOption {
   name: string;
 }
 
+function isPlaceholderName(name: string | null | undefined) {
+  const n = (name ?? '').trim();
+  return !n || n.toLowerCase() === 'location';
+}
+
 /** Picks the location sent as `x-location-id`; potta-backend scopes every query and posting to it. */
 export function LocationSwitcher({ className }: { className?: string }) {
   const queryClient = useQueryClient();
@@ -35,25 +40,54 @@ export function LocationSwitcher({ className }: { className?: string }) {
   const assignmentLocations = useMemo<LocationOption[]>(() => {
     const byId = new Map<string, LocationOption>();
     if (hierarchy?.location?.id) {
-      byId.set(hierarchy.location.id, { id: hierarchy.location.id, name: hierarchy.location.name });
+      byId.set(hierarchy.location.id, {
+        id: hierarchy.location.id,
+        name: hierarchy.location.name?.trim() || 'Unnamed location',
+      });
     }
     for (const a of assignments) {
       if (a.isActive !== false && a.location?.id && !byId.has(a.location.id)) {
-        byId.set(a.location.id, { id: a.location.id, name: a.location.name });
+        byId.set(a.location.id, {
+          id: a.location.id,
+          name: a.location.name?.trim() || 'Unnamed location',
+        });
       }
     }
     return [...byId.values()];
   }, [hierarchy, assignments]);
 
+  const assignmentNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const loc of assignmentLocations) {
+      if (!isPlaceholderName(loc.name)) map.set(loc.id, loc.name);
+    }
+    return map;
+  }, [assignmentLocations]);
+
   /** Prefer Auth full org list when permitted; otherwise session assignments only. */
   const locations = useMemo<LocationOption[]>(() => {
     if (authLocations && authLocations.length > 0) {
-      return authLocations.map((l) => ({ id: l.id, name: l.name }));
+      return authLocations.map((l) => {
+        const fromAuth = l.name?.trim() ?? '';
+        const fromSession = assignmentNameById.get(l.id);
+        const name = !isPlaceholderName(fromAuth)
+          ? fromAuth
+          : fromSession || fromAuth || 'Unnamed location';
+        return { id: l.id, name };
+      });
     }
     return assignmentLocations;
-  }, [authLocations, assignmentLocations]);
+  }, [authLocations, assignmentLocations, assignmentNameById]);
 
-  const active = locations.find((l) => l.id === locationId);
+  const active = useMemo(() => {
+    if (!locationId) return null;
+    const match = locations.find((l) => l.id === locationId);
+    if (match && !isPlaceholderName(match.name)) return match;
+    const fromSession = assignmentNameById.get(locationId);
+    if (fromSession) return { id: locationId, name: fromSession };
+    if (match) return match;
+    return { id: locationId, name: 'Unnamed location' };
+  }, [locationId, locations, assignmentNameById]);
 
   const select = (loc: LocationOption) => {
     if (loc.id === locationId) return;
@@ -61,6 +95,8 @@ export function LocationSwitcher({ className }: { className?: string }) {
     void queryClient.invalidateQueries();
     toast.success(`Switched to ${loc.name}`);
   };
+
+  const showNameSkeleton = Boolean(locationId) && loadingAll && !active?.name;
 
   return (
     <DropdownMenu>
@@ -75,8 +111,14 @@ export function LocationSwitcher({ className }: { className?: string }) {
           <span className="flex min-w-0 items-center gap-2">
             <MapPin weight="bold" className="size-3.5 shrink-0 text-green-700" />
             <span className="flex min-w-0 flex-col leading-none">
-              <span className="truncate text-xs font-medium">{active?.name ?? 'All locations'}</span>
-              <span className="text-[10px] text-gray-500">Location</span>
+              {showNameSkeleton ? (
+                <Skeleton className="h-3 w-24" />
+              ) : (
+                <span className="truncate text-xs font-medium">
+                  {active?.name ?? 'All locations'}
+                </span>
+              )}
+              <span className="mt-0.5 text-[10px] text-gray-500">Location</span>
             </span>
           </span>
           <CaretUpDown className="size-3.5 shrink-0 text-gray-500" />

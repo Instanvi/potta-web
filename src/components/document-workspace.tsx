@@ -36,8 +36,8 @@ export function DocumentWorkspace({
   };
 
   return (
-    <div className={cn('fixed inset-0 z-[100] flex flex-col bg-white', className)}>
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-black/10 px-4 py-3 md:px-6">
+    <div className={cn('fixed inset-0 z-[100] flex flex-col bg-main-bg', className)}>
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-black/10 bg-white px-4 py-3 md:px-6">
         <div className="min-w-0">
           <h1 className="truncate text-lg font-medium text-foreground">{title}</h1>
           {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
@@ -54,7 +54,7 @@ export function DocumentWorkspace({
           </button>
         </div>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto bg-white">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto bg-main-bg">{children}</div>
       {footer != null && (
         <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-black/10 bg-white px-4 py-3 md:px-6">
           {footer}

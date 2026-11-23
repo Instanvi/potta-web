@@ -9,10 +9,12 @@ import {
   EmptyState,
   ErrorState,
   ListToolbar,
-  LoadingState,
   PageContainer,
 } from '../_shared/states';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { Skeleton } from '@/components/ui/loaders';
+import { FIELD_INPUT } from '@/lib/field-styles';
+import { cn } from '@/lib/utils';
 import {
   useCreateDashboard,
   useDashboards,
@@ -51,13 +53,27 @@ export default function DashboardsListPage() {
       <PageContainer>
         <ListToolbar
           actions={
-            <Button size="sm" onClick={onCreate} disabled={create.isPending}>
-              {create.isPending ? 'Creating…' : 'New dashboard'}
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-9"
+                onClick={() => void refetch()}
+                disabled={isLoading}
+                aria-label="Refresh dashboards"
+                title="Refresh"
+              >
+                <i className={`ri-refresh-line text-base ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button size="sm" onClick={onCreate} disabled={create.isPending}>
+                {create.isPending ? 'Creating…' : 'New dashboard'}
+              </Button>
+            </>
           }
         >
           <input
-            className="h-9 w-full max-w-sm rounded-[2px] border border-black/10 bg-field px-3 text-sm"
+            className={cn(FIELD_INPUT, 'max-w-sm !bg-white')}
             placeholder="Search dashboards"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -65,7 +81,21 @@ export default function DashboardsListPage() {
         </ListToolbar>
 
         {isLoading ? (
-          <LoadingState />
+          <ul className="divide-y divide-black/[0.08] rounded-[2px] border border-black/[0.08] bg-white" aria-busy="true">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <li key={i} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-14" />
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : error ? (
           <ErrorState error={error} onRetry={() => refetch()} />
         ) : !data?.items.length ? (

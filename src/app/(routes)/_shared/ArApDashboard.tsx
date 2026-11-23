@@ -7,7 +7,9 @@ import { useDashboardSummary } from '../account_payables/hooks';
 import { DashboardSide } from '../account_payables/utils/types';
 import { formatCompact, formatMoney } from '../account_payables/utils/format';
 import { formatDate, startOfMonth, today } from './format';
-import { EmptyState, ErrorState, LoadingState, Panel, StatCard, StatusBadge } from './states';
+import { EmptyState, ErrorState, Panel, StatCard, StatusBadge } from './states';
+import { Skeleton } from '@potta/components/ui/loaders';
+import { Button } from '@/components/shadcn/button';
 
 const COPY: Record<DashboardSide, { party: string; docs: string; listHref: string; topTitle: string }> = {
   ar: { party: 'Customer', docs: 'invoices', listHref: '/account_receivables/invoice', topTitle: 'Top customers owing' },
@@ -42,11 +44,57 @@ const ArApDashboard = ({ side }: { side: DashboardSide }) => {
 
   return (
     <div className="flex flex-col gap-5">
-      <DateRangePicker label="Paid in period" className="w-72" value={range} onChange={setRange} />
+      <div className="flex flex-wrap items-end gap-3">
+        <DateRangePicker label="Paid in period" className="w-72" value={range} onChange={setRange} />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-10 shrink-0"
+          onClick={() => void refetch()}
+          disabled={isLoading}
+          aria-label="Refresh dashboard"
+          title="Refresh"
+        >
+          <i className={`ri-refresh-line text-base ${isLoading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
       {invalid ? (
         <p className="text-sm text-destructive">The start date must be before the end date.</p>
       ) : isLoading ? (
-        <LoadingState label="Loading dashboard..." />
+        <div className="flex flex-col gap-5" aria-busy="true">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Panel key={i} className="p-4">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="mt-3 h-8 w-28" />
+                <Skeleton className="mt-2 h-3 w-16" />
+              </Panel>
+            ))}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Panel className="p-4 lg:col-span-2">
+              <Skeleton className="mb-3 h-4 w-16" />
+              <Skeleton className="h-64 w-full" />
+            </Panel>
+            <Panel className="p-4">
+              <Skeleton className="mb-3 h-4 w-32" />
+              <div className="space-y-3 py-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+              </div>
+            </Panel>
+          </div>
+          <Panel className="overflow-hidden p-4">
+            <Skeleton className="mb-4 h-4 w-36" />
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-full" />
+              ))}
+            </div>
+          </Panel>
+        </div>
       ) : error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : !data ? null : (

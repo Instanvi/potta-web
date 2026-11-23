@@ -19,13 +19,32 @@ export const locationKeys = {
   org: (orgId: string) => ['auth-locations', orgId] as const,
 };
 
+function locationDisplayName(row: Record<string, unknown>): string {
+  const candidates = [
+    row.name,
+    row.locationName,
+    row.displayName,
+    row.title,
+    (row.location as Record<string, unknown> | null | undefined)?.name,
+  ];
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim() && c.trim().toLowerCase() !== 'location') {
+      return c.trim();
+    }
+  }
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c.trim();
+  }
+  return 'Unnamed location';
+}
+
 async function fetchOrganizationLocations(orgId: string): Promise<AuthLocation[]> {
   const { data } = await authClient.get(`/organizations/${orgId}/locations`);
   const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
   return rows
     .map((row: Record<string, unknown>) => ({
       id: String(row.id ?? row.uuid ?? ''),
-      name: String(row.name ?? 'Location'),
+      name: locationDisplayName(row),
       address: (row.address as string | null | undefined) ?? null,
       phone: (row.phone as string | null | undefined) ?? null,
       email: (row.email as string | null | undefined) ?? null,

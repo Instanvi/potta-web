@@ -96,8 +96,17 @@ export function BooksTransactionsHub({
         />
         <ListToolbar
           actions={
-            <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-              Refresh
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="size-9"
+              onClick={() => void load()}
+              disabled={loading}
+              aria-label="Refresh"
+              title="Refresh"
+            >
+              <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
             </Button>
           }
         >
