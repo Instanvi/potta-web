@@ -7,7 +7,9 @@ alwaysApply: true
 
 Potta web is the **POS + Books** frontend. Its primary backend is `potta-backend` (POS sync, accounting, invoicing, purchase orders, vendor portal, cashbook, bank accounts, vouchers, master data). Payroll, expenses, budgets, procurement, payments collection and notifications belong to other Instanvi apps; do not add product screens for them here.
 
-**Exception — shared Projects:** Project records are owned by `instanvi-payroll-expense-be` (`/expense/projects`). Potta Books consumes them via `payrollClient` (see `accounting/projects`); do not invent parallel project models in potta-backend for new work.
+**Exception — shared Projects:** Owned by `instanvi-payroll-expense-be` (`/expense/projects`). Potta Books consumes them via `payrollClient` (`accounting/projects`); do not invent parallel project models in potta-backend.
+
+A Project is a **versatile hub**, not a fixed Books-only row: it *may* attach a Spend budget (`budget_id` / soft `budget_amount`), *may* have tasks, and *may* have a kanban board (board → columns → tasks). Books UI can stay thin (name/customer/budget); task/board UIs come later against the same SoT. See expense-be `docs/PROJECTS.md`.
 
 - Routes live in `src/app/(routes)/<feature>/`. Each feature keeps its own:
   - `utils/api.ts` (or `_utils/api.ts`): an object of async functions returning `res.data`

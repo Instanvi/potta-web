@@ -6,7 +6,10 @@ export type ExpenseProject = Record<string, unknown> & {
   uuid?: string;
   name?: string;
   status?: string;
+  /** Soft target (budget_amount) for Books list/forms. */
   budget?: number | null;
+  budgetId?: string | null;
+  budget_id?: string | null;
   customerId?: string | null;
   customer_id?: string | null;
   startDate?: string | null;
@@ -33,7 +36,12 @@ export function normalizeProject(row: Record<string, unknown>): ExpenseProject {
     uuid: String(row.id ?? row.uuid ?? ''),
     name: (row.name as string) ?? '',
     status: (row.status as string) ?? 'active',
-    budget: (row.budget as number | null | undefined) ?? null,
+    budget:
+      (row.budget_amount as number | null | undefined) ??
+      (row.budget as number | null | undefined) ??
+      null,
+    budgetId: (row.budgetId ?? row.budget_id ?? null) as string | null,
+    budget_id: (row.budget_id ?? row.budgetId ?? null) as string | null,
     customerId: (row.customerId ?? row.customer_id ?? null) as string | null,
     customer_id: (row.customer_id ?? row.customerId ?? null) as string | null,
     startDate: toIsoDate(start) ?? null,
@@ -47,9 +55,11 @@ export function normalizeProject(row: Record<string, unknown>): ExpenseProject {
 function toExpenseBody(body: Record<string, unknown>) {
   return {
     name: body.name,
+    description: body.description,
     customer_id: body.customerId ?? body.customer_id,
     status: body.status,
-    budget: body.budget,
+    budget_id: body.budgetId ?? body.budget_id,
+    budget_amount: body.budget ?? body.budget_amount,
     start_date: body.startDate ?? body.start_date,
     end_date: body.endDate ?? body.end_date,
     notes: body.notes,
