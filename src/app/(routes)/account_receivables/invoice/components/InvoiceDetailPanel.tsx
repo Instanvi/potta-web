@@ -10,8 +10,10 @@ import RecordHistory from '@potta/components/shared/RecordHistory';
 import { DocumentDetailChrome } from '@potta/components/document-master-detail';
 import { ErrorState } from '../../../_shared/states';
 import { Skeleton } from '@potta/components/ui/loaders';
+import ConfirmModal from '../../../_shared/ConfirmModal';
 import useApproveInvoice from '../_hooks/useApproveInvoice';
 import useGetOneInvoice from '../_hooks/useGetOneInvoice';
+import useSendInvoice from '../_hooks/useSendInvoice';
 import InvoicePdfPreview, { InvoicePreviewModel } from './InvoicePdfPreview';
 import EditInvoiceModal from './EditInvoiceModal';
 import { downloadPreviewAsPdf } from '@/lib/print-preview';
@@ -46,7 +48,9 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
   const { data, isLoading, error, refetch } = useGetOneInvoice(invoiceId);
   const invoice = (data as InvoicePreviewModel & { uuid?: string; status?: string }) || fallback;
   const approveMutation = useApproveInvoice();
+  const sendMutation = useSendInvoice();
   const [editOpen, setEditOpen] = useState(false);
+  const [confirmSend, setConfirmSend] = useState(false);
 
   if (isLoading && !fallback) {
     return (
@@ -74,6 +78,7 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
   const canApprove = statusUpper === 'ISSUED';
   const canPay = PAYABLE_STATUSES.includes(statusUpper);
   const uuid = (invoice as { uuid?: string }).uuid || invoiceId;
+  const customerEmail = (invoice.customer?.email || '').trim();
   const customerName = invoice.customer
     ? `${invoice.customer.firstName ?? ''} ${invoice.customer.lastName ?? ''}`.trim()
     : '';
@@ -85,6 +90,27 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
       toast.success('Invoice approved successfully!', { id: loadingToast });
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to approve invoice', {
+        id: loadingToast,
+      });
+    }
+  };
+
+  const handleSendClick = () => {
+    if (!customerEmail) {
+      toast.error('Add a customer email before sending');
+      return;
+    }
+    setConfirmSend(true);
+  };
+
+  const handleSendConfirm = async () => {
+    const loadingToast = toast.loading('Sending invoice…');
+    try {
+      const res = await sendMutation.mutateAsync(uuid);
+      toast.success(`Invoice sent to ${res.to}`, { id: loadingToast });
+      setConfirmSend(false);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to send invoice', {
         id: loadingToast,
       });
     }
@@ -110,6 +136,14 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
           onClick={() => undefined}
         />
       )}
+      <Button
+        text={customerEmail ? 'Send' : 'Add customer email'}
+        type="button"
+        theme="lightBlue"
+        icon={<i className="ri-mail-send-line" />}
+        disabled={sendMutation.isPending}
+        onClick={handleSendClick}
+      />
       {canPay ? (
         <Link href={`/account_receivables/paynow/${uuid}`}>
           <Button
@@ -307,6 +341,19 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
         open={editOpen}
         setOpen={setEditOpen}
         invoice={invoice as any}
+      />
+      <ConfirmModal
+        open={confirmSend}
+        title={`Send invoice ${invoice.invoiceNumber || invoice.invoiceId}`}
+        message={
+          customerEmail
+            ? `Email this invoice to ${customerEmail}? Credits come from the branch notification wallet.`
+            : 'Add a customer email before sending.'
+        }
+        confirmText="Send"
+        isLoading={sendMutation.isPending}
+        onClose={() => setConfirmSend(false)}
+        onConfirm={() => void handleSendConfirm()}
       />
     </>
   );

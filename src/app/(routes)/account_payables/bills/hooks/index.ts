@@ -74,3 +74,15 @@ export const usePayBill = () => {
     onError: (error) => toast.error(apiErrorMessage(error, 'Failed to record payment')),
   });
 };
+
+export const useSendBill = () => {
+  const invalidate = useInvalidateBills();
+  return useMutation({
+    mutationFn: (id: string) => billsApi.send(id),
+    onSuccess: (res) => {
+      invalidate();
+      toast.success(`Bill emailed to ${res.to}`);
+    },
+    onError: (error) => toast.error(apiErrorMessage(error, 'Failed to send bill')),
+  });
+};
