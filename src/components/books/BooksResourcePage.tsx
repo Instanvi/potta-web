@@ -677,6 +677,7 @@ function EntitySelectField({
       onChange={onChange}
       placeholder={loading ? 'Loading…' : `Select ${label.toLowerCase()}`}
       isDisabled={loading}
+      outlined
     />
   );
 }
