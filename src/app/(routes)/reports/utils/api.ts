@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import { isExpenseReportId, runExpenseReport } from '@/lib/expense-reports';
 
 export type ReportColumn = {
   key: string;
@@ -30,6 +31,9 @@ export type ReportRunParams = {
 
 export const reportsApi = {
   run: async (reportId: string, params: ReportRunParams) => {
+    if (isExpenseReportId(reportId)) {
+      return runExpenseReport(reportId, params);
+    }
     const res = await axios.get<ReportResult>(`/reports/${reportId}/run`, { params });
     return res.data;
   },

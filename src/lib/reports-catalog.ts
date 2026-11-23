@@ -18,6 +18,7 @@ export const DEFAULT_FAVOURITE_IDS = [
   'balance-sheet',
   'profit-and-loss',
   'ar-ageing-summary',
+  'spend_summary',
 ] as const;
 
 export const REPORT_CATEGORIES: ReportCategory[] = [
@@ -113,16 +114,56 @@ export const REPORT_CATEGORIES: ReportCategory[] = [
     ],
   },
   {
+    id: 'spend-overview',
+    title: 'Spend overview',
+    reports: [
+      {
+        id: 'spend_summary',
+        title: 'Spend summary',
+        href: '/reports/view/spend_summary',
+        live: true,
+      },
+      {
+        id: 'unpaid_bills_summary',
+        title: 'Unpaid Bills (Spend)',
+        href: '/reports/view/unpaid_bills_summary',
+        live: true,
+      },
+    ],
+  },
+  {
     id: 'expenses-vendors',
     title: 'Expenses and vendors',
     reports: [
       { id: 'cheque-detail', title: 'Cheque Detail', href: '/reports/view/cheque-detail', live: true },
       { id: 'purchases-product-detail', title: 'Purchases by Product/Service Detail', href: '/reports/view/purchases-product-detail', live: true },
       { id: 'purchase-list', title: 'Purchase List', href: '/account_payables/purchase', live: true },
-      { id: 'txn-by-vendor', title: 'Transaction List by Vendor', href: '/reports/view/txn-by-vendor', live: true },
+      {
+        id: 'txn-by-vendor',
+        title: 'Transaction List by Vendor',
+        href: '/reports/view/txn-by-vendor',
+        live: true,
+      },
+      {
+        id: 'transaction_list_by_vendor',
+        title: 'Spend transaction list by vendor',
+        href: '/reports/view/transaction_list_by_vendor',
+        live: true,
+      },
       { id: 'purchases-vendor-detail', title: 'Purchases by Vendor Detail', href: '/reports/view/purchases-vendor-detail', live: true },
       { id: 'vendor-contact-list', title: 'Vendor Contact List', href: '/account_payables/contacts', live: true },
-      { id: 'expenses-vendor-summary', title: 'Expenses by Vendor Summary', href: '/reports/view/expenses-vendor-summary', live: true },
+      {
+        id: 'expenses-vendor-summary',
+        title: 'Expenses by Vendor Summary',
+        href: '/reports/view/expenses-vendor-summary',
+        live: true,
+      },
+      {
+        id: 'expenses_by_vendor',
+        title: 'Spend expenses by vendor',
+        href: '/reports/view/expenses_by_vendor',
+        live: true,
+      },
       { id: 'vendor-phone-list', title: 'Vendor Phone List', href: '/reports/view/vendor-phone-list', live: true },
     ],
   },
