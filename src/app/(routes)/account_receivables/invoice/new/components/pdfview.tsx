@@ -247,9 +247,20 @@ const PdfView = () => {
               <div className="pl-4">
                 <p>
                   <strong>Payment Method:</strong>{' '}
-                  {contextData.payment_method?.[0]
-                    ?.replace(/([A-Z])/g, ' $1')
-                    .toUpperCase() || 'Not selected'}
+                  {(() => {
+                    const raw =
+                      typeof contextData.payment_method === 'string'
+                        ? contextData.payment_method
+                        : contextData.payment_method?.[0] ||
+                          contextData.paymentMethod ||
+                          '';
+                    return (
+                      String(raw)
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, (c: string) => c.toUpperCase()) ||
+                      'Not selected'
+                    );
+                  })()}
                 </p>
 
                 {paymentReference && (

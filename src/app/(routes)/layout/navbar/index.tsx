@@ -40,7 +40,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-20 w-full border-b border-black/[0.06] bg-background font-sans">
       <div className="flex h-16 items-center justify-between px-3 md:px-4">
-        <h1 className="ml-4 text-start text-lg font-medium capitalize text-foreground">
+        <h1 className="text-start text-lg font-medium capitalize text-foreground">
           {getTitle(pathname, search)}
         </h1>
 

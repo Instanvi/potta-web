@@ -1,7 +1,13 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Controller, Resolver, useForm, useWatch } from 'react-hook-form';
+import {
+  Controller,
+  FormProvider,
+  Resolver,
+  useForm,
+  useWatch,
+} from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { toast } from 'sonner';
 import Button from '@potta/components/button';
@@ -10,14 +16,16 @@ import Select from '@potta/components/select';
 import SearchableSelect from '@potta/components/searchableSelect';
 import TextArea from '@potta/components/textArea';
 import { FormDatePicker } from '@potta/components/ui/date-picker';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { apiErrorMessage, formatDate, today, toDateInput } from '../../../../_shared/format';
 import { usePurchaseOrderOptions, useVendorOptions } from '../../../hooks';
 import { apLookupsApi } from '../../../utils/api';
 import { formatMoney } from '../../../utils/format';
 import { useCreateBill } from '../../hooks';
-import { BillCurrency, PAYMENT_METHODS, PaymentMethod } from '../../utils/types';
+import { BillCurrency, PaymentMethod } from '../../utils/types';
 import { BillFormValues, billSchema, lineTotals } from '../validations/billValidation';
 import LineItemsEditor, { DEFAULT_TAX_RATE, emptyLine } from './LineItemsEditor';
+import BillDraftPreview from './BillDraftPreview';
 import {
   DocumentBalanceDue,
   DocumentFormCard,
@@ -47,22 +55,26 @@ interface BillFormProps {
   variant?: 'page' | 'sheet';
   /** Called after save (with the new bill id) or cancel; defaults to navigating back to the bills list. */
   onDone?: (billId?: string) => void;
+  showPreview?: boolean;
+  onTogglePreview?: () => void;
+  /** When set, wraps form + preview under FormProvider for the split layout. */
+  renderSplit?: (form: ReactNode, preview: ReactNode) => ReactNode;
 }
 
-const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
+const BillForm = ({
+  variant = 'page',
+  onDone,
+  showPreview = true,
+  onTogglePreview,
+  renderSplit,
+}: BillFormProps) => {
   const router = useRouter();
   const inSheet = variant === 'sheet';
   const createBill = useCreateBill();
   const { data: vendors = [], isLoading: vendorsLoading } = useVendorOptions();
   const [copyingLines, setCopyingLines] = useState(false);
 
-  const {
-    control,
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<BillFormValues>({
+  const methods = useForm<BillFormValues>({
     resolver: yupResolver(billSchema) as unknown as Resolver<BillFormValues>,
     defaultValues: {
       vendorId: '',
@@ -78,13 +90,23 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
     },
   });
 
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = methods;
+
   const vendorId = useWatch({ control, name: 'vendorId' });
   const purchaseOrderId = useWatch({ control, name: 'purchaseOrderId' });
   const currency = useWatch({ control, name: 'currency' });
   const issueDate = useWatch({ control, name: 'issueDate' });
   const lines = useWatch({ control, name: 'lineItems' }) ?? [];
   const expenseAccountCode = useWatch({ control, name: 'expenseAccountCode' });
-  const { data: purchaseOrders = [], isFetching: ordersLoading } = usePurchaseOrderOptions(vendorId || undefined);
+  const { data: purchaseOrders = [], isFetching: ordersLoading } = usePurchaseOrderOptions(
+    vendorId || undefined,
+  );
 
   const summary = useMemo(
     () =>
@@ -97,9 +119,9 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
           acc.total += t.total;
           return acc;
         },
-        { subtotal: 0, discount: 0, tax: 0, total: 0 }
+        { subtotal: 0, discount: 0, tax: 0, total: 0 },
       ),
-    [lines]
+    [lines],
   );
 
   const copyLinesFromOrder = async () => {
@@ -121,7 +143,7 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
           discountAmount: Number(l.discountAmount ?? 0),
           productId: l.product?.uuid,
         })),
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
       toast.success(`Copied ${orderLines.length} line(s) from the purchase order`);
     } catch (error) {
@@ -155,7 +177,7 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
       {
         onSuccess: (bill) =>
           onDone ? onDone(bill.uuid) : router.push(`/account_payables/bills?id=${bill.uuid}`),
-      }
+      },
     );
   };
 
@@ -177,7 +199,8 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
                     field.onChange(value);
                     setValue('purchaseOrderId', '');
                     const vendor = vendors.find((v) => v.uuid === value);
-                    const vendorCurrency = CURRENCIES.find((c) => c.value === vendor?.currency)?.value;
+                    const vendorCurrency = CURRENCIES.find((c) => c.value === vendor?.currency)
+                      ?.value;
                     if (vendorCurrency) setValue('currency', vendorCurrency);
                   }}
                   placeholder={vendorsLoading ? 'Loading vendors…' : 'Select a vendor'}
@@ -240,6 +263,7 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               placeholder="e.g. INV-0042"
               register={register}
               errors={errors.vendorInvoiceNumber}
+              inputClass="!bg-white"
             />
           </div>
           <div className="md:col-span-2">
@@ -271,6 +295,7 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               required
               register={register}
               errors={errors.expenseAccountCode}
+              inputClass="!bg-white"
             />
           </div>
           <div className="md:col-span-2">
@@ -278,12 +303,10 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               control={control}
               name="paymentMethod"
               render={({ field }) => (
-                <Select
-                  label="Payment method"
-                  options={PAYMENT_METHODS.filter((m) => m.value !== 'CREDIT')}
-                  selectedValue={field.value}
-                  onChange={(v: PaymentMethod) => field.onChange(v)}
-                  bg="bg-white"
+                <PaymentMethodSelect
+                  value={field.value}
+                  onChange={(code) => field.onChange(code as PaymentMethod)}
+                  error={errors.paymentMethod?.message}
                 />
               )}
             />
@@ -309,8 +332,8 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
               errors={errors.notes}
             />
             <p className="mt-3 text-xs text-black/60">
-              Saved as a draft. Approving posts Dr {expenseAccountCode || '601'} expense + Dr 445 VAT / Cr
-              vendor payable.
+              Saved as a draft. Approving posts Dr {expenseAccountCode || '601'} expense + Dr 445 VAT /
+              Cr vendor payable.
             </p>
           </div>
           <div className="lg:col-span-5">
@@ -373,7 +396,7 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
     );
   }
 
-  return (
+  const formColumn = (
     <form onSubmit={handleSubmit(onSubmit)}>
       <DocumentFormShell>{fields}</DocumentFormShell>
       <DocumentFormFooter
@@ -388,8 +411,13 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
           </ShadcnButton>
         }
         center={
-          <DocumentFooterLink onClick={() => toast.info('Print / preview opens after save.')}>
-            Print or Preview
+          <DocumentFooterLink
+            onClick={() => {
+              if (onTogglePreview) onTogglePreview();
+              else toast.info('Preview is available in the side panel.');
+            }}
+          >
+            {showPreview ? 'Hide preview' : 'Print or Preview'}
           </DocumentFooterLink>
         }
         right={
@@ -414,6 +442,16 @@ const BillForm = ({ variant = 'page', onDone }: BillFormProps) => {
       />
     </form>
   );
+
+  if (renderSplit) {
+    return (
+      <FormProvider {...methods}>
+        {renderSplit(formColumn, <BillDraftPreview vendors={vendors} />)}
+      </FormProvider>
+    );
+  }
+
+  return <FormProvider {...methods}>{formColumn}</FormProvider>;
 };
 
 export default BillForm;

@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@potta/lib/utils';
 
-/** Document canvas used by Invoice and Bill create screens — fills the app content area. */
+/** Document canvas used by Invoice and Bill create screens — main-bg with white field cards. */
 export function DocumentFormShell({
   className,
   children,
@@ -12,8 +12,8 @@ export function DocumentFormShell({
   children: ReactNode;
 }) {
   return (
-    <div className={cn('flex w-full flex-col bg-white', className)}>
-      <div className="border-b border-black/[0.08] bg-white">{children}</div>
+    <div className={cn('flex w-full flex-col gap-3 bg-main-bg p-4 md:p-5', className)}>
+      {children}
     </div>
   );
 }
@@ -57,7 +57,7 @@ export function DocumentFormCard({
     <section
       className={cn(
         flush
-          ? 'border-b border-black/[0.06] px-4 py-5 last:border-b-0 md:px-6 md:py-6'
+          ? 'rounded-[2px] border border-black/[0.08] bg-white px-4 py-5 md:px-6 md:py-6'
           : 'rounded-[2px] border border-black/[0.08] bg-white p-5 shadow-sm md:p-6',
         className,
       )}

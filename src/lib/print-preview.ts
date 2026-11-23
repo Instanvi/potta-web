@@ -5,18 +5,28 @@ export function downloadPreviewAsPdf(
 ) {
   if (!source || typeof window === 'undefined') return;
 
-  const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=1100');
+  // Do not pass noopener/noreferrer in features — browsers then return null from
+  // window.open while still opening about:blank, so we never write the HTML.
+  const win = window.open('', '_blank', 'width=900,height=1100');
   if (!win) return;
+  try {
+    win.opener = null;
+  } catch {
+    /* ignore cross-origin / locked opener */
+  }
 
   const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
     .map((node) => node.outerHTML)
     .join('\n');
 
+  const safeTitle = title.replace(/</g, '');
+
+  win.document.open();
   win.document.write(`<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>${title.replace(/</g, '')}</title>
+    <title>${safeTitle}</title>
     ${styles}
     <style>
       @page { margin: 12mm; }

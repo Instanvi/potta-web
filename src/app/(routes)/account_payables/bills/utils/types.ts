@@ -109,7 +109,8 @@ export interface CreateBillPayload {
   issueDate: string;
   dueDate: string;
   currency?: BillCurrency;
-  paymentMethod?: PaymentMethod;
+  /** Org payment method code. */
+  paymentMethod?: PaymentMethod | string;
   expenseAccountCode?: string;
   notes?: string;
   lineItems: BillLinePayload[];

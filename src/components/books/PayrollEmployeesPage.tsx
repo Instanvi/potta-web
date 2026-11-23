@@ -86,11 +86,14 @@ export function PayrollEmployeesPage() {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="icon"
+                className="size-9"
                 onClick={() => void refetch()}
                 disabled={isFetching}
+                aria-label="Refresh"
+                title="Refresh"
               >
-                Refresh
+                <i className={`ri-refresh-line text-base ${isFetching ? 'animate-spin' : ''}`} />
               </Button>
               <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
                 New

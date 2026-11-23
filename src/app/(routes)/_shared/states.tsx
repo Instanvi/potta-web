@@ -102,9 +102,11 @@ export const ErrorState = ({
         <button
           type="button"
           onClick={onRetry}
-          className="h-9 rounded-[2px] border border-input bg-background px-4 text-sm font-medium text-foreground hover:bg-accent"
+          aria-label="Retry"
+          title="Retry"
+          className="inline-flex size-9 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent"
         >
-          Retry
+          <i className="ri-refresh-line text-base" />
         </button>
       )}
     </div>

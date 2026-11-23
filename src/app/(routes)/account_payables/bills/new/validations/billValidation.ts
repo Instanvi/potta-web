@@ -20,7 +20,8 @@ export interface BillFormValues {
   issueDate: string;
   dueDate: string;
   currency: BillCurrency;
-  paymentMethod: PaymentMethod;
+  /** Org payment method code (e.g. BANK_TRANSFER). */
+  paymentMethod: PaymentMethod | string;
   expenseAccountCode: string;
   notes?: string;
   lineItems: BillLineFormValues[];
@@ -64,7 +65,7 @@ export const billSchema = yup.object({
       return !value || !issueDate || value >= issueDate;
     }),
   currency: yup.mixed<BillCurrency>().oneOf(['XAF', 'USD', 'EUR']).required(),
-  paymentMethod: yup.mixed<PaymentMethod>().required(),
+  paymentMethod: yup.string().trim().required('Select a payment method'),
   expenseAccountCode: yup
     .string()
     .trim()

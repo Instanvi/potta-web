@@ -1,13 +1,21 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { CaretDoubleLeft, CaretDoubleRight, SignOut, User } from '@phosphor-icons/react';
+import {
+  CaretDoubleLeft,
+  CaretDoubleRight,
+  PushPin,
+  PushPinSlash,
+  SignOut,
+  User,
+} from '@phosphor-icons/react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { AppIcon } from '@/components/app-icon';
 import { cn } from '@potta/lib/utils';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +36,7 @@ import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 /** Icon rail (module toggler) + links panel, as in instanvi-payroll-expense-fe. */
 export const SIDEBAR_RAIL_WIDTH = 56;
 export const SIDEBAR_PANEL_WIDTH = 208;
+const PIN_STORAGE_KEY = 'potta.sidebar.panelPinned';
 
 const RailButton = ({
   module,
@@ -101,6 +110,22 @@ const Sidebars = () => {
   const context = useContext(ContextData);
   const canOpen = useCanOpenRoute();
   const collapsed = !!context?.toggle;
+  const [pinned, setPinned] = useState(false);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    try {
+      const next = window.localStorage.getItem(PIN_STORAGE_KEY) === '1';
+      setPinned(next);
+      if (next) context?.setToggle(false);
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const modules = NAV_MODULES.map((m) => ({
     ...m,
@@ -120,11 +145,46 @@ const Sidebars = () => {
     if (routeModule?.id !== module.id) router.push(module.items[0].href);
   };
 
+  const setPinnedPersist = (next: boolean) => {
+    setPinned(next);
+    try {
+      window.localStorage.setItem(PIN_STORAGE_KEY, next ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+    if (next) context?.setToggle(false);
+  };
+
+  const openFromHover = () => {
+    if (collapsed) context?.setToggle(false);
+  };
+
+  const closeIfUnpinned = () => {
+    if (!pinned) context?.setToggle(true);
+  };
+
+  const handleMouseEnter = () => {
+    if (leaveTimer.current) {
+      clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (pinned) return;
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    leaveTimer.current = setTimeout(() => closeIfUnpinned(), 180);
+  };
+
   const top = modules.filter((m) => m.placement !== 'bottom');
   const bottom = modules.filter((m) => m.placement === 'bottom');
 
   return (
-    <aside className="flex h-screen border-r border-black/[0.08] bg-[#f9f9f9] font-sans">
+    <aside
+      className="flex h-screen border-r border-black/[0.08] bg-white font-sans"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="flex w-14 shrink-0 flex-col items-center gap-2 py-3">
         <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-md">
           <img src="/icons/Potta.svg" alt="Potta" className="size-8 object-contain" />
@@ -134,18 +194,35 @@ const Sidebars = () => {
             <RailButton key={m.id} module={m} active={m.id === highlightedId} onSelect={select} />
           ))}
         </nav>
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-1">
           {bottom.map((m) => (
             <RailButton key={m.id} module={m} active={m.id === highlightedId} onSelect={select} />
           ))}
           <button
             type="button"
-            title={collapsed ? 'Show menu' : 'Hide menu'}
-            aria-label={collapsed ? 'Show menu' : 'Hide menu'}
+            title={collapsed ? 'Expand menu' : 'Collapse menu'}
+            aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}
+            onMouseEnter={openFromHover}
+            onFocus={openFromHover}
             onClick={() => context?.setToggle(!collapsed)}
             className="flex size-10 items-center justify-center rounded-md text-foreground/60 hover:bg-brand-subtle hover:text-primary"
           >
             {collapsed ? <CaretDoubleRight size={18} /> : <CaretDoubleLeft size={18} />}
+          </button>
+          <button
+            type="button"
+            title={pinned ? 'Unpin menu' : 'Pin menu open'}
+            aria-label={pinned ? 'Unpin menu' : 'Pin menu open'}
+            aria-pressed={pinned}
+            onClick={() => setPinnedPersist(!pinned)}
+            className={cn(
+              'flex size-10 items-center justify-center rounded-md transition-colors',
+              pinned
+                ? 'bg-brand-subtle text-primary'
+                : 'text-foreground/60 hover:bg-brand-subtle hover:text-primary'
+            )}
+          >
+            {pinned ? <PushPin size={16} weight="fill" /> : <PushPinSlash size={16} />}
           </button>
           <UserMenu />
         </div>

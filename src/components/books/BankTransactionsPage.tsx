@@ -131,8 +131,16 @@ export function BankTransactionsPage() {
           title="Bank transactions"
           actions={
             <>
-              <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
-                Refresh
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-9"
+                onClick={() => void load()}
+                aria-label="Refresh"
+                title="Refresh"
+              >
+                <i className="ri-refresh-line text-base" />
               </Button>
               <Button
                 type="button"
