@@ -110,7 +110,7 @@ const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-full w-full flex-col">
-      <div className="flex-1 space-y-4 p-6 pb-24">
+      <div className="flex-1 space-y-4 pb-6">
         <FormSection title="Basics" description="How the item is named and grouped.">
           <div className="md:col-span-2">
             <Input label="Item name" type="text" name="name" register={register} errors={errors.name} required />
@@ -265,7 +265,7 @@ const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess
         )}
       </div>
 
-      <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
+      <div className="sticky bottom-0 -mx-6 mt-auto flex justify-end gap-3 border-t border-black/10 bg-white px-6 py-4">
         <Button
           text="Reset"
           type="button"

@@ -141,7 +141,7 @@ const Filter = ({ rows = [] }: { rows?: Product[] }) => {
   return (
     <>
       <ListToolbar
-        className="mb-2"
+        className="mb-4"
         actions={
           <>
             <ExportButton

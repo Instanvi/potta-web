@@ -193,56 +193,53 @@ const Slider: FC<props> = ({
                 style={noPanelScroll ? { overflowY: 'visible' } : {}}
               >
                 <div
-                  className={`flex h-full flex-col bg-white py-6 ${tabs && "!py-0"}  ${
-                    noPanelScroll ? '' : ' overflow-y-auto'
+                  className={`flex h-full flex-col bg-white ${
+                    noPanelScroll ? '' : 'overflow-y-auto'
                   } ${sliderClass}`}
                 >
-                  <div className="flex justify-center items-center ">
-                    <div
-                      className={`flex px-4 w-full  border-b justify-between ${
-                        tabs ? 'py-2' : 'py-4'
-                      }`}
-                    >
-                      <div className="flex-1 flex gap-10 items-end">
-                        <DialogTitle className="text-base !font-medium text-foreground sm:text-lg">
-                          {title}
-                        </DialogTitle>
-                        {/* Tabs */}
-                        {tabs && tabs.length > 0 && (
-                          <div className="flex w-fit mt-4">
-                            {tabs.map((tab) => (
-                              <button
-                                key={tab.id}
-                                type="button"
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`px-4 text-muted-foreground duration-500 ease-in-out ${
-                                  activeTab === tab.id &&
-                                  'border-b-2 border-primary text-primary font-medium'
-                                } cursor-pointer flex items-center`}
-                              >
-                                <p>{tab.label}</p>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-3 flex h-7 items-center">
-                        {!closeButton && (
-                          <button
-                            type="button"
-                            onClick={() => setOpen(false)}
-                            className="relative rounded-[2px] text-muted-foreground hover:text-foreground focus:outline-none focus:ring-[3px] focus:ring-ring/30"
-                          >
-                            <span className="absolute -inset-2.5" />
-                            <span className="sr-only">Close panel</span>
-                            <XMarkIcon aria-hidden="true" className="h-6 w-6" />
-                          </button>
-                        )}
-                      </div>
+                  <div
+                    className={`flex w-full shrink-0 items-center justify-between border-b border-black/10 px-6 ${
+                      tabs ? 'py-3' : 'py-5'
+                    }`}
+                  >
+                    <div className="flex flex-1 items-end gap-8">
+                      <DialogTitle className="text-base !font-medium text-foreground sm:text-lg">
+                        {title}
+                      </DialogTitle>
+                      {tabs && tabs.length > 0 && (
+                        <div className="flex w-fit">
+                          {tabs.map((tab) => (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => setActiveTab(tab.id)}
+                              className={`flex cursor-pointer items-center px-4 text-muted-foreground duration-500 ease-in-out ${
+                                activeTab === tab.id &&
+                                'border-b-2 border-primary font-medium text-primary'
+                              }`}
+                            >
+                              <p>{tab.label}</p>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="ml-3 flex h-7 items-center">
+                      {!closeButton && (
+                        <button
+                          type="button"
+                          onClick={() => setOpen(false)}
+                          className="relative rounded-[2px] text-muted-foreground hover:text-foreground focus:outline-none focus:ring-[3px] focus:ring-ring/30"
+                        >
+                          <span className="absolute -inset-2.5" />
+                          <span className="sr-only">Close panel</span>
+                          <XMarkIcon aria-hidden="true" className="h-6 w-6" />
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div
-                    className={`mt-6 flex flex-1 overflow-y-auto custom-scrollbar justify-center bg-white px-4 sm:px-6 ${sliderContentClass}`}
+                    className={`custom-scrollbar flex flex-1 justify-center overflow-y-auto bg-white px-6 py-5 ${sliderContentClass}`}
                   >
                     {tabs && tabs.length > 0
                       ? tabs.find((tab) => tab.id === activeTab)?.content ||

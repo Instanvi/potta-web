@@ -190,9 +190,9 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
         onSubmit={handleSubmit(onSubmit)}
         className="relative h-screen w-full max-w-4xl overflow-y-auto"
       >
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 pb-6">
           {/* Basic Information */}
-          <div className="bg-white rounded-lg p-6 border">
+          <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:p-5">
             <h3 className="text-lg font-medium mb-4 flex items-center">
               <Package className="mr-2 h-5 w-5" />
               Basic Information
@@ -277,7 +277,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
           </div>
 
           {/* Pricing */}
-          <div className="bg-white rounded-lg p-6 border">
+          <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:p-5">
             <h3 className="text-lg font-medium mb-4">Pricing</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -320,7 +320,7 @@ const CreateBundleProduct: React.FC<CreateBundleProductProps> = ({
           </div>
 
           {/* Bundle Components */}
-          <div className="bg-white rounded-lg p-6 border">
+          <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:p-5">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Bundle Components</h3>
               <Button

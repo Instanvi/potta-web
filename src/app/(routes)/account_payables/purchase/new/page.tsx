@@ -48,7 +48,7 @@ const NewInvoice = () => {
             defaultSize={showPreview ? 50 : 100}
             style={{ transition: 'flex-basis 300ms ease-in-out' }}
           >
-            <div className="p-4 md:p-5 pb-8 h-[92.7vh] overflow-y-auto flex justify-center">
+            <div className="flex h-[92.7vh] justify-center overflow-y-auto bg-white p-4 pb-8 md:p-5">
               <Left />
             </div>
           </ResizablePanel>

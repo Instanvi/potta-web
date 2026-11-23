@@ -83,7 +83,7 @@ const NewReturnSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boolean
   return (
     <Slider open={open} setOpen={setOpen} edit title="New return">
       <form onSubmit={submit} className="flex min-h-full w-full max-w-3xl flex-col">
-        <div className="flex-1 space-y-4 p-6 pb-24">
+        <div className="flex-1 space-y-4 pb-6">
           <section className={panelClass}>
             <StockItemPicker label="Returned item" product={product} onChange={setProduct} />
             {product && (
@@ -119,7 +119,7 @@ const NewReturnSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boolean
                 selectedValue={reason}
                 onChange={(v: ReturnReason) => setReason(v)}
               />
-              <label className="block">
+              <label className="block md:col-span-2">
                 <span className="text-sm font-medium">Sale or receipt reference</span>
                 <input
                   className={inputClass}
@@ -163,7 +163,7 @@ const NewReturnSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boolean
           </section>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 mt-auto flex justify-end gap-3 border-t border-black/10 bg-white px-6 py-4">
           <Button text="Cancel" type="button" theme="outline" onClick={() => setOpen(false)} />
           <Button text="Record return" type="submit" isLoading={busy} disabled={!product || !qtyValid} />
         </div>
@@ -230,7 +230,10 @@ const ReturnsManager = () => {
   const target = pendingAction?.row;
   return (
     <div className="w-full">
-      <ListToolbar actions={<Button text="New return" type="button" onClick={openSheet} />}>
+      <ListToolbar
+        className="mb-4"
+        actions={<Button text="New return" type="button" onClick={openSheet} />}
+      >
         <MovementFilters
           search={search}
           onSearch={setSearch}

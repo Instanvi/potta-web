@@ -23,21 +23,7 @@ export const purchaseOrderValidationSchema = yup.object().shape({
     .min(5, 'Shipping address must be at least 5 characters')
     .max(500, 'Shipping address must not exceed 500 characters'),
 
-  paymentMethod: yup
-    .string()
-    .required('Payment method is required')
-    .oneOf(
-      [
-        'CREDIT_CARD',
-        'BANK_TRANSFER',
-        'ACH_TRANSAFER',
-        'MOBILE_MONEY',
-        'CASH',
-        'CREDIT',
-        'OTHER',
-      ],
-      'Please select a valid payment method'
-    ),
+  paymentMethod: yup.string().trim().required('Payment method is required'),
 
   paymentTerms: yup
     .string()
@@ -93,21 +79,7 @@ export const fieldSchemas = {
     .min(5, 'Shipping address must be at least 5 characters')
     .max(500, 'Shipping address must not exceed 500 characters'),
 
-  paymentMethod: yup
-    .string()
-    .required('Payment method is required')
-    .oneOf(
-      [
-        'CREDIT_CARD',
-        'BANK_TRANSFER',
-        'ACH_TRANSAFER',
-        'MOBILE_MONEY',
-        'CASH',
-        'CREDIT',
-        'OTHER',
-      ],
-      'Please select a valid payment method'
-    ),
+  paymentMethod: yup.string().trim().required('Payment method is required'),
 
   paymentTerms: yup
     .string()

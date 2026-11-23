@@ -67,19 +67,19 @@ function CatalogCreateSheet({
 }) {
   return (
     <Sheet open={open} onOpenChange={(value) => !value && onClose()}>
-      <SheetContent side="right" className="flex w-full flex-col">
-        <SheetHeader>
+      <SheetContent side="right" className="flex h-full w-full flex-col bg-white p-0">
+        <SheetHeader className="border-b border-black/10 bg-white px-6 py-5">
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
         <form
-          className="mt-6 flex flex-1 flex-col gap-4"
+          className="flex flex-1 flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             onSubmit();
           }}
         >
-          <div className="space-y-4">{children}</div>
-          <SheetFooter className="mt-auto flex justify-end gap-2 pt-6">
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">{children}</div>
+          <SheetFooter className="mt-0 flex justify-end gap-2 border-t border-black/10 px-6 py-4">
             <Button text="Cancel" type="button" theme="gray" color onClick={onClose} />
             <Button text={submitLabel} type="submit" isLoading={pending} disabled={pending} />
           </SheetFooter>
@@ -125,6 +125,7 @@ export function AttributeCreateForm() {
   return (
     <>
       <ListToolbar
+        className="mb-4"
         actions={
           <Button
             text="Add attribute"
@@ -203,6 +204,7 @@ export function UnitCreateForm() {
   return (
     <>
       <ListToolbar
+        className="mb-4"
         actions={
           <Button
             text="Add unit"
@@ -283,6 +285,7 @@ export function ModifierCreateForm() {
   return (
     <>
       <ListToolbar
+        className="mb-4"
         actions={
           <Button
             text="Add modifier"

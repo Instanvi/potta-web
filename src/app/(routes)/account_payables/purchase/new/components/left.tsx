@@ -6,14 +6,16 @@ import DynamicTable from './newtableInvoice';
 import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllVendors from '@potta/app/(routes)/vendors/hooks/useGetAllVendors';
-import Select from '@potta/components/select';
-import Checkbox from '@potta/components/checkbox';
-
 import { toast } from 'sonner';
 import TextArea from '@potta/components/textArea';
 import useCreatePurchaseOrder from '../hooks/useCreatePurchase';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { useRouter } from 'next/navigation';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
+import {
+  DocumentFormCard,
+  DocumentSectionTitle,
+} from '@potta/components/document-form-layout';
 import {
   validatePurchaseOrderForm,
   validateField,
@@ -189,34 +191,17 @@ const Left = () => {
     }));
   };
 
-  // Handle payment method selection
-  const handlePaymentMethodClick = (option: string) => {
-    // Map display names to API enum values
-    const paymentMethodMap: { [key: string]: string } = {
-      'Credit Card': 'CREDIT_CARD',
-      'Bank Transfer': 'BANK_TRANSFER',
-      'ACH Transfer': 'ACH_TRANSAFER',
-      'Mobile Money': 'MOBILE_MONEY',
-      Cash: 'CASH',
-      Credit: 'CREDIT',
-      Other: 'OTHER',
-    };
-
-    const apiValue = paymentMethodMap[option] || option;
-    setSelectedPaymentMethod(apiValue);
-
-    // Clear error when user selects a payment method
+  const handlePaymentMethodChange = (code: string) => {
+    setSelectedPaymentMethod(code);
     if (errors.paymentMethod) {
       setErrors((prev) => ({
         ...prev,
         paymentMethod: undefined,
       }));
     }
-
-    // Update context data for PDF view
     context?.setData((prevData: any) => ({
       ...prevData,
-      paymentMethod: apiValue,
+      paymentMethod: code,
     }));
   };
 
@@ -369,9 +354,9 @@ const Left = () => {
 
   return (
     <>
-      <div className="w-full max-w-5xl  px-2 min-w-5xl bg-transparent overflow-y-auto scroll gap-4">
-        <div className="  ">
-          <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="scroll w-full min-w-5xl max-w-5xl gap-4 overflow-y-auto bg-white px-2 pb-20">
+        <DocumentFormCard flush className="mb-3">
+          <div className="mb-6 grid grid-cols-2 gap-4">
             <div className={`${errors.orderDate ? 'error-field' : ''}`}>
               <DatePicker
                 valueType="date"
@@ -407,9 +392,7 @@ const Left = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4"></div>
-
-          <div className="mt-6 grid grid-cols-2 gap-4">
+          <div className="mt-2 grid grid-cols-2 gap-4">
             <div className={`${errors.vendorId ? 'error-field' : ''}`}>
               <SearchSelect
                 label={
@@ -421,14 +404,9 @@ const Left = () => {
                 options={vendorOptions}
                 value={selectedVendor}
                 onChange={(option: Option | null) => {
-                  console.log(
-                    'Vendor SearchSelect onChange called with:',
-                    option
-                  );
                   setSelectedVendor(option);
                   handleInputChange('vendorId', option?.value || '');
 
-                  // Also update vendor name in context for PDF view
                   if (option) {
                     context?.setData((prevData: any) => ({
                       ...prevData,
@@ -442,10 +420,10 @@ const Left = () => {
                 isSearchable={true}
               />
               {errors.vendorId && (
-                <p className="text-red-500 text-sm mt-1">{errors.vendorId}</p>
+                <p className="mt-1 text-sm text-red-500">{errors.vendorId}</p>
               )}
             </div>
-            <div className={` ${errors.shippingAddress ? 'error-field' : ''}`}>
+            <div className={`${errors.shippingAddress ? 'error-field' : ''}`}>
               <Input
                 type="text"
                 label={
@@ -464,119 +442,77 @@ const Left = () => {
                     ? { message: errors.shippingAddress }
                     : undefined
                 }
+                inputClass="!bg-white"
               />
             </div>
           </div>
-        </div>
+        </DocumentFormCard>
 
-        <div className="my-6">
-          <h3 className="text-lg font-medium mb-2">
+        <DocumentFormCard flush className="mb-3">
+          <DocumentSectionTitle>
             Order Items
             <RequiredMark />
-          </h3>
+          </DocumentSectionTitle>
           <DynamicTable />
           {errors.lineItems && (
-            <p className="text-red-500 text-sm mt-1">{errors.lineItems}</p>
+            <p className="mt-1 text-sm text-red-500">{errors.lineItems}</p>
           )}
-        </div>
+        </DocumentFormCard>
 
-        <hr className="my-6" />
-        <h3 className="text-lg font-medium mb-4">
-          Payment Information
-          <RequiredMark />
-        </h3>
-        <div className={`${errors.paymentMethod ? 'error-field' : ''}`}>
-          <div className="grid grid-cols-2 py-4 gap-4">
-            {[
-              'Credit Card',
-              'Bank Transfer',
-              'ACH Transfer',
-              'Mobile Money',
-              'Cash',
-              'Credit',
-              'Other',
-            ].map((option) => (
+        <DocumentFormCard flush className="mb-3">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+            <div className="space-y-4 lg:col-span-7">
+              <DocumentSectionTitle>
+                Payment Information
+                <RequiredMark />
+              </DocumentSectionTitle>
               <div
-                key={option}
-                onClick={() => handlePaymentMethodClick(option)}
-                className={`p-4 border cursor-pointer ${
-                  selectedPaymentMethod === option ||
-                  (option === 'Credit Card' &&
-                    selectedPaymentMethod === 'CREDIT_CARD') ||
-                  (option === 'Bank Transfer' &&
-                    selectedPaymentMethod === 'BANK_TRANSFER') ||
-                  (option === 'ACH Transfer' &&
-                    selectedPaymentMethod === 'ACH_TRANSAFER') ||
-                  (option === 'Mobile Money' &&
-                    selectedPaymentMethod === 'MOBILE_MONEY') ||
-                  (option === 'Cash' && selectedPaymentMethod === 'CASH') ||
-                  (option === 'Credit' && selectedPaymentMethod === 'CREDIT') ||
-                  (option === 'Other' && selectedPaymentMethod === 'OTHER')
-                    ? 'border-green-500 text-green-500'
-                    : errors.paymentMethod && formSubmitted
-                    ? 'border-red-500'
-                    : 'border-gray-300'
+                className={`space-y-4 rounded-[2px] border border-black/[0.08] bg-white p-4 ${
+                  errors.paymentMethod ? 'error-field' : ''
                 }`}
               >
-                <div className="flex items-center">
-                  <Checkbox
-                    id={`payment-${option}`}
-                    label=""
-                    checked={
-                      selectedPaymentMethod === option ||
-                      (option === 'Credit Card' &&
-                        selectedPaymentMethod === 'CREDIT_CARD') ||
-                      (option === 'Bank Transfer' &&
-                        selectedPaymentMethod === 'BANK_TRANSFER') ||
-                      (option === 'ACH Transfer' &&
-                        selectedPaymentMethod === 'ACH_TRANSAFER') ||
-                      (option === 'Mobile Money' &&
-                        selectedPaymentMethod === 'MOBILE_MONEY') ||
-                      (option === 'Cash' && selectedPaymentMethod === 'CASH') ||
-                      (option === 'Credit' &&
-                        selectedPaymentMethod === 'CREDIT') ||
-                      (option === 'Other' && selectedPaymentMethod === 'OTHER')
+                <PaymentMethodSelect
+                  value={selectedPaymentMethod}
+                  onChange={handlePaymentMethodChange}
+                  error={
+                    formSubmitted && errors.paymentMethod
+                      ? errors.paymentMethod
+                      : undefined
+                  }
+                />
+                <div className={errors.paymentTerms ? 'error-field' : ''}>
+                  <TextArea
+                    label="Payment Terms"
+                    name="paymentTerms"
+                    value={paymentTerms}
+                    onchange={(e: any) =>
+                      handleInputChange('paymentTerms', e.target.value)
                     }
-                    onChange={() => handlePaymentMethodClick(option)}
-                    className="mr-2"
+                    placeholder="Specify payment terms and conditions (minimum 10 characters)"
+                    errors={
+                      errors.paymentTerms ? errors.paymentTerms : undefined
+                    }
                   />
-                  <span>{option.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
                 </div>
               </div>
-            ))}
-            {errors.paymentMethod && (
-              <p className="text-red-500 text-sm col-span-2">
-                {errors.paymentMethod}
-              </p>
-            )}
+              <div className={errors.note ? 'error-field' : ''}>
+                <TextArea
+                  label="Additional Notes"
+                  name="note"
+                  value={note}
+                  onchange={(e: any) =>
+                    handleInputChange('note', e.target.value)
+                  }
+                  className="h-36"
+                  placeholder="Add any notes or special instructions for this purchase order"
+                  errors={errors.note ? errors.note : undefined}
+                />
+              </div>
+            </div>
           </div>
+        </DocumentFormCard>
 
-          <div className={`mt-4 ${errors.paymentTerms ? 'error-field' : ''}`}>
-            <TextArea
-              label="Payment Terms"
-              name="paymentTerms"
-              value={paymentTerms}
-              onchange={(e: any) =>
-                handleInputChange('paymentTerms', e.target.value)
-              }
-              placeholder="Specify payment terms and conditions (minimum 10 characters)"
-              errors={errors.paymentTerms ? errors.paymentTerms : undefined}
-            />
-          </div>
-        </div>
-
-        <hr className="my-6" />
-        <h3 className="text-lg font-medium mb-2">Additional Notes</h3>
-        <TextArea
-          name="note"
-          value={note}
-          onchange={(e: any) => handleInputChange('note', e.target.value)}
-          className="h-36"
-          placeholder="Add any notes or special instructions for this purchase order"
-          errors={errors.note ? errors.note : undefined}
-        />
-
-        <div className="fixed bottom-0 left-0 right-0 p-2 bg-white border-t border-gray-200 flex justify-end space-x-3">
+        <div className="fixed bottom-0 left-0 right-0 flex justify-end space-x-3 border-t border-gray-200 bg-white p-2">
           <Button
             text={
               mutation.isPending
