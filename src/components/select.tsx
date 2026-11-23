@@ -72,7 +72,7 @@ const Select: React.FC<SelectProps> = ({
             : error
               ? 'border-0 border-b border-destructive'
               : 'border-0 border-b border-black/15'
-        } rounded-t-[2px] rounded-b-none bg-white`}
+        } rounded-t-[2px] rounded-b-none bg-zinc-50`}
       >
         <div
           onClick={toggleDropdown}
@@ -87,14 +87,14 @@ const Select: React.FC<SelectProps> = ({
           {(() => {
             const selected = options.find((option) => option.value === selectedValue)?.label;
             return (
-              <span className={`block truncate ${selected ? '' : 'text-muted-foreground/70'}`}>
+              <span className={`block truncate ${selected ? '' : 'text-black/35'}`}>
                 {selected || placeholder || name}
               </span>
             );
           })()}
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <svg
-              className={`h-5 w-5 transform transition-transform duration-200 ${
+              className={`h-4 w-4 opacity-50 transform transition-transform duration-200 ${
                 isOpen ? 'rotate-180' : ''
               }`}
               viewBox="0 0 20 20"
