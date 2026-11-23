@@ -3,18 +3,18 @@ import { useState } from 'react';
 import CustomerContent from './CustomerContent';
 import VendorContent from './VendorContent';
 import Select from '@potta/components/select';
+import {
+  readContactType,
+  type ContactTypeFilter,
+} from './contact-type';
 
-export type ContactTypeFilter = 'customers' | 'vendors';
+export type { ContactTypeFilter };
+export { readContactType };
 
 const TYPE_OPTIONS = [
   { value: 'customers', label: 'Customers' },
   { value: 'vendors', label: 'Vendors' },
 ];
-
-export function readContactType(value?: string | null): ContactTypeFilter {
-  if (value === 'vendors' || value === 'vendor') return 'vendors';
-  return 'customers';
-}
 
 /** One contacts table at a time — switch between customers and vendors. */
 const ContactsContent = ({
@@ -33,7 +33,7 @@ const ContactsContent = ({
           bg="bg-white"
           options={TYPE_OPTIONS}
           selectedValue={type}
-          onChange={(value) =>
+          onChange={(value: string) =>
             setType(value === 'vendors' ? 'vendors' : 'customers')
           }
           placeholder="Contact type"

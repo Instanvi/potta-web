@@ -1,17 +1,23 @@
+'use client';
+
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import RootLayout from '../../layout';
 import ContactsContent, { readContactType } from '../../../../components/shared/ContactsContent';
 import { PageContainer } from '../../_shared/states';
 
-export default async function ReceivableContactsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ type?: string }>;
-}) {
-  const params = await searchParams;
+function ReceivableContactsBody() {
+  const searchParams = useSearchParams();
+  return <ContactsContent initialType={readContactType(searchParams.get('type'))} />;
+}
+
+export default function ReceivableContactsPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <ContactsContent initialType={readContactType(params.type)} />
+        <Suspense fallback={null}>
+          <ReceivableContactsBody />
+        </Suspense>
       </PageContainer>
     </RootLayout>
   );
