@@ -6,7 +6,7 @@ export const LoadingState = ({ label = 'Loading…' }: { label?: string }) => <I
 
 /** Page canvas used by every books page (payroll DashboardPage). */
 export const PageContainer = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <div className={cn('min-h-full bg-main-bg p-4 md:p-5', className)}>{children}</div>
+  <div className={cn('min-h-full bg-main-bg p-5 md:p-6', className)}>{children}</div>
 );
 
 /**

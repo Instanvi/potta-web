@@ -116,7 +116,7 @@ const NewAdjustmentSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boo
   return (
     <Slider open={open} setOpen={setOpen} edit title="New stock adjustment">
       <form onSubmit={submit} className="flex min-h-full w-full max-w-3xl flex-col">
-        <div className="flex-1 space-y-4 p-6 pb-24">
+        <div className="flex-1 space-y-4 pb-6">
           <section className={panelClass}>
             <StockItemPicker
               label="Item"
@@ -266,7 +266,7 @@ const NewAdjustmentSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boo
           )}
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 mt-auto flex justify-end gap-3 border-t border-black/10 bg-white px-6 py-4">
           <Button text="Cancel" type="button" theme="outline" onClick={() => setOpen(false)} />
           <Button
             text={applyNow ? 'Apply adjustment' : 'Save as pending'}
@@ -350,7 +350,10 @@ const AdjustmentsManager = () => {
   const target = pendingAction?.row;
   return (
     <div className="w-full">
-      <ListToolbar actions={<Button text="New adjustment" type="button" onClick={openSheet} />}>
+      <ListToolbar
+        className="mb-4"
+        actions={<Button text="New adjustment" type="button" onClick={openSheet} />}
+      >
         <MovementFilters
           search={search}
           onSearch={setSearch}

@@ -11,7 +11,7 @@ import { FieldHint } from '../fields/ItemFormFields';
 export const inputClass = `mt-2 ${FIELD_INPUT}`;
 
 export const panelClass =
-  'space-y-4 rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-card';
+  'space-y-4 rounded-[2px] border border-black/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:p-5';
 
 const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
   PENDING: 'warning',

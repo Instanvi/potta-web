@@ -77,7 +77,7 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
   return (
     <Slider open={open} setOpen={setOpen} edit title="Restock item">
       <form onSubmit={submit} className="flex min-h-full w-full max-w-3xl flex-col">
-        <div className="flex-1 space-y-4 p-6 pb-24">
+        <div className="flex-1 space-y-4 pb-6">
           <section className="space-y-4 rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div>
               <SearchableSelect
@@ -169,7 +169,7 @@ const RestockModal: React.FC<RestockModalProps> = ({ open, setOpen }) => {
           </section>
         </div>
 
-        <div className="sticky bottom-0 flex justify-end gap-3 border-t bg-white px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 mt-auto flex justify-end gap-3 border-t border-black/10 bg-white px-6 py-4">
           <Button text="Cancel" type="button" theme="outline" onClick={() => setOpen(false)} />
           <Button text="Add to stock" type="submit" isLoading={restock.isPending} disabled={!product || !qtyValid} />
         </div>
