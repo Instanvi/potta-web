@@ -1,7 +1,9 @@
 'use client';
-import React from 'react';
+
+import React, { useState } from 'react';
 import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 import Button from '@potta/components/button';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 interface SignOutButtonProps {
   className?: string;
@@ -13,26 +15,35 @@ interface SignOutButtonProps {
 const SignOutButton: React.FC<SignOutButtonProps> = ({
   className = '',
   variant = 'default',
-  size = 'md',
   children = 'Sign Out',
 }) => {
-
-
-  const handleSignOut = () => {
-    if (confirm('Are you sure you want to sign out?')) {
-      void signOutWithAuthApi();
-    }
-  };
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   return (
-    <Button
-      type="button"
-      text={children}
-      onClick={handleSignOut}
-      theme={variant === 'danger' ? 'danger' : 'default'}
-      className={className}
-    />
+    <>
+      <Button
+        type="button"
+        text={children}
+        onClick={() => setOpen(true)}
+        theme={variant === 'danger' ? 'danger' : 'default'}
+        className={className}
+      />
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Sign out?"
+        description="You will need to sign in again to continue using Potta."
+        confirmText="Sign out"
+        destructive
+        isLoading={loading}
+        onConfirm={() => {
+          setLoading(true);
+          void signOutWithAuthApi();
+        }}
+      />
+    </>
   );
 };
 
-export default SignOutButton; 
+export default SignOutButton;

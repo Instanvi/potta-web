@@ -12,6 +12,7 @@ import {
   LoadingState,
   PageContainer,
 } from '../_shared/states';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {
   useCreateDashboard,
   useDashboards,
@@ -23,6 +24,9 @@ import {
 export default function DashboardsListPage() {
   const router = useRouter();
   const [search, setSearch] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(
+    null,
+  );
   const { data, isLoading, error, refetch } = useDashboards({
     status: 'active',
     search: search.trim() || undefined,
@@ -112,9 +116,7 @@ export default function DashboardsListPage() {
                     size="sm"
                     variant="outline"
                     disabled={remove.isPending}
-                    onClick={() => {
-                      if (confirm(`Delete “${d.name}”?`)) remove.mutate(d.id);
-                    }}
+                    onClick={() => setPendingDelete({ id: d.id, name: d.name })}
                   >
                     Delete
                   </Button>
@@ -123,6 +125,24 @@ export default function DashboardsListPage() {
             ))}
           </ul>
         )}
+
+        <ConfirmDialog
+          open={Boolean(pendingDelete)}
+          onOpenChange={(open) => {
+            if (!open) setPendingDelete(null);
+          }}
+          title={pendingDelete ? `Delete “${pendingDelete.name}”?` : 'Delete dashboard?'}
+          description="This permanently removes the dashboard and its widgets."
+          confirmText="Delete"
+          destructive
+          isLoading={remove.isPending}
+          onConfirm={() => {
+            if (!pendingDelete) return;
+            remove.mutate(pendingDelete.id, {
+              onSuccess: () => setPendingDelete(null),
+            });
+          }}
+        />
       </PageContainer>
     </RootLayout>
   );

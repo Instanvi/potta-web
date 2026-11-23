@@ -11,4 +11,5 @@ Run the checks and report results; fix what fails in files changed on this branc
    - `rg 'Instanvi Sarl|bg-white px-3' src/lib/field-styles.ts src/app/(routes)/account_receivables/invoice` — no hardcoded seller; fields use `bg-field`.
    - `rg "InlineLoader" src/app/(routes)/account_receivables/invoice src/app/(routes)/account_payables/bills` — prefer TableSkeleton.
    - `rg "templatePayload|type: 'json'" src/app/(routes)/accounting/recurring` — no JSON template payload UI.
+   - `rg "window\\.(confirm|alert)|[^a-zA-Z]confirm\\(|[^a-zA-Z]alert\\(" src` — must be empty (use ConfirmDialog / ConfirmModal).
 5. Summarize: what passed, what failed, and anything that needs a running potta-backend / IdP to test manually.

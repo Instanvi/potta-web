@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreVertical } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@potta/components/shadcn/dropdown';
 import moment from 'moment';
 import { accountsApi } from '@potta/app/(routes)/accounting/utils/api';
 import { DataTable } from '@potta/components/ui/data-table';
@@ -111,25 +104,6 @@ const BankAccountTable: React.FC<BankAccountTableProps> = ({
       accessorKey: 'balance',
       header: 'Balance',
       cell: ({ row: { original } }) => <span className="font-medium">{original.balance}</span>,
-    },
-    {
-      id: 'actions',
-      header: '',
-      enableSorting: false,
-      cell: () => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="rounded-full p-1 outline-none hover:bg-accent">
-              <MoreVertical className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => alert('View Details')}>
-              View Details
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
     },
   ];
 

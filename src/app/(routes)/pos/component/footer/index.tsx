@@ -1,6 +1,8 @@
-// components/HeldOrders.tsx
+'use client';
+
 import React, { useContext, useEffect, useState } from 'react';
 import { ContextData } from '@potta/components/providers/DataProvider';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 interface CartItem {
   id: string;
@@ -20,6 +22,8 @@ interface HoldOrder {
 const HeldOrders: React.FC = () => {
   const context = useContext(ContextData);
   const [heldOrders, setHeldOrders] = useState<HoldOrder[]>([]);
+  const [replaceConfirm, setReplaceConfirm] = useState<HoldOrder | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadHeldOrders = () => {
@@ -35,23 +39,24 @@ const HeldOrders: React.FC = () => {
     };
   }, []);
 
+  const applyOrder = (order: HoldOrder) => {
+    context?.setData(order.items);
+    setReplaceConfirm(null);
+  };
+
   const handleSelectOrder = (order: HoldOrder) => {
     if (context?.data && context.data.length > 0) {
-      if (!confirm('Current cart will be replaced. Continue?')) {
-        return;
-      }
+      setReplaceConfirm(order);
+      return;
     }
-    context?.setData(order.items);
+    applyOrder(order);
   };
 
   const handleDeleteOrder = (orderId: string) => {
-    if (!confirm('Are you sure you want to delete this held order?')) {
-      return;
-    }
-
-    const updatedOrders = heldOrders.filter(o => o.id !== orderId);
+    const updatedOrders = heldOrders.filter((o) => o.id !== orderId);
     localStorage.setItem('heldOrders', JSON.stringify(updatedOrders));
     setHeldOrders(updatedOrders);
+    setDeleteConfirmId(null);
   };
 
   if (heldOrders.length === 0) {
@@ -63,33 +68,60 @@ const HeldOrders: React.FC = () => {
   }
 
   return (
-    <div className="h-20 bg-[#005D1F] p-2">
-      <div className="flex gap-4 overflow-x-auto">
-        {heldOrders.map((order) => (
-          <div
-            key={order.id}
-            onClick={() => handleSelectOrder(order)}
-            className="flex items-center gap-8 min-w-fit px-4 py-3 bg-[#A0E86F] text-black hover:bg-[#8ae74d] transition-colors cursor-pointer"
-          >
-            <button
-
-              className=""
+    <>
+      <div className="h-20 bg-[#005D1F] p-2">
+        <div className="flex gap-4 overflow-x-auto">
+          {heldOrders.map((order) => (
+            <div
+              key={order.id}
+              onClick={() => handleSelectOrder(order)}
+              className="flex items-center gap-8 min-w-fit px-4 py-3 bg-[#A0E86F] text-black hover:bg-[#8ae74d] transition-colors cursor-pointer"
             >
-              ID:{order.id}
-            </button>
-            <button
-              onClick={(e:any) =>{
-                e.stopPropagation(); // Prevent the click event from bubbling up to the parent div
-                handleDeleteOrder(order.id)
-              } }
-              className=" hover:text-white"
-            >
-              <i className="ri-close-line text-2xl"></i>
-            </button>
-          </div>
-        ))}
+              <button type="button" className="">
+                ID:{order.id}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirmId(order.id);
+                }}
+                className=" hover:text-white"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+
+      <ConfirmDialog
+        open={Boolean(replaceConfirm)}
+        onOpenChange={(open) => {
+          if (!open) setReplaceConfirm(null);
+        }}
+        title="Replace current cart?"
+        description="Selecting this held order will replace the items currently in the cart."
+        confirmText="Replace cart"
+        destructive={false}
+        onConfirm={() => {
+          if (replaceConfirm) applyOrder(replaceConfirm);
+        }}
+      />
+      <ConfirmDialog
+        open={Boolean(deleteConfirmId)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmId(null);
+        }}
+        title="Delete held order?"
+        description="This removes the held order from this device."
+        confirmText="Delete"
+        destructive
+        onConfirm={() => {
+          if (deleteConfirmId) handleDeleteOrder(deleteConfirmId);
+        }}
+      />
+    </>
   );
 };
 
