@@ -6,10 +6,6 @@ import { Suspense, useContext } from 'react';
 import { ContextData } from '../../../components/providers/DataProvider';
 import React from 'react';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export const revalidate = false;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const context = useContext(ContextData);
   const useSidebar = context?.layoutMode === 'sidebar';

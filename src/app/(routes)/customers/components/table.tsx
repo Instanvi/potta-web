@@ -5,7 +5,7 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 import Filter from './filters';
 import useGetAllCustomers from '../hooks/useGetAllCustomers';
-import ViewCustomerSlider from './viewCustomerSlider.tsx';
+import ViewCustomerSlider from './viewCustomerSlider';
 import EditCustomer from './updateCustomerSlider';
 import DeleteModal from './deleteModal';
 import { CustomerFilter } from '../utils/types';
