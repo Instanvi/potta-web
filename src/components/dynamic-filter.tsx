@@ -63,7 +63,7 @@ const DynamicFilter: React.FC<DynamicFilterProps> = ({
             <Search
               placeholder={searchPlaceholder}
               value={searchValue}
-              className="bg-white"
+              className="bg-field"
               onChange={onSearchChange}
               onClear={onSearchClear}
             />

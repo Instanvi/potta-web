@@ -16,7 +16,6 @@ import {
   EmptyState,
   ErrorState,
   PageContainer,
-  PageHeader,
   Tabs,
 } from '../../../_shared/states';
 
@@ -87,10 +86,7 @@ const BankAccountsPage = () => {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Bank accounts"
-          description="Bank accounts and cards linked to your ledger, with their current balances."
-        />
+        
         <BankAccountsFilter
           search={search}
           onSearchChange={setSearch}

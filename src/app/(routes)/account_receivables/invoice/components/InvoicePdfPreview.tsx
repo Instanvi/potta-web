@@ -1,6 +1,7 @@
 'use client';
 
 import moment from 'moment';
+import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
 
 export type InvoicePreviewLine = {
   uuid: string;
@@ -50,49 +51,48 @@ const paymentMethodLabel = (method?: string | null) => {
 /** Document-style PDF preview for an invoice (right column). */
 export function InvoicePdfPreview({ invoice }: { invoice: InvoicePreviewModel }) {
   const lines = invoice.lineItems ?? [];
+  const customerName = invoice.customer
+    ? `${invoice.customer.firstName ?? ''} ${invoice.customer.lastName ?? ''}`.trim() ||
+      'Customer'
+    : '—';
 
   return (
     <div className="h-full overflow-y-auto bg-main-bg p-4 md:p-6">
-      <div className="mx-auto min-h-full w-full max-w-xl space-y-6 bg-white shadow-sm">
-        <div className="flex items-center justify-between bg-green-700 px-6 py-8 text-white">
+      <div
+        data-document-preview
+        className="mx-auto min-h-full w-full max-w-xl space-y-0 bg-white shadow-sm"
+      >
+        <header className="flex items-start justify-between gap-4 border-b border-black/[0.08] px-6 py-5">
           <div>
-            <p className="text-2xl font-medium">{invoice.invoiceType}</p>
-            <p className="mt-1 text-sm opacity-90">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {invoice.invoiceType}
+            </p>
+            <p className="mt-1 text-xl font-medium text-foreground">
               #{invoice.invoiceNumber || invoice.invoiceId}
             </p>
           </div>
-          <div className="space-y-1 text-right text-xs">
+          <div className="space-y-1 text-right text-xs text-muted-foreground">
             <p>
-              <strong>Issue:</strong> {moment(invoice.issuedDate).format('MMM DD, YYYY')}
+              <span className="text-foreground">Issue</span>{' '}
+              {moment(invoice.issuedDate).format('MMM DD, YYYY')}
             </p>
             <p>
-              <strong>Due:</strong> {moment(invoice.dueDate).format('MMM DD, YYYY')}
+              <span className="text-foreground">Due</span>{' '}
+              {moment(invoice.dueDate).format('MMM DD, YYYY')}
             </p>
             <p>
-              <strong>Currency:</strong> {invoice.currency}
+              <span className="text-foreground">Currency</span> {invoice.currency}
             </p>
           </div>
-        </div>
+        </header>
 
-        <div className="space-y-8 px-6 pb-8">
+        <div className="space-y-8 px-6 py-6">
           <div className="flex flex-wrap gap-8 text-sm">
-            <div className="min-w-[140px] flex-1">
-              <p className="mb-1 font-medium text-foreground">From</p>
-              <div className="space-y-0.5 text-muted-foreground">
-                <p>Instanvi Sarl</p>
-                <p>hello@instanvi.com</p>
-                <p>Douala, Cameroon</p>
-              </div>
-            </div>
+            <DocumentSellerHeader />
             <div className="min-w-[140px] flex-1">
               <p className="mb-1 font-medium text-foreground">To</p>
               <div className="space-y-0.5 text-muted-foreground">
-                <p>
-                  {invoice.customer
-                    ? `${invoice.customer.firstName ?? ''} ${invoice.customer.lastName ?? ''}`.trim() ||
-                      'Customer'
-                    : '—'}
-                </p>
+                <p>{customerName}</p>
                 <p>{invoice.customer?.email || '—'}</p>
                 <p>{invoice.billingAddress || '—'}</p>
                 <p>{invoice.customer?.phone || '—'}</p>
@@ -102,7 +102,7 @@ export function InvoicePdfPreview({ invoice }: { invoice: InvoicePreviewModel })
 
           <div className="overflow-hidden border border-black/[0.08]">
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <thead className="bg-field text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2 font-medium">#</th>
                   <th className="px-3 py-2 font-medium">Description</th>

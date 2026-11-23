@@ -5,6 +5,8 @@
 /* Shared Instanvi tokens (same values as instanvi-payroll-expense-fe app/globals.css). */
 :root {
   --main-bg: #f7f7f8;
+  /* Inputs / selects on page canvas and white sheets — never pure white */
+  --field-bg: #f1f2f4;
   --brand: #0b5d1e;
   --brand-hover: #094c18;
   --brand-light: #a3e46b;

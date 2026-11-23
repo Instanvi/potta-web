@@ -6,7 +6,7 @@ import { CaretDown, CaretRight, Star } from '@phosphor-icons/react';
 import { useSearchParams } from 'next/navigation';
 
 import RootLayout from '../layout';
-import { PageContainer, PageHeader } from '../_shared/states';
+import { PageContainer } from '../_shared/states';
 import { Can, useCan } from '@/components/auth/can';
 import { useAuthContextStore } from '@/store/use-auth-context-store';
 import {
@@ -180,10 +180,7 @@ function ReportsHub() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Reports"
-        description="Financial and operational reports. Scoped to your branch unless you can view the whole organization."
-      />
+      
 
       <PanelCard className="mb-4">
         <PanelCardHeader
@@ -212,7 +209,7 @@ function ReportsHub() {
           <div className="w-full max-w-xs">
             <label className="mb-1 block text-sm font-medium text-foreground">Scope</label>
             <select
-              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm text-foreground outline-none focus-visible:border-primary"
+              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-field px-3 text-sm text-foreground outline-none focus-visible:border-primary"
               value={canOrgWide ? scope : 'branch'}
               disabled={!canOrgWide}
               onChange={(e) => {

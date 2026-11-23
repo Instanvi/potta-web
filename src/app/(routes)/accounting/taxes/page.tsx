@@ -1,14 +1,14 @@
 'use client';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { PageContainer } from '../../_shared/states';
 import TaxTable from './components/TaxTable';
 
 const TaxesPage = () => {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader title="Taxes" description="Tax rates applied to items, receipts and invoices." />
+        
         <Can
           resource="Tax"
           action="view-all"

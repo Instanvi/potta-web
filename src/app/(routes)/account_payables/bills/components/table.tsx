@@ -14,7 +14,7 @@ import {
   DocumentListRow,
 } from '@potta/components/document-master-detail';
 import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
-import { InlineLoader } from '@potta/components/ui/loaders';
+import { Skeleton } from '@potta/components/ui/loaders';
 import { formatDate } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
 import { formatMoney } from '../../utils/format';
@@ -270,8 +270,14 @@ export function BillsTable() {
           <ErrorState error={error} onRetry={() => refetch()} />
         </div>
       ) : isLoading ? (
-        <div className="flex justify-center py-10">
-          <InlineLoader label="Loading…" />
+        <div className="space-y-2 p-3" aria-busy="true">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="space-y-2 rounded-[2px] border border-black/[0.06] p-3">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          ))}
         </div>
       ) : rows.length === 0 ? (
         <p className="px-3 py-8 text-center text-sm text-muted-foreground">

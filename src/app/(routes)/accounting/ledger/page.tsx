@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader, Tabs } from '../../_shared/states';
+import { PageContainer, Tabs } from '../../_shared/states';
 import AgingTab from './components/AgingTab';
 import GeneralLedgerTab from './components/GeneralLedgerTab';
 
@@ -24,10 +24,7 @@ const LedgerPage = () => {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Ledger"
-          description="Posted entries and customer/vendor balances by age."
-        />
+        
         <Tabs tabs={TABS} value={tab} onChange={setTab} />
         {tab === 'general' ? (
           <Can resource="Ledger" action="view-entries" fallback={<NoAccess />}>

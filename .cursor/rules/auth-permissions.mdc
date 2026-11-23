@@ -8,7 +8,8 @@ alwaysApply: false
 
 - Sign-in is the Instanvi hub SSO handoff (same as Payroll, Pay, Talk): `src/proxy.ts` sends anonymous users to `${NEXT_PUBLIC_SUPER_APP_URL}/login`, the hub returns to `/auth-callback?payload=...`, which runs next-auth `signIn('session-sync')` and `hydrateAuthContext()`.
 - `src/store/use-auth-context-store.ts` is the single source of truth for organization, location, hierarchy, roles and permissions (filled from IdP `/get-session`, `/session/permissions`, `/session/hierarchy`). Do not add another permission store or read permissions from the next-auth session.
-- Location: the user picks it in the header `LocationSwitcher`; `x-location-id` follows the store. After changing it, invalidate queries (the switcher already does).
+- **Slim vs full org:** `/get-session` returns a slim organization (`id`, `name`, `slug`, `logo`, KYC). For invoice/document seller branding (logo, business address, phone, email, registration, tax ID), fetch `GET /organizations/:id` via `useOrganizationProfile` / `authClient` — do not invent those fields on potta-backend invoices.
+- Location: the user picks it in the header `LocationSwitcher`; `x-location-id` follows the store. After changing it, invalidate queries (the switcher already does). No bordered “Location context” card around the switcher.
 - Gate UI with `<Can resource="Invoice" action="create">...</Can>` or `useCan().canAccess(resource, action)`. Org admins/owners pass automatically.
 - Resource/action strings must match potta-backend's `@Permissions({ action, resource })` exactly (e.g. `SalesReciept`, `JournalEntries`, `BankAccounts`). The catalog is `src/lib/permissions.ts`; keep it in sync with instanvi-auth-starter `src/roles/potta-permissions.catalog.ts`.
 - New routes need an entry in `src/lib/route-permissions.ts` (longest prefix wins) so the sidebar hides them for users without access.

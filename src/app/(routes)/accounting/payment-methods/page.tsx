@@ -2,17 +2,14 @@
 
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../layout';
-import { PageContainer, PageHeader } from '../../_shared/states';
+import { PageContainer } from '../../_shared/states';
 import PaymentMethodTable from './components/PaymentMethodTable';
 
 const PaymentMethodsPage = () => {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Payment methods"
-          description="Defaults are seeded per organization. Add custom methods for sales receipts and POS."
-        />
+        
         <Can
           resource="PaymentMethod"
           action="view-all"

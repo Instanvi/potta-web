@@ -8,6 +8,8 @@ import { DocumentDetailChrome } from '@potta/components/document-master-detail';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatDate, formatDateTime } from '../../../_shared/format';
 import { ErrorState, LoadingState } from '../../../_shared/states';
+import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
+import { Skeleton } from '@/components/ui/loaders';
 import { formatMoney } from '../../utils/format';
 import { useApproveBill, useBill } from '../hooks';
 import { Bill, billExpenseAccount, paymentMethodLabel } from '../utils/types';
@@ -347,8 +349,10 @@ export function BillPreviewPanel({ billId }: { billId: string }) {
 
   if (isLoading || !bill) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">
-        {isLoading ? 'Loading preview…' : 'No preview'}
+      <div className="space-y-3 p-6" aria-busy="true">
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-4 w-56" />
+        <Skeleton className="h-32 w-full" />
       </div>
     );
   }
@@ -358,7 +362,7 @@ export function BillPreviewPanel({ billId }: { billId: string }) {
 
   return (
     <div className="h-full overflow-y-auto bg-main-bg p-4 md:p-6">
-      <div className="mx-auto w-full max-w-md space-y-6 bg-white p-6 shadow-sm">
+      <div data-document-preview className="mx-auto w-full max-w-md space-y-6 bg-white p-6 shadow-sm">
         <div className="border-b border-black/[0.08] pb-4">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Bill</p>
           <p className="mt-1 text-xl font-medium text-foreground">{bill.code}</p>
@@ -366,6 +370,7 @@ export function BillPreviewPanel({ billId }: { billId: string }) {
             <BillStatusBadge status={bill.status} />
           </div>
         </div>
+        <DocumentSellerHeader />
         <div className="space-y-2 text-sm">
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Vendor</span>

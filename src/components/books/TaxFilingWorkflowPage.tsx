@@ -144,7 +144,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
         </div>
 
         <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>New tax filing</SheetTitle>
             </SheetHeader>
@@ -183,7 +183,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
         </Sheet>
 
         <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-          <SheetContent side="left" className="bg-white">
+          <SheetContent side="right" className="bg-white">
             <SheetHeader>
               <SheetTitle>{mode === 'prepare' ? 'Prepare filing' : 'Submit filing'}</SheetTitle>
             </SheetHeader>
