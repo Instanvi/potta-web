@@ -1,8 +1,8 @@
 'use client';
+import { Check } from '@phosphor-icons/react';
 import React, { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreVertical } from 'lucide-react';
-import { Icon } from '@iconify/react';
 import Link from 'next/link';
 import { DataTable } from '@potta/components/ui/data-table';
 import DynamicFilter from '@potta/components/dynamic-filter';
@@ -166,7 +166,7 @@ const InvoiceTable = () => {
         <div className="flex justify-center border-r pr-4">
           <div className="flex w-full items-center gap-3 border border-primary/40 bg-brand-subtle px-3 py-2 text-primary">
             <div className="flex size-4 items-center justify-center rounded-full bg-primary text-white">
-              <Icon icon="material-symbols:check" width="20" height="20" />
+              <Check size={20} weight="bold" />
             </div>
             Closed
           </div>

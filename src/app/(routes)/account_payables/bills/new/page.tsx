@@ -47,7 +47,7 @@ export default function NewBillPage() {
         <BillForm
           showPreview={showPreview}
           onTogglePreview={togglePreview}
-          renderSplit={(form, preview) => (
+          renderSplit={(form, preview, actions) => (
             <div className="flex h-full min-h-0 flex-col bg-main-bg">
               <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
                 <ResizablePanel
@@ -66,6 +66,7 @@ export default function NewBillPage() {
                           title="Preview"
                           downloadTitle="Bill"
                           onClose={() => setShowPreview(false)}
+                          onDownloadPdf={actions?.onDownloadPdf}
                         >
                           {preview}
                         </DocumentPreviewShell>

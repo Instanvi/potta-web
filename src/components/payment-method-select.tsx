@@ -32,13 +32,24 @@ export function PaymentMethodSelect({
   const { data, isLoading } = usePaymentMethods({ page: 1, limit: 100 });
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const options = useMemo(
-    () =>
-      (data?.data ?? [])
-        .filter((m) => m.isActive)
-        .map((m) => ({ label: m.name, value: m.code })),
-    [data?.data],
+  /** Fallback codes so invoice/bill create still works if the API is down. */
+  const fallbackOptions = useMemo(
+    () => [
+      { label: 'Bank Transfer', value: 'BANK_TRANSFER' },
+      { label: 'Cash', value: 'CASH' },
+      { label: 'Mobile Money', value: 'MOBILE_MONEY' },
+      { label: 'Credit Card', value: 'CREDIT_CARD' },
+      { label: 'Other', value: 'OTHER' },
+    ],
+    [],
   );
+
+  const options = useMemo(() => {
+    const fromApi = (data?.data ?? [])
+      .filter((m) => m.isActive)
+      .map((m) => ({ label: m.name, value: m.code }));
+    return fromApi.length > 0 ? fromApi : fallbackOptions;
+  }, [data?.data, fallbackOptions]);
 
   const onCreated = (method: OrgPaymentMethod) => {
     onChange(method.code);
