@@ -31,6 +31,10 @@ export const billsApi = {
     const res = await axios.put(`/bills/${billId}/pay`, clean(data));
     return res.data;
   },
+  send: async (billId: string): Promise<{ ok: true; to: string }> => {
+    const res = await axios.post(`/bills/${billId}/send`);
+    return res.data;
+  },
 };
 
 export const billKeys = {

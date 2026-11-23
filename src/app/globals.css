@@ -75,10 +75,20 @@
   }
 }
 
-/* Print styles for cash flow reports */
+/* Print styles for cash flow reports + report letterhead */
 @media print {
+  nav,
+  aside,
+  header:not([data-report-print] header),
+  .print\:hidden,
   [class*="print:hidden"] {
     display: none !important;
+  }
+
+  [data-report-print] {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
 
   [class*="print:p-4"] {

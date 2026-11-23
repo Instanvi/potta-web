@@ -11,7 +11,7 @@ import { ErrorState, LoadingState } from '../../../_shared/states';
 import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
 import { Skeleton } from '@/components/ui/loaders';
 import { formatMoney } from '../../utils/format';
-import { useApproveBill, useBill } from '../hooks';
+import { useApproveBill, useBill, useSendBill } from '../hooks';
 import { Bill, billExpenseAccount, paymentMethodLabel } from '../utils/types';
 import BillStatusBadge from './BillStatusBadge';
 import PayBillModal from './PayBillModal';
@@ -90,7 +90,9 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 export function BillDetailPanel({ billId }: { billId: string }) {
   const { data: bill, isLoading, error, refetch } = useBill(billId);
   const approve = useApproveBill();
+  const sendBill = useSendBill();
   const [confirmApprove, setConfirmApprove] = useState(false);
+  const [confirmSend, setConfirmSend] = useState(false);
   const [toReject, setToReject] = useState<Bill | null>(null);
   const [toPay, setToPay] = useState<Bill | null>(null);
 
@@ -117,6 +119,15 @@ export function BillDetailPanel({ billId }: { billId: string }) {
   const total = Number(bill.invoiceTotal ?? 0);
   const canApproveOrReject = bill.status === 'DRAFT' || bill.status === 'ISSUED';
   const canPay = bill.status === 'APPROVED' || bill.status === 'OVERDUE';
+  const vendorEmail = (bill.vendor?.email || '').trim();
+
+  const handleSendClick = () => {
+    if (!vendorEmail) {
+      toast.error('Add a vendor email before sending');
+      return;
+    }
+    setConfirmSend(true);
+  };
 
   const toolbar = (
     <>
@@ -140,6 +151,14 @@ export function BillDetailPanel({ billId }: { billId: string }) {
           </Can>
         </>
       )}
+      <Button
+        text={vendorEmail ? 'Send' : 'Add vendor email'}
+        type="button"
+        theme="lightBlue"
+        icon={<i className="ri-mail-send-line" />}
+        disabled={sendBill.isPending}
+        onClick={handleSendClick}
+      />
       {canPay && (
         <Can resource="Bill" action="pay">
           <Button
@@ -335,6 +354,21 @@ export function BillDetailPanel({ billId }: { billId: string }) {
         onClose={() => setConfirmApprove(false)}
         onConfirm={() =>
           approve.mutate({ id: bill.uuid }, { onSuccess: () => setConfirmApprove(false) })
+        }
+      />
+      <ConfirmModal
+        open={confirmSend}
+        title={`Send bill ${bill.code}`}
+        message={
+          vendorEmail
+            ? `Email this bill to ${vendorEmail}? Credits come from the branch notification wallet.`
+            : 'Add a vendor email before sending.'
+        }
+        confirmText="Send"
+        isLoading={sendBill.isPending}
+        onClose={() => setConfirmSend(false)}
+        onConfirm={() =>
+          sendBill.mutate(bill.uuid, { onSuccess: () => setConfirmSend(false) })
         }
       />
       <RejectBillModal bill={toReject} onClose={() => setToReject(null)} />

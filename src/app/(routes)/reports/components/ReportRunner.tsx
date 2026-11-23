@@ -4,8 +4,10 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
+import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { DatePicker, DateRangePicker } from '@potta/components/ui/date-picker';
+import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
 import { ExportButton } from '@/components/export-button';
 import { formatAmount, today, startOfMonth } from '../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, LoadingState } from '../../_shared/states';
@@ -92,23 +94,35 @@ export function ReportRunner({
       title={title}
       description={description}
       actions={
-        <Link href="/reports" className="text-sm font-medium text-primary hover:underline">
+        <Link href="/reports" className="text-sm font-medium text-primary hover:underline print:hidden">
           Back to reports
         </Link>
       }
     >
       <div className="flex flex-col gap-4">
         <ListToolbar
+          className="print:hidden"
           actions={
-            <ExportButton
-              filename={reportId}
-              rows={data?.rows ?? []}
-              columns={(data?.columns ?? []).map((c: ReportColumn) => ({
-                key: c.key,
-                header: c.label,
-                value: (row: Record<string, unknown>) => formatCell(row[c.key], c.type),
-              }))}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                text="Print / PDF"
+                theme="lightBlue"
+                color
+                disabled={!data?.rows?.length}
+                icon={<i className="ri-printer-line" />}
+                onClick={() => window.print()}
+              />
+              <ExportButton
+                filename={reportId}
+                rows={data?.rows ?? []}
+                columns={(data?.columns ?? []).map((c: ReportColumn) => ({
+                  key: c.key,
+                  header: c.label,
+                  value: (row: Record<string, unknown>) => formatCell(row[c.key], c.type),
+                }))}
+              />
+            </div>
           }
         >
           {mode === 'asOf' || mode === 'compare' ? (
@@ -149,7 +163,7 @@ export function ReportRunner({
         </ListToolbar>
 
         {data?.notes?.length ? (
-          <p className="text-xs text-muted-foreground">{data.notes.join(' ')}</p>
+          <p className="text-xs text-muted-foreground print:hidden">{data.notes.join(' ')}</p>
         ) : null}
 
         {isLoading ? (
@@ -163,11 +177,28 @@ export function ReportRunner({
             description={
               data?.notes?.length
                 ? data.notes.join(' ')
-                : 'Nothing matched these filters for this report. Try another period or organization scope.'
+                : 'Nothing matched these filters. Pick another period, location, or organization scope and try again.'
             }
           />
         ) : (
-          <>
+          <div
+            data-report-print
+            className="space-y-4 rounded-[2px] border border-black/[0.08] bg-white p-4 print:border-0 print:p-0"
+          >
+            <header className="border-b border-black/[0.08] pb-4">
+              <DocumentSellerHeader label="" compact />
+              <div className="mt-3 space-y-0.5">
+                <h2 className="text-base font-medium text-foreground">{title}</h2>
+                {description ? (
+                  <p className="text-sm text-muted-foreground">{description}</p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">
+                  {mode === 'asOf' || mode === 'compare'
+                    ? `As of ${asOfDate}`
+                    : `Period ${range.from ?? '—'} – ${range.to ?? '—'}`}
+                </p>
+              </div>
+            </header>
             {data.totals && Object.keys(data.totals).length > 0 && (
               <div className="flex flex-wrap gap-4 text-sm">
                 {Object.entries(data.totals).map(([k, v]) => (
@@ -179,7 +210,7 @@ export function ReportRunner({
               </div>
             )}
             <DataTable columns={columns} data={data.rows} />
-          </>
+          </div>
         )}
       </div>
     </ReportPageShell>
