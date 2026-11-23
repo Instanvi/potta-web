@@ -14,6 +14,7 @@ import { menuStructure } from './navbarLinks';
 import { useSession } from 'next-auth/react';
 import { signOutWithAuthApi } from '@/lib/auth-sign-out';
 import { NotificationBell } from './shell/notification-bell';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 
 export type MenuItem = {
@@ -35,6 +36,8 @@ const ImprovedCustomNavbar = () => {
   const user = session?.user as any;
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [signOutLoading, setSignOutLoading] = useState(false);
   const pathname = usePathname();
   const context = useContext(ContextData);
   console.log(user?.user?.user);
@@ -361,10 +364,10 @@ const ImprovedCustomNavbar = () => {
                 </Link>
                 <hr className="my-1 border-gray-100" />
                 <button
+                  type="button"
                   onClick={() => {
-                    if (confirm('Are you sure you want to sign out?')) {
-                      void signOutWithAuthApi();
-                    }
+                    setShowUserMenu(false);
+                    setSignOutOpen(true);
                   }}
                   className="flex items-center w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50  transition-colors duration-200"
                 >
@@ -376,6 +379,19 @@ const ImprovedCustomNavbar = () => {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={signOutOpen}
+        onOpenChange={setSignOutOpen}
+        title="Sign out?"
+        description="You will need to sign in again to continue using Potta."
+        confirmText="Sign out"
+        destructive
+        isLoading={signOutLoading}
+        onConfirm={() => {
+          setSignOutLoading(true);
+          void signOutWithAuthApi();
+        }}
+      />
     </nav>
   );
 };

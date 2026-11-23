@@ -29,6 +29,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   booksApi,
+  type BooksResourceClient,
   cellValue,
   rowId,
 } from '@/lib/books-api';
@@ -48,6 +49,7 @@ import {
   useBooksResourceRemove,
   useBooksResourceUpdate,
 } from '@/hooks/use-books-resource';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 export type BooksColumn = { key: string; label: string };
 export type BooksField = {
@@ -85,6 +87,8 @@ export type BooksResourcePageProps = {
   actions?: BooksAction[];
   /** Extra query params for list (page, limit, sortBy). */
   listParams?: Record<string, unknown>;
+  /** Override CRUD client (e.g. expense projects via payrollClient). */
+  api?: BooksResourceClient;
 };
 
 function coerceFormValue(type: string | undefined, raw: string): unknown {
@@ -122,6 +126,7 @@ export function BooksResourcePage({
   fields,
   actions = [],
   listParams,
+  api = booksApi,
 }: BooksResourcePageProps) {
   const [search, setSearch] = useState('');
   const [searchApplied, setSearchApplied] = useState('');
@@ -130,6 +135,8 @@ export function BooksResourcePage({
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [editForm, setEditForm] = useState<Record<string, string>>({});
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<BooksAction | null>(null);
 
   const params = useMemo(
     () => ({ page: 1, limit: 50, sortBy: 'createdAt:DESC', ...listParams }),
@@ -141,10 +148,10 @@ export function BooksResourcePage({
     return f;
   }, [searchApplied]);
 
-  const listQuery = useBooksResourceList(resourcePath, filter, params);
-  const createMutation = useBooksResourceCreate(resourcePath);
-  const updateMutation = useBooksResourceUpdate(resourcePath);
-  const removeMutation = useBooksResourceRemove(resourcePath);
+  const listQuery = useBooksResourceList(resourcePath, filter, params, true, api);
+  const createMutation = useBooksResourceCreate(resourcePath, api);
+  const updateMutation = useBooksResourceUpdate(resourcePath, api);
+  const removeMutation = useBooksResourceRemove(resourcePath, api);
 
   const rows = listQuery.data ?? [];
   const loading = listQuery.isLoading;
@@ -167,8 +174,10 @@ export function BooksResourcePage({
     setDetailOpen(true);
     if (!id) return;
     try {
-      const detail = await booksApi.get(resourcePath, id);
-      const record = (detail?.data ?? detail) as Record<string, unknown>;
+      const detail = await api.get(resourcePath, id);
+      const detailObj =
+        detail && typeof detail === 'object' ? (detail as Record<string, unknown>) : null;
+      const record = (detailObj?.data ?? detail) as Record<string, unknown>;
       setSelected(record && typeof record === 'object' ? record : row);
       const next: Record<string, string> = {};
       for (const f of fields) {
@@ -213,31 +222,39 @@ export function BooksResourcePage({
     }
   };
 
-  const handleDelete = async () => {
+  const runDelete = async () => {
     const id = selected ? rowId(selected) : '';
     if (!id) return;
-    if (!window.confirm(`Delete this ${title.toLowerCase()}?`)) return;
     try {
       await removeMutation.mutateAsync(id);
       toast.success(`${title} deleted`);
+      setConfirmDeleteOpen(false);
       setDetailOpen(false);
     } catch {
       /* toast handled in hook */
     }
   };
 
-  const handleAction = async (act: BooksAction) => {
+  const runAction = async (act: BooksAction) => {
     const id = selected ? rowId(selected) : '';
     if (!id) return;
-    if (act.confirm && !window.confirm(`${act.label}?`)) return;
     try {
-      await booksApi.action(resourcePath, id, act.action);
+      await api.action(resourcePath, id, act.action);
       toast.success(`${act.label} succeeded`);
+      setPendingAction(null);
       setDetailOpen(false);
       await load();
     } catch (e: any) {
       toast.error(e?.response?.data?.message || e?.message || `${act.label} failed`);
     }
+  };
+
+  const handleAction = (act: BooksAction) => {
+    if (act.confirm) {
+      setPendingAction(act);
+      return;
+    }
+    void runAction(act);
   };
 
   return (
@@ -391,7 +408,12 @@ export function BooksResourcePage({
               >
                 Download PDF
               </Button>
-              <Button type="button" variant="destructive" onClick={() => void handleDelete()} disabled={saving}>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setConfirmDeleteOpen(true)}
+                disabled={saving}
+              >
                 Delete
               </Button>
               {actions.map((act) => (
@@ -399,7 +421,7 @@ export function BooksResourcePage({
                   key={act.action}
                   type="button"
                   variant="outline"
-                  onClick={() => void handleAction(act)}
+                  onClick={() => handleAction(act)}
                   disabled={saving}
                 >
                   {act.label}
@@ -411,6 +433,31 @@ export function BooksResourcePage({
             </SheetFooter>
           </SheetContent>
         </Sheet>
+
+        <ConfirmDialog
+          open={confirmDeleteOpen}
+          onOpenChange={setConfirmDeleteOpen}
+          title={`Delete ${title.toLowerCase()}?`}
+          description={`This permanently deletes this ${title.toLowerCase()}. This cannot be undone.`}
+          confirmText="Delete"
+          destructive
+          isLoading={removeMutation.isPending}
+          onConfirm={() => void runDelete()}
+        />
+        <ConfirmDialog
+          open={Boolean(pendingAction)}
+          onOpenChange={(open) => {
+            if (!open) setPendingAction(null);
+          }}
+          title={pendingAction ? `${pendingAction.label}?` : 'Confirm'}
+          description="Are you sure you want to continue?"
+          confirmText={pendingAction?.label ?? 'Confirm'}
+          destructive={false}
+          isLoading={saving}
+          onConfirm={() => {
+            if (pendingAction) void runAction(pendingAction);
+          }}
+        />
       </PageContainer>
     </RootLayout>
   );

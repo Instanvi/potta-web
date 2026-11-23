@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { toast } from 'sonner';
 import { ContextData } from '@potta/components/providers/DataProvider';
 
 interface CartItem {
@@ -21,7 +22,7 @@ const HoldOrderButton: React.FC = () => {
 
   const handleHold = () => {
     if (!context?.data || context?.data.length === 0) {
-      alert('No items to hold');
+      toast.info('No items to hold');
       return;
     }
 
