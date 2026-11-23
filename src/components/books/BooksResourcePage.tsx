@@ -21,10 +21,10 @@ import {
 } from '@/components/ui/sheet';
 import {
   FIELD_INPUT,
-  SHEET_FIELD_INPUT,
-  SHEET_FIELD_LABEL,
-  SHEET_FIELD_SELECT,
-  SHEET_FIELD_TEXTAREA,
+  FIELD_LABEL,
+  FIELD_NO_SPIN,
+  FIELD_SELECT,
+  FIELD_TEXTAREA,
 } from '@/lib/field-styles';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
@@ -569,9 +569,9 @@ function FieldInput({
     const options = field.options ?? [];
     return (
       <label className="block space-y-1">
-        <span className={SHEET_FIELD_LABEL}>{field.label}</span>
+        <span className={FIELD_LABEL}>{field.label}</span>
         <Select value={value || undefined} onValueChange={onChange}>
-          <SelectTrigger className={cn(SHEET_FIELD_SELECT, 'h-10')}>
+          <SelectTrigger className={cn(FIELD_SELECT, 'h-10')}>
             <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
           </SelectTrigger>
           <SelectContent>
@@ -588,12 +588,12 @@ function FieldInput({
   if (type === 'textarea' || type === 'json') {
     return (
       <label className="block space-y-1">
-        <span className={SHEET_FIELD_LABEL}>{field.label}</span>
+        <span className={FIELD_LABEL}>{field.label}</span>
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={type === 'json' ? 6 : 3}
-          className={SHEET_FIELD_TEXTAREA}
+          className={FIELD_TEXTAREA}
           placeholder={field.label}
         />
       </label>
@@ -624,12 +624,12 @@ function FieldInput({
   }
   return (
     <label className="block space-y-1">
-      <span className={SHEET_FIELD_LABEL}>{field.label}</span>
+      <span className={FIELD_LABEL}>{field.label}</span>
       <input
         type={type === 'number' ? 'number' : 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={SHEET_FIELD_INPUT}
+        className={cn(FIELD_INPUT, type === 'number' && FIELD_NO_SPIN)}
         placeholder={field.label}
       />
     </label>

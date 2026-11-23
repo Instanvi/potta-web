@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactSelect, { Props as ReactSelectProps } from 'react-select';
 import AsyncSelect from 'react-select/async';
-import { SHEET_FIELD_LABEL } from '@/lib/field-styles';
+import { FIELD_LABEL } from '@/lib/field-styles';
 import { cn } from '@potta/lib/utils';
 
 export interface Option {
@@ -10,7 +10,6 @@ export interface Option {
   label: string;
 }
 
-// Overload for single select
 interface SearchableSelectSingleProps
   extends Omit<
     ReactSelectProps<Option, false>,
@@ -28,10 +27,10 @@ interface SearchableSelectSingleProps
   multiple?: false;
   loadOptions?: (inputValue: string) => Promise<Option[]>;
   minInputLength?: number;
-  /** Full outline — match sheet text inputs (`SHEET_FIELD_INPUT`). */
+  /** @deprecated One field system — always outlined. */
   outlined?: boolean;
 }
-// Overload for multi select
+
 interface SearchableSelectMultiProps
   extends Omit<
     ReactSelectProps<Option, true>,
@@ -49,7 +48,7 @@ interface SearchableSelectMultiProps
   multiple: true;
   loadOptions?: (inputValue: string) => Promise<Option[]>;
   minInputLength?: number;
-  /** Full outline — match sheet text inputs (`SHEET_FIELD_INPUT`). */
+  /** @deprecated One field system — always outlined. */
   outlined?: boolean;
 }
 
@@ -59,11 +58,11 @@ type SearchableSelectProps =
 
 const FIELD_BG = '#f1f2f4';
 
-function buildStyles(outlined: boolean, error?: string) {
+function buildStyles(error?: string) {
   return {
     control: (provided: any, state: any) => ({
       ...provided,
-      borderWidth: outlined ? '1px' : '0 0 1px 0',
+      borderWidth: '1px',
       borderStyle: 'solid',
       borderColor: error
         ? '#e5181b'
@@ -71,13 +70,14 @@ function buildStyles(outlined: boolean, error?: string) {
           ? '#0b5d1e'
           : 'rgba(0,0,0,0.15)',
       boxShadow: 'none',
-      borderRadius: outlined ? '2px' : '2px 2px 0 0',
+      borderRadius: '2px',
       paddingTop: '0',
       paddingBottom: '0',
       paddingLeft: '0.25rem',
       paddingRight: '0.25rem',
       backgroundColor: state.isDisabled ? 'rgba(0,0,0,0.04)' : FIELD_BG,
       minHeight: '40px',
+      height: '40px',
       outline: 'none',
       '&:hover': {
         borderColor: error
@@ -86,6 +86,15 @@ function buildStyles(outlined: boolean, error?: string) {
             ? '#0b5d1e'
             : 'rgba(0,0,0,0.15)',
       },
+    }),
+    valueContainer: (provided: any) => ({
+      ...provided,
+      paddingTop: 0,
+      paddingBottom: 0,
+    }),
+    indicatorsContainer: (provided: any) => ({
+      ...provided,
+      height: '38px',
     }),
     option: (provided: any, state: any) => ({
       ...provided,
@@ -133,13 +142,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   multiple = false,
   loadOptions,
   minInputLength = 2,
-  outlined = false,
+  outlined: _outlined,
   ...rest
 }) => {
-  const styles = buildStyles(outlined, error);
-  const labelClasses = outlined
-    ? cn(SHEET_FIELD_LABEL, labelClass)
-    : cn('mb-1 block text-sm font-normal text-foreground', labelClass);
+  const styles = buildStyles(error);
+  const labelClasses = cn(FIELD_LABEL, labelClass);
 
   const sharedProps = {
     placeholder,
@@ -153,7 +160,6 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     classNamePrefix: 'react-select',
   };
 
-  // If loadOptions is provided, use AsyncSelect
   if (loadOptions) {
     return (
       <div className="w-full space-y-1">
@@ -198,7 +204,6 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     );
   }
 
-  // Otherwise use regular ReactSelect
   return (
     <div className="w-full space-y-1">
       {label ? (
