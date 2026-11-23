@@ -29,6 +29,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   booksApi,
+  type BooksResourceClient,
   cellValue,
   rowId,
 } from '@/lib/books-api';
@@ -86,6 +87,8 @@ export type BooksResourcePageProps = {
   actions?: BooksAction[];
   /** Extra query params for list (page, limit, sortBy). */
   listParams?: Record<string, unknown>;
+  /** Override CRUD client (e.g. expense projects via payrollClient). */
+  api?: BooksResourceClient;
 };
 
 function coerceFormValue(type: string | undefined, raw: string): unknown {
@@ -123,6 +126,7 @@ export function BooksResourcePage({
   fields,
   actions = [],
   listParams,
+  api = booksApi,
 }: BooksResourcePageProps) {
   const [search, setSearch] = useState('');
   const [searchApplied, setSearchApplied] = useState('');
@@ -144,10 +148,10 @@ export function BooksResourcePage({
     return f;
   }, [searchApplied]);
 
-  const listQuery = useBooksResourceList(resourcePath, filter, params);
-  const createMutation = useBooksResourceCreate(resourcePath);
-  const updateMutation = useBooksResourceUpdate(resourcePath);
-  const removeMutation = useBooksResourceRemove(resourcePath);
+  const listQuery = useBooksResourceList(resourcePath, filter, params, true, api);
+  const createMutation = useBooksResourceCreate(resourcePath, api);
+  const updateMutation = useBooksResourceUpdate(resourcePath, api);
+  const removeMutation = useBooksResourceRemove(resourcePath, api);
 
   const rows = listQuery.data ?? [];
   const loading = listQuery.isLoading;
@@ -170,8 +174,10 @@ export function BooksResourcePage({
     setDetailOpen(true);
     if (!id) return;
     try {
-      const detail = await booksApi.get(resourcePath, id);
-      const record = (detail?.data ?? detail) as Record<string, unknown>;
+      const detail = await api.get(resourcePath, id);
+      const detailObj =
+        detail && typeof detail === 'object' ? (detail as Record<string, unknown>) : null;
+      const record = (detailObj?.data ?? detail) as Record<string, unknown>;
       setSelected(record && typeof record === 'object' ? record : row);
       const next: Record<string, string> = {};
       for (const f of fields) {
@@ -233,7 +239,7 @@ export function BooksResourcePage({
     const id = selected ? rowId(selected) : '';
     if (!id) return;
     try {
-      await booksApi.action(resourcePath, id, act.action);
+      await api.action(resourcePath, id, act.action);
       toast.success(`${act.label} succeeded`);
       setPendingAction(null);
       setDetailOpen(false);

@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
 import { useAuthContextStore } from '@/store/use-auth-context-store';
+import { useOrganizationLocations } from '@/hooks/use-organization-locations';
+import { Skeleton } from '@/components/ui/loaders';
 import { cn } from '@/lib/utils';
 
 interface LocationOption {
@@ -28,7 +30,9 @@ export function LocationSwitcher({ className }: { className?: string }) {
   const assignments = useAuthContextStore((s) => s.organizationAssignments);
   const setLocationId = useAuthContextStore((s) => s.setLocationId);
 
-  const locations = useMemo<LocationOption[]>(() => {
+  const { data: authLocations, isLoading: loadingAll } = useOrganizationLocations();
+
+  const assignmentLocations = useMemo<LocationOption[]>(() => {
     const byId = new Map<string, LocationOption>();
     if (hierarchy?.location?.id) {
       byId.set(hierarchy.location.id, { id: hierarchy.location.id, name: hierarchy.location.name });
@@ -40,6 +44,14 @@ export function LocationSwitcher({ className }: { className?: string }) {
     }
     return [...byId.values()];
   }, [hierarchy, assignments]);
+
+  /** Prefer Auth full org list when permitted; otherwise session assignments only. */
+  const locations = useMemo<LocationOption[]>(() => {
+    if (authLocations && authLocations.length > 0) {
+      return authLocations.map((l) => ({ id: l.id, name: l.name }));
+    }
+    return assignmentLocations;
+  }, [authLocations, assignmentLocations]);
 
   const active = locations.find((l) => l.id === locationId);
 
@@ -73,7 +85,12 @@ export function LocationSwitcher({ className }: { className?: string }) {
       <DropdownMenuContent className="w-64 bg-white" align="end">
         <DropdownMenuLabel className="text-xs text-gray-500">Switch location</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {locations.length === 0 ? (
+        {loadingAll && !locations.length ? (
+          <div className="space-y-2 px-2 py-3" aria-busy="true">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ) : locations.length === 0 ? (
           <div className="px-2 py-3 text-xs text-gray-500">No locations available for this session.</div>
         ) : (
           locations.map((loc) => (
@@ -83,7 +100,9 @@ export function LocationSwitcher({ className }: { className?: string }) {
               className="flex cursor-pointer items-center justify-between gap-2 text-xs"
             >
               <span className="truncate">{loc.name}</span>
-              {loc.id === locationId ? <Check className="size-3.5 shrink-0 text-green-700" weight="bold" /> : null}
+              {loc.id === locationId ? (
+                <Check className="size-3.5 shrink-0 text-green-700" weight="bold" />
+              ) : null}
             </DropdownMenuItem>
           ))
         )}

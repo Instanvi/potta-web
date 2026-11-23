@@ -1,12 +1,14 @@
 'use client';
 
 import { BooksResourcePage } from '@/components/books/BooksResourcePage';
+import { expenseProjectsApi } from './utils/api';
 
 export default function Page() {
   return (
     <BooksResourcePage
-      resourcePath="project"
+      resourcePath="expense-projects"
       title="Project"
+      api={expenseProjectsApi}
       columns={[
         { key: 'name', label: 'Name' },
         { key: 'status', label: 'Status' },

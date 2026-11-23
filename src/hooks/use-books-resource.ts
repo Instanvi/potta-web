@@ -6,6 +6,7 @@ import {
   booksApi,
   extractBooksRows,
   rowId,
+  type BooksResourceClient,
 } from '@/lib/books-api';
 
 export const booksResourceKeys = {
@@ -21,11 +22,12 @@ export function useBooksResourceList(
   filter: Record<string, unknown>,
   params: Record<string, unknown>,
   enabled = true,
+  api: BooksResourceClient = booksApi,
 ) {
   return useQuery({
     queryKey: booksResourceKeys.list(resourcePath, filter, params),
     queryFn: async () => {
-      const raw = await booksApi.list(resourcePath, filter, params);
+      const raw = await api.list(resourcePath, filter, params);
       return extractBooksRows(raw);
     },
     enabled: Boolean(resourcePath) && enabled,
@@ -33,10 +35,13 @@ export function useBooksResourceList(
   });
 }
 
-export function useBooksResourceCreate(resourcePath: string) {
+export function useBooksResourceCreate(
+  resourcePath: string,
+  api: BooksResourceClient = booksApi,
+) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => booksApi.create(resourcePath, body),
+    mutationFn: (body: Record<string, unknown>) => api.create(resourcePath, body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: booksResourceKeys.all });
     },
@@ -47,11 +52,14 @@ export function useBooksResourceCreate(resourcePath: string) {
   });
 }
 
-export function useBooksResourceUpdate(resourcePath: string) {
+export function useBooksResourceUpdate(
+  resourcePath: string,
+  api: BooksResourceClient = booksApi,
+) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: Record<string, unknown> }) =>
-      booksApi.update(resourcePath, id, body),
+      api.update(resourcePath, id, body),
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: booksResourceKeys.all });
       void qc.invalidateQueries({
@@ -65,10 +73,13 @@ export function useBooksResourceUpdate(resourcePath: string) {
   });
 }
 
-export function useBooksResourceRemove(resourcePath: string) {
+export function useBooksResourceRemove(
+  resourcePath: string,
+  api: BooksResourceClient = booksApi,
+) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => booksApi.remove(resourcePath, id),
+    mutationFn: (id: string) => api.remove(resourcePath, id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: booksResourceKeys.all });
     },

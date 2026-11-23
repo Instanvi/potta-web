@@ -1,7 +1,21 @@
 import axios from 'config/axios.config';
 
+/** Pluggable CRUD client used by BooksResourcePage (default: potta-backend). */
+export type BooksResourceClient = {
+  list: (
+    path: string,
+    filter?: Record<string, unknown>,
+    params?: Record<string, unknown>,
+  ) => Promise<unknown>;
+  get: (path: string, id: string) => Promise<unknown>;
+  create: (path: string, data: unknown) => Promise<unknown>;
+  update: (path: string, id: string, data: unknown) => Promise<unknown>;
+  remove: (path: string, id: string) => Promise<unknown>;
+  action: (path: string, id: string, action: string, data?: unknown) => Promise<unknown>;
+};
+
 /** Generic Books CRUD helpers. Paths match potta-backend `@Controller` names. */
-export const booksApi = {
+export const booksApi: BooksResourceClient = {
   list: (path: string, filter: Record<string, unknown> = {}, params: Record<string, unknown> = {}) =>
     axios.post(`/${path}/filter`, filter, { params }).then((r) => r.data),
   get: (path: string, id: string) => axios.get(`/${path}/details/${id}`).then((r) => r.data),
