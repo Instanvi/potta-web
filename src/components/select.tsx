@@ -56,7 +56,7 @@ const Select: React.FC<SelectProps> = ({
   };
 
   return (
-    <>
+    <div className={`w-full ${SelectClass ?? ''}`}>
       {label && (
         <div
           className={`mb-1 block text-sm font-normal text-foreground ${labelClass}`}
@@ -66,7 +66,7 @@ const Select: React.FC<SelectProps> = ({
         </div>
       )}
       <div
-        className={`relative inline-block w-full md:w-full ${SelectClass} ${
+        className={`relative inline-block w-full ${
           border
             ? ''
             : error
@@ -128,7 +128,7 @@ const Select: React.FC<SelectProps> = ({
         )}
       </div>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-    </>
+    </div>
   );
 };
 

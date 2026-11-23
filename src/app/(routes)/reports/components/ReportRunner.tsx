@@ -128,14 +128,12 @@ export function ReportRunner({
           {mode === 'asOf' || mode === 'compare' ? (
             <DatePicker
               id={`${reportId}-asOf`}
-              label="As of"
               className="w-52"
               value={asOfDate}
               onChange={(v) => setAsOfDate(v || today())}
             />
           ) : (
             <DateRangePicker
-              label="Period"
               className="w-72"
               value={range}
               onChange={setRange}
@@ -144,22 +142,18 @@ export function ReportRunner({
           {mode === 'compare' && (
             <DatePicker
               id={`${reportId}-compare`}
-              label="Compare as of"
               className="w-52"
               value={compareEnd}
               onChange={(v) => setCompareEnd(v || startOfMonth())}
             />
           )}
-          <div className="flex w-full max-w-sm flex-col gap-1">
-            <label className="text-sm font-medium text-foreground">Search</label>
-            <Search
-              placeholder="Search…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch('')}
-              className="w-full"
-            />
-          </div>
+          <Search
+            placeholder="Search…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClear={() => setSearch('')}
+            className="w-full max-w-sm"
+          />
         </ListToolbar>
 
         {data?.notes?.length ? (

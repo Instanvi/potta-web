@@ -198,15 +198,15 @@ export function ReconcilePage() {
           ) : lines.length === 0 ? (
             <EmptyState title="No bank lines" description="No transactions for this account." />
           ) : (
-            <Panel className="overflow-x-auto p-0">
+            <Panel className="overflow-hidden rounded-[2px] border border-black/[0.08] p-0 shadow-none">
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-black/10">
-                    <th className="px-4 py-3 w-10" />
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Date</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Description</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+                  <tr className="border-b border-black/10 bg-table-head">
+                    <th className="h-11 w-10 bg-table-head px-4" />
+                    <th className="h-11 bg-table-head px-4 text-sm font-normal text-black">Date</th>
+                    <th className="h-11 bg-table-head px-4 text-sm font-normal text-black">Description</th>
+                    <th className="h-11 bg-table-head px-4 text-sm font-normal text-black">Amount</th>
+                    <th className="h-11 bg-table-head px-4 text-sm font-normal text-black">Status</th>
                   </tr>
                 </thead>
                 <tbody>

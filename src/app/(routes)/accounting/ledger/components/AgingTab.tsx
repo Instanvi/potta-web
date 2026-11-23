@@ -99,7 +99,6 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
       >
         <DatePicker
           id="agingAsOf"
-          label="As of"
           className="w-52"
           value={asOfDate}
           onChange={(value) => setAsOfDate(value || today())}

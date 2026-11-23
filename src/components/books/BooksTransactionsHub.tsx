@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
 import {
   EmptyState,
@@ -10,9 +10,10 @@ import {
   Panel,
   Tabs,
 } from '@/app/(routes)/_shared/states';
+import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
-import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
+import { booksApi, extractBooksRows, rowId } from '@/lib/books-api';
 import axios, { payrollClient } from 'config/axios.config';
 import { cn } from '@/lib/utils';
 
@@ -85,6 +86,18 @@ export function BooksTransactionsHub({
   }, [load]);
 
   const columns = active?.columns ?? [];
+  const hubColumns = useMemo(
+    () => [{ key: '_type', label: 'Type' }, ...columns],
+    [columns],
+  );
+  const hubRows = useMemo(
+    () =>
+      rows.map((row) => ({
+        ...row,
+        _type: row._type ?? active?.label ?? '',
+      })),
+    [rows, active?.label],
+  );
 
   return (
     <RootLayout>
@@ -130,32 +143,10 @@ export function BooksTransactionsHub({
           ) : rows.length === 0 ? (
             <EmptyState title="No transactions" description="Nothing matched this type." />
           ) : (
-            <Panel className="overflow-x-auto p-0">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-black/10">
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Type</th>
-                    {columns.map((c) => (
-                      <th key={c.key} className="px-4 py-3 font-medium text-muted-foreground">
-                        {c.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={rowId(row) || JSON.stringify(row)} className="border-b border-black/10">
-                      <td className="px-4 py-3">{String(row._type ?? active?.label)}</td>
-                      {columns.map((c) => (
-                        <td key={c.key} className="px-4 py-3">
-                          {cellValue(row, c.key)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Panel>
+            <BooksListTable
+              columns={hubColumns}
+              rows={hubRows}
+            />
           )}
         </div>
       </PageContainer>
