@@ -100,49 +100,55 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
   const customStyles = {
     container: (base: any) => ({
       ...base,
-      marginTop: noMarginTop ? 0 : '0.5rem', // Conditionally apply margin top
+      marginTop: noMarginTop ? 0 : '0.5rem',
     }),
     control: (base: any, state: { isFocused: boolean }) => ({
       ...base,
-      minHeight: '46px',
-      padding: '0.25rem 0', // to match py-2.5
-      borderRadius: '2px', // rounded-[2px]
-      borderColor: state.isFocused ? '#22c55e' : '#e5e7eb', // border-gray-200, focus:border-blue-500
-      boxShadow: state.isFocused ? '0 0 0 2px #22c55e' : 'none', // focus:ring-2 focus:ring-blue-500
+      minHeight: '40px',
+      height: '40px',
+      borderRadius: '2px',
+      borderWidth: '1px',
+      borderColor: state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
+      backgroundColor: '#f1f2f4',
+      boxShadow: 'none',
+      outline: 'none',
       '&:hover': {
-        borderColor: state.isFocused ? '#22c55e' : '#e5e7eb',
+        borderColor: state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
       },
     }),
     valueContainer: (base: any) => ({
       ...base,
-      padding: '0 1rem', // px-4
+      padding: '0 0.75rem',
     }),
     input: (base: any) => ({
       ...base,
-      color: '#111827',
+      color: '#111111',
       padding: '0',
       margin: '0',
-
     }),
     placeholder: (base: any) => ({
       ...base,
-      color: '#9ca3af',
+      color: 'rgba(0,0,0,0.35)',
+      fontSize: '0.875rem',
     }),
     singleValue: (base: any) => ({
       ...base,
-      color: '#111827',
+      color: '#111111',
+      fontSize: '0.875rem',
     }),
     option: (base: any, state: { isSelected: boolean; isFocused: boolean }) => ({
       ...base,
       backgroundColor: state.isSelected
-        ? '#3b82f6'
+        ? '#0b5d1e'
         : state.isFocused
-          ? '#f3f4f6'
+          ? '#f1faf7'
           : 'transparent',
-      color: state.isSelected ? 'white' : '#111827',
+      color: state.isSelected ? 'white' : '#111111',
       cursor: 'pointer',
+      fontSize: '0.875rem',
       '&:active': {
-        backgroundColor: '#3b82f6',
+        backgroundColor: '#0b5d1e',
+        color: 'white',
       },
     }),
     loadingMessage: (base: any) => ({
@@ -154,7 +160,7 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
       color: '#6b7280',
     }),
     indicatorSeparator: () => ({
-      display: 'none', // Remove the separator
+      display: 'none',
     }),
     dropdownIndicator: (base: any) => ({
       ...base,
@@ -168,8 +174,8 @@ const SearchSelect: React.FC<SearchSelectProps> = ({
       ...base,
       marginTop: '4px',
       borderRadius: '2px',
-      border: '1px solid #e5e7eb',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      zIndex: 60,
     }),
   };
 
