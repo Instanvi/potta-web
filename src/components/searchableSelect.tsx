@@ -2,6 +2,8 @@
 import React from 'react';
 import ReactSelect, { Props as ReactSelectProps } from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { SHEET_FIELD_LABEL } from '@/lib/field-styles';
+import { cn } from '@potta/lib/utils';
 
 export interface Option {
   value: string;
@@ -26,6 +28,8 @@ interface SearchableSelectSingleProps
   multiple?: false;
   loadOptions?: (inputValue: string) => Promise<Option[]>;
   minInputLength?: number;
+  /** Full outline — match sheet text inputs (`SHEET_FIELD_INPUT`). */
+  outlined?: boolean;
 }
 // Overload for multi select
 interface SearchableSelectMultiProps
@@ -45,64 +49,76 @@ interface SearchableSelectMultiProps
   multiple: true;
   loadOptions?: (inputValue: string) => Promise<Option[]>;
   minInputLength?: number;
+  /** Full outline — match sheet text inputs (`SHEET_FIELD_INPUT`). */
+  outlined?: boolean;
 }
 
 type SearchableSelectProps =
   | SearchableSelectSingleProps
   | SearchableSelectMultiProps;
 
-// ✅ Custom styles for react-select
-const customStyles = {
-  control: (provided: any, state: any, { error }: { error?: string }) => ({
-    ...provided,
-    // Match Talk/Potta underline inputs: zinc field, bottom border only, no focus ring.
-    borderWidth: '0 0 1px 0',
-    borderStyle: 'solid',
-    borderColor: error ? '#e5181b' : state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
-    boxShadow: 'none',
-    borderRadius: '2px 2px 0 0',
-    paddingTop: '0',
-    paddingBottom: '0',
-    paddingLeft: '0.25rem',
-    paddingRight: '0.25rem',
-    backgroundColor: state.isDisabled ? 'rgba(0,0,0,0.04)' : '#fafafa',
-    minHeight: '40px',
-    outline: 'none',
-    '&:hover': {
-      borderColor: error ? '#e5181b' : state.isFocused ? '#0b5d1e' : 'rgba(0,0,0,0.15)',
-    },
-  }),
-  option: (provided: any, state: any) => ({
-    ...provided,
-    backgroundColor: state.isSelected
-      ? '#0b5d1e'
-      : state.isFocused
-      ? '#f1faf7'
-      : undefined,
-    color: state.isSelected ? 'white' : '#111111',
-    fontSize: '0.875rem',
-    '&:active': {
-      backgroundColor: '#0b5d1e',
-      color: 'white',
-    },
-  }),
-  placeholder: (provided: any) => ({
-    ...provided,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: '0.875rem',
-  }),
-  singleValue: (provided: any) => ({
-    ...provided,
-    color: '#111111',
-    fontSize: '0.875rem',
-  }),
-  menu: (provided: any) => ({
-    ...provided,
-    borderRadius: '2px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    zIndex: 20,
-  }),
-};
+const FIELD_BG = '#f1f2f4';
+
+function buildStyles(outlined: boolean, error?: string) {
+  return {
+    control: (provided: any, state: any) => ({
+      ...provided,
+      borderWidth: outlined ? '1px' : '0 0 1px 0',
+      borderStyle: 'solid',
+      borderColor: error
+        ? '#e5181b'
+        : state.isFocused
+          ? '#0b5d1e'
+          : 'rgba(0,0,0,0.15)',
+      boxShadow: 'none',
+      borderRadius: outlined ? '2px' : '2px 2px 0 0',
+      paddingTop: '0',
+      paddingBottom: '0',
+      paddingLeft: '0.25rem',
+      paddingRight: '0.25rem',
+      backgroundColor: state.isDisabled ? 'rgba(0,0,0,0.04)' : FIELD_BG,
+      minHeight: '40px',
+      outline: 'none',
+      '&:hover': {
+        borderColor: error
+          ? '#e5181b'
+          : state.isFocused
+            ? '#0b5d1e'
+            : 'rgba(0,0,0,0.15)',
+      },
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? '#0b5d1e'
+        : state.isFocused
+          ? '#f1faf7'
+          : undefined,
+      color: state.isSelected ? 'white' : '#111111',
+      fontSize: '0.875rem',
+      '&:active': {
+        backgroundColor: '#0b5d1e',
+        color: 'white',
+      },
+    }),
+    placeholder: (provided: any) => ({
+      ...provided,
+      color: 'rgba(0,0,0,0.35)',
+      fontSize: '0.875rem',
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      color: '#111111',
+      fontSize: '0.875rem',
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      borderRadius: '2px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      zIndex: 60,
+    }),
+  };
+}
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
   label,
@@ -117,17 +133,35 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   multiple = false,
   loadOptions,
   minInputLength = 2,
+  outlined = false,
   ...rest
 }) => {
+  const styles = buildStyles(outlined, error);
+  const labelClasses = outlined
+    ? cn(SHEET_FIELD_LABEL, labelClass)
+    : cn('mb-1 block text-sm font-normal text-foreground', labelClass);
+
+  const sharedProps = {
+    placeholder,
+    isDisabled,
+    isClearable: true as const,
+    isSearchable: true as const,
+    styles,
+    className: `react-select-container ${
+      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+    }`,
+    classNamePrefix: 'react-select',
+  };
+
   // If loadOptions is provided, use AsyncSelect
   if (loadOptions) {
     return (
-      <div className="w-full">
-        {label && (
-          <label className={`mb-3 block text-base font-medium text-foreground ${labelClass}`}>
-            {label} {required && <span className="text-red-500">*</span>}
+      <div className="w-full space-y-1">
+        {label ? (
+          <label className={labelClasses}>
+            {label} {required ? <span className="text-red-500">*</span> : null}
           </label>
-        )}
+        ) : null}
         <AsyncSelect
           loadOptions={loadOptions}
           defaultOptions={options}
@@ -136,7 +170,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
               ? options.filter((option) =>
                   Array.isArray(selectedValue)
                     ? selectedValue.includes(option.value)
-                    : false
+                    : false,
                 )
               : options.find((option) => option.value === selectedValue) || null
           }
@@ -144,48 +178,34 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             if (multiple) {
               if (Array.isArray(option)) {
                 (onChange as (value: string[]) => void)(
-                  option.map((o) => o.value)
+                  option.map((o) => o.value),
                 );
               } else {
                 (onChange as (value: string[]) => void)([]);
               }
+            } else if (option) {
+              (onChange as (value: string) => void)((option as Option).value);
             } else {
-              if (option) {
-                (onChange as (value: string) => void)((option as Option).value);
-              } else {
-                (onChange as (value: string) => void)('');
-              }
+              (onChange as (value: string) => void)('');
             }
           }}
-          placeholder={placeholder}
-          isDisabled={isDisabled}
-          isClearable
-          isSearchable
           cacheOptions={false}
-          styles={{
-            ...customStyles,
-            control: (provided: any, state: any) =>
-              customStyles.control(provided, state, { error }),
-          }}
-          className={`react-select-container ${
-            isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          classNamePrefix="react-select"
+          {...sharedProps}
           {...rest}
         />
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
       </div>
     );
   }
 
   // Otherwise use regular ReactSelect
   return (
-    <div className="w-full">
-      {label && (
-        <label className={`mb-3 block text-base font-medium text-foreground ${labelClass}`}>
-          {label} {required && <span className="text-red-500">*</span>}
+    <div className="w-full space-y-1">
+      {label ? (
+        <label className={labelClasses}>
+          {label} {required ? <span className="text-red-500">*</span> : null}
         </label>
-      )}
+      ) : null}
       <ReactSelect
         options={options}
         isMulti={multiple}
@@ -194,7 +214,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             ? options.filter((option) =>
                 Array.isArray(selectedValue)
                   ? selectedValue.includes(option.value)
-                  : false
+                  : false,
               )
             : options.find((option) => option.value === selectedValue) || null
         }
@@ -202,35 +222,21 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
           if (multiple) {
             if (Array.isArray(option)) {
               (onChange as (value: string[]) => void)(
-                option.map((o) => o.value)
+                option.map((o) => o.value),
               );
             } else {
               (onChange as (value: string[]) => void)([]);
             }
+          } else if (option) {
+            (onChange as (value: string) => void)((option as Option).value);
           } else {
-            if (option) {
-              (onChange as (value: string) => void)((option as Option).value);
-            } else {
-              (onChange as (value: string) => void)('');
-            }
+            (onChange as (value: string) => void)('');
           }
         }}
-        placeholder={placeholder}
-        isDisabled={isDisabled}
-        isClearable
-        isSearchable
-        styles={{
-          ...customStyles,
-          control: (provided: any, state: any) =>
-            customStyles.control(provided, state, { error }),
-        }}
-        className={`react-select-container ${
-          isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
-        classNamePrefix="react-select"
+        {...sharedProps}
         {...rest}
       />
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
     </div>
   );
 };

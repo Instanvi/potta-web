@@ -1,10 +1,19 @@
 'use client';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
-import Button from '@potta/components/button';
 import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
+import {
+  InvoicePdfDocument,
+  type InvoicePdfProps,
+} from '@/components/documents/invoice-pdf-document';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import React, { useContext, useState } from 'react';
+import {
+  formatOrgAddress,
+  orgDisplayName,
+  useOrganizationProfile,
+} from '@/hooks/use-organization-profile';
+import { downloadReactPdf } from '@/lib/download-react-pdf';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface TableItem {
   name: string;
@@ -16,11 +25,31 @@ interface TableItem {
   id: number;
 }
 
-const PdfView = () => {
+function formatPaymentMethod(raw: unknown): string {
+  const value =
+    typeof raw === 'string'
+      ? raw
+      : Array.isArray(raw)
+        ? String(raw[0] ?? '')
+        : '';
+  return (
+    value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c: string) => c.toUpperCase()) || ''
+  );
+}
+
+const PdfView = ({
+  onRegisterDownload,
+}: {
+  /** Receives a stable download callback for the preview shell toolbar. */
+  onRegisterDownload?: (download: () => Promise<void>) => void;
+} = {}) => {
   const context = useContext(ContextData);
   const contextData = context?.data || {};
   const tableData: TableItem[] = contextData.table || [];
   const customerId = contextData.customerName; // Get customer ID from context
+  const { data: org } = useOrganizationProfile();
 
   // State for invoice color
   const [invoiceColor, setInvoiceColor] = useState('#059669'); // Default green-700
@@ -91,6 +120,105 @@ const PdfView = () => {
   }, 0);
 
   const total = subtotal + totalTax;
+
+  const paymentMethodLabel = formatPaymentMethod(
+    typeof contextData.payment_method === 'string' ||
+      Array.isArray(contextData.payment_method)
+      ? contextData.payment_method
+      : contextData.paymentMethod,
+  );
+
+  const pdfProps: InvoicePdfProps = useMemo(() => {
+    const customerName = customerDetails
+      ? `${customerDetails.firstName ?? ''} ${customerDetails.lastName ?? ''}`.trim()
+      : '';
+    return {
+      title: invoiceType || 'Invoice',
+      invoiceNumber: invoiceNumber ? String(invoiceNumber) : undefined,
+      issueDate: formattedIssueDate,
+      dueDate: formattedDueDate,
+      currency: contextData.currency || 'USD',
+      paymentMethod: paymentMethodLabel || undefined,
+      paymentReference: paymentReference || undefined,
+      paymentTerms: paymentTerms || undefined,
+      notes: contextData.note || undefined,
+      shippingAddress: shippingAddress || undefined,
+      seller: {
+        name: orgDisplayName(org) || 'Your organization',
+        email: org?.businessEmail,
+        phone: org?.businessPhone,
+        addressLines: formatOrgAddress(org),
+        logoUrl: org?.logo,
+        registrationNumber: org?.registrationNumber,
+        taxId: org?.taxIdentificationNumber,
+      },
+      customer: customerDetails
+        ? {
+            name: customerName || 'Customer',
+            email: customerDetails.email,
+            phone: customerDetails.phone,
+            address:
+              billingAddress ||
+              customerDetails.address?.address ||
+              undefined,
+          }
+        : null,
+      lines: tableData.map((item) => {
+        const price = Number(item.price) || 0;
+        const qty = Number(item.qty) || 0;
+        const taxPct = Number(item.tax) || 0;
+        const lineSub = price * qty;
+        const lineTax = (lineSub * taxPct) / 100;
+        return {
+          description: item.name || 'Item or service',
+          quantity: qty,
+          unitPrice: price,
+          taxRate: taxPct,
+          lineTotal: lineSub + lineTax,
+        };
+      }),
+      subtotal,
+      tax: totalTax,
+      total,
+      accent: invoiceColor,
+      draft: true,
+    };
+  }, [
+    billingAddress,
+    contextData.currency,
+    contextData.note,
+    customerDetails,
+    formattedDueDate,
+    formattedIssueDate,
+    invoiceColor,
+    invoiceNumber,
+    invoiceType,
+    org,
+    paymentMethodLabel,
+    paymentReference,
+    paymentTerms,
+    shippingAddress,
+    subtotal,
+    tableData,
+    total,
+    totalTax,
+  ]);
+
+  const documentNode = useMemo(
+    () => <InvoicePdfDocument {...pdfProps} />,
+    [pdfProps],
+  );
+
+  const download = useCallback(async () => {
+    const filename = pdfProps.invoiceNumber
+      ? `invoice-${pdfProps.invoiceNumber}`
+      : 'draft-invoice';
+    await downloadReactPdf(documentNode, filename);
+  }, [documentNode, pdfProps.invoiceNumber]);
+
+  useEffect(() => {
+    onRegisterDownload?.(download);
+  }, [download, onRegisterDownload]);
 
   return (
     <div className="flex min-h-full flex-col items-start justify-center overflow-y-auto w-full scroll bg-main-bg">
@@ -247,20 +375,7 @@ const PdfView = () => {
               <div className="pl-4">
                 <p>
                   <strong>Payment Method:</strong>{' '}
-                  {(() => {
-                    const raw =
-                      typeof contextData.payment_method === 'string'
-                        ? contextData.payment_method
-                        : contextData.payment_method?.[0] ||
-                          contextData.paymentMethod ||
-                          '';
-                    return (
-                      String(raw)
-                        .replace(/_/g, ' ')
-                        .replace(/\b\w/g, (c: string) => c.toUpperCase()) ||
-                      'Not selected'
-                    );
-                  })()}
+                  {paymentMethodLabel || 'Not selected'}
                 </p>
 
                 {paymentReference && (

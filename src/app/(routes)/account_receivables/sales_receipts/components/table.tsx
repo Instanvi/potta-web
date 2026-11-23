@@ -9,7 +9,6 @@ import { exportRows } from '@/lib/export-file';
 import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { CloudDownload, FileDown } from 'lucide-react';
 import ViewReceiptSlider from './viewSlider';
 import DeleteModal from './deleteModal';
 import Button from '@potta/components/button';
@@ -233,15 +232,6 @@ const SaleTable = () => {
       ),
     },
     {
-      id: 'download',
-      header: '',
-      cell: () => (
-        <div className="">
-          <FileDown />
-        </div>
-      ),
-    },
-    {
       id: 'resolution',
       header: 'Resolution',
       cell: () => {
@@ -300,13 +290,13 @@ const SaleTable = () => {
   ];
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <ListToolbar
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               text={'Export'}
-              icon={<img src="/images/export.svg" />}
+              icon={<img src="/images/export.svg" alt="" />}
               theme="lightBlue"
               type={'button'}
               onClick={() =>
@@ -345,7 +335,7 @@ const SaleTable = () => {
                 type={'button'}
               />
             </Link>
-          </>
+          </div>
         }
       >
         <DynamicFilter
@@ -357,7 +347,7 @@ const SaleTable = () => {
           className="p-0"
         />
         <DateRangePicker
-          className="w-auto min-w-[240px]"
+          className="w-auto min-w-[220px]"
           placeholder="Sale date: all"
           clearable
           value={dateRange}
@@ -377,8 +367,6 @@ const SaleTable = () => {
         />
       )}
 
-      {/* Add your modal components here when implemented */}
-
       {openDeleteModal && (
         <DeleteModal
           recieptID={openDeleteModal}
@@ -393,7 +381,7 @@ const SaleTable = () => {
           setOpen={setIsViewOpen}
         />
       )}
-    </>
+    </div>
   );
 };
 

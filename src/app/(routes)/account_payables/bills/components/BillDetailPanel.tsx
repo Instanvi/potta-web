@@ -16,7 +16,13 @@ import { Bill, billExpenseAccount, paymentMethodLabel } from '../utils/types';
 import BillStatusBadge from './BillStatusBadge';
 import PayBillModal from './PayBillModal';
 import RejectBillModal from './RejectBillModal';
-import { downloadPreviewAsPdf } from '@/lib/print-preview';
+import { BillPdfDocument } from '@/components/documents/bill-pdf-document';
+import {
+  formatOrgAddress,
+  orgDisplayName,
+  useOrganizationProfile,
+} from '@/hooks/use-organization-profile';
+import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { toast } from 'sonner';
 
 type TimelineStep = {
@@ -91,6 +97,7 @@ export function BillDetailPanel({ billId }: { billId: string }) {
   const { data: bill, isLoading, error, refetch } = useBill(billId);
   const approve = useApproveBill();
   const sendBill = useSendBill();
+  const { data: org } = useOrganizationProfile();
   const [confirmApprove, setConfirmApprove] = useState(false);
   const [confirmSend, setConfirmSend] = useState(false);
   const [toReject, setToReject] = useState<Bill | null>(null);
@@ -175,14 +182,56 @@ export function BillDetailPanel({ billId }: { billId: string }) {
         theme="lightBlue"
         icon={<i className="ri-download-2-line" />}
         onClick={() => {
-          const el = document.querySelector(
-            '[data-document-preview]'
-          ) as HTMLElement | null;
-          if (!el) {
-            toast.message('Open Preview first, then download the PDF.');
-            return;
-          }
-          downloadPreviewAsPdf(el, bill.code || 'Bill');
+          void (async () => {
+            try {
+              await downloadReactPdf(
+                <BillPdfDocument
+                  title={bill.code ? `Bill ${bill.code}` : 'Bill'}
+                  billNumber={bill.code || bill.vendorInvoiceNumber || undefined}
+                  issueDate={formatDate(bill.issuedDate)}
+                  dueDate={formatDate(bill.dueDate)}
+                  currency={bill.currency || 'XAF'}
+                  paymentMethod={paymentMethodLabel(bill.paymentMethod)}
+                  expenseAccountCode={billExpenseAccount(bill)}
+                  notes={bill.notes || undefined}
+                  seller={{
+                    name: orgDisplayName(org) || 'Your organization',
+                    email: org?.businessEmail,
+                    phone: org?.businessPhone,
+                    addressLines: formatOrgAddress(org),
+                    logoUrl: org?.logo,
+                    registrationNumber: org?.registrationNumber,
+                    taxId: org?.taxIdentificationNumber,
+                  }}
+                  vendor={
+                    bill.vendor
+                      ? {
+                          name: bill.vendor.name,
+                          email: bill.vendor.email,
+                          phone: bill.vendor.phone,
+                        }
+                      : null
+                  }
+                  lines={lines.map((line) => ({
+                    description: line.description || 'Item or service',
+                    quantity: Number(line.quantity || 0),
+                    unitPrice: Number(line.unitPrice || 0),
+                    taxRate: Number(line.taxRate || 0),
+                    discountAmount: Number(line.discountAmount || 0),
+                    lineTotal: Number(line.totalAmount || 0),
+                  }))}
+                  subtotal={totals.subtotal}
+                  discount={totals.discount}
+                  tax={tax}
+                  total={total}
+                  draft={bill.status === 'DRAFT'}
+                />,
+                bill.code || 'bill',
+              );
+            } catch {
+              toast.error('Could not generate PDF');
+            }
+          })();
         }}
       />
     </>

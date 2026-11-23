@@ -177,7 +177,7 @@ const Slider: FC<props> = ({
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        className="relative z-50 overflow-x-hidden"
+        className="relative z-[110] overflow-x-hidden"
       >
         <DialogBackdrop
           transition
