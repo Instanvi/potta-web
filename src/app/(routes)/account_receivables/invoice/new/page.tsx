@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useContext, Suspense } from 'react';
+import React, { useCallback, useState, useContext, Suspense } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 import { useSearchParams } from 'next/navigation';
@@ -19,6 +19,12 @@ import { Skeleton } from '@potta/components/ui/loaders';
 
 const NewInvoiceInner = () => {
   const [showPreview, setShowPreview] = useState(true);
+  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
+    null,
+  );
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    setDownloadPdf(() => fn);
+  }, []);
   const searchParams = useSearchParams();
   const initialInvoiceType = searchParams.get('type');
   const [extracting, setExtracting] = useState(false);
@@ -90,8 +96,9 @@ const NewInvoiceInner = () => {
                       title="Preview"
                       downloadTitle="Invoice"
                       onClose={() => setShowPreview(false)}
+                      onDownloadPdf={downloadPdf ?? undefined}
                     >
-                      <PdfView />
+                      <PdfView onRegisterDownload={registerDownload} />
                     </DocumentPreviewShell>
                   </div>
                 </ResizablePanel>
