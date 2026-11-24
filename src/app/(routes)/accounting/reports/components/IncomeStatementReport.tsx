@@ -1,18 +1,25 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { DateRangePicker, parseDateValue } from '@potta/components/ui/date-picker';
+import { ExportButton } from '@/components/export-button';
 import {
   formatAmount,
   formatDate,
   startOfYear,
   today,
 } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState, StatCard } from '../../../_shared/states';
+import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
 import { useIncomeStatement } from '../hooks';
 import ReportSection from './ReportSection';
 
 const sum = (lines?: Record<string, number>) =>
   Object.values(lines ?? {}).reduce((s, v) => s + Number(v), 0);
+
+function flattenSection(section: string, lines?: Record<string, number>, hideZero?: boolean) {
+  return Object.entries(lines ?? {})
+    .filter(([, amount]) => !hideZero || Math.abs(Number(amount)) >= 0.005)
+    .map(([account, amount]) => ({ section, account, amount: Number(amount) }));
+}
 
 const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
   const [startDate, setStartDate] = useState(startOfYear());
@@ -23,18 +30,51 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
   const isEmpty =
     data && !Object.keys(data.incomes ?? {}).length && !Object.keys(data.expenses ?? {}).length;
 
+  const exportRows = useMemo(() => {
+    if (!data) return [];
+    return [
+      ...flattenSection('Income', data.incomes, hideZero),
+      ...flattenSection('Expenses', data.expenses, hideZero),
+      {
+        section: 'Net',
+        account: data.netProfitLoss >= 0 ? 'Net profit' : 'Net loss',
+        amount: Number(data.netProfitLoss) || 0,
+      },
+    ];
+  }, [data, hideZero]);
+
   return (
     <div className="flex flex-col gap-4">
-      <DateRangePicker
-        id="incomeStatementPeriod"
-        label="Period"
-        className="w-72"
-        value={{ from: startDate, to: endDate }}
-        onChange={({ from, to }) => {
-          setStartDate(from || startOfYear());
-          setEndDate(to || today());
-        }}
-      />
+      <ListToolbar
+        className="print:hidden"
+        actions={
+          <ExportButton
+            filename={`profit-and-loss-${startDate}-${endDate}`}
+            rows={exportRows}
+            columns={[
+              { key: 'section', header: 'Section' },
+              { key: 'account', header: 'Account' },
+              {
+                key: 'amount',
+                header: 'Amount',
+                value: (row) => formatAmount(row.amount),
+              },
+            ]}
+            disabled={!exportRows.length || invalidRange}
+          />
+        }
+      >
+        <DateRangePicker
+          id="incomeStatementPeriod"
+          label="Period"
+          className="w-72"
+          value={{ from: startDate, to: endDate }}
+          onChange={({ from, to }) => {
+            setStartDate(from || startOfYear());
+            setEndDate(to || today());
+          }}
+        />
+      </ListToolbar>
       {invalidRange ? (
         <p className="text-sm text-destructive">The start date must be before the end date.</p>
       ) : isLoading ? (

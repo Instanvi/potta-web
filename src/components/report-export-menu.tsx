@@ -54,7 +54,7 @@ export function ReportExportMenu({
           return;
         }
         await exportRows({
-          filename: reportId,
+          filename: title || reportId,
           rows,
           columns: columns.map((c) => ({
             key: c.key,

@@ -115,6 +115,7 @@ export function ReportRunner({
               />
               <ReportExportMenu
                 reportId={reportId}
+                title={title}
                 params={params}
                 columns={data?.columns ?? []}
                 rows={data?.rows ?? []}
