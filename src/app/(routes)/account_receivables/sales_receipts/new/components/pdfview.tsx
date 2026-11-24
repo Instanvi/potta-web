@@ -179,7 +179,10 @@ const PdfView = ({
   }, [download, onRegisterDownload]);
 
   return (
-    <div className="flex min-h-full w-full flex-col items-center justify-center overflow-y-auto scroll bg-main-bg">
+    <div
+      data-pdf-capture
+      className="flex min-h-full w-full flex-col items-center justify-center overflow-y-auto scroll bg-main-bg"
+    >
       <div className="flex w-full min-w-[30rem] justify-between p-8 pb-2">
         <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>

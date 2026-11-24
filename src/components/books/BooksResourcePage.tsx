@@ -384,30 +384,37 @@ export function BooksResourcePage({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  let lines: any[] = [];
-                  try {
-                    lines = editForm.lines ? JSON.parse(editForm.lines) : [];
-                  } catch {
-                    lines = [];
-                  }
-                  downloadBooksPdf({
-                    title: selected
-                      ? String(
-                          selected.receiptNumber ??
-                            selected.code ??
-                            selected.orderNumber ??
-                            title
-                        )
-                      : title,
-                    subtitle: title,
-                    fields: fields
-                      .filter((f) => f.type !== 'lines' && f.type !== 'json')
-                      .map((f) => ({
-                        label: f.label,
-                        value: editForm[f.key] ?? '',
-                      })),
-                    lines,
-                  });
+                  void (async () => {
+                    let lines: any[] = [];
+                    try {
+                      lines = editForm.lines ? JSON.parse(editForm.lines) : [];
+                    } catch {
+                      lines = [];
+                    }
+                    try {
+                      await downloadBooksPdf({
+                        title: selected
+                          ? String(
+                              selected.receiptNumber ??
+                                selected.code ??
+                                selected.orderNumber ??
+                                title
+                            )
+                          : title,
+                        subtitle: title,
+                        fields: fields
+                          .filter((f) => f.type !== 'lines' && f.type !== 'json')
+                          .map((f) => ({
+                            label: f.label,
+                            value: editForm[f.key] ?? '',
+                          })),
+                        lines,
+                      });
+                    } catch (err) {
+                      console.error(err);
+                      toast.error('Could not download PDF');
+                    }
+                  })();
                 }}
               >
                 Download PDF
