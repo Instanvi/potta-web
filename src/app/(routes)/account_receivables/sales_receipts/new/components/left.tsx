@@ -3,7 +3,6 @@ import Input from '@potta/components/input';
 import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect, useRef } from 'react';
 import DynamicTable from './newtableInvoice';
-import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
@@ -17,10 +16,13 @@ import { SalesReceiptPayload } from '../../utils/validation';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
 import {
   DocumentFormCard,
+  DocumentFormFooter,
   DocumentFormShell,
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { FIELD_TEXTAREA } from '@/lib/field-styles';
+import { useRouter } from 'next/navigation';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -79,6 +81,7 @@ interface SaleReceiptDto {
 }
 
 const Left = () => {
+  const router = useRouter();
   const context = useContext(ContextData);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const { data, isLoading: customersLoading } = useGetAllCustomers({
@@ -310,8 +313,9 @@ const Left = () => {
   const RequiredMark = () => <span className="ml-1 text-red-500">*</span>;
 
   return (
-    <>
-      <DocumentFormShell className="w-full max-w-5xl">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+      <DocumentFormShell className="w-full max-w-5xl pb-6">
         <DocumentFormCard flush>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
             <div className="md:col-span-3">
@@ -422,68 +426,83 @@ const Left = () => {
         </DocumentFormCard>
 
         <DocumentFormCard flush>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="space-y-4 lg:col-span-7">
-              <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-main-bg/40 p-4">
-                <PaymentMethodSelect
-                  value={selectedPaymentMethod}
-                  onChange={handlePaymentMethodChange}
-                  error={errors.paymentMethod}
+          <div className="space-y-4">
+            <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-main-bg/40 p-4">
+              <PaymentMethodSelect
+                value={selectedPaymentMethod}
+                onChange={handlePaymentMethodChange}
+                error={errors.paymentMethod}
+              />
+              <div className={errors.paymentReference ? 'error-field' : ''}>
+                <Input
+                  type="text"
+                  label={
+                    <>
+                      Payment reference
+                      <RequiredMark />
+                    </>
+                  }
+                  name="paymentReference"
+                  value={paymentReference}
+                  onchange={(e: any) =>
+                    handleInputChange('paymentReference', e.target.value)
+                  }
+                  placeholder="Enter payment reference"
+                  errors={
+                    errors.paymentReference
+                      ? { message: errors.paymentReference }
+                      : undefined
+                  }
                 />
-                <div className={errors.paymentReference ? 'error-field' : ''}>
-                  <Input
-                    type="text"
-                    label={
-                      <>
-                        Payment reference
-                        <RequiredMark />
-                      </>
-                    }
-                    name="paymentReference"
-                    value={paymentReference}
-                    onchange={(e: any) =>
-                      handleInputChange('paymentReference', e.target.value)
-                    }
-                    placeholder="Enter payment reference"
-                    errors={
-                      errors.paymentReference
-                        ? { message: errors.paymentReference }
-                        : undefined
-                    }
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-normal text-foreground">
-                  Notes
-                </label>
-                <textarea
-                  value={note}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  className={`${FIELD_TEXTAREA} min-h-28`}
-                  placeholder="Optional notes"
-                />
-                {errors.notes && (
-                  <p className="mt-1 text-sm text-red-500">{errors.notes}</p>
-                )}
               </div>
             </div>
-            <div className="flex items-end justify-end lg:col-span-5">
-              <Button
-                text="Save receipt"
-                onClick={handleSaveInvoice}
-                type="button"
+            <div>
+              <label className="mb-1 block text-sm font-normal text-foreground">
+                Notes
+              </label>
+              <textarea
+                value={note}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
+                className={`${FIELD_TEXTAREA} min-h-28`}
+                placeholder="Optional notes"
               />
+              {errors.notes && (
+                <p className="mt-1 text-sm text-red-500">{errors.notes}</p>
+              )}
             </div>
           </div>
         </DocumentFormCard>
       </DocumentFormShell>
+      </div>
+
+      <DocumentFormFooter
+        left={
+          <ShadcnButton
+            type="button"
+            variant="outline"
+            className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            onClick={() => router.push('/account_receivables/sales_receipts')}
+          >
+            Cancel
+          </ShadcnButton>
+        }
+        right={
+          <ShadcnButton
+            type="button"
+            className="bg-white text-foreground hover:bg-white/90"
+            onClick={handleSaveInvoice}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? 'Saving…' : 'Save receipt'}
+          </ShadcnButton>
+        }
+      />
 
       <SliderCustomer
         open={isAddCustomerDrawer}
         setOpen={setIsAddCustomerDrawer}
       />
-    </>
+    </div>
   );
 };
 
