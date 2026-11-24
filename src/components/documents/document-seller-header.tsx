@@ -6,6 +6,7 @@ import {
   orgDisplayName,
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
+import { orgLogoOrPotta } from '@/lib/brand';
 import { cn } from '@/lib/utils';
 import type { OrganizationProfile } from '@/types/auth';
 
@@ -24,20 +25,19 @@ function SellerBlock({
   const phone = org.businessPhone;
   const reg = org.registrationNumber;
   const tax = org.taxIdentificationNumber;
+  const logoSrc = orgLogoOrPotta(org.logo, 'svg');
 
   return (
     <div className={cn('flex gap-3 text-sm', className)}>
-      {org.logo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={org.logo}
-          alt={name || 'Organization logo'}
-          className={cn(
-            'shrink-0 object-contain',
-            compact ? 'h-10 w-10' : 'h-14 w-14',
-          )}
-        />
-      ) : null}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={logoSrc}
+        alt={name || 'Potta'}
+        className={cn(
+          'shrink-0 object-contain',
+          compact ? 'h-10 w-10' : 'h-14 w-14',
+        )}
+      />
       <div className="min-w-0 space-y-0.5 text-muted-foreground">
         {name ? <p className="font-medium text-foreground">{name}</p> : null}
         {email ? <p>{email}</p> : null}

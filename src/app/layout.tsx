@@ -4,6 +4,7 @@ import 'remixicon/fonts/remixicon.css';
 import 'react-accessible-accordion/dist/fancy-example.css';
 
 import { AppProviders } from '@potta/components/providers/AppProviders';
+import NextTopLoader from 'nextjs-toploader';
 
 import { Inter } from 'next/font/google';
 
@@ -34,6 +35,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans bg-[var(--main-bg)] antialiased">
+        <NextTopLoader
+          color="#0b5d1e"
+          height={2}
+          showSpinner={false}
+          crawlSpeed={150}
+          speed={200}
+          shadow={false}
+        />
         <Suspense fallback={null}>
           <AppProviders>{children}</AppProviders>
         </Suspense>

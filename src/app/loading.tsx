@@ -1,5 +1,4 @@
-import { PageLoader } from '@potta/components/ui/loaders';
-
+/** Route transitions use NextTopLoader in the root layout — no full-page spinner. */
 export default function Loading() {
-  return <PageLoader />;
+  return null;
 }
