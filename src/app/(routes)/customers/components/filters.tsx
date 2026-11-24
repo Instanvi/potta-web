@@ -11,6 +11,7 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { ListToolbar } from '../../_shared/states';
 import { ExportButton } from '@/components/export-button';
+import { useContactToolbarStart } from '@/components/shared/contact-toolbar';
 
 interface FilterProps {
   searchValue: string;
@@ -22,6 +23,7 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [] 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toolbarStart = useContactToolbarStart();
 
   return (
     <>
@@ -81,6 +83,7 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [] 
           </>
         }
       >
+        {toolbarStart}
         <Search
           placeholder="Search customers by name, email or phone..."
           value={searchValue}
