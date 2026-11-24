@@ -157,6 +157,7 @@ const InventoryTable = ({
     {
       accessorKey: 'actions',
       header: 'Actions',
+      enableHiding: false,
       cell: ({ row: { original } }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -243,7 +244,10 @@ const InventoryTable = ({
         data={rows}
         isLoading={isLoading}
         onRowClick={handleRowClick}
-        onSelectionChange={(selected) => setSelectedProducts(selected as Product[])}
+        onSelectionChange={(selected) =>
+          setSelectedProducts(selected as Product[])
+        }
+        storageKey="pos-inventory-table"
         {...tableProps(data?.meta, rows.length)}
       />
       {openDeleteModal && (

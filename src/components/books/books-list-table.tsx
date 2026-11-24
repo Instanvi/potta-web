@@ -13,6 +13,8 @@ type BooksListTableProps<T extends Record<string, unknown>> = {
   isLoading?: boolean;
   onRowClick?: (row: T) => void;
   showPagination?: boolean;
+  storageKey?: string;
+  showViewOptions?: boolean;
 };
 
 /** Shared DataTable chrome for books / payroll list pages. */
@@ -22,6 +24,8 @@ export function BooksListTable<T extends Record<string, unknown>>({
   isLoading,
   onRowClick,
   showPagination,
+  storageKey,
+  showViewOptions,
 }: BooksListTableProps<T>) {
   const defs = useMemo<ColumnDef<T>[]>(
     () =>
@@ -43,6 +47,8 @@ export function BooksListTable<T extends Record<string, unknown>>({
       onRowClick={onRowClick}
       showPagination={showPagination ?? rows.length > 10}
       pageSize={10}
+      storageKey={storageKey}
+      showViewOptions={showViewOptions}
     />
   );
 }

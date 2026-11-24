@@ -13,7 +13,7 @@ import {
   DocumentListPanel,
   DocumentListRow,
 } from '@potta/components/document-master-detail';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import { Skeleton } from '@potta/components/ui/loaders';
 import { formatDate } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
@@ -370,10 +370,11 @@ export function BillsTable() {
           }
         />
       ) : (
-        <DataGrid
+        <DataTable
           columns={columns}
           data={rows}
           onRowClick={(row) => setSelectedId(row.uuid)}
+          storageKey="bills-table"
           isLoading={isLoading}
           manualPagination
           pageCount={pageCount}

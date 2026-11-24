@@ -1,7 +1,7 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import type { ProductCategory } from '../_utils/types';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import { Button } from '@potta/components/shadcn/button';
 import {
   Sheet,
@@ -71,6 +71,7 @@ const CategoryManager = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: 'Actions',
       cell: ({ row: { original } }) => (
         <DropdownMenu>
@@ -124,12 +125,14 @@ const CategoryManager = () => {
         />
       ) : (
         <Panel className="overflow-hidden p-0">
-          <DataGrid
+          <DataTable
             columns={columns}
             data={rows}
             isLoading={false}
             {...tableProps(data?.meta, rows.length)}
-          />
+          
+          storageKey="pos-categories-table"
+        />
         </Panel>
       )}
 

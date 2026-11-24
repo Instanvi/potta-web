@@ -146,6 +146,7 @@ export function BooksTransactionsHub({
             <BooksListTable
               columns={hubColumns}
               rows={hubRows}
+              storageKey="books-transactions-hub-table"
             />
           )}
         </div>

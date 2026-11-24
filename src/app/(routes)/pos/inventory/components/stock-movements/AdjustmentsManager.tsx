@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { toast } from 'sonner';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import Button from '@potta/components/button';
 import Select from '@potta/components/select';
 import Slider from '@potta/components/slideover';
@@ -335,6 +335,7 @@ const AdjustmentsManager = () => {
     { id: 'status', header: 'Status', cell: ({ row }) => <MovementStatus status={row.original.status} /> },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row }) => (
         <RowActions
@@ -373,12 +374,14 @@ const AdjustmentsManager = () => {
           }
         />
       </ListToolbar>
-      <DataGrid
+      <DataTable
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}
         {...tableProps(data?.meta, data?.data?.length)}
-      />
+      
+          storageKey="pos-adjustments-table"
+        />
       <NewAdjustmentSheet key={sheetKey} open={sheetOpen} setOpen={setSheetOpen} />
       <ConfirmDialog
         open={!!pendingAction}

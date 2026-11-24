@@ -38,7 +38,9 @@ const Section = <T,>({
         withRowSelection={false}
         pageSize={10}
         pageSizeOptions={[10, 20, 50, 100]}
-      />
+      
+          storageKey="pos-sync-entity-health-table"
+        />
     )}
   </Panel>
 );

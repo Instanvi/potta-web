@@ -165,6 +165,7 @@ const TableComponents = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: 'Actions',
       cell: ({ row: { original } }) => {
         return (
@@ -264,6 +265,8 @@ const TableComponents = () => {
           pageSizeOptions={[10, 20, 50, 100]}
           onRowClick={handleRowClick}
           {...tableProps(vendor?.meta, vendor?.data?.length)}
+        
+          storageKey="vendors-table"
         />
       )}
       <DeleteModal

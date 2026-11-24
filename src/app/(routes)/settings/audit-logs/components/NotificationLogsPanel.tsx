@@ -176,6 +176,8 @@ export default function NotificationLogsPanel() {
           withRowSelection={false}
           pageSizeOptions={[25, 50, 100]}
           {...tableProps(data?.meta, rows.length)}
+        
+          storageKey="notification-logs-table"
         />
       )}
     </div>

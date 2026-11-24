@@ -86,6 +86,7 @@ const TaxTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row }) => (
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -263,6 +264,8 @@ const TaxTable = () => {
           onPaginationChange={setPagination}
           pageSize={pagination.pageSize}
           pageSizeOptions={[5, 10, 20, 50, 100]}
+        
+          storageKey="taxes-table"
         />
       )}
 

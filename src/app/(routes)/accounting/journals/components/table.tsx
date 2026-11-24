@@ -79,6 +79,7 @@ const JournalEntriesTable = ({
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row }) => (
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -124,6 +125,7 @@ const JournalEntriesTable = ({
         isLoading={isLoading}
         withRowSelection={false}
         onRowClick={(row) => setViewId(row.uuid)}
+        storageKey="journals-table"
         {...tableProps(data?.meta, rows.length)}
       />
       <JournalViewSlider

@@ -101,6 +101,7 @@ export default function NotificationsPage() {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row: { original: n } }) => {
         const isUnread = !n.isRead;
@@ -184,7 +185,9 @@ export default function NotificationsPage() {
             isLoading={isLoading}
             withRowSelection={false}
             {...tableProps(data?.meta, items.length)}
-          />
+          
+          storageKey="notifications-table"
+        />
         )}
       </PageContainer>
 

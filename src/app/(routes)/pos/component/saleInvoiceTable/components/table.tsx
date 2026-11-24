@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useContext } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from './orderSummary';
 import { computeLine, computeTotals, lineDiscount, type SaleLineItem } from '@potta/app/(routes)/pos/utils/sale';
@@ -134,10 +134,11 @@ const TableOPS = () => {
               Cart Items
             </h3>
             <div className="">
-              <DataGrid<LineItem>
+              <DataTable<LineItem>
                 columns={columns as ColumnDef<LineItem>[]}
                 data={Array.isArray(context?.data) ? context.data : []}
                 showPagination={false}
+                showViewOptions={false}
               />
             </div>
           </div>

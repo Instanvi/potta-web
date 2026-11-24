@@ -124,6 +124,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
             <BooksListTable
               columns={COLUMNS}
               rows={rows}
+              storageKey="tax-filing-workflow-table"
               onRowClick={(row) => setSelected(row)}
             />
           )}

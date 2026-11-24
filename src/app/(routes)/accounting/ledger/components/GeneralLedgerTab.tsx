@@ -196,7 +196,9 @@ const GeneralLedgerTab = () => {
             onPaginationChange={setPagination}
             pageSize={pagination.pageSize}
             pageSizeOptions={[20, 50, 100]}
-          />
+          
+          storageKey="general-ledger-table"
+        />
         </>
       )}
     </div>

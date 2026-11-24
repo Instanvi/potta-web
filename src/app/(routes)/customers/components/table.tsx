@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 import Filter from './filters';
@@ -123,6 +123,7 @@ const TableComponents = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: 'Actions',
       cell: ({ row: { original } }) => {
         return (
@@ -200,13 +201,15 @@ const TableComponents = () => {
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
-        <DataGrid
+        <DataTable
           columns={columns}
           data={customer?.data ?? []}
           isLoading={isLoading}
           onRowClick={handleRowClick}
           pageSizeOptions={[10, 20, 50, 100]}
           {...tableProps(customer?.meta, customer?.data?.length)}
+        
+          storageKey="customers-table"
         />
       )}
       {openDeleteModal && (

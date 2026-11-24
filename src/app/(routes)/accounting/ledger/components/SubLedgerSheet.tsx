@@ -88,7 +88,9 @@ const Transactions = ({ type, row }: { type: SubLedgerKind; row: AgingRow }) => 
       {entries.length === 0 ? (
         <EmptyState title="No transactions" />
       ) : (
-        <DataTable columns={columns} data={entries} withRowSelection={false} pageSize={10} />
+        <DataTable columns={columns} data={entries} withRowSelection={false} pageSize={10} 
+          storageKey="sub-ledger-table"
+        />
       )}
     </div>
   );

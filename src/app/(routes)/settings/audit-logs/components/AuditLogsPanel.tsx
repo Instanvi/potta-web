@@ -124,6 +124,8 @@ export default function AuditLogsPanel() {
           onRowClick={setSelected}
           pageSizeOptions={[25, 50, 100]}
           {...tableProps(data?.meta, pageRows.length)}
+        
+          storageKey="audit-logs-table"
         />
       )}
 

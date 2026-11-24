@@ -139,6 +139,7 @@ const IntegrationTransactionsTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row }) => {
         const txn = row.original;
@@ -290,6 +291,8 @@ const IntegrationTransactionsTable = () => {
           withRowSelection={false}
           pageSizeOptions={[20, 50, 100]}
           {...tableProps(data?.meta, rows.length)}
+        
+          storageKey="integration-transactions-table"
         />
       )}
 
