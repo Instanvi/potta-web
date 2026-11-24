@@ -48,7 +48,7 @@ const NewSalesReciept = () => {
             defaultSize={showPreview ? 58 : 100}
             className="min-w-0"
           >
-            <div className="h-full min-h-0 overflow-y-auto bg-main-bg">
+            <div className="flex h-full min-h-0 flex-col bg-main-bg">
               <Left />
             </div>
           </ResizablePanel>

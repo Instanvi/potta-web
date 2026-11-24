@@ -18,7 +18,10 @@ export function DocumentFormShell({
   );
 }
 
-/** Sticky green action bar: Cancel | center links | Save / Save and send. */
+/** Green action bar: Cancel | center links | Save / Save and send.
+ * Prefer placing outside the scroll region (flex sibling) so Save stays visible;
+ * `sticky` still helps when the bar lives inside an overflow container.
+ */
 export function DocumentFormFooter({
   left,
   center,
@@ -29,7 +32,7 @@ export function DocumentFormFooter({
   right?: ReactNode;
 }) {
   return (
-    <div className="sticky bottom-0 z-30 border-t border-primary/30 bg-primary px-4 py-3 md:px-6">
+    <div className="sticky bottom-0 z-30 shrink-0 border-t border-primary/30 bg-primary px-4 py-3 md:px-6">
       <div className="flex w-full flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">{left}</div>
         {center ? (
@@ -37,7 +40,7 @@ export function DocumentFormFooter({
             {center}
           </div>
         ) : null}
-        <div className="flex flex-wrap items-center gap-2">{right}</div>
+        <div className="ml-auto flex flex-wrap items-center gap-2">{right}</div>
       </div>
     </div>
   );
