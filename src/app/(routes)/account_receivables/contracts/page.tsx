@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="contract"
       title="Contract"
+      documentKind="contract"
       columns={[
         { key: 'title', label: 'Title' },
         { key: 'status', label: 'Status' },

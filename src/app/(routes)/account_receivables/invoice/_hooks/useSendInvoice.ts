@@ -5,7 +5,13 @@ const useSendInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (invoiceId: string) => invoiceApi.send(invoiceId),
+    mutationFn: ({
+      invoiceId,
+      data,
+    }: {
+      invoiceId: string;
+      data?: { channel?: 'email' | 'sms'; to?: string; phone?: string; message?: string };
+    }) => invoiceApi.send(invoiceId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['get-all-invoicing'] });
       queryClient.invalidateQueries({ queryKey: ['get-one-invoice'] });

@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="supplier-credit"
       title="Supplier credit"
+      documentKind="supplier_credit"
       columns={[
         { key: 'vendorId', label: 'Vendor' },
         { key: 'creditAmount', label: 'Amount' },

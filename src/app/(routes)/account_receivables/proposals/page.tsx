@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="proposal"
       title="Proposal"
+      documentKind="proposal"
       columns={[
         { key: 'title', label: 'Title' },
         { key: 'status', label: 'Status' },

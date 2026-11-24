@@ -55,8 +55,11 @@ export const invoiceApi = {
     const result = await axios.post(`/invoice/${invoice_id}/pay`, data);
     return result?.data;
   },
-  send: async (invoice_id: string): Promise<{ ok: true; to: string }> => {
-    const result = await axios.post(`/invoice/${invoice_id}/send`);
+  send: async (
+    invoice_id: string,
+    data: { channel?: 'email' | 'sms'; to?: string; phone?: string; message?: string } = {},
+  ): Promise<{ ok: true; to: string; channel: 'email' | 'sms' }> => {
+    const result = await axios.post(`/invoice/${invoice_id}/send`, data);
     return result?.data;
   },
   addLineItems: async (invoiceId: string, lineItems: unknown[]) => {

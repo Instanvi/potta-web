@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="sales-order"
       title="Sales order"
+      documentKind="sales_order"
       columns={[
         { key: 'customerId', label: 'Customer' },
         { key: 'status', label: 'Status' },

@@ -23,6 +23,10 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
+import {
+  DocumentChannelMenu,
+  documentChannelOptions,
+} from '@/components/document-channel-menu';
 
 /** Statuses that are considered posted / non-editable — use a credit note instead. */
 export const POSTED_INVOICE_STATUSES = [
@@ -57,7 +61,7 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
   const sendMutation = useSendInvoice();
   const { data: org } = useOrganizationProfile();
   const [editOpen, setEditOpen] = useState(false);
-  const [confirmSend, setConfirmSend] = useState(false);
+  const [confirmSend, setConfirmSend] = useState<'email' | 'sms' | null>(null);
 
   if (isLoading && !fallback) {
     return (
@@ -86,9 +90,11 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
   const canPay = PAYABLE_STATUSES.includes(statusUpper);
   const uuid = (invoice as { uuid?: string }).uuid || invoiceId;
   const customerEmail = (invoice.customer?.email || '').trim();
+  const customerPhone = (invoice.customer?.phone || '').trim();
   const customerName = invoice.customer
     ? `${invoice.customer.firstName ?? ''} ${invoice.customer.lastName ?? ''}`.trim()
     : '';
+  const alreadySent = Boolean((invoice as { lastSentAt?: string | null }).lastSentAt);
 
   const handleApprove = async () => {
     const loadingToast = toast.loading('Approving invoice...');
@@ -102,20 +108,25 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
     }
   };
 
-  const handleSendClick = () => {
-    if (!customerEmail) {
-      toast.error('Add a customer email before sending');
-      return;
-    }
-    setConfirmSend(true);
-  };
-
   const handleSendConfirm = async () => {
-    const loadingToast = toast.loading('Sending invoice…');
+    if (!confirmSend) return;
+    const loadingToast = toast.loading(
+      confirmSend === 'sms' ? 'Sending invoice SMS…' : 'Sending invoice…',
+    );
     try {
-      const res = await sendMutation.mutateAsync(uuid);
-      toast.success(`Invoice sent to ${res.to}`, { id: loadingToast });
-      setConfirmSend(false);
+      const res = await sendMutation.mutateAsync({
+        invoiceId: uuid,
+        data: {
+          channel: confirmSend,
+          to: confirmSend === 'email' ? customerEmail : undefined,
+          phone: confirmSend === 'sms' ? customerPhone : undefined,
+        },
+      });
+      toast.success(
+        res.channel === 'sms' ? `Invoice texted to ${res.to}` : `Invoice sent to ${res.to}`,
+        { id: loadingToast },
+      );
+      setConfirmSend(null);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to send invoice', {
         id: loadingToast,
@@ -143,13 +154,11 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
           onClick={() => undefined}
         />
       )}
-      <Button
-        text={customerEmail ? 'Send' : 'Add customer email'}
-        type="button"
-        theme="lightBlue"
-        icon={<i className="ri-mail-send-line" />}
+      <DocumentChannelMenu
+        label={alreadySent ? 'Resend' : 'Send'}
         disabled={sendMutation.isPending}
-        onClick={handleSendClick}
+        options={documentChannelOptions({ email: customerEmail, phone: customerPhone })}
+        onSelect={(channel) => setConfirmSend(channel)}
       />
       {canPay ? (
         <Link href={`/account_receivables/paynow/${uuid}`}>
@@ -400,16 +409,22 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
         invoice={invoice as any}
       />
       <ConfirmModal
-        open={confirmSend}
-        title={`Send invoice ${invoice.invoiceNumber || invoice.invoiceId}`}
+        open={Boolean(confirmSend)}
+        title={`${alreadySent ? 'Resend' : 'Send'} invoice ${invoice.invoiceNumber || invoice.invoiceId}`}
         message={
-          customerEmail
-            ? `Email this invoice to ${customerEmail}? Credits come from the branch notification wallet.`
-            : 'Add a customer email before sending.'
+          confirmSend === 'sms'
+            ? `Text this invoice to ${customerPhone || 'the customer phone'}?${
+                alreadySent ? ' The previous download link will stop working.' : ''
+              }`
+            : customerEmail
+              ? `Email this invoice to ${customerEmail}?${
+                  alreadySent ? ' The previous download link will stop working.' : ''
+                }`
+              : 'Add a customer email before sending.'
         }
-        confirmText="Send"
+        confirmText={alreadySent ? 'Resend' : 'Send'}
         isLoading={sendMutation.isPending}
-        onClose={() => setConfirmSend(false)}
+        onClose={() => setConfirmSend(null)}
         onConfirm={() => void handleSendConfirm()}
       />
     </>

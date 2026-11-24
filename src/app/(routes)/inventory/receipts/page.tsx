@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="item-receipt"
       title="Item receipt"
+      documentKind="item_receipt"
       columns={[
         { key: 'purchaseOrderId', label: 'PO' },
         { key: 'vendorId', label: 'Vendor' },
