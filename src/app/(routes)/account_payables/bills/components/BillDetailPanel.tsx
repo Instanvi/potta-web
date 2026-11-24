@@ -23,6 +23,10 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
+import {
+  DocumentChannelMenu,
+  documentChannelOptions,
+} from '@/components/document-channel-menu';
 import { toast } from 'sonner';
 
 type TimelineStep = {
@@ -99,7 +103,7 @@ export function BillDetailPanel({ billId }: { billId: string }) {
   const sendBill = useSendBill();
   const { data: org } = useOrganizationProfile();
   const [confirmApprove, setConfirmApprove] = useState(false);
-  const [confirmSend, setConfirmSend] = useState(false);
+  const [confirmSend, setConfirmSend] = useState<'email' | 'sms' | null>(null);
   const [toReject, setToReject] = useState<Bill | null>(null);
   const [toPay, setToPay] = useState<Bill | null>(null);
 
@@ -127,14 +131,8 @@ export function BillDetailPanel({ billId }: { billId: string }) {
   const canApproveOrReject = bill.status === 'DRAFT' || bill.status === 'ISSUED';
   const canPay = bill.status === 'APPROVED' || bill.status === 'OVERDUE';
   const vendorEmail = (bill.vendor?.email || '').trim();
-
-  const handleSendClick = () => {
-    if (!vendorEmail) {
-      toast.error('Add a vendor email before sending');
-      return;
-    }
-    setConfirmSend(true);
-  };
+  const vendorPhone = (bill.vendor?.phone || '').trim();
+  const alreadySent = Boolean((bill as { lastSentAt?: string | null }).lastSentAt);
 
   const toolbar = (
     <>
@@ -158,13 +156,11 @@ export function BillDetailPanel({ billId }: { billId: string }) {
           </Can>
         </>
       )}
-      <Button
-        text={vendorEmail ? 'Send' : 'Add vendor email'}
-        type="button"
-        theme="lightBlue"
-        icon={<i className="ri-mail-send-line" />}
+      <DocumentChannelMenu
+        label={alreadySent ? 'Resend' : 'Send'}
         disabled={sendBill.isPending}
-        onClick={handleSendClick}
+        options={documentChannelOptions({ email: vendorEmail, phone: vendorPhone })}
+        onSelect={(channel) => setConfirmSend(channel)}
       />
       {canPay && (
         <Can resource="Bill" action="pay">
@@ -406,19 +402,36 @@ export function BillDetailPanel({ billId }: { billId: string }) {
         }
       />
       <ConfirmModal
-        open={confirmSend}
-        title={`Send bill ${bill.code}`}
+        open={Boolean(confirmSend)}
+        title={`${alreadySent ? 'Resend' : 'Send'} bill ${bill.code}`}
         message={
-          vendorEmail
-            ? `Email this bill to ${vendorEmail}? Credits come from the branch notification wallet.`
-            : 'Add a vendor email before sending.'
+          confirmSend === 'sms'
+            ? `Text this bill to ${vendorPhone || 'the vendor phone'}?${
+                alreadySent ? ' The previous download link will stop working.' : ''
+              }`
+            : vendorEmail
+              ? `Email this bill to ${vendorEmail}?${
+                  alreadySent ? ' The previous download link will stop working.' : ''
+                }`
+              : 'Add a vendor email before sending.'
         }
-        confirmText="Send"
+        confirmText={alreadySent ? 'Resend' : 'Send'}
         isLoading={sendBill.isPending}
-        onClose={() => setConfirmSend(false)}
-        onConfirm={() =>
-          sendBill.mutate(bill.uuid, { onSuccess: () => setConfirmSend(false) })
-        }
+        onClose={() => setConfirmSend(null)}
+        onConfirm={() => {
+          if (!confirmSend) return;
+          sendBill.mutate(
+            {
+              id: bill.uuid,
+              data: {
+                channel: confirmSend,
+                to: confirmSend === 'email' ? vendorEmail : undefined,
+                phone: confirmSend === 'sms' ? vendorPhone : undefined,
+              },
+            },
+            { onSuccess: () => setConfirmSend(null) },
+          );
+        }}
       />
       <RejectBillModal bill={toReject} onClose={() => setToReject(null)} />
       <PayBillModal bill={toPay} onClose={() => setToPay(null)} />

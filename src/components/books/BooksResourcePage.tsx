@@ -44,6 +44,11 @@ import {
 } from '@/lib/books-entities';
 import { TableSkeleton } from '@/components/ui/loaders';
 import {
+  DocumentChannelMenu,
+  type DocumentChannel,
+} from '@/components/document-channel-menu';
+import { sendPartyDocument } from '@/lib/document-send';
+import {
   useBooksResourceCreate,
   useBooksResourceList,
   useBooksResourceRemove,
@@ -85,6 +90,18 @@ export type BooksResourcePageProps = {
   columns: BooksColumn[];
   fields: BooksField[];
   actions?: BooksAction[];
+  /** When set, shows Email/SMS send (versioned download links). */
+  documentKind?:
+    | 'estimate'
+    | 'sales_order'
+    | 'sales_receipt'
+    | 'shipment'
+    | 'supplier_credit'
+    | 'item_receipt'
+    | 'proposal'
+    | 'contract'
+    | 'purchase_order'
+    | 'credit_note';
   /** Extra query params for list (page, limit, sortBy). */
   listParams?: Record<string, unknown>;
   /** Override CRUD client (e.g. expense projects via payrollClient). */
@@ -125,6 +142,7 @@ export function BooksResourcePage({
   columns,
   fields,
   actions = [],
+  documentKind,
   listParams,
   api = booksApi,
 }: BooksResourcePageProps) {
@@ -137,6 +155,8 @@ export function BooksResourcePage({
   const [editForm, setEditForm] = useState<Record<string, string>>({});
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<BooksAction | null>(null);
+  const [sendChannel, setSendChannel] = useState<DocumentChannel | null>(null);
+  const [sending, setSending] = useState(false);
 
   const params = useMemo(
     () => ({ page: 1, limit: 50, sortBy: 'createdAt:DESC', ...listParams }),
@@ -411,6 +431,17 @@ export function BooksResourcePage({
                   {act.label}
                 </Button>
               ))}
+              {documentKind && selected ? (
+                <DocumentChannelMenu
+                  label={selected.lastSentAt ? 'Resend' : 'Send'}
+                  disabled={sending}
+                  options={[
+                    { channel: 'email', label: 'Email', description: 'Party email on file' },
+                    { channel: 'sms', label: 'SMS', description: 'Party phone on file' },
+                  ]}
+                  onSelect={(channel) => setSendChannel(channel)}
+                />
+              ) : null}
               <Button type="button" onClick={() => void handleUpdate()} disabled={saving}>
                 {saving ? 'Saving…' : 'Save'}
               </Button>
@@ -427,6 +458,48 @@ export function BooksResourcePage({
           destructive
           isLoading={removeMutation.isPending}
           onConfirm={() => void runDelete()}
+        />
+        <ConfirmDialog
+          open={Boolean(sendChannel && selected && documentKind)}
+          onOpenChange={(open) => {
+            if (!open) setSendChannel(null);
+          }}
+          title={`${selected?.lastSentAt ? 'Resend' : 'Send'} ${title.toLowerCase()}?`}
+          description={
+            sendChannel === 'sms'
+              ? `Send this ${title.toLowerCase()} by SMS?${
+                  selected?.lastSentAt ? ' The previous download link will stop working.' : ''
+                }`
+              : `Send this ${title.toLowerCase()} by email?${
+                  selected?.lastSentAt ? ' The previous download link will stop working.' : ''
+                }`
+          }
+          confirmText={selected?.lastSentAt ? 'Resend' : 'Send'}
+          destructive={false}
+          isLoading={sending}
+          onConfirm={() => {
+            if (!selected || !documentKind || !sendChannel) return;
+            const id = rowId(selected);
+            if (!id) return;
+            setSending(true);
+            void sendPartyDocument(documentKind, id, { channel: sendChannel })
+              .then((res) => {
+                toast.success(
+                  res.channel === 'sms'
+                    ? `${title} texted to ${res.to}`
+                    : `${title} emailed to ${res.to}`,
+                );
+                setSendChannel(null);
+              })
+              .catch((err: unknown) => {
+                const message =
+                  err && typeof err === 'object' && 'response' in err
+                    ? String((err as { response?: { data?: { message?: string } } }).response?.data?.message || '')
+                    : '';
+                toast.error(message || `Failed to send ${title.toLowerCase()}`);
+              })
+              .finally(() => setSending(false));
+          }}
         />
         <ConfirmDialog
           open={Boolean(pendingAction)}

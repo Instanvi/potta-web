@@ -78,10 +78,18 @@ export const usePayBill = () => {
 export const useSendBill = () => {
   const invalidate = useInvalidateBills();
   return useMutation({
-    mutationFn: (id: string) => billsApi.send(id),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data?: { channel?: 'email' | 'sms'; to?: string; phone?: string; message?: string };
+    }) => billsApi.send(id, data),
     onSuccess: (res) => {
       invalidate();
-      toast.success(`Bill emailed to ${res.to}`);
+      toast.success(
+        res.channel === 'sms' ? `Bill texted to ${res.to}` : `Bill emailed to ${res.to}`,
+      );
     },
     onError: (error) => toast.error(apiErrorMessage(error, 'Failed to send bill')),
   });

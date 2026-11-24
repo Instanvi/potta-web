@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="shipment"
       title="Shipment"
+      documentKind="shipment"
       columns={[
         { key: 'shipDate', label: 'Ship date' },
         { key: 'status', label: 'Status' },
