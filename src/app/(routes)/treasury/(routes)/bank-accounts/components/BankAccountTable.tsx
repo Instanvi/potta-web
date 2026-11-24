@@ -116,7 +116,9 @@ const BankAccountTable: React.FC<BankAccountTableProps> = ({
       isLoading={loading}
       pageSize={20}
       pageSizeOptions={[10, 20, 50, 100]}
-    />
+    
+          storageKey="bank-accounts-table"
+        />
   );
 };
 

@@ -24,7 +24,7 @@ import {
   InvoiceDetailPanel,
   InvoiceDetailPreview,
 } from './InvoiceDetailPanel';
-import DataGrid from './DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 
 const startOfLocalDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -427,11 +427,12 @@ const InvoiceTable = () => {
           }
         />
       ) : (
-        <DataGrid
+        <DataTable
           columns={columns}
           data={filteredData}
           onRowClick={(row) => setSelectedId(row.uuid)}
           isLoading={isLoading}
+          storageKey="invoices-table"
           {...tableProps(data?.meta, data?.data?.length)}
         />
       )}

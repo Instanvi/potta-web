@@ -140,7 +140,9 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
             pageSize={20}
             pageSizeOptions={[10, 20, 50, 100]}
             onRowClick={setSelected}
-          />
+          
+          storageKey="aging-table"
+        />
           <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-[2px] border border-black/[0.08] bg-brand-subtle px-4 py-3 text-sm sm:grid-cols-3 lg:grid-cols-6">
             {BUCKETS.map((b) => (
               <div key={b.key} className="flex flex-col">

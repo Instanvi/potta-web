@@ -92,6 +92,7 @@ const ReconcilePanel = () => {
             ]}
             withRowSelection={false}
             showPagination={false}
+            storageKey="pos-sync-reconcile-table"
           />
           <div className="grid max-w-3xl grid-cols-3 gap-3">
             <StatCard label="Cash 571 debits" value={formatAmount(gl.cash_debit_571)} />

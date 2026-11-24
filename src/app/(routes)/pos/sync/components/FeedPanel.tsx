@@ -98,6 +98,8 @@ const FeedPanel = () => {
           isLoading={isLoading}
           withRowSelection={false}
           {...pager.tableProps(data, items.length)}
+        
+          storageKey="pos-sync-feed-table"
         />
       )}
       <Sheet open={!!payloadItem} onOpenChange={(open) => !open && setPayloadItem(null)}>

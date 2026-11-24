@@ -116,6 +116,7 @@ const CashbookTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row }) => (
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -281,7 +282,9 @@ const CashbookTable = () => {
             withRowSelection={false}
             pageSizeOptions={[20, 50, 100]}
             {...tableProps(data?.meta, rows.length)}
-          />
+          
+          storageKey="cashbook-table"
+        />
         </>
       )}
 

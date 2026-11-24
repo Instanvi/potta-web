@@ -116,6 +116,7 @@ const VoucherTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row: { original } }) => {
         const actions: PopoverAction[] = [
@@ -213,6 +214,8 @@ const VoucherTable = () => {
           isLoading={isLoading}
           withRowSelection
           {...tableProps(data?.meta, rows.length)}
+        
+          storageKey="vouchers-table"
         />
       )}
 

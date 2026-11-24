@@ -20,7 +20,7 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 
 // Updated type to match the actual response structure
 type ResponseSalesReceipt = {
@@ -250,6 +250,7 @@ const SaleTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: 'Actions',
       cell: ({ row: { original } }) => {
         return (
@@ -358,12 +359,14 @@ const SaleTable = () => {
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
-        <DataGrid
+        <DataTable
           columns={columns}
           data={receiptsData}
           onRowClick={handleRowClick}
           isLoading={isLoading}
           {...tableProps(data?.meta, data?.data?.length)}
+        
+          storageKey="sales-receipts-table"
         />
       )}
 

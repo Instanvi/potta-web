@@ -178,6 +178,7 @@ export function BankTransactionsPage() {
             <BooksListTable
               columns={COLUMNS}
               rows={rows}
+              storageKey="books-bank-transactions-table"
               onRowClick={(row) => {
                 setDetail(row);
                 setMatchAr('');

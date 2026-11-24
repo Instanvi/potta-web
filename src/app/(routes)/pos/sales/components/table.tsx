@@ -15,7 +15,7 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
@@ -227,6 +227,7 @@ const SaleTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row: { original } }) => {
         return (
@@ -338,12 +339,14 @@ const SaleTable = () => {
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
-        <DataGrid
+        <DataTable
           columns={columns}
           data={receiptsData}
           onRowClick={handleRowClick}
           isLoading={isLoading}
           {...tableProps(data?.meta, receiptsData.length)}
+        
+          storageKey="pos-sales-table"
         />
       )}
 

@@ -175,6 +175,7 @@ const InvoiceTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: () => (
         <div className="flex justify-center">
@@ -256,6 +257,8 @@ const InvoiceTable = () => {
           isLoading={isLoading}
           withRowSelection
           {...tableProps(data?.meta, data?.data?.length)}
+        
+          storageKey="recurring-vouchers-table"
         />
       )}
       <ModalInvoice isOpen={isOpen} setIsOpen={setIsOpen} />

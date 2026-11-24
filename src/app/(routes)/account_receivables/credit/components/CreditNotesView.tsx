@@ -110,6 +110,7 @@ const CreditNotesView = () => {
       },
       {
         id: 'actions',
+        enableHiding: false,
         header: '',
         cell: ({ row }) => {
           const note = row.original;
@@ -247,6 +248,7 @@ const CreditNotesView = () => {
           isLoading={isLoading}
           withRowSelection={false}
           onRowClick={(row) => setViewId(row.uuid)}
+          storageKey="credit-notes-table"
           manualPagination
           pageCount={data?.meta?.totalPages ?? 1}
           totalRows={data?.meta?.totalItems ?? 0}

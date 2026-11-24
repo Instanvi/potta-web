@@ -123,7 +123,11 @@ export function PayrollEmployeesPage() {
               description="Payroll API returned no rows, or the service is unreachable."
             />
           ) : (
-            <BooksListTable columns={COLUMNS} rows={rows} />
+            <BooksListTable
+              columns={COLUMNS}
+              rows={rows}
+              storageKey="payroll-employees-table"
+            />
           )}
         </div>
 

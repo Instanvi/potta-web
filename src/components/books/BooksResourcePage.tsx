@@ -312,6 +312,7 @@ export function BooksResourcePage({
               columns={columns}
               rows={rows}
               onRowClick={(row) => void openDetail(row)}
+              storageKey={`books-${resourcePath.replace(/\//g, '-')}-table`}
             />
           )}
         </div>

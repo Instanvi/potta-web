@@ -23,9 +23,33 @@ import {
   TableRow,
 } from '@potta/components/ui/table';
 import { DataTablePagination } from '@potta/components/ui/data-table-pagination';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { cn } from '@potta/lib/utils';
 import { TableSkeleton } from '@potta/components/ui/loaders';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+
+const STORAGE_PREFIX = 'potta-dt-visibility:';
+
+function loadVisibility(storageKey?: string): VisibilityState {
+  if (!storageKey || typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(`${STORAGE_PREFIX}${storageKey}`);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as VisibilityState;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveVisibility(storageKey: string | undefined, state: VisibilityState) {
+  if (!storageKey || typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`${STORAGE_PREFIX}${storageKey}`, JSON.stringify(state));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
 
 interface DataTableProps<TData> {
   columns?: ColumnDef<TData>[];
@@ -49,6 +73,12 @@ interface DataTableProps<TData> {
   totalRows?: number;
   /** Called with the selected rows whenever the selection changes. */
   onSelectionChange?: (rows: TData[]) => void;
+  /** Extra content rendered to the left of the Columns toggle. */
+  toolbar?: React.ReactNode;
+  /** Show Columns visibility dropdown. Default true. */
+  showViewOptions?: boolean;
+  /** Persist column visibility under this key in localStorage. */
+  storageKey?: string;
 }
 
 export function DataTable<TData>({
@@ -70,11 +100,14 @@ export function DataTable<TData>({
   onPaginationChange: controlledOnPaginationChange,
   totalRows: serverTotalRows,
   onSelectionChange,
+  toolbar,
+  showViewOptions = true,
+  storageKey,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+    React.useState<VisibilityState>(() => loadVisibility(storageKey));
   const [internalPagination, setInternalPagination] =
     React.useState<PaginationState>({
       pageIndex: 0,
@@ -92,6 +125,24 @@ export function DataTable<TData>({
       );
     }
   }, [pageSize, controlledPagination]);
+
+  React.useEffect(() => {
+    if (storageKey) {
+      setColumnVisibility(loadVisibility(storageKey));
+    }
+  }, [storageKey]);
+
+  const handleColumnVisibilityChange: OnChangeFn<VisibilityState> =
+    React.useCallback(
+      (updater) => {
+        setColumnVisibility((prev) => {
+          const next = typeof updater === 'function' ? updater(prev) : updater;
+          saveVisibility(storageKey, next);
+          return next;
+        });
+      },
+      [storageKey],
+    );
 
   const resolvedColumns = React.useMemo(() => {
     const baseColumns = column ?? columns;
@@ -140,7 +191,7 @@ export function DataTable<TData>({
     onSortingChange: setSorting,
     onPaginationChange,
     onRowSelectionChange: setRowSelection,
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
     enableRowSelection: withRowSelection,
     state: {
       sorting,
@@ -163,6 +214,9 @@ export function DataTable<TData>({
   }, [rowSelection, data]);
 
   const tableLoading = isLoading || loading;
+  const showToolbar =
+    Boolean(toolbar) ||
+    (showViewOptions && table.getAllColumns().some((c) => c.getCanHide()));
 
   if (tableLoading) {
     return (
@@ -175,87 +229,90 @@ export function DataTable<TData>({
   }
 
   return (
-    <div
-      className={cn(
-        'flex flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-white',
-        className
+    <div className={cn('flex flex-col gap-2', className)}>
+      {showToolbar && (
+        <div className="flex flex-wrap items-center justify-end gap-2 print:hidden">
+          {toolbar}
+          {showViewOptions && <DataTableViewOptions table={table} />}
+        </div>
       )}
-    >
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow
-              key={headerGroup.id}
-              className="border-t-0 border-b border-black/10 bg-table-head hover:bg-table-head"
-            >
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className={cn(
-                    'h-11 bg-table-head px-4 text-sm font-normal tracking-normal text-black',
-                    header.column.getCanSort() && 'cursor-pointer select-none'
-                  )}
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  <div className="flex items-center gap-1.5">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    {header.column.getIsSorted() === 'asc' && <ChevronUp className="size-3.5 text-muted-foreground" />}
-                    {header.column.getIsSorted() === 'desc' && <ChevronDown className="size-3.5 text-muted-foreground" />}
-                  </div>
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
+      <div className="flex flex-col overflow-hidden rounded-[2px] border border-black/[0.08] bg-white">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() ? 'selected' : undefined}
-                className={cn(
-                  'border-0 border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.02]',
-                  onRowClick && 'cursor-pointer',
-                  row.getIsSelected() && 'bg-muted hover:bg-muted'
-                )}
-                onClick={() => onRowClick?.(row.original)}
+                key={headerGroup.id}
+                className="border-t-0 border-b border-black/10 bg-table-head hover:bg-table-head"
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="px-4 py-3 text-sm">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      'h-11 bg-table-head px-4 text-sm font-normal tracking-normal text-black',
+                      header.column.getCanSort() && 'cursor-pointer select-none'
+                    )}
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      {header.column.getIsSorted() === 'asc' && <ChevronUp className="size-3.5 text-muted-foreground" />}
+                      {header.column.getIsSorted() === 'desc' && <ChevronDown className="size-3.5 text-muted-foreground" />}
+                    </div>
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={resolvedColumns.length || 1}
-                className="h-32 text-center text-sm font-normal text-muted-foreground"
-              >
-                No results.
-              </TableCell>
-            </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() ? 'selected' : undefined}
+                  className={cn(
+                    'border-0 border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.02]',
+                    onRowClick && 'cursor-pointer',
+                    row.getIsSelected() && 'bg-muted hover:bg-muted'
+                  )}
+                  onClick={() => onRowClick?.(row.original)}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="px-4 py-3 text-sm">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={resolvedColumns.length || 1}
+                  className="h-32 text-center text-sm font-normal text-muted-foreground"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+        {showPagination &&
+          (manualPagination
+            ? (serverTotalRows ?? 0) > 0 || (data?.length ?? 0) > 0
+            : table.getFilteredRowModel().rows.length > 0) && (
+            <DataTablePagination
+              table={table}
+              pageSizeOptions={pageSizeOptions}
+              totalRowsOverride={
+                manualPagination ? serverTotalRows : undefined
+              }
+            />
           )}
-        </TableBody>
-      </Table>
-      {showPagination &&
-        (manualPagination
-          ? (serverTotalRows ?? 0) > 0 || (data?.length ?? 0) > 0
-          : table.getFilteredRowModel().rows.length > 0) && (
-          <DataTablePagination
-            table={table}
-            pageSizeOptions={pageSizeOptions}
-            totalRowsOverride={
-              manualPagination ? serverTotalRows : undefined
-            }
-          />
-        )}
+      </div>
     </div>
   );
 }

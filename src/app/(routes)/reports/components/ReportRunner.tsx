@@ -8,7 +8,7 @@ import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { DatePicker, DateRangePicker } from '@potta/components/ui/date-picker';
 import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
-import { ExportButton } from '@/components/export-button';
+import { ReportExportMenu } from '@/components/report-export-menu';
 import { formatAmount, today, startOfMonth } from '../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, LoadingState } from '../../_shared/states';
 import { useReportRun } from '../hooks';
@@ -106,21 +106,19 @@ export function ReportRunner({
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                text="Print / PDF"
+                text="Print"
                 theme="lightBlue"
                 color
                 disabled={!data?.rows?.length}
                 icon={<i className="ri-printer-line" />}
                 onClick={() => window.print()}
               />
-              <ExportButton
-                filename={reportId}
+              <ReportExportMenu
+                reportId={reportId}
+                params={params}
+                columns={data?.columns ?? []}
                 rows={data?.rows ?? []}
-                columns={(data?.columns ?? []).map((c: ReportColumn) => ({
-                  key: c.key,
-                  header: c.label,
-                  value: (row: Record<string, unknown>) => formatCell(row[c.key], c.type),
-                }))}
+                disabled={!data?.rows?.length}
               />
             </div>
           }
@@ -203,7 +201,12 @@ export function ReportRunner({
                 ))}
               </div>
             )}
-            <DataTable columns={columns} data={data.rows} />
+            <DataTable
+              columns={columns}
+              data={data.rows}
+              storageKey={`report-${reportId}-table`}
+              withRowSelection={false}
+            />
           </div>
         )}
       </div>

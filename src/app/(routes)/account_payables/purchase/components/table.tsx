@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import DataGrid from '@potta/app/(routes)/account_receivables/invoice/components/DataGrid';
+import { DataTable } from '@potta/components/ui/data-table';
 
 import {
   DropdownMenu,
@@ -276,6 +276,7 @@ const InvoiceTable = () => {
     },
     {
       id: 'actions',
+      enableHiding: false,
       header: '',
       cell: ({ row }) => (
         <div className="flex justify-center">
@@ -393,11 +394,13 @@ const InvoiceTable = () => {
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
-        <DataGrid
+        <DataTable
           data={(data?.data ?? []) as PurchaseOrder[]}
           columns={columns}
           loading={isLoading}
           {...tableProps(data?.meta, data?.data?.length)}
+        
+          storageKey="purchase-orders-table"
         />
       )}
 

@@ -98,7 +98,11 @@ export function PayrollExpensesPage() {
               description="Payroll expense API returned no rows, or the service is unreachable."
             />
           ) : (
-            <BooksListTable columns={COLUMNS} rows={rows} />
+            <BooksListTable
+              columns={COLUMNS}
+              rows={rows}
+              storageKey="payroll-expenses-table"
+            />
           )}
         </div>
       </PageContainer>
