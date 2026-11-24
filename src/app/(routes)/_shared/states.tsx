@@ -39,24 +39,44 @@ export const StatCard = ({
   value,
   hint,
   tone,
+  size = 'default',
 }: {
   label: string;
   value: ReactNode;
   hint?: ReactNode;
   tone?: 'default' | 'success' | 'destructive';
+  /** `lg` — roomier padding and type for Books overview / dashboards. */
+  size?: 'default' | 'lg';
 }) => (
-  <div className="dashboard-panel p-4">
-    <p className="text-xs text-muted-foreground">{label}</p>
+  <div
+    className={cn(
+      'dashboard-panel h-full',
+      size === 'lg' ? 'min-h-[132px] px-6 py-5' : 'p-4',
+    )}
+  >
     <p
       className={cn(
-        'mt-1 text-2xl font-medium tabular-nums',
+        'text-muted-foreground',
+        size === 'lg' ? 'text-sm font-normal leading-snug' : 'text-xs',
+      )}
+    >
+      {label}
+    </p>
+    <p
+      className={cn(
+        'font-medium tabular-nums tracking-tight',
+        size === 'lg' ? 'mt-3 text-[1.75rem] leading-none sm:text-[2rem]' : 'mt-1 text-2xl',
         tone === 'success' && 'text-success',
-        tone === 'destructive' && 'text-destructive'
+        tone === 'destructive' && 'text-destructive',
       )}
     >
       {value}
     </p>
-    {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
+    {hint && (
+      <p className={cn('text-muted-foreground', size === 'lg' ? 'mt-2 text-sm' : 'mt-1 text-[11px]')}>
+        {hint}
+      </p>
+    )}
   </div>
 );
 
