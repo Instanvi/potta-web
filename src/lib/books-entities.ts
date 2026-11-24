@@ -148,7 +148,7 @@ export async function loadPurchaseOrderForReceipt(
   return { vendorId, linesJson: JSON.stringify(lines) };
 }
 
-export function downloadBooksPdf(opts: {
+export async function downloadBooksPdf(opts: {
   title: string;
   subtitle?: string;
   fields: { label: string; value: string }[];
@@ -159,6 +159,8 @@ export function downloadBooksPdf(opts: {
     totalAmount?: number;
   }>;
 }) {
+  const { downloadPreviewAsPdf } = await import('@/lib/print-preview');
+
   const linesHtml = (opts.lines ?? [])
     .map(
       (line) =>
@@ -180,23 +182,32 @@ export function downloadBooksPdf(opts: {
     )
     .join('');
 
-  const html = `<!doctype html><html><head><title>${opts.title}</title>
-    <style>body{font-family:Inter,Arial,sans-serif;padding:32px;color:#111}h1{font-size:20px;margin:0 0 4px}p{margin:0 0 16px;color:#666}
-    table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px}th{text-align:left;padding:8px;border-bottom:1px solid #ccc;font-weight:500}</style>
-    </head><body>
-    <h1>${opts.title}</h1>
-    ${opts.subtitle ? `<p>${opts.subtitle}</p>` : ''}
+  const host = window.document.createElement('div');
+  host.setAttribute('data-books-pdf-host', '1');
+  host.style.cssText =
+    'position:fixed;left:-12000px;top:0;width:800px;background:#fff;padding:32px;font-family:Inter,Arial,sans-serif;color:#111;';
+  host.innerHTML = `
+    <h1 style="font-size:20px;margin:0 0 4px;font-weight:600">${opts.title}</h1>
+    ${opts.subtitle ? `<p style="margin:0 0 16px;color:#666">${opts.subtitle}</p>` : ''}
     ${fieldsHtml}
     ${
       opts.lines?.length
-        ? `<table><thead><tr><th>Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${linesHtml}</tbody></table>`
+        ? `<table style="width:100%;border-collapse:collapse;margin-top:20px;font-size:13px">
+            <thead><tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Item</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Qty</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Price</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Total</th>
+            </tr></thead>
+            <tbody>${linesHtml}</tbody>
+          </table>`
         : ''
-    }
-    <script>window.onload=()=>{window.print()}</script>
-    </body></html>`;
+    }`;
 
-  const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
-  if (!win) return;
-  win.document.write(html);
-  win.document.close();
+  window.document.body.appendChild(host);
+  try {
+    await downloadPreviewAsPdf(host, opts.title);
+  } finally {
+    host.remove();
+  }
 }

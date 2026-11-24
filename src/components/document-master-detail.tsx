@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -143,39 +144,62 @@ export function DocumentPreviewShell({
   title?: string;
   downloadTitle?: string;
   onClose?: () => void;
-  /** When set, used instead of HTML print-to-PDF (e.g. @react-pdf blob download). */
+  /** Preferred: @react-pdf blob download. Falls back to rasterizing the preview DOM. */
   onDownloadPdf?: () => void | Promise<void>;
   children: ReactNode;
   className?: string;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      if (onDownloadPdf) await onDownloadPdf();
+      else await downloadPreviewAsPdf(contentRef.current, downloadTitle || title);
+    } catch (err) {
+      console.error('PDF download failed', err);
+      try {
+        // Prefer a real file over Chrome's print dialog when react-pdf fails.
+        if (onDownloadPdf) {
+          await downloadPreviewAsPdf(contentRef.current, downloadTitle || title);
+        } else {
+          throw err;
+        }
+      } catch (fallbackErr) {
+        console.error('PDF fallback failed', fallbackErr);
+        toast.error('Could not download PDF. Try again.');
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-black/[0.06] bg-white px-3 py-2">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-black/[0.06] bg-white px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <span className="inline-flex size-7 items-center justify-center rounded-[2px] bg-brand-subtle text-primary">
             <i className="ri-eye-line text-sm" />
           </span>
           <p className="truncate text-sm font-medium text-foreground">{title}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={() => {
-              if (onDownloadPdf) void onDownloadPdf();
-              else downloadPreviewAsPdf(contentRef.current, downloadTitle || title);
-            }}
-            className="inline-flex h-8 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-2.5 text-xs font-medium text-foreground hover:bg-accent"
+            disabled={downloading}
+            onClick={() => void handleDownload()}
+            className="inline-flex h-9 items-center gap-2 rounded-[2px] bg-primary px-3.5 text-sm font-normal text-primary-foreground hover:bg-brand-hover disabled:pointer-events-none disabled:opacity-60"
           >
-            <i className="ri-download-2-line text-sm" />
-            Download PDF
+            <i className={downloading ? 'ri-loader-4-line animate-spin text-base' : 'ri-download-2-line text-base'} />
+            {downloading ? 'Downloading…' : 'Download PDF'}
           </button>
           {onClose ? (
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex size-8 items-center justify-center rounded-[2px] text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="inline-flex size-9 items-center justify-center rounded-[2px] text-muted-foreground hover:bg-accent hover:text-foreground"
               aria-label={`Hide ${title}`}
               title={`Hide ${title}`}
             >
