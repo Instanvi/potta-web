@@ -1,30 +1,22 @@
 import { payrollClient } from 'config/axios.config';
 import type { ReportColumn, ReportResult, ReportRunParams } from '@/app/(routes)/reports/utils/api';
 
-/** Report ids owned by expense-be (`GET /expense/reports/:key`). */
+/** Report ids owned by expense-be (`GET /expense/reports/:key`). Books catalog ids stay on potta-backend. */
 export const EXPENSE_REPORT_KEYS = [
   'spend_summary',
   'expenses_by_vendor',
   'transaction_list_by_vendor',
   'unpaid_bills_summary',
-  // Catalog aliases used in Potta books labels
-  'expenses-vendor-summary',
-  'txn-by-vendor',
 ] as const;
 
 export type ExpenseReportKey = (typeof EXPENSE_REPORT_KEYS)[number];
-
-const KEY_MAP: Record<string, string> = {
-  'expenses-vendor-summary': 'expenses_by_vendor',
-  'txn-by-vendor': 'transaction_list_by_vendor',
-};
 
 export function isExpenseReportId(reportId: string): boolean {
   return (EXPENSE_REPORT_KEYS as readonly string[]).includes(reportId);
 }
 
 function backendKey(reportId: string): string {
-  return KEY_MAP[reportId] ?? reportId;
+  return reportId;
 }
 
 function inferColumns(rows: Record<string, unknown>[]): ReportColumn[] {

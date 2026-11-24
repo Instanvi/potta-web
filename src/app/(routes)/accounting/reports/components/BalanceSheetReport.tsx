@@ -1,10 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { DatePicker, parseDateValue } from '@potta/components/ui/date-picker';
+import { ExportButton } from '@/components/export-button';
 import { formatAmount, formatDate, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, LoadingState, StatCard, StatusBadge } from '../../../_shared/states';
+import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard, StatusBadge } from '../../../_shared/states';
 import { useBalanceSheet } from '../hooks';
 import ReportSection from './ReportSection';
+
+function flattenSection(section: string, lines?: Record<string, number>, hideZero?: boolean) {
+  return Object.entries(lines ?? {})
+    .filter(([, amount]) => !hideZero || Math.abs(Number(amount)) >= 0.005)
+    .map(([account, amount]) => ({ section, account, amount: Number(amount) }));
+}
 
 const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
   const [asOfDate, setAsOfDate] = useState(today());
@@ -19,14 +26,49 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
     Object.values(lines ?? {}).reduce((s, v) => s + Number(v), 0);
   const retainedEarnings = data ? data.totalEquity - sectionSum(data.equity) : 0;
 
+  const exportRows = useMemo(() => {
+    if (!data) return [];
+    const equityLines = {
+      ...data.equity,
+      ...(Math.abs(retainedEarnings) >= 0.005
+        ? { 'Current period result (revenue − expenses)': retainedEarnings }
+        : {}),
+    };
+    return [
+      ...flattenSection('Assets', data.assets, hideZero),
+      ...flattenSection('Liabilities', data.liabilities, hideZero),
+      ...flattenSection('Equity', equityLines, hideZero),
+    ];
+  }, [data, hideZero, retainedEarnings]);
+
   return (
     <div className="flex flex-col gap-4">
-      <DatePicker
-        id="balanceSheetAsOf"
-        className="w-52"
-        value={asOfDate}
-        onChange={(value) => setAsOfDate(value || today())}
-      />
+      <ListToolbar
+        className="print:hidden"
+        actions={
+          <ExportButton
+            filename={`balance-sheet-${asOfDate}`}
+            rows={exportRows}
+            columns={[
+              { key: 'section', header: 'Section' },
+              { key: 'account', header: 'Account' },
+              {
+                key: 'amount',
+                header: 'Amount',
+                value: (row) => formatAmount(row.amount),
+              },
+            ]}
+            disabled={!exportRows.length}
+          />
+        }
+      >
+        <DatePicker
+          id="balanceSheetAsOf"
+          className="w-52"
+          value={asOfDate}
+          onChange={(value) => setAsOfDate(value || today())}
+        />
+      </ListToolbar>
       {isLoading ? (
         <LoadingState label="Generating balance sheet..." />
       ) : error ? (
