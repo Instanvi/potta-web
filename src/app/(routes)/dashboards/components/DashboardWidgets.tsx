@@ -27,6 +27,7 @@ function KpiWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'kpi' 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   return (
     <StatCard
+      size="lg"
       label={widget.title}
       value={formatMetricValue(data?.value, widget.config.format)}
     />
@@ -44,26 +45,30 @@ function EntityListWidget({ widget }: { widget: Extract<DashboardWidget, { type:
   const items = data?.items ?? [];
 
   return (
-    <div className="dashboard-panel p-4">
-      <p className="text-xs text-muted-foreground">{widget.title}</p>
+    <div className="dashboard-panel h-full px-6 py-5">
+      <p className="text-sm font-medium text-foreground">{widget.title}</p>
       {items.length === 0 ? (
         <EmptyState title="No records" description="Nothing to show for this list yet." variant="plain" />
       ) : (
-        <ul className="mt-3 divide-y divide-black/[0.06]">
+        <ul className="mt-4 divide-y divide-black/[0.06]">
           {items.map((row) => {
             const content = (
-              <div className="flex items-center justify-between gap-3 py-2 text-sm">
+              <div className="flex items-center justify-between gap-4 py-3 text-[15px]">
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{row.reference || row.title || '—'}</p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="truncate text-[15px] font-medium leading-snug">
+                    {row.reference || row.title || '—'}
+                  </p>
+                  <p className="mt-0.5 truncate text-sm text-muted-foreground">
                     {row.title && row.reference ? row.title : row.statusLabel}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
                   {row.amount != null && (
-                    <p className="tabular-nums font-medium">{formatMetricValue(row.amount, { decimals: 0, scale: 'none', currency: 'XAF' })}</p>
+                    <p className="text-[15px] font-medium tabular-nums leading-snug">
+                      {formatMetricValue(row.amount, { decimals: 0, scale: 'none', currency: 'XAF' })}
+                    </p>
                   )}
-                  <p className="text-xs text-muted-foreground">{row.statusLabel}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{row.statusLabel}</p>
                 </div>
               </div>
             );
@@ -104,7 +109,7 @@ export function DashboardGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
       {widgets.map((widget) => (
         <div key={widget.id} className={`relative col-span-1 ${colSpan[widget.w] ?? 'md:col-span-4'}`}>
           {onRemove && (

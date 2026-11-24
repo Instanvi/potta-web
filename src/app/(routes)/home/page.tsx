@@ -79,11 +79,16 @@ export default function HomePage() {
                   </option>
                 ))}
               </select>
-              <Button size="sm" onClick={customize} disabled={customizeBuiltin.isPending}>
-                <PencilSimple size={14} className="mr-1" />
+              <Button
+                size="default"
+                className="h-10 px-4 text-[15px] font-normal"
+                onClick={customize}
+                disabled={customizeBuiltin.isPending}
+              >
+                <PencilSimple size={16} className="mr-1.5" />
                 {customizeBuiltin.isPending ? 'Preparing…' : 'Customize'}
               </Button>
-              <Button asChild size="sm" variant="outline">
+              <Button asChild size="sm" variant="ghost" className="font-normal text-sm text-foreground">
                 <Link href="/dashboards">
                   <ChartBar size={14} className="mr-1" />
                   All dashboards

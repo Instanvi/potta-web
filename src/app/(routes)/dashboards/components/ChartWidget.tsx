@@ -64,21 +64,21 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
   const formatTip = (v: number | string) => formatMetricValue(v, widget.config.format);
   const tip = {
     formatter: ((v: number | string) => [formatTip(v), 'Value']) as never,
-    contentStyle: { borderRadius: 2, border: '1px solid rgba(0,0,0,0.08)', fontSize: 12 },
+    contentStyle: { borderRadius: 2, border: '1px solid rgba(0,0,0,0.08)', fontSize: 13 },
   };
 
   return (
-    <div className="dashboard-panel flex h-full flex-col p-4">
+    <div className="dashboard-panel flex h-full min-h-[320px] flex-col px-6 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{widget.title}</p>
-          <p className="mt-0.5 text-lg font-semibold tabular-nums tracking-tight">
+          <p className="text-sm font-medium text-foreground">{widget.title}</p>
+          <p className="mt-2 text-[1.75rem] font-medium tabular-nums leading-none tracking-tight sm:text-[2rem]">
             {formatMetricValue(total, widget.config.format)}
           </p>
         </div>
         {onChartTypeChange ? (
           <select
-            className="rounded-[2px] border border-black/10 bg-white px-2 py-1 text-[11px] text-muted-foreground"
+            className="rounded-[2px] border border-black/10 bg-white px-2.5 py-1.5 text-sm text-muted-foreground"
             value={chartType}
             aria-label="Chart type"
             onChange={(e) =>
@@ -98,38 +98,38 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
             <option value="table">Table</option>
           </select>
         ) : (
-          <span className="rounded-[2px] bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+          <span className="rounded-[2px] bg-muted px-2.5 py-1 text-xs font-normal uppercase tracking-wide text-muted-foreground">
             {chartType.replace(/_/g, ' ')}
           </span>
         )}
       </div>
 
       {chartData.length === 0 ? (
-        <p className="mt-8 text-center text-sm text-muted-foreground">
+        <p className="mt-10 text-center text-[15px] text-muted-foreground">
           No data for this period. Try another range or group.
         </p>
       ) : chartType === 'table' ? (
-        <div className="mt-3 max-h-[240px] overflow-auto">
-          <table className="w-full text-left text-sm">
+        <div className="mt-4 max-h-[280px] overflow-auto">
+          <table className="w-full text-left text-[15px]">
             <thead>
-              <tr className="border-b border-black/10 text-xs text-muted-foreground">
-                <th className="py-1.5 font-medium">Category</th>
-                <th className="py-1.5 text-right font-medium">Value</th>
-                <th className="py-1.5 text-right font-medium">Share</th>
+              <tr className="border-b border-black/10 text-sm text-muted-foreground">
+                <th className="py-2 font-medium">Category</th>
+                <th className="py-2 text-right font-medium">Value</th>
+                <th className="py-2 text-right font-medium">Share</th>
               </tr>
             </thead>
             <tbody>
               {chartData.map((row) => (
                 <tr key={row.name} className="border-b border-black/[0.04]">
-                  <td className="flex items-center gap-2 py-1.5">
+                  <td className="flex items-center gap-2 py-2.5">
                     <span
                       className="inline-block size-2.5 shrink-0 rounded-[2px]"
                       style={{ background: row.fill }}
                     />
                     {row.name}
                   </td>
-                  <td className="py-1.5 text-right tabular-nums">{formatTip(row.value)}</td>
-                  <td className="py-1.5 text-right tabular-nums text-muted-foreground">
+                  <td className="py-2.5 text-right tabular-nums">{formatTip(row.value)}</td>
+                  <td className="py-2.5 text-right tabular-nums text-muted-foreground">
                     {total ? `${Math.round((row.value / total) * 100)}%` : '—'}
                   </td>
                 </tr>
@@ -138,7 +138,7 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
           </table>
         </div>
       ) : (
-        <div className="mt-2 h-[220px] w-full min-h-[180px] flex-1">
+        <div className="mt-4 h-[260px] w-full min-h-[220px] flex-1">
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'pie' || chartType === 'donut' ? (
               <PieChart>
@@ -146,8 +146,8 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
                   data={chartData}
                   dataKey="value"
                   nameKey="name"
-                  innerRadius={chartType === 'donut' ? 58 : 0}
-                  outerRadius={88}
+                  innerRadius={chartType === 'donut' ? 68 : 0}
+                  outerRadius={102}
                   paddingAngle={2}
                 >
                   {chartData.map((row, i) => (
@@ -155,13 +155,13 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
                   ))}
                 </Pie>
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
               </PieChart>
             ) : chartType === 'radar' ? (
               <RadarChart data={chartData} cx="50%" cy="50%" outerRadius="70%">
                 <PolarGrid />
-                <PolarAngleAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <PolarRadiusAxis tick={{ fontSize: 10 }} />
+                <PolarAngleAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <PolarRadiusAxis tick={{ fontSize: 12 }} />
                 <Radar
                   dataKey="value"
                   stroke={colors[0]}
@@ -169,7 +169,7 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
                   fillOpacity={0.35}
                 />
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
               </RadarChart>
             ) : chartType === 'radial' ? (
               <RadialBarChart
@@ -185,15 +185,15 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
                   ))}
                 </RadialBar>
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
               </RadialBarChart>
             ) : chartType === 'line' ? (
               <LineChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
                 {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
                 <Line
                   type="monotone"
                   dataKey="value"
@@ -205,10 +205,10 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
             ) : chartType === 'area' ? (
               <AreaChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
                 {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
                 <Area
                   type="monotone"
                   dataKey="value"
@@ -220,10 +220,10 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
             ) : chartType === 'composed' ? (
               <ComposedChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
                 {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
                 <Bar dataKey="value" name="Value" radius={[2, 2, 0, 0]}>
                   {chartData.map((row, i) => (
                     <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
@@ -241,10 +241,10 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
             ) : chartType === 'horizontal_bar' ? (
               <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8, top: 8 }}>
                 {showGrid ? <CartesianGrid strokeDasharray="3 3" horizontal={false} /> : null}
-                <XAxis type="number" tick={{ fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={96} tick={{ fontSize: 11 }} />
+                <XAxis type="number" tick={{ fontSize: 12 }} />
+                <YAxis type="category" dataKey="name" width={96} tick={{ fontSize: 12 }} />
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
                 <Bar dataKey="value" radius={[0, 2, 2, 0]}>
                   {chartData.map((row, i) => (
                     <Cell key={row.name} fill={row.fill ?? colors[i % colors.length]} />
@@ -254,10 +254,10 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
             ) : (
               <BarChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
                 {showGrid ? <CartesianGrid strokeDasharray="3 3" vertical={false} /> : null}
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip {...tip} />
-                {showLegend ? <Legend wrapperStyle={{ fontSize: 11 }} /> : null}
+                {showLegend ? <Legend wrapperStyle={{ fontSize: 13 }} /> : null}
                 <Bar
                   dataKey="value"
                   radius={[2, 2, 0, 0]}
