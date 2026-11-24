@@ -7,6 +7,7 @@ import BulkSlider from '@potta/app/(routes)/customers/components/bulkSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import { ListToolbar } from '../../_shared/states';
 import { ExportButton } from '@/components/export-button';
+import { useContactToolbarStart } from '@/components/shared/contact-toolbar';
 
 interface FilterProps {
   searchValue: string;
@@ -30,6 +31,7 @@ const Filter: React.FC<FilterProps> = ({
   rows = [],
 }) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const toolbarStart = useContactToolbarStart();
   const filterConfig = [
     {
       key: 'status',
@@ -101,6 +103,7 @@ const Filter: React.FC<FilterProps> = ({
         </>
       }
     >
+      {toolbarStart}
       <DynamicFilter
         searchValue={searchValue}
         onSearchChange={onSearchChange}

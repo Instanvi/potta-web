@@ -7,6 +7,7 @@ import {
   readContactType,
   type ContactTypeFilter,
 } from './contact-type';
+import { ContactToolbarStartProvider } from './contact-toolbar';
 
 export type { ContactTypeFilter };
 export { readContactType };
@@ -26,21 +27,25 @@ const ContactsContent = ({
     initialType === 'vendors' ? 'vendors' : 'customers',
   );
 
-  return (
-    <div>
-      <div className="mb-4 w-full max-w-[220px]">
-        <Select
-          bg="bg-white"
-          options={TYPE_OPTIONS}
-          selectedValue={type}
-          onChange={(value: string) =>
-            setType(value === 'vendors' ? 'vendors' : 'customers')
-          }
-          placeholder="Contact type"
-        />
-      </div>
-      {type === 'customers' ? <CustomerContent /> : <VendorContent />}
+  const typeSelect = (
+    <div className="w-[160px] shrink-0">
+      <Select
+        bg="bg-white"
+        options={TYPE_OPTIONS}
+        selectedValue={type}
+        onChange={(value: string) =>
+          setType(value === 'vendors' ? 'vendors' : 'customers')
+        }
+        placeholder="Contact type"
+        SelectClass="min-w-0"
+      />
     </div>
+  );
+
+  return (
+    <ContactToolbarStartProvider value={typeSelect}>
+      {type === 'customers' ? <CustomerContent /> : <VendorContent />}
+    </ContactToolbarStartProvider>
   );
 };
 
