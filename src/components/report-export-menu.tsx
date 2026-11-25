@@ -11,6 +11,10 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { isExpenseReportId } from '@/lib/expense-reports';
 import { exportRows } from '@/lib/export-file';
+import { ReportPdfDocument } from '@/components/documents/report-pdf-document';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { downloadReactPdf } from '@/lib/download-react-pdf';
+import { orgToSeller } from '@/lib/org-to-seller';
 import {
   reportsApi,
   type ReportColumn,
@@ -31,6 +35,9 @@ type Props = {
   columns: ReportColumn[];
   rows: Record<string, unknown>[];
   disabled?: boolean;
+  /** Period / as-of label printed under the title on generated PDFs. */
+  period?: string;
+  description?: string;
 };
 
 /** Format picker: backend export for catalog reports; client fallback for expense-proxied ids. */
@@ -41,8 +48,11 @@ export function ReportExportMenu({
   columns,
   rows,
   disabled,
+  period,
+  description,
 }: Props) {
   const [busy, setBusy] = useState(false);
+  const { data: org } = useOrganizationProfile();
 
   const onExport = async (format: ReportExportFormat) => {
     if (busy || disabled) return;
@@ -50,7 +60,17 @@ export function ReportExportMenu({
     try {
       if (isExpenseReportId(reportId)) {
         if (format === 'pdf') {
-          window.print();
+          await downloadReactPdf(
+            <ReportPdfDocument
+              seller={orgToSeller(org)}
+              title={title || reportId}
+              description={description}
+              period={period}
+              columns={columns}
+              rows={rows}
+            />,
+            title || reportId,
+          );
           return;
         }
         await exportRows({

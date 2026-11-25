@@ -11,6 +11,12 @@ import {
 import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
 import { useIncomeStatement } from '../hooks';
 import ReportSection from './ReportSection';
+import { StatementPdfActions } from './StatementPdfActions';
+
+const toLines = (lines?: Record<string, number>, hideZero?: boolean) =>
+  Object.entries(lines ?? {})
+    .filter(([, amount]) => !hideZero || Math.abs(Number(amount)) >= 0.005)
+    .map(([label, amount]) => ({ label, amount: Number(amount) }));
 
 const sum = (lines?: Record<string, number>) =>
   Object.values(lines ?? {}).reduce((s, v) => s + Number(v), 0);
@@ -48,6 +54,33 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
       <ListToolbar
         className="print:hidden"
         actions={
+          <div className="flex flex-wrap items-center gap-2">
+          <StatementPdfActions
+            filename={`profit-and-loss-${startDate}-${endDate}`}
+            disabled={!data || !!isEmpty || invalidRange}
+            statement={{
+              title: 'Income statement (Profit & Loss)',
+              period: `${startDate} – ${endDate}`,
+              sections: [
+                {
+                  title: 'Income',
+                  lines: toLines(data?.incomes, hideZero),
+                  total: sum(data?.incomes),
+                },
+                {
+                  title: 'Expenses',
+                  lines: toLines(data?.expenses, hideZero),
+                  total: sum(data?.expenses),
+                },
+              ],
+              summary: [
+                {
+                  label: (data?.netProfitLoss ?? 0) >= 0 ? 'Net profit' : 'Net loss',
+                  amount: Number(data?.netProfitLoss) || 0,
+                },
+              ],
+            }}
+          />
           <ExportButton
             filename={`profit-and-loss-${startDate}-${endDate}`}
             rows={exportRows}
@@ -62,6 +95,7 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
             ]}
             disabled={!exportRows.length || invalidRange}
           />
+          </div>
         }
       >
         <DateRangePicker

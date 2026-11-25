@@ -1,13 +1,14 @@
 'use client';
-import React, { FC, useState } from 'react';
-import {
-  PopoverTrigger,
-  PopoverContent,
-  Popover as NextUIPopover,
-  Button,
-} from '@nextui-org/react';
 
-// Define the types for the popover actions
+import React from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@potta/components/shadcn/dropdown';
+import { cn } from '@potta/lib/utils';
+
 export type PopoverAction = {
   label: string;
   onClick: () => void;
@@ -15,7 +16,6 @@ export type PopoverAction = {
   icon?: React.ReactNode;
 };
 
-// Popover Component
 const TableActionPopover: React.FC<{
   actions: PopoverAction[];
   triggerButton?: React.ReactNode;
@@ -24,51 +24,42 @@ const TableActionPopover: React.FC<{
   setOpenPopover: (uuid: string | null) => void;
   onClick?: () => void;
 }> = ({ actions, triggerButton, rowUuid, openPopover, setOpenPopover }) => {
+  const open = openPopover === rowUuid;
+
   return (
-    <NextUIPopover
-      placement="bottom-end"
-      shouldCloseOnBlur={false}
-      isOpen={openPopover === rowUuid}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) setOpenPopover(null);
-      }}
+    <DropdownMenu
+      open={open}
+      onOpenChange={(isOpen) => setOpenPopover(isOpen ? rowUuid : null)}
     >
-      <PopoverTrigger className='z-10'>
-        {triggerButton || (
-          <Button onClick={() => setOpenPopover(rowUuid)}>
-            <i className="ri-more-2-fill z-0"></i>
-          </Button>
+      <DropdownMenuTrigger asChild>
+        {triggerButton ? (
+          <span className="inline-flex">{triggerButton}</span>
+        ) : (
+          <button
+            type="button"
+            aria-label="Row actions"
+            className="inline-flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-accent"
+          >
+            <i className="ri-more-2-fill text-base" />
+          </button>
         )}
-      </PopoverTrigger>
-      <PopoverContent>
-        <div className="p-1 bg-white shadow-md flex flex-col gap-2">
-          {actions.map((action, index) => (
-            <div
-              key={index}
-              className={`
-                text-lg
-                cursor-pointer
-                hover:bg-gray-200
-                py-0.5
-                px-2
-                rounded-[2px]
-                flex
-                items-center
-                gap-2
-                ${action.className || ''}
-              `}
-              onClick={() => {
-                setOpenPopover(null);
-                action.onClick();
-              }}
-            >
-              {action.icon}
-              {action.label}
-            </div>
-          ))}
-        </div>
-      </PopoverContent>
-    </NextUIPopover>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[10rem]">
+        {actions.map((action, index) => (
+          <DropdownMenuItem
+            key={index}
+            className={cn('gap-2 cursor-pointer', action.className)}
+            onSelect={() => {
+              setOpenPopover(null);
+              action.onClick();
+            }}
+          >
+            {action.icon}
+            {action.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

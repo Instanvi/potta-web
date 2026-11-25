@@ -23,7 +23,13 @@ export const creditNoteApi = {
     return result.data;
   },
   create: async (data: CreateCreditNotePayload): Promise<CreditNote> => {
-    const result = await axios.post('/credit-note/create', data);
+    // Drop undefined/empty optional ids so the API never sees blank uuids.
+    const body = Object.fromEntries(
+      Object.entries(data).filter(
+        ([, v]) => v !== undefined && v !== null && v !== ''
+      )
+    );
+    const result = await axios.post('/credit-note/create', body);
     return result.data;
   },
   delete: async (creditNoteId: string) => {

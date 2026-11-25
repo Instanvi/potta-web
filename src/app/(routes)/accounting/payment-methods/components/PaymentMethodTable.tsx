@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ColumnDef, PaginationState } from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { Can, useCan } from '@/components/auth/can';
@@ -16,18 +17,27 @@ import {
 } from '../hooks';
 import type { OrgPaymentMethod } from '../utils/api';
 import PaymentMethodSheet from './PaymentMethodSheet';
+import { ExportButton } from '@/components/export-button';
+import { fetchAllPages } from '@/lib/fetch-all-pages';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useServerPagination } from '@/hooks/use-server-pagination';
+import { paymentMethodApi } from '../utils/api';
 
 const PaymentMethodTable = () => {
   const { canAccess } = useCan();
   const [search, setSearch] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
+  // Search is sent to the API (backend searchableColumns: name, code, description).
+  const debouncedSearch = useDebouncedValue(search.trim(), 300);
+  const { page, limit, tableProps } = useServerPagination({
     pageSize: 20,
+    resetOn: [debouncedSearch],
   });
   const { data, isLoading, error, refetch } = usePaymentMethods({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
+    page,
+    limit,
+    search: debouncedSearch || undefined,
   });
+  const { table, onTableChange } = useDataTableHandle<OrgPaymentMethod>();
   const deleteMutation = useDeletePaymentMethod();
   const seedMutation = useSeedPaymentMethods();
 
@@ -35,17 +45,7 @@ const PaymentMethodTable = () => {
   const [editing, setEditing] = useState<OrgPaymentMethod | null>(null);
   const [toDelete, setToDelete] = useState<OrgPaymentMethod | null>(null);
 
-  const rows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return (data?.data ?? []).filter((m) => {
-      if (!q) return true;
-      return (
-        m.name?.toLowerCase().includes(q) ||
-        m.code?.toLowerCase().includes(q) ||
-        m.description?.toLowerCase().includes(q)
-      );
-    });
-  }, [data?.data, search]);
+  const rows = useMemo(() => data?.data ?? [], [data?.data]);
 
   const columns: ColumnDef<OrgPaymentMethod>[] = [
     {
@@ -112,6 +112,27 @@ const PaymentMethodTable = () => {
       <ListToolbar
         actions={
           <div className="flex flex-wrap items-center gap-3">
+            {table && rows.length > 0 && <DataTableViewOptions table={table} />}
+            <ExportButton
+              filename="payment-methods"
+              rows={rows}
+              fetchAllRows={() =>
+                fetchAllPages<OrgPaymentMethod>((p, l) =>
+                  paymentMethodApi.list({
+                    page: p,
+                    limit: l,
+                    search: debouncedSearch || undefined,
+                  }),
+                )
+              }
+              columns={[
+                { key: 'name', header: 'Name' },
+                { key: 'code', header: 'Code' },
+                { key: 'description', header: 'Description', value: (r) => r.description || '' },
+                { key: 'isSystem', header: 'Type', value: (r) => (r.isSystem ? 'Default' : 'Custom') },
+                { key: 'isActive', header: 'Status', value: (r) => (r.isActive ? 'Active' : 'Inactive') },
+              ]}
+            />
             <Can resource="PaymentMethod" action="create">
               <Button
                 text={seedMutation.isPending ? 'Seeding…' : 'Seed defaults'}
@@ -136,14 +157,8 @@ const PaymentMethodTable = () => {
         <Search
           placeholder="Search payment methods"
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPagination((p) => ({ ...p, pageIndex: 0 }));
-          }}
-          onClear={() => {
-            setSearch('');
-            setPagination((p) => ({ ...p, pageIndex: 0 }));
-          }}
+          onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
           className="w-full max-w-sm"
         />
       </ListToolbar>
@@ -161,14 +176,10 @@ const PaymentMethodTable = () => {
           data={rows}
           isLoading={isLoading}
           withRowSelection={false}
-          manualPagination={!search}
-          pageCount={search ? undefined : (data?.meta?.totalPages ?? 1)}
-          totalRows={search ? rows.length : (data?.meta?.totalItems ?? 0)}
-          pagination={pagination}
-          onPaginationChange={setPagination}
-          pageSize={pagination.pageSize}
+          {...tableProps(data?.meta, rows.length)}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-        
+          showViewOptions={false}
+          onTableChange={onTableChange}
           storageKey="payment-methods-table"
         />
       )}

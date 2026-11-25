@@ -235,7 +235,7 @@ const SaleTable = () => {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="rounded-[2px] p-2 hover:bg-black/[0.04]"
+                className="rounded-full p-2 hover:bg-black/[0.04]"
                 onClick={(e) => e.stopPropagation()}
               >
                 <i className="ri-more-2-fill text-muted-foreground" />

@@ -12,8 +12,14 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
+import { orgToSeller } from '@/lib/org-to-seller';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import useGetOneInvoice from '../../../invoice/_hooks/useGetOneInvoice';
+import {
+  CreditNoteTableRow,
+  computeCreditAmount,
+  rowTotal,
+} from '../../_utils/lines';
 
 interface Invoice {
   uuid: string;
@@ -38,7 +44,17 @@ const PdfView = ({
 
   const customerId = contextData.customerName;
   const invoiceId = contextData.invoiceId;
-  const creditAmount = Number(contextData.creditAmount) || 0;
+  // Amount comes from the form lines (tax included); fall back to a stored amount.
+  const tableRows: CreditNoteTableRow[] = useMemo(
+    () => (Array.isArray(contextData.table) ? contextData.table : []),
+    [contextData.table],
+  );
+  const lineRows = useMemo(
+    () => tableRows.filter((r) => Number(r.qty) > 0 || Number(r.price) > 0),
+    [tableRows],
+  );
+  const creditAmount =
+    computeCreditAmount(tableRows) || Number(contextData.creditAmount) || 0;
   const reason = contextData.reason || '';
 
   const getCurrencySymbol = (currencyCode: string): string => {
@@ -90,15 +106,14 @@ const PdfView = ({
         ? new Date(invoiceDetails.issuedDate).toLocaleDateString()
         : undefined,
       notes: contextData.note || undefined,
-      seller: {
-        name: orgDisplayName(org) || 'Your organization',
-        email: org?.businessEmail,
-        phone: org?.businessPhone,
-        addressLines: formatOrgAddress(org),
-        logoUrl: org?.logo,
-        registrationNumber: org?.registrationNumber,
-        taxId: org?.taxIdentificationNumber,
-      },
+      seller: orgToSeller(org),
+      lineItems: lineRows.map((row) => ({
+        description: row.name || undefined,
+        quantity: Number(row.qty) || 0,
+        unitPrice: Number(row.price) || 0,
+        taxRate: Number(row.tax) || 0,
+        total: rowTotal(row),
+      })),
       customer: customerDetails
         ? {
             name: customerName || 'Customer',
@@ -116,6 +131,7 @@ const PdfView = ({
     customerDetails,
     formattedIssueDate,
     invoiceDetails,
+    lineRows,
     org,
     reason,
     reference,
@@ -233,6 +249,40 @@ const PdfView = ({
               </div>
             </div>
           </div>
+
+          {lineRows.length > 0 && (
+            <div>
+              <h3 className="text-lg font-medium mb-3">Lines</h3>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs uppercase text-gray-500">
+                    <th className="py-2 pr-2">Description</th>
+                    <th className="py-2 pr-2 text-right">Qty</th>
+                    <th className="py-2 pr-2 text-right">Price</th>
+                    <th className="py-2 pr-2 text-right">Tax</th>
+                    <th className="py-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lineRows.map((row, index) => (
+                    <tr key={`${row.uuid ?? 'line'}-${index}`} className="border-b">
+                      <td className="py-2 pr-2">{row.name || '—'}</td>
+                      <td className="py-2 pr-2 text-right">{Number(row.qty) || 0}</td>
+                      <td className="py-2 pr-2 text-right">
+                        {currencySymbol}
+                        {(Number(row.price) || 0).toFixed(2)}
+                      </td>
+                      <td className="py-2 pr-2 text-right">{Number(row.tax) || 0}%</td>
+                      <td className="py-2 text-right">
+                        {currencySymbol}
+                        {rowTotal(row).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {contextData.note && (
             <div className="mt-4">

@@ -30,6 +30,9 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   booksApi,
+  cellValue,
+  extractBooksMeta,
+  extractBooksRows,
   type BooksResourceClient,
   rowId,
 } from '@/lib/books-api';
@@ -42,12 +45,18 @@ import {
   loadBooksEntityOptions,
   loadPurchaseOrderForReceipt,
 } from '@/lib/books-entities';
-import { TableSkeleton } from '@/components/ui/loaders';
+import { useDataTableHandle } from '@/components/ui/data-table';
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ExportButton } from '@/components/export-button';
+import { fetchAllPages } from '@/lib/fetch-all-pages';
+import { useServerPagination } from '@/hooks/use-server-pagination';
 import {
   DocumentChannelMenu,
   type DocumentChannel,
 } from '@/components/document-channel-menu';
 import { sendPartyDocument } from '@/lib/document-send';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { orgToSeller } from '@/lib/org-to-seller';
 import {
   useBooksResourceCreate,
   useBooksResourceList,
@@ -157,29 +166,62 @@ export function BooksResourcePage({
   const [pendingAction, setPendingAction] = useState<BooksAction | null>(null);
   const [sendChannel, setSendChannel] = useState<DocumentChannel | null>(null);
   const [sending, setSending] = useState(false);
+  const { data: org } = useOrganizationProfile();
 
-  const params = useMemo(
-    () => ({ page: 1, limit: 50, sortBy: 'createdAt:DESC', ...listParams }),
-    [listParams]
-  );
   const filter = useMemo(() => {
     const f: Record<string, unknown> = {};
     if (searchApplied.trim()) f.search = searchApplied.trim();
     return f;
   }, [searchApplied]);
 
+  const { page, limit, tableProps } = useServerPagination({
+    pageSize: 20,
+    resetOn: [searchApplied, resourcePath, JSON.stringify(listParams ?? {})],
+  });
+  const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
+
+  // page/limit come from server pagination state; listParams may still set sortBy etc.
+  const baseParams = useMemo(
+    () => ({ sortBy: 'createdAt:DESC', ...listParams }),
+    [listParams]
+  );
+  const params = useMemo(
+    () => ({ ...baseParams, page, limit }),
+    [baseParams, page, limit]
+  );
+
   const listQuery = useBooksResourceList(resourcePath, filter, params, true, api);
   const createMutation = useBooksResourceCreate(resourcePath, api);
   const updateMutation = useBooksResourceUpdate(resourcePath, api);
   const removeMutation = useBooksResourceRemove(resourcePath, api);
 
-  const rows = listQuery.data ?? [];
+  const rows = listQuery.data?.rows ?? [];
+  const meta = listQuery.data?.meta;
   const loading = listQuery.isLoading;
   const error = listQuery.error;
   const saving =
     createMutation.isPending || updateMutation.isPending || removeMutation.isPending;
 
   const load = () => listQuery.refetch();
+
+  const exportColumns = useMemo(
+    () =>
+      columns.map((c) => ({
+        key: c.key,
+        header: c.label,
+        value: (row: Record<string, unknown>) => {
+          const v = cellValue(row, c.key);
+          return v === '—' ? '' : v;
+        },
+      })),
+    [columns]
+  );
+
+  const fetchAllRows = () =>
+    fetchAllPages<Record<string, unknown>>(async (p, l) => {
+      const raw = await api.list(resourcePath, filter, { ...baseParams, page: p, limit: l });
+      return { data: extractBooksRows(raw), meta: extractBooksMeta(raw) ?? undefined };
+    });
 
   const openCreate = () => {
     const initial: Record<string, string> = {};
@@ -283,6 +325,13 @@ export function BooksResourcePage({
         <ListToolbar
           actions={
             <>
+              {table && rows.length > 0 && <DataTableViewOptions table={table} />}
+              <ExportButton
+                filename={resourcePath.replace(/\//g, '-')}
+                rows={rows}
+                columns={exportColumns}
+                fetchAllRows={fetchAllRows}
+              />
               <Button
                 type="button"
                 variant="outline"
@@ -316,9 +365,7 @@ export function BooksResourcePage({
         <div className="mt-4">
           {error ? (
             <ErrorState error={error} onRetry={() => void load()} />
-          ) : loading ? (
-            <TableSkeleton rows={8} columns={Math.max(columns.length, 3)} />
-          ) : rows.length === 0 ? (
+          ) : !loading && rows.length === 0 ? (
             <EmptyState
               title={`No ${title.toLowerCase()} yet`}
               action={
@@ -331,8 +378,12 @@ export function BooksResourcePage({
             <BooksListTable
               columns={columns}
               rows={rows}
+              isLoading={loading}
               onRowClick={(row) => void openDetail(row)}
               storageKey={`books-${resourcePath.replace(/\//g, '-')}-table`}
+              serverPagination={tableProps(meta, rows.length)}
+              showViewOptions={false}
+              onTableChange={onTableChange}
             />
           )}
         </div>
@@ -409,6 +460,8 @@ export function BooksResourcePage({
                             value: editForm[f.key] ?? '',
                           })),
                         lines,
+                        seller: orgToSeller(org),
+                        currency: editForm.currency || undefined,
                       });
                     } catch (err) {
                       console.error(err);

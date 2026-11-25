@@ -171,7 +171,7 @@ const TableComponents = () => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-gray-100 rounded-md">
+              <button className="p-2 hover:bg-gray-100 rounded-full">
                 <i className="ri-more-2-fill text-gray-600"></i>
               </button>
             </DropdownMenuTrigger>

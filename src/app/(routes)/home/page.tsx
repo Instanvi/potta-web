@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChartBar, PencilSimple } from '@phosphor-icons/react';
 import { Button } from '@/components/shadcn/button';
+import Select from '@potta/components/select';
 import { BUILTIN_BOOKS_DASHBOARD, BUILTIN_DASHBOARD_NAME } from '@/lib/dashboards/builtin';
 import RootLayout from '../layout';
 import { LoadingState, PageContainer, PageHeader } from '../_shared/states';
@@ -65,20 +66,20 @@ export default function HomePage() {
           description="Default books metrics. Customize to create your own KPIs and charts."
           actions={
             <div className="flex flex-wrap items-center gap-2">
-              <select
-                aria-label="Dashboard shown on Home"
-                className="h-9 rounded-[2px] border border-black/10 bg-white px-2 text-sm"
-                disabled={switching || defaultDashboard.isLoading}
-                value={chosen?.id ?? BUILTIN_KEY}
-                onChange={(e) => switchTo(e.target.value)}
-              >
-                <option value={BUILTIN_KEY}>{BUILTIN_DASHBOARD_NAME} (built-in)</option>
-                {(dashboards.data?.items ?? []).map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <Select
+                name="Dashboard shown on Home"
+                SelectClass="w-56"
+                isDisabled={switching || defaultDashboard.isLoading}
+                selectedValue={chosen?.id ?? BUILTIN_KEY}
+                onChange={switchTo}
+                options={[
+                  { value: BUILTIN_KEY, label: `${BUILTIN_DASHBOARD_NAME} (built-in)` },
+                  ...(dashboards.data?.items ?? []).map((d) => ({
+                    value: d.id,
+                    label: d.name,
+                  })),
+                ]}
+              />
               <Button
                 size="default"
                 className="h-10 px-4 text-[15px] font-normal"

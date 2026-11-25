@@ -6,6 +6,7 @@ import RootLayout from '@/app/(routes)/layout';
 import { EmptyState, ListToolbar, PageContainer, Panel, StatCard } from '@/app/(routes)/_shared/states';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
+import Select from '@potta/components/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
 import axios from 'config/axios.config';
@@ -143,23 +144,18 @@ export function ReconcilePage() {
             </>
           }
         >
-          <select
-            value={bankAccountId}
-            onChange={(e) => setBankAccountId(e.target.value)}
-            className={cn(FIELD_INPUT, 'max-w-xs')}
-            disabled={!!reconcileId}
-          >
-            <option value="">Select bank account</option>
-            {accounts.map((a) => {
+          <Select
+            name="Select bank account"
+            SelectClass="max-w-xs"
+            selectedValue={bankAccountId}
+            onChange={setBankAccountId}
+            isDisabled={!!reconcileId}
+            options={accounts.map((a) => {
               const id = String(a.uuid ?? a.id ?? '');
               const label = a.name ?? a.account_name ?? a.accountName ?? id;
-              return (
-                <option key={id} value={id}>
-                  {label}
-                </option>
-              );
+              return { value: id, label };
             })}
-          </select>
+          />
           <DatePicker
             value={statementDate}
             onChange={setStatementDate}

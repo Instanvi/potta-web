@@ -3,11 +3,14 @@ import { toast } from 'sonner';
 import { apiErrorMessage } from '../../../_shared/format';
 import {
   OrgPaymentMethodPayload,
+  PaymentMethodListParams,
   paymentMethodApi,
   paymentMethodKeys,
 } from '../utils/api';
 
-export const usePaymentMethods = (params: { page: number; limit: number } = { page: 1, limit: 100 }) =>
+export const usePaymentMethods = (
+  params: PaymentMethodListParams = { page: 1, limit: 100 },
+) =>
   useQuery({
     queryKey: paymentMethodKeys.list(params),
     queryFn: () => paymentMethodApi.list(params),

@@ -4,7 +4,7 @@ import Input from '@potta/components/input';
 import Slider from '@potta/components/slideover';
 import SearchableSelect from '@potta/components/searchableSelect';
 import Button from '@potta/components/button';
-import { accountsApi } from '../utils/api';
+import { useAccountsByType, useCreateAccount } from '../_hooks/useAccounts';
 import { ACCOUNT_TYPES, type AccountType, type accountPayload } from '../utils/validations';
 
 interface AccountNode {
@@ -58,13 +58,18 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [accountsByType, setAccountsByType] = useState<AccountNode[]>([]);
   const [parentAccount, setParentAccount] = useState<string | null>(null);
   const [accountName, setAccountName] = useState('');
   const [initialBalance, setInitialBalance] = useState(0);
-  const [loadingAccounts, setLoadingAccounts] = useState(false);
 
   const [accountType, setAccountType] = useState<AccountType>('ASSET');
+  const createAccount = useCreateAccount();
+  const {
+    data: accountsByTypeResponse,
+    isLoading: loadingAccounts,
+    isError: accountsLoadFailed,
+  } = useAccountsByType(accountType, { enabled: open });
+  const accountsByType: AccountNode[] = accountsByTypeResponse?.data ?? [];
 
   // Helper function to flatten the account hierarchy for parent selection
   const flattenAccountHierarchy = (accounts: AccountNode[]): AccountNode[] => {
@@ -85,25 +90,6 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
     setAccountType(toAccountType(value));
     setParentAccount(null);
   };
-
-  // Fetch accounts filtered by account type for parent selection
-  useEffect(() => {
-    const fetchAccountsByType = async () => {
-      if (!open) return;
-
-      try {
-        setLoadingAccounts(true);
-        const response = await accountsApi.getByType(accountType, '');
-        setAccountsByType(response.data || []);
-      } catch {
-        setError('Failed to load accounts. Please try again.');
-      } finally {
-        setLoadingAccounts(false);
-      }
-    };
-
-    fetchAccountsByType();
-  }, [accountType, open]);
 
   // Reset form when opening/closing
   useEffect(() => {
@@ -152,7 +138,7 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
         ...(parentAccount ? { parentId: parentAccount } : {}),
       };
 
-      await accountsApi.create(accountData);
+      await createAccount.mutateAsync(accountData);
 
       setOpen(false);
       if (onAccountSaved) {
@@ -188,9 +174,9 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
       buttonText="account"
     >
       <div className="my-14 min-w-[600px] relative">
-        {error && (
+        {(error || accountsLoadFailed) && (
           <div className="mb-4 rounded-[2px] border border-destructive/30 bg-destructive/5 p-3">
-            <p className="text-destructive text-sm">{error}</p>
+            <p className="text-destructive text-sm">{error ?? 'Failed to load accounts. Please try again.'}</p>
           </div>
         )}
 

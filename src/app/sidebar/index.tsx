@@ -4,6 +4,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   CaretDoubleLeft,
   CaretDoubleRight,
@@ -32,20 +33,26 @@ import {
 } from '@/lib/navigation';
 import { useCanOpenRoute } from '@/lib/use-can-open-route';
 import { signOutWithAuthApi } from '@/lib/auth-sign-out';
+import { accountTreeQueryOptions } from '../(routes)/accounting/_hooks/useAccounts';
 
 /** Icon rail (module toggler) + links panel, as in instanvi-payroll-expense-fe. */
 export const SIDEBAR_RAIL_WIDTH = 56;
 export const SIDEBAR_PANEL_WIDTH = 208;
 const PIN_STORAGE_KEY = 'potta.sidebar.panelPinned';
 
+/** Accounting pages (Accounts, Journals, ...) all start from the chart of accounts. */
+const isAccountingHref = (href: string) => href.split('?')[0] === '/accounting';
+
 const RailButton = ({
   module,
   active,
   onSelect,
+  onPrefetch,
 }: {
   module: NavModule;
   active: boolean;
   onSelect: (module: NavModule) => void;
+  onPrefetch?: (module: NavModule) => void;
 }) => {
   const ModuleIcon = module.icon;
   return (
@@ -55,8 +62,10 @@ const RailButton = ({
       aria-label={module.title}
       aria-pressed={active}
       onClick={() => onSelect(module)}
+      onMouseEnter={() => onPrefetch?.(module)}
+      onFocus={() => onPrefetch?.(module)}
       className={cn(
-        'flex size-10 items-center justify-center rounded-md transition-colors',
+        'flex size-10 items-center justify-center rounded-full transition-colors',
         active
           ? 'bg-primary text-primary-foreground'
           : 'text-foreground/70 hover:bg-brand-subtle hover:text-primary'
@@ -109,6 +118,7 @@ const Sidebars = () => {
   const router = useRouter();
   const context = useContext(ContextData);
   const canOpen = useCanOpenRoute();
+  const queryClient = useQueryClient();
   const collapsed = !!context?.toggle;
   const [pinned, setPinned] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -138,6 +148,32 @@ const Sidebars = () => {
   const activeItem = active
     ? getActiveNavItem(pathname, active.items, search)
     : null;
+
+  // Only prefetch what this user may open; prefetchQuery skips fresh cache entries.
+  const prefetchAccounts = () => {
+    if (canOpen('/accounting')) {
+      void queryClient.prefetchQuery(accountTreeQueryOptions());
+    }
+  };
+
+  const prefetchForModule = (module: NavModule) => {
+    if (module.items.some((i) => isAccountingHref(i.href))) prefetchAccounts();
+  };
+
+  // One-time warm-up while the browser is idle, so the first visit to Accounts is instant.
+  useEffect(() => {
+    const idle = (window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    });
+    if (idle.requestIdleCallback) {
+      const id = idle.requestIdleCallback(prefetchAccounts);
+      return () => idle.cancelIdleCallback?.(id);
+    }
+    const timer = setTimeout(prefetchAccounts, 1500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const select = (module: NavModule) => {
     setPickedId(module.id);
@@ -186,17 +222,29 @@ const Sidebars = () => {
       onMouseLeave={handleMouseLeave}
     >
       <div className="flex w-14 shrink-0 flex-col items-center gap-2 py-3">
-        <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-md">
+        <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-full">
           <img src="/icons/Potta.svg" alt="Potta" className="size-8 object-contain" />
         </Link>
         <nav aria-label="Modules" className="flex flex-1 flex-col items-center gap-2">
           {top.map((m) => (
-            <RailButton key={m.id} module={m} active={m.id === highlightedId} onSelect={select} />
+            <RailButton
+              key={m.id}
+              module={m}
+              active={m.id === highlightedId}
+              onSelect={select}
+              onPrefetch={prefetchForModule}
+            />
           ))}
         </nav>
         <div className="flex flex-col items-center gap-1">
           {bottom.map((m) => (
-            <RailButton key={m.id} module={m} active={m.id === highlightedId} onSelect={select} />
+            <RailButton
+              key={m.id}
+              module={m}
+              active={m.id === highlightedId}
+              onSelect={select}
+              onPrefetch={prefetchForModule}
+            />
           ))}
           <button
             type="button"
@@ -205,7 +253,7 @@ const Sidebars = () => {
             onMouseEnter={openFromHover}
             onFocus={openFromHover}
             onClick={() => context?.setToggle(!collapsed)}
-            className="flex size-10 items-center justify-center rounded-md text-foreground/60 hover:bg-brand-subtle hover:text-primary"
+            className="flex size-10 items-center justify-center rounded-full text-foreground/60 hover:bg-brand-subtle hover:text-primary"
           >
             {collapsed ? <CaretDoubleRight size={18} /> : <CaretDoubleLeft size={18} />}
           </button>
@@ -216,7 +264,7 @@ const Sidebars = () => {
             aria-pressed={pinned}
             onClick={() => setPinnedPersist(!pinned)}
             className={cn(
-              'flex size-10 items-center justify-center rounded-md transition-colors',
+              'flex size-10 items-center justify-center rounded-full transition-colors',
               pinned
                 ? 'bg-brand-subtle text-primary'
                 : 'text-foreground/60 hover:bg-brand-subtle hover:text-primary'
@@ -249,6 +297,12 @@ const Sidebars = () => {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onMouseEnter={
+                    isAccountingHref(item.href) ? prefetchAccounts : undefined
+                  }
+                  onFocus={
+                    isAccountingHref(item.href) ? prefetchAccounts : undefined
+                  }
                   className={cn(
                     'flex h-10 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors',
                     on

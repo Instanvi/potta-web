@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productCategoryApi } from '../_utils/api';
 import useGetAllProductCategories from './useGetAllProductCategories';
 import useCreateProductCategory from './useCreateProductCategory';
@@ -18,6 +18,26 @@ export function useProductCategoryManager() {
   const { data, isLoading } = useGetAllProductCategories({ page, limit });
   const createCategory = useCreateProductCategory();
   const queryClient = useQueryClient();
+  const invalidateCategories = () =>
+    queryClient.invalidateQueries({ queryKey: ['get-all-product-category'] });
+
+  const updateCategory = useMutation({
+    mutationKey: ['update-product-category'],
+    mutationFn: ({
+      uuid,
+      data,
+    }: {
+      uuid: string;
+      data: { name: string; description: string };
+    }) => productCategoryApi.update(uuid, data),
+    onSuccess: invalidateCategories,
+  });
+
+  const deleteCategory = useMutation({
+    mutationKey: ['delete-product-category'],
+    mutationFn: (uuid: string) => productCategoryApi.delete(uuid),
+    onSuccess: invalidateCategories,
+  });
 
   const {
     register,
@@ -50,10 +70,13 @@ export function useProductCategoryManager() {
 
   const handleDelete = async () => {
     if (deleteId) {
-      await productCategoryApi.delete(deleteId);
-      setDeleteId(null);
-      toast.success('Category deleted!');
-      queryClient.invalidateQueries({ queryKey: ['get-all-product-category'] });
+      try {
+        await deleteCategory.mutateAsync(deleteId);
+        setDeleteId(null);
+        toast.success('Category deleted!');
+      } catch {
+        toast.error('Failed to delete category');
+      }
     }
   };
 
@@ -61,15 +84,12 @@ export function useProductCategoryManager() {
     try {
       await productCategorySchema.validate(form, { abortEarly: false });
       if (editMode && editId) {
-        await productCategoryApi.update(editId, form);
+        await updateCategory.mutateAsync({ uuid: editId, data: form });
         setModalOpen(false);
         setEditMode(false);
         setEditId(null);
         reset();
         toast.success('Category updated!');
-        queryClient.invalidateQueries({
-          queryKey: ['get-all-product-category'],
-        });
         return;
       }
       createCategory.mutate(form, {
@@ -77,9 +97,6 @@ export function useProductCategoryManager() {
           setModalOpen(false);
           reset();
           toast.success('Category created!');
-          queryClient.invalidateQueries({
-            queryKey: ['get-all-product-category'],
-          });
         },
         onError: (err: any) => {
           // Set error on the form (show as toast or set error state if needed)
@@ -114,5 +131,7 @@ export function useProductCategoryManager() {
     handleDelete,
     onSubmit,
     createCategory,
+    updateCategory,
+    deleteCategory,
   };
 }

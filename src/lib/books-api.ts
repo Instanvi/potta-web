@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import type { ListMeta } from '@/hooks/use-server-pagination';
 
 /** Pluggable CRUD client used by BooksResourcePage (default: potta-backend). */
 export type BooksResourceClient = {
@@ -36,6 +37,13 @@ export function extractBooksRows(payload: unknown): Record<string, unknown>[] {
   if (Array.isArray(obj.items)) return obj.items as Record<string, unknown>[];
   if (Array.isArray(obj.results)) return obj.results as Record<string, unknown>[];
   return [];
+}
+
+/** Pagination `meta` from nestjs-paginate list payloads (undefined for raw arrays / custom shapes). */
+export function extractBooksMeta(payload: unknown): ListMeta {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return undefined;
+  const meta = (payload as Record<string, unknown>).meta;
+  return meta && typeof meta === 'object' ? (meta as ListMeta) : undefined;
 }
 
 export function rowId(row: Record<string, unknown>): string {
