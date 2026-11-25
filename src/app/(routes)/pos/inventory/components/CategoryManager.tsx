@@ -86,28 +86,30 @@ const CategoryManager = () => {
         enableHiding: false,
         header: 'Actions',
         cell: ({ row: { original } }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label="Category actions"
-                className="inline-flex size-8 items-center justify-center rounded-full p-0 transition-colors hover:bg-black/[0.04]"
-              >
-                <i className="ri-more-2-fill text-base text-muted-foreground" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => handleEdit(original)}>
-                <i className="ri-edit-line mr-2" /> Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setDeleteId(original.uuid)}
-                className="text-destructive"
-              >
-                <i className="ri-delete-bin-line mr-2" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Category actions"
+                  className="inline-flex size-8 items-center justify-center rounded-full p-0 transition-colors hover:bg-black/[0.04]"
+                >
+                  <i className="ri-more-2-fill text-base text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={() => handleEdit(original)}>
+                  <i className="ri-edit-line mr-2" /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDeleteId(original.uuid)}
+                  className="text-destructive"
+                >
+                  <i className="ri-delete-bin-line mr-2" /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ),
       },
     ],

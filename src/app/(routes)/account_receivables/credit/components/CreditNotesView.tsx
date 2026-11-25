@@ -15,7 +15,6 @@ import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate } from '../../../_shared/format';
 import {
-  EmptyState,
   ErrorState,
   ListToolbar,
   PageHeader,
@@ -117,7 +116,7 @@ const CreditNotesView = () => {
           const canApprove = note.status === 'DRAFT' || note.status === 'PENDING';
           const canRefund = note.status === 'APPROVED' && !note.refundedAt;
           return (
-            <div onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="p-2 hover:bg-gray-100 rounded-full">
@@ -236,13 +235,9 @@ const CreditNotesView = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No credit notes yet"
-          description="Create a credit note to refund or credit a customer invoice."
-        />
       ) : (
         <DataTable
+          emptyMessage="No credit notes yet"
           columns={columns}
           data={rows}
           isLoading={isLoading}

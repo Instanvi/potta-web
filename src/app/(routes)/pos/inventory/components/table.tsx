@@ -159,52 +159,54 @@ const InventoryTable = ({
       header: 'Actions',
       enableHiding: false,
       cell: ({ row: { original } }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <i className="ri-more-2-fill text-xl text-gray-600"></i>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem
-              onClick={() => {
-                setOpenViewModal(original.uuid);
-                setIsViewOpen(true);
-              }}
-            >
-              <i className="ri-eye-line mr-2"></i> View Details
-            </DropdownMenuItem>
-            <Can resource="Item" action="update">
+        <div className="flex justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <i className="ri-more-2-fill text-xl text-gray-600"></i>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
                 onClick={() => {
-                  setOpenUpdateModal(original.uuid);
-                  setproductDetails({
-                    ...original,
-                    cost: Number(original.cost),
-                    salesPrice: Number(original.salesPrice),
-                    images: productImageUrls(original),
-                  });
-                  setIsEditOpen(true);
+                  setOpenViewModal(original.uuid);
+                  setIsViewOpen(true);
                 }}
               >
-                <i className="ri-edit-line mr-2"></i> {original.payProductId ? 'Managed in Pay' : 'Edit'}
+                <i className="ri-eye-line mr-2"></i> View Details
               </DropdownMenuItem>
-            </Can>
-            {!original.payProductId && (
-              <Can resource="Item" action="remove">
+              <Can resource="Item" action="update">
                 <DropdownMenuItem
                   onClick={() => {
-                    setOpenDeleteModal(original.uuid);
-                    setIsDeleteOpen(true);
+                    setOpenUpdateModal(original.uuid);
+                    setproductDetails({
+                      ...original,
+                      cost: Number(original.cost),
+                      salesPrice: Number(original.salesPrice),
+                      images: productImageUrls(original),
+                    });
+                    setIsEditOpen(true);
                   }}
-                  className="text-destructive"
                 >
-                  <i className="ri-delete-bin-line mr-2"></i> Delete
+                  <i className="ri-edit-line mr-2"></i> {original.payProductId ? 'Managed in Pay' : 'Edit'}
                 </DropdownMenuItem>
               </Can>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {!original.payProductId && (
+                <Can resource="Item" action="remove">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setOpenDeleteModal(original.uuid);
+                      setIsDeleteOpen(true);
+                    }}
+                    className="text-destructive"
+                  >
+                    <i className="ri-delete-bin-line mr-2"></i> Delete
+                  </DropdownMenuItem>
+                </Can>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
     },
   ];

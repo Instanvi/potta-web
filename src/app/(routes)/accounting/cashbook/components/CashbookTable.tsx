@@ -11,7 +11,7 @@ import Select from '@potta/components/select';
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, StatCard, StatusBadge } from '../../../_shared/states';
+import { ErrorState, StatCard, StatusBadge } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useCashAccounts, useCashbookEntries, useDeleteCashbookEntry } from '../hooks';
 import { CashbookDirection, CashbookEntry, CashbookFilter } from '../utils/types';
@@ -119,7 +119,7 @@ const CashbookTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
           {canAccess('Cashbook', 'update') && (
             <button
               type="button"
@@ -268,17 +268,13 @@ const CashbookTable = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No cashbook entries"
-          description="Record cash received or paid out; each entry posts a journal automatically."
-        />
       ) : (
         <>
           <DataTable
             columns={columns}
             data={rows}
             isLoading={isLoading}
+            emptyMessage="No cashbook entries"
             withRowSelection={false}
             pageSizeOptions={[20, 50, 100]}
             {...tableProps(data?.meta, rows.length)}

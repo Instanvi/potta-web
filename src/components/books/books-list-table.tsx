@@ -13,6 +13,7 @@ type BooksListTableProps<T extends Record<string, unknown>> = {
   columns: BooksListColumn[];
   rows: T[];
   isLoading?: boolean;
+  emptyMessage?: string;
   onRowClick?: (row: T) => void;
   showPagination?: boolean;
   storageKey?: string;
@@ -28,6 +29,7 @@ export function BooksListTable<T extends Record<string, unknown>>({
   columns,
   rows,
   isLoading,
+  emptyMessage,
   onRowClick,
   showPagination,
   storageKey,
@@ -51,6 +53,7 @@ export function BooksListTable<T extends Record<string, unknown>>({
       data={rows}
       columns={defs}
       isLoading={isLoading}
+      emptyMessage={emptyMessage}
       withRowSelection={false}
       onRowClick={onRowClick}
       showPagination={showPagination ?? (serverPagination ? true : rows.length > 10)}

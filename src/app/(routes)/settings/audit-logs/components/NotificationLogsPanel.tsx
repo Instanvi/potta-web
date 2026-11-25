@@ -12,7 +12,7 @@ import {
 } from '@potta/components/shadcn/select';
 import { DataTable } from '@potta/components/ui/data-table';
 import { useServerPagination } from '@/hooks/use-server-pagination';
-import { EmptyState, ErrorState, StatusBadge } from '../../../_shared/states';
+import { ErrorState, StatusBadge } from '../../../_shared/states';
 import { useNotificationLogs } from '../hooks';
 import type { NotificationChannel, NotificationLog, NotificationLogStatus } from '../utils/api';
 import { formatDateTime } from '../utils/format';
@@ -163,13 +163,9 @@ export default function NotificationLogsPanel() {
 
       {isError ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No notifications sent yet"
-          description={channel || status ? 'Try another channel or status.' : undefined}
-        />
       ) : (
         <DataTable
+          emptyMessage="No notifications sent yet"
           columns={columns}
           data={rows}
           isLoading={isLoading}

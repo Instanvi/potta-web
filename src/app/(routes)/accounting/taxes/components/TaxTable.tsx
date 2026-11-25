@@ -10,7 +10,7 @@ import Select from '@potta/components/select';
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount } from '../../../_shared/format';
-import { EmptyState, ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useDeleteTax, useImportTaxesCsv, useTaxes } from '../hooks';
 import { Tax, taxApi } from '../utils/api';
@@ -94,7 +94,7 @@ const TaxTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
           {canAccess('Tax', 'update') && (
             <button
               type="button"
@@ -242,13 +242,9 @@ const TaxTable = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No taxes configured"
-          description="Add the taxes you charge (e.g. VAT 19.25%) so they can be applied to items and invoices."
-        />
       ) : (
         <DataTable
+          emptyMessage="No taxes configured"
           columns={columns}
           data={rows}
           isLoading={isLoading}

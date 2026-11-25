@@ -127,46 +127,48 @@ const TableComponents = () => {
       header: 'Actions',
       cell: ({ row: { original } }) => {
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <i className="ri-more-2-fill text-gray-600"></i>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => {
-                  setOpenViewModal(original.uuid);
-                  setIsViewOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                <i className="ri-eye-line mr-2"></i>
-                View
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setOpenUpdateModal(original.uuid);
-                  setCustomerDetails(original);
-                  setIsEditOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                <i className="ri-edit-line mr-2"></i>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  setOpenDeleteModal(original.uuid);
-                  setIsDeleteOpen(true);
-                }}
-                className="cursor-pointer text-red-600"
-              >
-                <i className="ri-delete-bin-line mr-2"></i>
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-2 hover:bg-gray-100 rounded-full">
+                  <i className="ri-more-2-fill text-gray-600"></i>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenViewModal(original.uuid);
+                    setIsViewOpen(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <i className="ri-eye-line mr-2"></i>
+                  View
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenUpdateModal(original.uuid);
+                    setCustomerDetails(original);
+                    setIsEditOpen(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <i className="ri-edit-line mr-2"></i>
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenDeleteModal(original.uuid);
+                    setIsDeleteOpen(true);
+                  }}
+                  className="cursor-pointer text-red-600"
+                >
+                  <i className="ri-delete-bin-line mr-2"></i>
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },

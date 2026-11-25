@@ -85,7 +85,13 @@ interface DataTableProps<TData> {
    * Prefer `useDataTableHandle()` to wire this up.
    */
   onTableChange?: (table: TanstackTable<TData>) => void;
+  /** Body message when there are zero rows (headers still show). */
+  emptyMessage?: string;
 }
+
+/** Shared width for the select checkbox column and the actions (⋮) column. */
+const ICON_COL =
+  'w-12 min-w-12 max-w-12 px-2 text-center [&:has([role=checkbox])]:pr-2';
 
 /** Lifts the DataTable instance into the parent so Columns can live in a shared ListToolbar. */
 export function useDataTableHandle<TData>() {
@@ -120,6 +126,7 @@ export function DataTable<TData>({
   showViewOptions = true,
   storageKey,
   onTableChange,
+  emptyMessage = 'No results.',
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -162,30 +169,39 @@ export function DataTable<TData>({
     );
 
   const resolvedColumns = React.useMemo(() => {
-    const baseColumns = column ?? columns;
-    if (!withRowSelection) {
-      return baseColumns;
-    }
+    const baseColumns = (column ?? columns).map((col) => {
+      const id = (col as { id?: string }).id;
+      if (id !== 'actions') return col;
+      return { ...col, size: 48, maxSize: 48, minSize: 48 };
+    });
+    if (!withRowSelection) return baseColumns;
 
     const selectionColumn: ColumnDef<TData> = {
       id: 'select',
+      size: 48,
+      maxSize: 48,
+      minSize: 48,
       header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all rows"
-        />
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all rows"
+          />
+        </div>
       ),
       cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          onClick={(event) => event.stopPropagation()}
-        />
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
       ),
       enableSorting: false,
       enableHiding: false,
@@ -193,6 +209,8 @@ export function DataTable<TData>({
 
     return [selectionColumn, ...baseColumns];
   }, [column, columns, withRowSelection]);
+
+  const iconColIds = React.useMemo(() => new Set(['select', 'actions']), []);
 
   const table = useReactTable({
     data: data ?? [],
@@ -262,9 +280,15 @@ export function DataTable<TData>({
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    style={
+                      iconColIds.has(header.column.id)
+                        ? { width: 48, minWidth: 48, maxWidth: 48 }
+                        : undefined
+                    }
                     className={cn(
                       'h-11 bg-table-head px-4 text-sm font-normal tracking-normal text-black',
-                      header.column.getCanSort() && 'cursor-pointer select-none'
+                      header.column.getCanSort() && 'cursor-pointer select-none',
+                      iconColIds.has(header.column.id) && ICON_COL,
                     )}
                     onClick={tableLoading ? undefined : header.column.getToggleSortingHandler()}
                   >
@@ -327,19 +351,30 @@ export function DataTable<TData>({
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-4 py-3 text-sm">
+                    <TableCell
+                      key={cell.id}
+                      style={
+                        iconColIds.has(cell.column.id)
+                          ? { width: 48, minWidth: 48, maxWidth: 48 }
+                          : undefined
+                      }
+                      className={cn(
+                        'px-4 py-3 text-sm',
+                        iconColIds.has(cell.column.id) && ICON_COL,
+                      )}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={colCount}
-                  className="h-32 text-center text-sm font-normal text-muted-foreground"
+                  className="h-24 text-center text-sm font-normal text-muted-foreground"
                 >
-                  No results.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}

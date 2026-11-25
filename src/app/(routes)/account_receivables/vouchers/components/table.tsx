@@ -141,12 +141,14 @@ const VoucherTable = () => {
         ];
 
         return (
-          <TableActionPopover
-            actions={actions}
-            rowUuid={original.uuid}
-            openPopover={openPopover}
-            setOpenPopover={setOpenPopover}
-          />
+          <div className="flex justify-center">
+            <TableActionPopover
+              actions={actions}
+              rowUuid={original.uuid}
+              openPopover={openPopover}
+              setOpenPopover={setOpenPopover}
+            />
+          </div>
         );
       },
     },

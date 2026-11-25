@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
 import { useServerPagination } from '@/hooks/use-server-pagination';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { ErrorState } from '../../../_shared/states';
 import { useAuditLogs } from '../hooks';
 import type { AuditLog, AuditLogQuery } from '../utils/api';
 import { entityTypeLabel, formatDateTime, humanizeAction, shortId } from '../utils/format';
@@ -106,20 +106,12 @@ export default function AuditLogsPanel() {
 
       {isError ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && (data?.meta.total ?? 0) === 0 ? (
-        <EmptyState
-          title="No activity found"
-          description={
-            Object.values(debounced).some(Boolean)
-              ? 'Try widening the filters.'
-              : 'Changes to books, sales and master data will appear here.'
-          }
-        />
       ) : (
         <DataTable
           columns={columns}
           data={rows}
           isLoading={isLoading}
+          emptyMessage="No activity found"
           withRowSelection={false}
           onRowClick={setSelected}
           pageSizeOptions={[25, 50, 100]}

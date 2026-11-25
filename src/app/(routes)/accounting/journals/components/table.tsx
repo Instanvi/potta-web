@@ -6,7 +6,7 @@ import { DataTable } from '@potta/components/ui/data-table';
 import { Can } from '@/components/auth/can';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { formatAmount, formatDate } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { ErrorState } from '../../../_shared/states';
 import useGetJournalEntries from '../hooks/useGetJournalEntries';
 import { Journal } from '../utils/types';
 import DeleteModal from './deleteModal';
@@ -82,7 +82,7 @@ const JournalEntriesTable = ({
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             title="View"
@@ -107,22 +107,13 @@ const JournalEntriesTable = ({
   ];
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
-  if (!isLoading && rows.length === 0 && page === 1)
-    return term ? (
-      <EmptyState title="No matching entries" description={`Nothing matches "${term}".`} />
-    ) : (
-      <EmptyState
-        title="No journal entries"
-        description="Entries posted from sales, purchases and manual journals appear here."
-      />
-    );
-
   return (
     <>
       <DataTable
         columns={columns}
         data={rows}
         isLoading={isLoading}
+        emptyMessage={term ? 'No matching entries' : 'No journal entries'}
         withRowSelection={false}
         onRowClick={(row) => setViewId(row.uuid)}
         storageKey="journals-table"

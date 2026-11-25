@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer } from '@/app/(routes)/_shared/states';
+import { ErrorState, ListToolbar, PageContainer } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
 import {
@@ -365,20 +365,12 @@ export function BooksResourcePage({
         <div className="mt-4">
           {error ? (
             <ErrorState error={error} onRetry={() => void load()} />
-          ) : !loading && rows.length === 0 ? (
-            <EmptyState
-              title={`No ${title.toLowerCase()} yet`}
-              action={
-                <Button type="button" size="sm" onClick={openCreate}>
-                  New {title}
-                </Button>
-              }
-            />
           ) : (
             <BooksListTable
               columns={columns}
               rows={rows}
               isLoading={loading}
+              emptyMessage={`No ${title.toLowerCase()} yet`}
               onRowClick={(row) => void openDetail(row)}
               storageKey={`books-${resourcePath.replace(/\//g, '-')}-table`}
               serverPagination={tableProps(meta, rows.length)}

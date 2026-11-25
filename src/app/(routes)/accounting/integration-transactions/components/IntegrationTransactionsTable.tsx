@@ -13,7 +13,7 @@ import Select from '@potta/components/select';
 import { useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDateTime } from '../../../_shared/format';
-import { EmptyState, ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { cn } from '@/lib/utils';
 import {
@@ -146,7 +146,7 @@ const IntegrationTransactionsTable = () => {
         const actionable = txn.status === 'new' || txn.status === 'reviewed';
         if (!actionable) return null;
         return (
-          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+          <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
             {canAccess('JournalEntries', 'create') && (
               <>
                 <button
@@ -278,13 +278,9 @@ const IntegrationTransactionsTable = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No integration transactions"
-          description="Successful Pay payments/refunds and Expense reimbursements appear here for review."
-        />
       ) : (
         <DataTable
+          emptyMessage="No integration transactions"
           columns={columns}
           data={rows}
           isLoading={isLoading}

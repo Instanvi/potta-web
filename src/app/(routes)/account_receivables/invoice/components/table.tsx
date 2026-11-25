@@ -15,7 +15,7 @@ import {
 } from '@potta/components/document-master-detail';
 import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
-import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
+import { ErrorState, ListToolbar } from '../../../_shared/states';
 import { Skeleton } from '@potta/components/ui/loaders';
 import { IFilter } from '../_utils/types';
 import useGetAllInvoice from '../_hooks/useGetAllInvoice';
@@ -461,16 +461,6 @@ const InvoiceTable = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && filteredData.length === 0 ? (
-        <EmptyState
-          title="No invoices yet"
-          description="Create an invoice to bill a customer."
-          action={
-            <Link href="/account_receivables/invoice/new">
-              <Button text="New invoice" type="button" theme="default" />
-            </Link>
-          }
-        />
       ) : (
         <DataTable
           columns={columns}
@@ -478,6 +468,7 @@ const InvoiceTable = () => {
           onRowClick={(row) => setSelectedId(row.uuid)}
           isLoading={isLoading}
           storageKey="invoices-table"
+          emptyMessage="No invoices yet"
           showViewOptions={false}
           onTableChange={onTableChange}
           {...tableProps(data?.meta, data?.data?.length)}

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
+import { ErrorState, ListToolbar, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
@@ -90,18 +90,13 @@ export function PayrollExpensesPage() {
         <div className="mt-4">
           {error ? (
             <ErrorState error={error} onRetry={() => void load()} />
-          ) : loading ? (
-            <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">Loading…</Panel>
-          ) : rows.length === 0 ? (
-            <EmptyState
-              title="No expense transactions"
-              description="Payroll expense API returned no rows, or the service is unreachable."
-            />
           ) : (
             <BooksListTable
               columns={COLUMNS}
               rows={rows}
               storageKey="payroll-expenses-table"
+              isLoading={loading}
+              emptyMessage="No expense transactions"
             />
           )}
         </div>

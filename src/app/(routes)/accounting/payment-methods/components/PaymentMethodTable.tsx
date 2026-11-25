@@ -9,7 +9,7 @@ import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { Can, useCan } from '@/components/auth/can';
 import ConfirmModal from '../../../_shared/ConfirmModal';
-import { EmptyState, ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
 import {
   useDeletePaymentMethod,
   usePaymentMethods,
@@ -78,7 +78,7 @@ const PaymentMethodTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
           {canAccess('PaymentMethod', 'update') && (
             <button
               type="button"
@@ -165,13 +165,9 @@ const PaymentMethodTable = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No payment methods"
-          description="Seed the defaults or add your own (Wave, cheque, etc.)."
-        />
       ) : (
         <DataTable
+          emptyMessage="No payment methods"
           columns={columns}
           data={rows}
           isLoading={isLoading}

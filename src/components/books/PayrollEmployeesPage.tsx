@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, ListToolbar, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
+import { ErrorState, ListToolbar, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { useCreateEmployee, useGetEmployees } from '@/app/(routes)/accounting/employees/hooks';
 import {
   createEmployeeSchema,
@@ -115,18 +115,13 @@ export function PayrollEmployeesPage() {
         <div className="mt-4">
           {error ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
-          ) : isLoading ? (
-            <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">Loading…</Panel>
-          ) : rows.length === 0 ? (
-            <EmptyState
-              title="No employees"
-              description="Payroll API returned no rows, or the service is unreachable."
-            />
           ) : (
             <BooksListTable
               columns={COLUMNS}
               rows={rows}
               storageKey="payroll-employees-table"
+              isLoading={isLoading}
+              emptyMessage="No employees"
             />
           )}
         </div>

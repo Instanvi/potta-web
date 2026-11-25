@@ -5,7 +5,7 @@ import { DataTable } from '@potta/components/ui/data-table';
 import Search from '@potta/components/search';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatAmount, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
+import { ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useAgingReport } from '../hooks';
 import { AgingRow, SubLedgerKind } from '../utils/api';
@@ -116,12 +116,6 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
         <LoadingState />
       ) : error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : rows.length === 0 ? (
-        <EmptyState
-          variant="plain"
-          title={`No ${type === 'AR' ? 'receivables' : 'payables'}`}
-          description={`${partyLabel} balances appear here once invoices or purchases are posted.`}
-        />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -136,6 +130,7 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
           <DataTable
             columns={columns}
             data={rows}
+            emptyMessage={`No ${type === 'AR' ? 'receivables' : 'payables'}`}
             withRowSelection={false}
             pageSize={20}
             pageSizeOptions={[10, 20, 50, 100]}

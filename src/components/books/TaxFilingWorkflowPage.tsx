@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { EmptyState, ErrorState, PageContainer, PageHeader, Panel } from '@/app/(routes)/_shared/states';
+import { ErrorState, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
 import {
@@ -116,15 +116,13 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
         <div className="mt-4">
           {error ? (
             <ErrorState error={error} onRetry={() => void load()} />
-          ) : loading ? (
-            <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">Loading…</Panel>
-          ) : rows.length === 0 ? (
-            <EmptyState title="No tax filings" description="Create a filing to get started." />
           ) : (
             <BooksListTable
               columns={COLUMNS}
               rows={rows}
               storageKey="tax-filing-workflow-table"
+              isLoading={loading}
+              emptyMessage="No tax filings"
               onRowClick={(row) => setSelected(row)}
             />
           )}

@@ -16,7 +16,7 @@ import {
 import { DataTable } from '@potta/components/ui/data-table';
 import { Skeleton } from '@potta/components/ui/loaders';
 import { formatDate } from '../../../_shared/format';
-import { EmptyState, ErrorState, ListToolbar } from '../../../_shared/states';
+import { ErrorState, ListToolbar } from '../../../_shared/states';
 import { formatMoney } from '../../utils/format';
 import { useVendorOptions } from '../../hooks';
 import { useBills } from '../hooks';
@@ -353,28 +353,13 @@ export function BillsTable() {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title={filtered ? 'No bills match these filters' : 'No bills yet'}
-          description={
-            filtered
-              ? 'Try clearing filters, or create a new bill.'
-              : 'Record a vendor bill to track what you owe.'
-          }
-          action={
-            canAccess('Bill', 'create') ? (
-              <Link href="/account_payables/bills/new">
-                <Button text="New bill" type="button" theme="default" />
-              </Link>
-            ) : undefined
-          }
-        />
       ) : (
         <DataTable
           columns={columns}
           data={rows}
           onRowClick={(row) => setSelectedId(row.uuid)}
           storageKey="bills-table"
+          emptyMessage={filtered ? 'No bills match these filters' : 'No bills yet'}
           isLoading={isLoading}
           manualPagination
           pageCount={pageCount}

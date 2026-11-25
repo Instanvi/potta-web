@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
 import {
-  EmptyState,
   ErrorState,
   ListToolbar,
   PageContainer,
-  Panel,
   Tabs,
 } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
@@ -138,15 +136,13 @@ export function BooksTransactionsHub({
         <div className="mt-4">
           {error ? (
             <ErrorState error={error} onRetry={() => void load()} />
-          ) : loading ? (
-            <Panel className="px-6 py-16 text-center text-sm text-muted-foreground">Loading…</Panel>
-          ) : rows.length === 0 ? (
-            <EmptyState title="No transactions" description="Nothing matched this type." />
           ) : (
             <BooksListTable
               columns={hubColumns}
               rows={hubRows}
               storageKey="books-transactions-hub-table"
+              isLoading={loading}
+              emptyMessage="No transactions"
             />
           )}
         </div>

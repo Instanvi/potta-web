@@ -6,7 +6,7 @@ import Search from '@potta/components/search';
 import Select from '@potta/components/select';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
-import { EmptyState, ErrorState, ListToolbar, StatCard } from '../../../_shared/states';
+import { ErrorState, ListToolbar, StatCard } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useGeneralLedger } from '../hooks';
 import { GeneralLedgerEntry } from '../utils/types';
@@ -169,11 +169,6 @@ const GeneralLedgerTab = () => {
 
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 ? (
-        <EmptyState
-          title="No ledger entries in this period"
-          description="Posted journal lines appear here once transactions are recorded."
-        />
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -185,6 +180,7 @@ const GeneralLedgerTab = () => {
             columns={columns}
             data={rows}
             isLoading={isLoading}
+            emptyMessage="No ledger entries in this period"
             withRowSelection={false}
             manualPagination={!search && sourceFilter === 'all'}
             pageCount={

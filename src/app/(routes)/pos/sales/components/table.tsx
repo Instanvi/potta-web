@@ -231,43 +231,45 @@ const SaleTable = () => {
       header: '',
       cell: ({ row: { original } }) => {
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="rounded-full p-2 hover:bg-black/[0.04]"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <i className="ri-more-2-fill text-muted-foreground" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenViewModal(original.uuid);
-                  setReceiptDetails(original);
-                  setIsViewOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                <i className="ri-eye-line mr-2" />
-                View
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenDeleteModal(original.uuid);
-                  setReceiptDetails(original);
-                  setIsDeleteOpen(true);
-                }}
-                className="cursor-pointer text-destructive"
-              >
-                <i className="ri-delete-bin-line mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="rounded-full p-2 hover:bg-black/[0.04]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <i className="ri-more-2-fill text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenViewModal(original.uuid);
+                    setReceiptDetails(original);
+                    setIsViewOpen(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <i className="ri-eye-line mr-2" />
+                  View
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenDeleteModal(original.uuid);
+                    setReceiptDetails(original);
+                    setIsDeleteOpen(true);
+                  }}
+                  className="cursor-pointer text-destructive"
+                >
+                  <i className="ri-delete-bin-line mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },

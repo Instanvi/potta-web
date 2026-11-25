@@ -85,13 +85,9 @@ const Transactions = ({ type, row }: { type: SubLedgerKind; row: AgingRow }) => 
         />
         <StatCard label="Last transaction" value={formatDate(balance.data?.lastTransactionDate)} />
       </div>
-      {entries.length === 0 ? (
-        <EmptyState title="No transactions" />
-      ) : (
-        <DataTable columns={columns} data={entries} withRowSelection={false} pageSize={10} 
-          storageKey="sub-ledger-table"
-        />
-      )}
+      <DataTable columns={columns} data={entries} emptyMessage="No transactions" withRowSelection={false} pageSize={10} 
+        storageKey="sub-ledger-table"
+      />
     </div>
   );
 };

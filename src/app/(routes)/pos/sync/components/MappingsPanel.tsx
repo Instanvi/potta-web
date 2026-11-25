@@ -4,7 +4,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatDateTime } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { ErrorState } from '../../../_shared/states';
 import { useMappings } from '../hooks';
 import { MappingItem, PosSyncKind } from '../utils/api';
 import { KindFilter, Mono, useCursorTable } from './shared';
@@ -72,13 +72,9 @@ const MappingsPanel = () => {
       </div>
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && rows.length === 0 && pager.pageIndex === 0 ? (
-        <EmptyState
-          title="No mappings"
-          description="Mappings are created when the POS desktop app pushes records."
-        />
       ) : (
         <DataTable
+          emptyMessage="No mappings"
           columns={columns}
           data={rows}
           isLoading={isLoading}

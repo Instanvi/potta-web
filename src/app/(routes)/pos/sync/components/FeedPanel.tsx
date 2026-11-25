@@ -11,7 +11,7 @@ import {
   SheetTitle,
 } from '@potta/components/ui/sheet';
 import { formatDateTime } from '../../../_shared/format';
-import { EmptyState, ErrorState } from '../../../_shared/states';
+import { ErrorState } from '../../../_shared/states';
 import { useFeed } from '../hooks';
 import { FeedItem, PosSyncKind } from '../utils/api';
 import { KindFilter, Mono, useCursorTable } from './shared';
@@ -86,13 +86,9 @@ const FeedPanel = () => {
       </div>
       {error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
-      ) : !isLoading && items.length === 0 && pager.pageIndex === 0 ? (
-        <EmptyState
-          title="No changes"
-          description="The feed lists catalog and document changes the desktop app will pull."
-        />
       ) : (
         <DataTable
+          emptyMessage="No changes"
           columns={columns}
           data={items}
           isLoading={isLoading}
