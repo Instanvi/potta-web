@@ -12,8 +12,9 @@ import {
   orgDisplayName,
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 
 interface TableItem {
   name: string;
@@ -50,13 +51,15 @@ const PdfView = ({
   const tableData: TableItem[] = contextData.table || [];
   const customerId = contextData.customerName; // Get customer ID from context
   const { data: org } = useOrganizationProfile();
+  const { prefs: letterhead, setPrefs: setLetterhead } = useDocumentLetterhead();
 
-  // State for invoice color
-  const [invoiceColor, setInvoiceColor] = useState('#059669'); // Default green-700
+  // Accent follows letterhead prefs (shared with the editor form).
+  const invoiceColor = letterhead.accent || '#0b5d1e';
+  const setInvoiceColor = (value: string) => setLetterhead({ accent: value });
 
   // Predefined color options for companies
   const colorOptions = [
-    { name: 'Green', value: '#059669', class: 'bg-green-700' },
+    { name: 'Green', value: '#0b5d1e', class: 'bg-green-800' },
     { name: 'Blue', value: '#1d4ed8', class: 'bg-blue-700' },
     { name: 'Purple', value: '#7c3aed', class: 'bg-purple-700' },
     { name: 'Red', value: '#dc2626', class: 'bg-red-700' },

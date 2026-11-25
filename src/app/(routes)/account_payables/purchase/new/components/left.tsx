@@ -12,6 +12,7 @@ import useCreatePurchaseOrder from '../hooks/useCreatePurchase';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { useRouter } from 'next/navigation';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
+import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
 import {
   DocumentFormCard,
   DocumentSectionTitle,
@@ -354,7 +355,8 @@ const Left = () => {
 
   return (
     <>
-      <div className="scroll mx-auto w-full max-w-4xl gap-4 overflow-y-auto bg-white px-4 pb-20 md:px-5">
+      <div className="scroll mx-auto flex w-full max-w-6xl flex-col gap-3 overflow-y-auto bg-white px-3 pb-20 sm:px-5 md:px-8 lg:px-10">
+        <DocumentLetterheadControls flush />
         <DocumentFormCard flush className="mb-3">
           <div className="mb-6 grid grid-cols-2 gap-4">
             <div className={`${errors.orderDate ? 'error-field' : ''}`}>

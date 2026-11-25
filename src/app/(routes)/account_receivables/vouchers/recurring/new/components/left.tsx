@@ -16,6 +16,7 @@ import { DatePicker } from '@potta/components/ui/date-picker';
 import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
 import { GeneratedNumberField } from '@potta/components/generated-number-field';
+import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -376,7 +377,8 @@ const Left = () => {
   const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
 
   return (
-    <div className="mx-auto w-full max-w-4xl scroll overflow-y-auto bg-white px-4 md:px-5">
+    <div className="mx-auto flex w-full max-w-6xl scroll flex-col gap-3 overflow-y-auto bg-white px-3 sm:px-5 md:px-8 lg:px-10">
+      <DocumentLetterheadControls flush />
       <div className="w-full grid grid-cols-4 gap-4">
         <div>
           <Select

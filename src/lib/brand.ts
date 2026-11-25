@@ -1,6 +1,10 @@
 /** Default Potta mark when an organization has not uploaded a logo. */
 export const POTTA_LOGO_SVG = '/images/pottaLogo.svg';
 export const POTTA_LOGO_PNG = '/images/potta-logo.png';
+export const INSTANVI_LOGO_SVG = '/instanvi_logo_full.svg';
+export const INSTANVI_ICON_SVG = '/icons/instanvi.svg';
+
+export type DocumentLetterheadLogo = 'org' | 'potta' | 'instanvi' | 'none';
 
 /** Prefer org logo; otherwise the Potta brand mark (SVG for UI, PNG for PDF/print). */
 export function orgLogoOrPotta(
@@ -10,6 +14,18 @@ export function orgLogoOrPotta(
   const trimmed = typeof logo === 'string' ? logo.trim() : '';
   if (trimmed) return trimmed;
   return format === 'png' ? POTTA_LOGO_PNG : POTTA_LOGO_SVG;
+}
+
+/** Resolve letterhead logo from user choice + org profile. */
+export function resolveLetterheadLogoUrl(
+  choice: DocumentLetterheadLogo,
+  orgLogo?: string | null,
+  format: 'svg' | 'png' = 'svg',
+): string | null {
+  if (choice === 'none') return null;
+  if (choice === 'potta') return format === 'png' ? POTTA_LOGO_PNG : POTTA_LOGO_SVG;
+  if (choice === 'instanvi') return INSTANVI_LOGO_SVG;
+  return orgLogoOrPotta(orgLogo, format);
 }
 
 /** Absolute URL for @react-pdf / print iframes (needs a fetchable http(s) or same-origin URL). */

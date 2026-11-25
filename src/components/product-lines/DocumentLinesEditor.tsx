@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CaretDown, Package, Plus, Trash } from '@phosphor-icons/react';
 import { Button } from '@potta/components/shadcn/button';
 import {
@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@potta/components/shadc
 import useGetAllProducts from '@potta/app/(routes)/pos/inventory/_hooks/useGetAllProducts';
 import { productApi } from '@potta/app/(routes)/pos/inventory/_utils/api';
 import type { Product } from '@potta/app/(routes)/pos/inventory/_utils/types';
+import { isStockTracked } from '@potta/app/(routes)/pos/utils/sale';
 import { priceCatalogSelection } from '@/lib/catalog-price';
 import { cn } from '@potta/lib/utils';
 
@@ -52,6 +53,16 @@ function lineAmount(line: DocumentLine) {
   return net + (net * tax) / 100;
 }
 
+export function productStockOnHand(product: Product): number {
+  return Number(product.stockTotal ?? product.inventoryLevel ?? 0);
+}
+
+/** Services always; inventory items only when stock &gt; 0. */
+export function isProductAvailableForSale(product: Product): boolean {
+  if (!isStockTracked(product)) return true;
+  return productStockOnHand(product) > 0;
+}
+
 function ProductCombobox({
   line,
   products,
@@ -82,7 +93,12 @@ function ProductCombobox({
           className="h-10 w-full justify-start gap-2 rounded-[2px] px-3 font-normal"
         >
           <Package size={16} className="shrink-0 text-primary" weight="duotone" />
-          <span className={cn('min-w-0 flex-1 truncate text-left', !line.description && 'text-muted-foreground')}>
+          <span
+            className={cn(
+              'min-w-0 flex-1 truncate text-left',
+              !line.description && 'text-muted-foreground',
+            )}
+          >
             {loading ? 'Loading…' : label}
           </span>
           <CaretDown size={14} className="shrink-0 text-muted-foreground" />
@@ -91,7 +107,7 @@ function ProductCombobox({
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <Command shouldFilter>
           <CommandInput
-            placeholder="Search catalog or type a service…"
+            placeholder="Search in-stock products or services…"
             value={query}
             onValueChange={setQuery}
           />
@@ -110,26 +126,36 @@ function ProductCombobox({
                   Use “{query.trim()}” as a free-text line
                 </button>
               ) : (
-                <span className="px-3 py-2 text-sm text-muted-foreground">No products found</span>
+                <span className="px-3 py-2 text-sm text-muted-foreground">
+                  No in-stock products or services found
+                </span>
               )}
             </CommandEmpty>
-            <CommandGroup heading="Products">
-              {products.map((p) => (
-                <CommandItem
-                  key={p.uuid}
-                  value={p.name}
-                  onSelect={() => {
-                    onPickProduct(p);
-                    setOpen(false);
-                    setQuery('');
-                  }}
-                >
-                  <Package size={14} className="mr-2 text-muted-foreground" />
-                  {p.name}
-                </CommandItem>
-              ))}
+            <CommandGroup heading="In stock / services">
+              {products.map((p) => {
+                const tracked = isStockTracked(p);
+                const stock = productStockOnHand(p);
+                return (
+                  <CommandItem
+                    key={p.uuid}
+                    value={`${p.name} ${stock}`}
+                    onSelect={() => {
+                      onPickProduct(p);
+                      setOpen(false);
+                      setQuery('');
+                    }}
+                  >
+                    <Package size={14} className="mr-2 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                    <span className="ml-2 shrink-0 text-xs tabular-nums text-muted-foreground">
+                      {tracked ? `${stock} in stock` : 'Service'}
+                    </span>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
-            {query.trim() && products.every((p) => p.name.toLowerCase() !== query.trim().toLowerCase()) ? (
+            {query.trim() &&
+            products.every((p) => p.name.toLowerCase() !== query.trim().toLowerCase()) ? (
               <CommandGroup>
                 <CommandItem
                   value={`create-${query}`}
@@ -165,8 +191,21 @@ export function DocumentLinesEditor({
   defaultTaxRate?: number;
   className?: string;
 }) {
-  const { data, isLoading } = useGetAllProducts({ page: 1, limit: 100 });
-  const products: Product[] = data?.data ?? [];
+  const { data, isLoading } = useGetAllProducts({ page: 1, limit: 200 });
+  const products: Product[] = useMemo(
+    () => (data?.data ?? []).filter(isProductAvailableForSale),
+    [data?.data],
+  );
+  const stockById = useMemo(() => {
+    const map = new Map<string, { stock: number; tracked: boolean }>();
+    for (const p of data?.data ?? []) {
+      map.set(p.uuid, {
+        stock: productStockOnHand(p),
+        tracked: isStockTracked(p),
+      });
+    }
+    return map;
+  }, [data?.data]);
   const rows = lines.length > 0 ? lines : [];
 
   const setLine = (index: number, patch: Partial<DocumentLine>) => {
@@ -188,11 +227,14 @@ export function DocumentLinesEditor({
       modifiers: [],
     });
     const taxRate = Number(detail.tax?.rate ?? defaultTaxRate);
+    const tracked = isStockTracked(detail);
+    const stock = productStockOnHand(detail);
     setLine(index, {
       productId: detail.uuid,
       description: detail.name,
       unitPrice: priced.unitPrice,
       taxRate,
+      quantity: tracked ? Math.min(Math.max(1, Number(rows[index]?.quantity) || 1), stock) : rows[index]?.quantity || 1,
     });
   };
 
@@ -209,87 +251,124 @@ export function DocumentLinesEditor({
       <div className="overflow-hidden rounded-[2px] border border-black/[0.08] bg-white">
         {rows.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-            No lines yet — click Add line below.
+            No lines yet — click Add line below. Only in-stock products and services are listed.
           </p>
         ) : (
           <ul className="divide-y divide-black/[0.06]">
-            {rows.map((line, index) => (
-              <li key={`line-${index}`} className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-12 sm:items-end">
-                <div className="space-y-1.5 sm:col-span-5">
-                  <Label className="text-xs font-medium text-foreground">Product / service</Label>
-                  <ProductCombobox
-                    line={line}
-                    products={products}
-                    loading={isLoading}
-                    onPickProduct={(p) => void pickProduct(index, p)}
-                    onPickCustom={(name) =>
-                      setLine(index, {
-                        productId: undefined,
-                        description: name,
-                      })
-                    }
-                  />
-                  <Input
-                    value={line.description}
-                    onChange={(e) => setLine(index, { description: e.target.value })}
-                    placeholder="Description"
-                    className="mt-1"
-                  />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-xs font-medium">
-                    {confirmQuantities ? 'Received qty' : 'Qty'}
-                  </Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={line.quantity}
-                    onChange={(e) => setLine(index, { quantity: Number(e.target.value) || 0 })}
-                  />
-                  {confirmQuantities && line.orderedQuantity != null ? (
-                    <span className="text-[11px] text-muted-foreground">
-                      Ordered {line.orderedQuantity}
+            {rows.map((line, index) => {
+              const stockInfo = line.productId ? stockById.get(line.productId) : undefined;
+              const overStock =
+                stockInfo?.tracked && Number(line.quantity) > stockInfo.stock;
+
+              return (
+                <li
+                  key={`line-${index}`}
+                  className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-12 sm:items-end"
+                >
+                  <div className="space-y-1.5 sm:col-span-5">
+                    <Label className="text-xs font-medium text-foreground">
+                      Product / service
+                    </Label>
+                    <ProductCombobox
+                      line={line}
+                      products={products}
+                      loading={isLoading}
+                      onPickProduct={(p) => void pickProduct(index, p)}
+                      onPickCustom={(name) =>
+                        setLine(index, {
+                          productId: undefined,
+                          description: name,
+                        })
+                      }
+                    />
+                    <Input
+                      value={line.description}
+                      onChange={(e) => setLine(index, { description: e.target.value })}
+                      placeholder="Description"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label className="text-xs font-medium">
+                      {confirmQuantities ? 'Received qty' : 'Qty'}
+                    </Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={stockInfo?.tracked ? stockInfo.stock : undefined}
+                      step="any"
+                      value={line.quantity}
+                      onChange={(e) => {
+                        let next = Number(e.target.value) || 0;
+                        if (stockInfo?.tracked) {
+                          next = Math.min(next, stockInfo.stock);
+                        }
+                        setLine(index, { quantity: next });
+                      }}
+                      className={cn(overStock && 'border-destructive')}
+                    />
+                    {stockInfo?.tracked ? (
+                      <span
+                        className={cn(
+                          'text-[11px] tabular-nums',
+                          overStock ? 'text-destructive' : 'text-muted-foreground',
+                        )}
+                      >
+                        {stockInfo.stock} in stock
+                      </span>
+                    ) : line.productId && stockInfo && !stockInfo.tracked ? (
+                      <span className="text-[11px] text-muted-foreground">Service</span>
+                    ) : null}
+                    {confirmQuantities && line.orderedQuantity != null ? (
+                      <span className="text-[11px] text-muted-foreground">
+                        Ordered {line.orderedQuantity}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label className="text-xs font-medium">Price</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="any"
+                      value={line.unitPrice}
+                      onChange={(e) =>
+                        setLine(index, { unitPrice: Number(e.target.value) || 0 })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label className="text-xs font-medium">Tax %</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="any"
+                      value={line.taxRate}
+                      onChange={(e) =>
+                        setLine(index, { taxRate: Number(e.target.value) || 0 })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end sm:justify-end">
+                    <span className="text-sm tabular-nums text-muted-foreground sm:mb-2">
+                      {lineAmount(line).toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                      })}
                     </span>
-                  ) : null}
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-xs font-medium">Price</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={line.unitPrice}
-                    onChange={(e) => setLine(index, { unitPrice: Number(e.target.value) || 0 })}
-                  />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-xs font-medium">Tax %</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={line.taxRate}
-                    onChange={(e) => setLine(index, { taxRate: Number(e.target.value) || 0 })}
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end sm:justify-end">
-                  <span className="text-sm tabular-nums text-muted-foreground sm:mb-2">
-                    {lineAmount(line).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => removeLine(index)}
-                    aria-label="Remove line"
-                  >
-                    <Trash size={16} />
-                  </Button>
-                </div>
-              </li>
-            ))}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => removeLine(index)}
+                      aria-label="Remove line"
+                    >
+                      <Trash size={16} />
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
