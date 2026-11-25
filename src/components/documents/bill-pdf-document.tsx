@@ -292,9 +292,15 @@ export function BillPdfDocument({
             </Text>
           </View>
           <View>
-            <Text style={styles.headerMeta}>Issue date: {issueDate || '—'}</Text>
-            <Text style={styles.headerMeta}>Due date: {dueDate || '—'}</Text>
-            <Text style={styles.headerMeta}>Currency: {currency}</Text>
+            {issueDate ? (
+              <Text style={styles.headerMeta}>Issue date: {issueDate}</Text>
+            ) : null}
+            {dueDate ? (
+              <Text style={styles.headerMeta}>Due date: {dueDate}</Text>
+            ) : null}
+            {currency ? (
+              <Text style={styles.headerMeta}>Currency: {currency}</Text>
+            ) : null}
           </View>
         </View>
 

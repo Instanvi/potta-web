@@ -91,14 +91,16 @@ const PdfView = ({
     { name: 'Pink', value: '#be185d', class: 'bg-pink-700' },
   ];
 
-  // Format dates if they exist
   const formattedIssueDate = contextData.issueDate
     ? new Date(contextData.issueDate).toLocaleDateString()
-    : 'Not set';
-
+    : '';
   const formattedDueDate = contextData.dueDate
     ? new Date(contextData.dueDate).toLocaleDateString()
-    : 'Not set';
+    : '';
+  const previewCurrency =
+    typeof contextData.currency === 'string' && contextData.currency.trim()
+      ? contextData.currency
+      : '';
 
   const invoiceType = contextData.invoiceType || 'Invoice';
   const invoiceNumber = withDocumentAcronym(
@@ -149,7 +151,7 @@ const PdfView = ({
       invoiceNumber: invoiceNumber ? String(invoiceNumber) : undefined,
       issueDate: formattedIssueDate,
       dueDate: formattedDueDate,
-      currency: contextData.currency || 'USD',
+      currency: previewCurrency,
       paymentMethod: paymentMethodLabel || undefined,
       paymentReference: paymentReference || undefined,
       paymentTerms: paymentTerms || undefined,
@@ -200,7 +202,7 @@ const PdfView = ({
     };
   }, [
     billingAddress,
-    contextData.currency,
+    previewCurrency,
     contextData.note,
     customerDetails,
     formattedDueDate,
@@ -280,16 +282,22 @@ const PdfView = ({
             <p className="text-3xl font-medium text-white">{invoiceType}</p>
             <p className="text-white mt-2">#{invoiceNumber}</p>
           </div>
-          <div className="text-right text-white">
-            <p>
-              <strong>Issue Date:</strong> {formattedIssueDate}
-            </p>
-            <p>
-              <strong>Due Date:</strong> {formattedDueDate}
-            </p>
-            <p>
-              <strong>Currency:</strong> {contextData.currency || 'USD'}
-            </p>
+          <div className="space-y-1 text-right text-white">
+            {formattedIssueDate ? (
+              <p>
+                <strong>Issue Date:</strong> {formattedIssueDate}
+              </p>
+            ) : null}
+            {formattedDueDate ? (
+              <p>
+                <strong>Due Date:</strong> {formattedDueDate}
+              </p>
+            ) : null}
+            {previewCurrency ? (
+              <p>
+                <strong>Currency:</strong> {previewCurrency}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="p-5 space-y-16 bg-white">

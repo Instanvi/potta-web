@@ -72,9 +72,9 @@ function buildPdfProps(input: {
   return {
     title,
     billNumber,
-    issueDate: input.issueDate ? formatDate(input.issueDate) : '—',
-    dueDate: input.dueDate ? formatDate(input.dueDate) : '—',
-    currency: input.currency || 'XAF',
+    issueDate: input.issueDate ? formatDate(input.issueDate) : '',
+    dueDate: input.dueDate ? formatDate(input.dueDate) : '',
+    currency: input.currency || '',
     paymentMethod: paymentMethodLabel(input.paymentMethod),
     expenseAccountCode: input.expenseAccountCode?.trim() || undefined,
     notes: input.notes,

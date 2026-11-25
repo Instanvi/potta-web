@@ -41,9 +41,22 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { formatPartyAddress } from '@/lib/party-address';
+import { today, toDateInput } from '@potta/app/(routes)/_shared/format';
 
 // Import Option interface from SearchableSelect to avoid conflicts
 import type { Option as SearchableSelectOption } from '@potta/components/searchableSelect';
+
+const termsToDays = (terms: string) => {
+  if (/due on receipt/i.test(terms)) return 0;
+  const match = terms.match(/net\s+(\d+)/i);
+  return match ? Number(match[1]) : 30;
+};
+
+const addDays = (date: string, days: number) => {
+  const d = new Date(`${date}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return toDateInput(d);
+};
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -125,14 +138,14 @@ const Left = ({
   const context = useContext(ContextData);
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<string>('');
+    useState<string>('BANK_TRANSFER');
   const { data, isLoading: customersLoading } = useGetAllCustomers({
     page: 1,
     limit: 100,
   });
   const customers: Customer[] = data?.data || [];
-  const [issueDate, setIssueDate] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [issueDate, setIssueDate] = useState(() => today());
+  const [dueDate, setDueDate] = useState(() => addDays(today(), 30));
   const [invoice, setInvoice] = useState('Invoice');
   const [customerName, setCustomerName] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Option | null>(null);
@@ -265,16 +278,25 @@ const Left = ({
     if (source.invoiceType) setInvioceType(source.invoiceType);
   }, [context?.data]);
 
-  // The preview reads the shared form context, so publish the INV- number once.
+  // Seed the preview with form defaults (number, dates, terms, currency, payment).
   useEffect(() => {
     if (!context?.setData) return;
-    const current = String(context.data?.invoiceNumber || '').trim();
-    if (current) return;
-    context.setData((prevData: any) => ({
-      ...prevData,
-      invoiceNumber,
-    }));
-  }, [context, invoiceNumber]);
+    context.setData((prevData: any) => {
+      const next = { ...prevData };
+      if (!String(prevData?.invoiceNumber || '').trim()) next.invoiceNumber = invoiceNumber;
+      if (!prevData?.issueDate) next.issueDate = issueDate;
+      if (!prevData?.dueDate) next.dueDate = dueDate;
+      if (!prevData?.paymentTerms) next.paymentTerms = paymentTerms;
+      if (!prevData?.currency) next.currency = currency;
+      if (!prevData?.paymentMethod && !prevData?.payment_method) {
+        next.paymentMethod = selectedPaymentMethod;
+        next.payment_method = selectedPaymentMethod;
+      }
+      return next;
+    });
+    // Only on first mount for defaults; later edits go through handleInputChange.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInputChange = async (key: string, value: any) => {
     console.log(`Changing ${key} to:`, value);
@@ -297,11 +319,19 @@ const Left = ({
     }
 
     // Update local state
+    let nextIssueDate = issueDate;
+    let nextDueDate = dueDate;
+    let nextPaymentTerms = paymentTerms;
+
     switch (key) {
       case 'issueDate':
+        nextIssueDate = value;
         setIssueDate(value);
+        nextDueDate = addDays(value || today(), termsToDays(paymentTerms));
+        setDueDate(nextDueDate);
         break;
       case 'dueDate':
+        nextDueDate = value;
         setDueDate(value);
         break;
       case 'invoice':
@@ -332,7 +362,10 @@ const Left = ({
         setPaymentReference(value);
         break;
       case 'paymentTerms':
+        nextPaymentTerms = value;
         setPaymentTerms(value);
+        nextDueDate = addDays(issueDate || today(), termsToDays(value));
+        setDueDate(nextDueDate);
         break;
       case 'taxRate':
         setTaxRate(value);
@@ -344,6 +377,9 @@ const Left = ({
     context?.setData((prevData: any) => ({
       ...prevData,
       [key]: value,
+      ...(key === 'issueDate' || key === 'paymentTerms'
+        ? { issueDate: nextIssueDate, dueDate: nextDueDate, paymentTerms: nextPaymentTerms }
+        : null),
     }));
   };
 
@@ -381,11 +417,7 @@ const Left = ({
       notes: note,
     };
 
-    const result = await validateInvoiceForm(formData, {
-      validateAddresses: true,
-      validatePaymentTerms: true,
-      validateNotes: true,
-    });
+    const result = await validateInvoiceForm(formData);
 
     if (!result.isValid) {
       setErrors(result.errors as ValidationErrors);
@@ -745,10 +777,10 @@ const Left = ({
           )}
         </DocumentFormCard>
 
-        {/* Dates / terms / number */}
+        {/* Dates / terms / number — two rows so fields breathe */}
         <DocumentFormCard flush>
           <DocumentSectionTitle>Invoice details</DocumentSectionTitle>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
             <div className={errors.paymentTerms ? 'error-field' : ''}>
               <Select
                 label="Terms"
@@ -771,7 +803,6 @@ const Left = ({
                 value={issueDate}
                 onChange={(value) => handleInputChange('issueDate', value)}
                 placeholder="Select date"
-                required
                 error={errors.issueDate}
               />
             </div>
@@ -783,7 +814,6 @@ const Left = ({
                 min={issueDate || undefined}
                 onChange={(value) => handleInputChange('dueDate', value)}
                 placeholder="Select date"
-                required
                 error={errors.dueDate}
               />
             </div>
@@ -810,30 +840,28 @@ const Left = ({
                 error={errors.currency}
               />
             </div>
-            <div className="flex flex-wrap items-end gap-4">
-              <div className={errors.taxRate ? 'error-field' : ''}>
-                <Input
-                  type="number"
-                  label="Tax rate %"
-                  name="taxRate"
-                  value={taxRate}
-                  onchange={(e: any) => handleInputChange('taxRate', e.target.value)}
-                  errors={errors.taxRate}
-                />
-              </div>
+            <div className={errors.taxRate ? 'error-field' : ''}>
+              <Input
+                type="number"
+                label="Tax rate %"
+                name="taxRate"
+                value={taxRate}
+                onchange={(e: any) => handleInputChange('taxRate', e.target.value)}
+                errors={errors.taxRate}
+              />
             </div>
-          </div>
-          <div className="mt-4 max-w-xs">
-            <Select
-              label="Amounts are"
-              options={[
-                { label: 'Exclusive of Tax', value: 'exclusive' },
-                { label: 'Inclusive of Tax', value: 'inclusive' },
-              ]}
-              selectedValue={amountsAre}
-              onChange={(value: any) => setAmountsAre(value)}
-              bg="bg-white"
-            />
+            <div className="sm:col-span-2 lg:col-span-2">
+              <Select
+                label="Amounts are"
+                options={[
+                  { label: 'Exclusive of Tax', value: 'exclusive' },
+                  { label: 'Inclusive of Tax', value: 'inclusive' },
+                ]}
+                selectedValue={amountsAre}
+                onChange={(value: any) => setAmountsAre(value)}
+                bg="bg-white"
+              />
+            </div>
           </div>
         </DocumentFormCard>
 
@@ -867,7 +895,7 @@ const Left = ({
           <DocumentSectionTitle>
             Product / service lines <RequiredMark />
           </DocumentSectionTitle>
-          <DynamicTable />
+          <DynamicTable showSummary={false} />
           {errors.lineItems && (
             <p className="mt-2 text-sm text-red-500">{errors.lineItems}</p>
           )}
@@ -876,7 +904,7 @@ const Left = ({
         {/* Message + payments + totals */}
         <DocumentFormCard flush>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            <div className="space-y-4 lg:col-span-7">
+            <div className="space-y-6 lg:col-span-7">
               <div className={errors.notes ? 'error-field' : ''}>
                 <TextArea
                   label="Message on invoice"
@@ -891,6 +919,7 @@ const Left = ({
                   value={selectedPaymentMethod}
                   onChange={handlePaymentMethodChange}
                   error={errors.paymentMethod}
+                  required={false}
                 />
                 <div className={errors.paymentReference ? 'error-field' : ''}>
                   <GeneratedNumberField

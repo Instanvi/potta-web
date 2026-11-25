@@ -74,7 +74,12 @@ function linesToRows(lines: DocumentLine[], prev: TableRow[]): TableRow[] {
   });
 }
 
-export default function ProductLinesTable() {
+export default function ProductLinesTable({
+  showSummary = true,
+}: {
+  /** Hide when the parent form already shows totals. */
+  showSummary?: boolean;
+} = {}) {
   const context = useContext(ContextData);
   const rows: TableRow[] = context?.data?.table || [];
   const currency = context?.data?.currency || 'USD';
@@ -103,26 +108,28 @@ export default function ProductLinesTable() {
         defaultTaxRate={DEFAULT_LINE_TAX_RATE}
       />
 
-      <div className="ml-auto w-full max-w-xs space-y-1.5 text-sm">
-        <div className="flex justify-between text-muted-foreground">
-          <span>Subtotal</span>
-          <span className="tabular-nums text-foreground">
-            {currencySymbol} {money(subtotal)}
-          </span>
+      {showSummary ? (
+        <div className="ml-auto w-full max-w-xs space-y-1.5 text-sm">
+          <div className="flex justify-between text-muted-foreground">
+            <span>Subtotal</span>
+            <span className="tabular-nums text-foreground">
+              {currencySymbol} {money(subtotal)}
+            </span>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span>Tax</span>
+            <span className="tabular-nums text-foreground">
+              {currencySymbol} {money(taxAmount)}
+            </span>
+          </div>
+          <div className="flex justify-between border-t border-black/[0.08] pt-2 text-base font-medium text-foreground">
+            <span>Total</span>
+            <span className="tabular-nums">
+              {currencySymbol} {money(subtotal + taxAmount)}
+            </span>
+          </div>
         </div>
-        <div className="flex justify-between text-muted-foreground">
-          <span>Tax</span>
-          <span className="tabular-nums text-foreground">
-            {currencySymbol} {money(taxAmount)}
-          </span>
-        </div>
-        <div className="flex justify-between border-t border-black/[0.08] pt-2 text-base font-medium text-foreground">
-          <span>Total</span>
-          <span className="tabular-nums">
-            {currencySymbol} {money(subtotal + taxAmount)}
-          </span>
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }

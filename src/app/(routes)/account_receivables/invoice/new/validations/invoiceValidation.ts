@@ -21,58 +21,34 @@ const lineItemSchema = yup.object({
   uuid: yup.string().required('Product ID is required'),
 });
 
-// Main invoice validation schema
+/**
+ * Draft invoices only require a customer and at least one line.
+ * Dates, terms, currency, payment, addresses, and notes use form defaults
+ * unless the client changes them.
+ */
 export const invoiceValidationSchema = yup
   .object({
-    // Basic Information
-    issueDate: yup.string().required('Issue date is required'),
-    dueDate: yup.string().required('Due date is required'),
     customerName: yup.string().required('Customer is required'),
-    currency: yup.string().required('Currency is required'),
     invoiceNumber: yup.string().required('Invoice number is required'),
     invoiceType: yup.string().required('Invoice type is required'),
-
-    // Addresses (optional but validate if provided)
-    billingAddress: yup.string().when('$validateAddresses', {
-      is: true,
-      then: (schema) =>
-        schema.min(10, 'Billing address must be at least 10 characters'),
-      otherwise: (schema) => schema.optional(),
-    }),
-    shippingAddress: yup.string().when('$validateAddresses', {
-      is: true,
-      then: (schema) =>
-        schema.min(10, 'Shipping address must be at least 10 characters'),
-      otherwise: (schema) => schema.optional(),
-    }),
-
-    // Line Items
+    currency: yup.string().optional(),
+    issueDate: yup.string().optional(),
+    dueDate: yup.string().optional(),
+    billingAddress: yup.string().optional(),
+    shippingAddress: yup.string().optional(),
     lineItems: yup
       .array()
       .of(lineItemSchema)
       .min(1, 'At least one line item is required'),
-
-    // Payment Information
-    paymentMethod: yup.string().required('Payment method is required'),
+    paymentMethod: yup.string().optional(),
     paymentReference: yup.string().optional(),
     taxRate: yup
       .number()
       .min(0, 'Tax rate cannot be negative')
-      .max(100, 'Tax rate cannot exceed 100%'),
-    paymentTerms: yup.string().when('$validatePaymentTerms', {
-      is: true,
-      then: (schema) =>
-        schema.min(5, 'Payment terms must be at least 5 characters'),
-      otherwise: (schema) => schema.optional(),
-    }),
-
-    // Notes (optional but validate if provided)
-    notes: yup.string().when('$validateNotes', {
-      is: true,
-      then: (schema) =>
-        schema.min(10, 'Notes must be at least 10 characters if provided'),
-      otherwise: (schema) => schema.optional(),
-    }),
+      .max(100, 'Tax rate cannot exceed 100%')
+      .optional(),
+    paymentTerms: yup.string().optional(),
+    notes: yup.string().optional(),
   })
   .test(
     'due-date-after-issue',
@@ -84,26 +60,21 @@ export const invoiceValidationSchema = yup
       const dueDate = new Date(value.dueDate);
 
       return dueDate >= issueDate;
-    }
+    },
   );
 
 // Validation function for the form
 export const validateInvoiceForm = async (
   data: any,
-  options: {
+  _options: {
     validateAddresses?: boolean;
     validatePaymentTerms?: boolean;
     validateNotes?: boolean;
-  } = {}
+  } = {},
 ) => {
   try {
     const validatedData = await invoiceValidationSchema.validate(data, {
       abortEarly: false,
-      context: {
-        validateAddresses: options.validateAddresses || false,
-        validatePaymentTerms: options.validatePaymentTerms || false,
-        validateNotes: options.validateNotes || false,
-      },
     });
     return { isValid: true, data: validatedData, errors: {} };
   } catch (error) {
@@ -139,25 +110,17 @@ export const validateField = async (field: string, value: any, schema: any) => {
 
 // Export individual schemas for field-level validation
 export const fieldSchemas = {
-  issueDate: yup.string().required('Issue date is required'),
-  dueDate: yup.string().required('Due date is required'),
+  issueDate: yup.string().optional(),
+  dueDate: yup.string().optional(),
   customerName: yup.string().required('Customer is required'),
-  currency: yup.string().required('Currency is required'),
-  billingAddress: yup
-    .string()
-    .min(10, 'Billing address must be at least 10 characters'),
-  shippingAddress: yup
-    .string()
-    .min(10, 'Shipping address must be at least 10 characters'),
-  paymentMethod: yup.string().required('Payment method is required'),
+  currency: yup.string().optional(),
+  billingAddress: yup.string().optional(),
+  shippingAddress: yup.string().optional(),
+  paymentMethod: yup.string().optional(),
   taxRate: yup
     .number()
     .min(0, 'Tax rate cannot be negative')
     .max(100, 'Tax rate cannot exceed 100%'),
-  paymentTerms: yup
-    .string()
-    .min(5, 'Payment terms must be at least 5 characters'),
-  notes: yup
-    .string()
-    .min(10, 'Notes must be at least 10 characters if provided'),
+  paymentTerms: yup.string().optional(),
+  notes: yup.string().optional(),
 };
