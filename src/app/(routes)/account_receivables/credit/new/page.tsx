@@ -3,18 +3,19 @@
 import React, { useCallback, useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@potta/components/resizable';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import DocumentWorkspace from '@potta/components/document-workspace';
 import { DocumentPreviewShell } from '@potta/components/document-master-detail';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@potta/components/shadcn/dialog';
 
 export default function NewCreditNotePage() {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
     null,
@@ -22,7 +23,8 @@ export default function NewCreditNotePage() {
   const registerDownload = useCallback((fn: () => Promise<void>) => {
     setDownloadPdf(() => fn);
   }, []);
-  const togglePreview = () => setShowPreview((v) => !v);
+  const openPreview = () => setShowPreview(true);
+  const closePreview = () => setShowPreview(false);
 
   const extractInvoiceData = async (_file: File) => {
     setExtracting(true);
@@ -38,47 +40,39 @@ export default function NewCreditNotePage() {
           <LocationSwitcher />
           <button
             type="button"
-            onClick={togglePreview}
+            onClick={openPreview}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-3 text-sm text-foreground hover:bg-accent"
           >
-            <i className={showPreview ? 'ri-eye-off-line' : 'ri-eye-line'} />
-            {showPreview ? 'Hide preview' : 'Show preview'}
+            <i className="ri-eye-line" />
+            Preview
           </button>
         </>
       }
     >
       <FileExtractDropzone onExtract={extractInvoiceData} extracting={extracting}>
         <div className="flex h-full min-h-0 flex-col bg-white">
-          <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
-            <ResizablePanel
-              minSize={40}
-              defaultSize={showPreview ? 58 : 100}
-              className="min-w-0"
-            >
-              <div className="h-full min-h-0 overflow-y-auto bg-white">
-                <Left onTogglePreview={togglePreview} showPreview={showPreview} />
-              </div>
-            </ResizablePanel>
-            {showPreview ? (
-              <>
-                <ResizableHandle withHandle className="bg-transparent" />
-                <ResizablePanel minSize={25} defaultSize={42} className="min-w-0">
-                  <div className="h-full min-h-0 overflow-hidden border-l border-black/[0.06] bg-white">
-                    <DocumentPreviewShell
-                      title="Preview"
-                      downloadTitle="Credit note"
-                      onClose={() => setShowPreview(false)}
-                      onDownloadPdf={downloadPdf ?? undefined}
-                    >
-                      <PdfView onRegisterDownload={registerDownload} />
-                    </DocumentPreviewShell>
-                  </div>
-                </ResizablePanel>
-              </>
-            ) : null}
-          </ResizablePanelGroup>
+          <div className="h-full min-h-0 overflow-y-auto bg-white">
+            <Left onOpenPreview={openPreview} />
+          </div>
         </div>
       </FileExtractDropzone>
+
+      <Dialog open={showPreview} onOpenChange={(open) => !open && closePreview()}>
+        <DialogContent className="flex h-[min(92vh,900px)] w-[min(96vw,920px)] max-w-none flex-col gap-0 overflow-hidden p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Credit note preview</DialogTitle>
+          </DialogHeader>
+          <DocumentPreviewShell
+            title="Preview"
+            downloadTitle="Credit note"
+            onClose={closePreview}
+            onDownloadPdf={downloadPdf ?? undefined}
+            className="h-full min-h-0"
+          >
+            <PdfView onRegisterDownload={registerDownload} />
+          </DocumentPreviewShell>
+        </DialogContent>
+      </Dialog>
     </DocumentWorkspace>
   );
 }

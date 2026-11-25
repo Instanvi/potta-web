@@ -1,8 +1,6 @@
 'use client';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import Input from '@potta/components/input';
 import Select from '@potta/components/select';
 import SearchableSelect, {
   Option as SearchableSelectOption,
@@ -39,8 +37,7 @@ interface ValidationErrors {
 }
 
 interface LeftProps {
-  onTogglePreview?: () => void;
-  showPreview?: boolean;
+  onOpenPreview?: () => void;
 }
 
 const DEFAULT_CURRENCY = 'USD';
@@ -48,7 +45,7 @@ const DEFAULT_CURRENCY = 'USD';
 /** Blank document state shared with the invoice/bill forms (they all use ContextData.data). */
 const freshDocumentState = () => ({ currency: DEFAULT_CURRENCY, table: [] });
 
-const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
+const Left = ({ onOpenPreview }: LeftProps) => {
   const context = useContext(ContextData);
   const router = useRouter();
   const setContextData = context?.setData;
@@ -63,7 +60,7 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
   const [customerId, setCustomerId] = useState('');
   const [invoiceId, setInvoiceId] = useState('');
   const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
-  const [reason, setReason] = useState('');
+  /** Single field used as both API `reason` and `notes`. */
   const [note, setNote] = useState('');
   const [isAddCustomerDrawer, setIsAddCustomerDrawer] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -105,7 +102,6 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
 
   const handleCustomerChange = (value: string) => {
     setCustomerId(value);
-    // The invoice list belongs to the customer, so drop any previous selection.
     setInvoiceId('');
     clearError('customerName');
     setContextData?.((prev: any) => ({
@@ -131,15 +127,15 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
     setContextField('currency', value);
   };
 
-  const handleReasonChange = (value: string) => {
-    setReason(value);
-    clearError('reason');
-    setContextField('reason', value);
-  };
-
   const handleNoteChange = (value: string) => {
     setNote(value);
-    setContextField('note', value);
+    clearError('reason');
+    // Keep preview + API in sync: notes and reason are the same text.
+    setContextData?.((prev: any) => ({
+      ...prev,
+      note: value,
+      reason: value,
+    }));
   };
 
   const tableRows = context?.data?.table || [];
@@ -150,7 +146,6 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
       maximumFractionDigits: 2,
     })}`;
 
-  // Keep the preview in sync with the amount derived from the lines.
   useEffect(() => {
     setContextData?.((prev: any) =>
       Number(prev?.creditAmount) === creditAmount
@@ -163,7 +158,7 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
     const next: ValidationErrors = {};
     if (!customerId) next.customerName = 'Customer is required';
     if (!issueDate) next.issueDate = 'Issue date is required';
-    if (!reason.trim()) next.reason = 'Reason is required';
+    if (!note.trim()) next.reason = 'Notes / reason is required';
     if (serializeLineItems(tableRows).length === 0 || creditAmount <= 0) {
       next.lineItems = 'Add at least one line with a quantity and price';
     }
@@ -175,7 +170,6 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
 
   const handleSave = () => {
     if (!validateForm()) {
-      // Wait for the error markup to render before scrolling.
       setTimeout(() => {
         document
           .querySelector('.error-field')
@@ -184,15 +178,16 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
       return;
     }
 
+    const text = note.trim();
     const payload: CreateCreditNotePayload = {
       customerId,
       issueDate,
       creditAmount,
-      reason: reason.trim(),
+      reason: text,
+      notes: text,
       currency,
       lineItems: serializeLineItems(tableRows),
       ...(invoiceId ? { invoiceId } : {}),
-      ...(note.trim() ? { notes: note.trim() } : {}),
     };
 
     mutation.mutate(payload, {
@@ -205,128 +200,123 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
   return (
     <>
       <DocumentFormShell className="bg-white">
-        {/* Customer + amount */}
-        <DocumentFormCard flush>
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className={errors.customerName ? 'error-field' : ''}>
-                <div className="flex items-end gap-2">
-                  <div className="min-w-0 flex-1">
-                    <SearchableSelect
-                      label="Customer"
-                      options={customerOptions}
-                      selectedValue={customerId}
-                      onChange={handleCustomerChange}
-                      placeholder="Select a customer"
-                      isDisabled={customersLoading}
-                      required
-                    />
+        <div className="mx-auto w-full max-w-4xl space-y-3">
+          {/* Customer + invoice + amount */}
+          <DocumentFormCard flush>
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className={errors.customerName ? 'error-field' : ''}>
+                  <div className="flex items-end gap-2">
+                    <div className="min-w-0 flex-1">
+                      <SearchableSelect
+                        label="Customer"
+                        options={customerOptions}
+                        selectedValue={customerId}
+                        onChange={handleCustomerChange}
+                        placeholder="Select a customer"
+                        isDisabled={customersLoading}
+                        required
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddCustomerDrawer(true)}
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-brand-hover"
+                      aria-label="Add customer"
+                    >
+                      <i className="ri-add-line text-xl" />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddCustomerDrawer(true)}
-                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
-                    aria-label="Add customer"
-                  >
-                    <i className="ri-add-line text-xl" />
-                  </button>
+                  {errors.customerName ? (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.customerName}
+                    </p>
+                  ) : null}
                 </div>
-                {errors.customerName ? (
-                  <p className="mt-1 text-sm text-red-500">
-                    {errors.customerName}
-                  </p>
-                ) : null}
-              </div>
-              {customerId ? (
                 <div>
                   <SearchableSelect
-                    label="Invoice (optional)"
+                    label="Invoice"
                     options={invoiceOptions}
                     selectedValue={invoiceId}
                     onChange={handleInvoiceChange}
                     placeholder={
-                      !invoicesLoading && invoiceOptions.length === 0
-                        ? 'No invoices for this customer'
-                        : 'Link an invoice'
+                      !customerId
+                        ? 'Select a customer first'
+                        : !invoicesLoading && invoiceOptions.length === 0
+                          ? 'No invoices for this customer'
+                          : 'Select an invoice'
                     }
-                    isDisabled={invoicesLoading}
+                    isDisabled={!customerId || invoicesLoading}
                   />
                 </div>
+              </div>
+              <DocumentBalanceDue label="Credit amount" amount={money(creditAmount)} />
+            </div>
+          </DocumentFormCard>
+
+          {/* Credit meta */}
+          <DocumentFormCard flush>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className={errors.issueDate ? 'error-field' : ''}>
+                <DatePicker
+                  label="Issue date"
+                  name="issueDate"
+                  value={issueDate}
+                  onChange={handleIssueDateChange}
+                  placeholder="Select date"
+                  required
+                  error={errors.issueDate}
+                />
+              </div>
+              <div>
+                <Select
+                  label="Currency"
+                  options={[
+                    { label: 'XAF', value: 'XAF' },
+                    { label: 'USD ($)', value: 'USD' },
+                    { label: 'EUR (€)', value: 'EUR' },
+                  ]}
+                  selectedValue={currency}
+                  onChange={handleCurrencyChange}
+                  bg="bg-white"
+                />
+              </div>
+            </div>
+          </DocumentFormCard>
+
+          {/* Line items */}
+          <DocumentFormCard flush>
+            <DocumentSectionTitle>
+              Product / service lines <RequiredMark />
+            </DocumentSectionTitle>
+            <div className={errors.lineItems ? 'error-field' : ''}>
+              <CreditNoteForm />
+              {errors.lineItems ? (
+                <p className="mt-2 text-sm text-red-500">{errors.lineItems}</p>
               ) : null}
             </div>
-            <DocumentBalanceDue label="Credit amount" amount={money(creditAmount)} />
-          </div>
-        </DocumentFormCard>
+          </DocumentFormCard>
 
-        {/* Credit meta */}
-        <DocumentFormCard flush>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-            <div
-              className={`md:col-span-3 ${errors.issueDate ? 'error-field' : ''}`}
-            >
-              <DatePicker
-                label="Issue date"
-                name="issueDate"
-                value={issueDate}
-                onChange={handleIssueDateChange}
-                placeholder="Select date"
-                required
-                error={errors.issueDate}
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Select
-                label="Currency"
-                options={[
-                  { label: 'XAF', value: 'XAF' },
-                  { label: 'USD ($)', value: 'USD' },
-                  { label: 'EUR (€)', value: 'EUR' },
-                ]}
-                selectedValue={currency}
-                onChange={handleCurrencyChange}
-                bg="bg-white"
-              />
-            </div>
-            <div
-              className={`md:col-span-6 ${errors.reason ? 'error-field' : ''}`}
-            >
-              <Input
-                type="text"
-                label="Reason"
-                name="reason"
-                required
-                value={reason}
+          {/* Notes doubles as the API reason — kept next to the lines section. */}
+          <DocumentFormCard flush>
+            <div className={errors.reason ? 'error-field' : ''}>
+              <TextArea
+                label="Notes / reason *"
+                name="note"
+                value={note}
                 placeholder="e.g. Returned goods, billing error"
-                onchange={(e: any) => handleReasonChange(e.target.value)}
-                errors={errors.reason}
+                onchange={(e: any) => handleNoteChange(e.target.value)}
               />
+              {errors.reason ? (
+                <p className="mt-1 text-sm text-red-500">{errors.reason}</p>
+              ) : (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Saved as both the credit note reason and notes.
+                </p>
+              )}
             </div>
-          </div>
-        </DocumentFormCard>
-
-        {/* Line items */}
-        <DocumentFormCard flush>
-          <DocumentSectionTitle>
-            Product / service lines <RequiredMark />
-          </DocumentSectionTitle>
-          <div className={errors.lineItems ? 'error-field' : ''}>
-            <CreditNoteForm />
-            {errors.lineItems ? (
-              <p className="mt-2 text-sm text-red-500">{errors.lineItems}</p>
-            ) : null}
-          </div>
-        </DocumentFormCard>
-
-        {/* Notes */}
-        <DocumentFormCard flush>
-          <TextArea
-            label="Notes"
-            name="note"
-            value={note}
-            placeholder="Add any additional notes about this credit note"
-            onchange={(e: any) => handleNoteChange(e.target.value)}
-          />
-        </DocumentFormCard>
+          </DocumentFormCard>
+        </div>
       </DocumentFormShell>
 
       <DocumentFormFooter
@@ -341,13 +331,8 @@ const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
           </ShadcnButton>
         }
         center={
-          <DocumentFooterLink
-            onClick={() => {
-              if (onTogglePreview) onTogglePreview();
-              else toast.info('Preview is available in the side panel.');
-            }}
-          >
-            {showPreview ? 'Hide preview' : 'Print or Preview'}
+          <DocumentFooterLink onClick={() => onOpenPreview?.()}>
+            Print or Preview
           </DocumentFooterLink>
         }
         right={
