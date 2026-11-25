@@ -8,12 +8,16 @@ import type { DashboardWidget } from '@/lib/dashboards/types';
 import RootLayout from '../../layout';
 import {
   ErrorState,
-  LoadingState,
   PageContainer,
   PageHeader,
 } from '../../_shared/states';
 import { AddWidgetPanel } from '../components/AddWidgetPanel';
 import { DashboardGrid } from '../components/DashboardWidgets';
+import {
+  ChartWidgetSkeleton,
+  KpiWidgetSkeleton,
+} from '../components/WidgetSkeletons';
+import { Skeleton } from '@/components/ui/loaders';
 import {
   useDashboard,
   useDashboardEntities,
@@ -49,7 +53,16 @@ export default function DashboardDetailPage() {
     <RootLayout>
       <PageContainer>
         {isLoading ? (
-          <LoadingState label="Loading dashboard…" />
+          <div className="space-y-6" role="status" aria-busy="true">
+            <Skeleton className="h-8 w-56" />
+            <div className="grid gap-4 md:grid-cols-3">
+              <KpiWidgetSkeleton />
+              <KpiWidgetSkeleton />
+              <KpiWidgetSkeleton />
+            </div>
+            <ChartWidgetSkeleton />
+            <span className="sr-only">Loading dashboard…</span>
+          </div>
         ) : error ? (
           <ErrorState error={error} onRetry={() => refetch()} />
         ) : !data ? (

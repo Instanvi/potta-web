@@ -48,22 +48,22 @@ export default function NewCreditNotePage() {
       }
     >
       <FileExtractDropzone onExtract={extractInvoiceData} extracting={extracting}>
-        <div className="flex h-full min-h-0 flex-col bg-main-bg">
+        <div className="flex h-full min-h-0 flex-col bg-white">
           <ResizablePanelGroup direction="horizontal" className="min-h-0 flex-1">
             <ResizablePanel
               minSize={40}
               defaultSize={showPreview ? 58 : 100}
               className="min-w-0"
             >
-              <div className="h-full min-h-0 overflow-y-auto bg-main-bg">
-                <Left />
+              <div className="h-full min-h-0 overflow-y-auto bg-white">
+                <Left onTogglePreview={togglePreview} showPreview={showPreview} />
               </div>
             </ResizablePanel>
             {showPreview ? (
               <>
                 <ResizableHandle withHandle className="bg-transparent" />
                 <ResizablePanel minSize={25} defaultSize={42} className="min-w-0">
-                  <div className="h-full min-h-0 overflow-hidden border-l border-black/[0.06] bg-main-bg">
+                  <div className="h-full min-h-0 overflow-hidden border-l border-black/[0.06] bg-white">
                     <DocumentPreviewShell
                       title="Preview"
                       downloadTitle="Credit note"

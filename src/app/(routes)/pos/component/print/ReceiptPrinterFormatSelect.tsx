@@ -7,8 +7,9 @@ import {
   type ReceiptPrinterFormat,
 } from './receiptPrinter';
 import { useEffect, useState } from 'react';
+import Select from '@potta/components/select';
 
-const OPTIONS: { value: ReceiptPrinterFormat; label: string }[] = [
+const OPTIONS: { value: string; label: string }[] = [
   { value: 'thermal-58', label: '58mm thermal' },
   { value: 'thermal-80', label: '80mm thermal' },
   { value: 'a4', label: 'A4 / letter' },
@@ -27,25 +28,18 @@ export function ReceiptPrinterFormatSelect({
   }, [printer]);
 
   return (
-    <label className="flex flex-col gap-1 text-sm text-gray-600">
-      <span className="font-medium text-gray-800">Receipt printer</span>
-      <select
-        className="h-10 rounded-[2px] border border-black/10 bg-white px-3 text-sm text-foreground"
-        value={format}
-        aria-label="Receipt printer format"
-        onChange={(e) => {
-          const next = e.target.value as ReceiptPrinterFormat;
-          setFormat(next);
-          printer.setFormat(next);
-          writeReceiptPrinterFormat(next);
-        }}
-      >
-        {OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Select
+      label="Receipt printer"
+      name="Receipt printer"
+      bg=""
+      options={OPTIONS}
+      selectedValue={format}
+      onChange={(value) => {
+        const next = value as ReceiptPrinterFormat;
+        setFormat(next);
+        printer.setFormat(next);
+        writeReceiptPrinterFormat(next);
+      }}
+    />
   );
 }

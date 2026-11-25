@@ -7,6 +7,7 @@ import { AppProviders } from '@potta/components/providers/AppProviders';
 import NextTopLoader from 'nextjs-toploader';
 
 import { Inter } from 'next/font/google';
+import { Suspense } from 'react';
 
 // Same family as the hub (instanvi-auth-frontend). Variable font: every weight 100–900 is available.
 const inter = Inter({
@@ -24,8 +25,6 @@ export const metadata: Metadata = {
     apple: '/icons/Potta.svg',
   },
 };
-
-import { Suspense } from 'react';
 
 export default function RootLayout({
   children,

@@ -1,6 +1,11 @@
 'use client';
 import React from 'react';
 import Modal from '@potta/components/modal';
+import { toast } from 'sonner';
+import { SalesReceiptPdfDocument } from '@/components/documents/sales-receipt-pdf-document';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { orgToSeller } from '@/lib/org-to-seller';
+import { printReactPdf } from '@/lib/print-react-pdf';
 
 interface PrintModalProps {
   open: boolean;
@@ -12,12 +17,57 @@ interface PrintModalProps {
     tax: number;
     total: number;
   };
+  currency?: string;
 }
 
-const ModalPrint: React.FC<PrintModalProps> = ({ open, setOpen, data }) => {
-  const handlePrint = () => {
-    window.print();
-    setOpen(false);
+const ModalPrint: React.FC<PrintModalProps> = ({
+  open,
+  setOpen,
+  data,
+  currency = 'XAF',
+}) => {
+  const { data: org } = useOrganizationProfile();
+  const [printing, setPrinting] = React.useState(false);
+
+  // Prints the letterhead PDF receipt (react-pdf) instead of the browser page.
+  const handlePrint = async () => {
+    if (printing) return;
+    setPrinting(true);
+    try {
+      const now = new Date();
+      await printReactPdf(
+        <SalesReceiptPdfDocument
+          title="POS receipt"
+          saleDate={now.toLocaleString()}
+          currency={currency}
+          notes={data.discount > 0 ? `Discount applied: ${data.discount.toFixed(2)}` : undefined}
+          seller={orgToSeller(org)}
+          customer={null}
+          lines={data.items.map((item) => {
+            const quantity = Number(item.quantity) || 0;
+            const unitPrice = Number(item.price) || 0;
+            return {
+              description: item.name || 'Item',
+              quantity,
+              unitPrice,
+              taxRate: Number(item.tax) || 0,
+              lineTotal: unitPrice * quantity,
+            };
+          })}
+          subtotal={data.subtotal}
+          tax={data.tax}
+          total={data.total}
+          draft={false}
+        />,
+        `pos-receipt-${now.getTime()}`,
+      );
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not print receipt');
+    } finally {
+      setPrinting(false);
+    }
   };
 
   return (
@@ -82,9 +132,10 @@ const ModalPrint: React.FC<PrintModalProps> = ({ open, setOpen, data }) => {
       <div className="border-t px-4 py-3 flex justify-end">
         <button
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          onClick={handlePrint}
+          disabled={printing}
+          onClick={() => void handlePrint()}
         >
-          Print Receipt
+          {printing ? 'Preparing…' : 'Print Receipt'}
         </button>
       </div>
     </Modal>

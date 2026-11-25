@@ -10,6 +10,7 @@ import * as yup from 'yup';
 import { FormDatePicker } from '@potta/components/ui/date-picker';
 import { toDateInput } from '../../../_shared/format';
 import { accountsApi } from '../../utils/api';
+import { accountKeys } from '../../_hooks/useAccounts';
 import { journalApi } from '../utils/api';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -141,7 +142,13 @@ const JournalSlider: React.FC<JournalSliderProps> = ({
   const searchAccount = async (term: string) => {
     try {
       setLoadingAccounts(true);
-      const response = await accountsApi.getFiltered({ search: term, limit: 10 });
+      // Cached lookup: repeating a search term reuses the previous result.
+      const params = { search: term, limit: 10 };
+      const response = await queryClient.fetchQuery({
+        queryKey: accountKeys.filtered(params),
+        queryFn: () => accountsApi.getFiltered(params),
+        staleTime: 60 * 1000,
+      });
 
       // Get currently selected accounts from lines
       const selectedAccounts = lines

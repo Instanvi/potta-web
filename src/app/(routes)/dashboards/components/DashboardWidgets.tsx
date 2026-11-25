@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { formatMetricValue } from '@/lib/dashboards/format';
 import type { ChartType, DashboardWidget } from '@/lib/dashboards/types';
-import { EmptyState, ErrorState, LoadingState, StatCard } from '../../_shared/states';
+import { EmptyState, ErrorState, StatCard } from '../../_shared/states';
 import { useAggregate, useDashboardRecords } from '../hooks';
 import { ChartWidget } from './ChartWidget';
+import { KpiWidgetSkeleton, ListWidgetSkeleton } from './WidgetSkeletons';
 
 const colSpan: Record<number, string> = {
   3: 'md:col-span-3',
@@ -23,7 +24,7 @@ function KpiWidget({ widget }: { widget: Extract<DashboardWidget, { type: 'kpi' 
     fromDate: widget.config.fromDate,
     toDate: widget.config.toDate,
   });
-  if (isLoading) return <LoadingState label="Loading metric…" />;
+  if (isLoading) return <KpiWidgetSkeleton />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   return (
     <StatCard
@@ -40,7 +41,7 @@ function EntityListWidget({ widget }: { widget: Extract<DashboardWidget, { type:
     order: widget.config.order,
     limit: widget.config.pageSize,
   });
-  if (isLoading) return <LoadingState label="Loading list…" />;
+  if (isLoading) return <ListWidgetSkeleton />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
   const items = data?.items ?? [];
 

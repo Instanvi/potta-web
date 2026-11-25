@@ -18,6 +18,13 @@ import type {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/shadcn/button';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shadcn/select';
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -32,6 +39,35 @@ function newId(prefix: string) {
 
 const fieldClass =
   'mt-1 w-full rounded-[2px] border border-black/10 bg-field px-2 py-1.5 text-sm';
+
+type FieldOption = { value: string; label: string; disabled?: boolean };
+
+function FieldSelect({
+  value,
+  onChange,
+  options,
+  placeholder = 'Select',
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: FieldOption[];
+  placeholder?: string;
+}) {
+  return (
+    <Select value={value || undefined} onValueChange={onChange}>
+      <SelectTrigger className="mt-1 w-full">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value} disabled={o.disabled}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 export function AddWidgetPanel({
   catalog,
@@ -228,41 +264,35 @@ export function AddWidgetPanel({
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-xs">
                 Type
-                <select
-                  className={fieldClass}
+                <FieldSelect
                   value={type}
-                  onChange={(e) => {
-                    const next = e.target.value as typeof type;
+                  onChange={(v) => {
+                    const next = v as typeof type;
                     setType(next);
                     if (next === 'chart' && w < 6) setW(6);
                     if (next === 'entity_list') setW(12);
                   }}
-                >
-                  <option value="kpi">KPI</option>
-                  <option value="chart">Chart</option>
-                  <option value="entity_list">List</option>
-                </select>
+                  options={[
+                    { value: 'kpi', label: 'KPI' },
+                    { value: 'chart', label: 'Chart' },
+                    { value: 'entity_list', label: 'List' },
+                  ]}
+                />
               </label>
               <label className="text-xs">
                 Entity
-                <select
-                  className={fieldClass}
+                <FieldSelect
                   value={entity}
-                  onChange={(e) => {
-                    const next = e.target.value as EntityKey;
+                  onChange={(v) => {
+                    const next = v as EntityKey;
                     setEntity(next);
                     setField('');
                     setStatuses([]);
                     const entry = catalog.find((c) => c.key === next);
                     setGroupBy(entry?.groupBy[0]?.key ?? '');
                   }}
-                >
-                  {catalog.map((c) => (
-                    <option key={c.key} value={c.key}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
+                  options={catalog.map((c) => ({ value: c.key, label: c.label }))}
+                />
               </label>
               <label className="text-xs sm:col-span-2">
                 Title
@@ -276,103 +306,80 @@ export function AddWidgetPanel({
                 <>
                   <label className="text-xs">
                     Aggregation
-                    <select
-                      className={fieldClass}
+                    <FieldSelect
                       value={aggregation}
-                      onChange={(e) => setAggregation(e.target.value as Aggregation)}
-                    >
-                      <option value="count">Count</option>
-                      <option value="sum" disabled={!selected?.amounts.length}>
-                        Sum
-                      </option>
-                      <option value="avg" disabled={!selected?.amounts.length}>
-                        Average
-                      </option>
-                      <option value="min" disabled={!selected?.amounts.length}>
-                        Min
-                      </option>
-                      <option value="max" disabled={!selected?.amounts.length}>
-                        Max
-                      </option>
-                    </select>
+                      onChange={(v) => setAggregation(v as Aggregation)}
+                      options={[
+                        { value: 'count', label: 'Count' },
+                        { value: 'sum', label: 'Sum', disabled: !selected?.amounts.length },
+                        { value: 'avg', label: 'Average', disabled: !selected?.amounts.length },
+                        { value: 'min', label: 'Min', disabled: !selected?.amounts.length },
+                        { value: 'max', label: 'Max', disabled: !selected?.amounts.length },
+                      ]}
+                    />
                   </label>
                   <label className="text-xs">
                     Period
-                    <select
-                      className={fieldClass}
+                    <FieldSelect
                       value={datePreset}
-                      onChange={(e) => setDatePreset(e.target.value as DatePreset)}
-                    >
-                      {DATE_PRESET_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(v) => setDatePreset(v as DatePreset)}
+                      options={DATE_PRESET_OPTIONS.map((o) => ({
+                        value: o.value,
+                        label: o.label,
+                      }))}
+                    />
                   </label>
                 </>
               )}
               {type !== 'entity_list' && aggregation !== 'count' && (
                 <label className="text-xs">
                   Amount field
-                  <select
-                    className={fieldClass}
+                  <FieldSelect
                     value={field || selected?.amounts[0]?.key || ''}
-                    onChange={(e) => setField(e.target.value)}
-                  >
-                    {(selected?.amounts ?? []).map((a) => (
-                      <option key={a.key} value={a.key}>
-                        {a.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setField}
+                    options={(selected?.amounts ?? []).map((a) => ({
+                      value: a.key,
+                      label: a.label,
+                    }))}
+                  />
                 </label>
               )}
               {type === 'chart' && (
                 <>
                   <label className="text-xs">
                     Group by
-                    <select
-                      className={fieldClass}
+                    <FieldSelect
                       value={groupBy || selected?.groupBy[0]?.key || ''}
-                      onChange={(e) => setGroupBy(e.target.value)}
-                    >
-                      {(selected?.groupBy ?? []).map((g) => (
-                        <option key={g.key} value={g.key}>
-                          {g.label}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={setGroupBy}
+                      options={(selected?.groupBy ?? []).map((g) => ({
+                        value: g.key,
+                        label: g.label,
+                      }))}
+                    />
                   </label>
                   <label className="text-xs">
                     Categories
-                    <select
-                      className={fieldClass}
-                      value={limit}
-                      onChange={(e) => setLimit(Number(e.target.value))}
-                    >
-                      {[5, 8, 10, 12, 15, 20].map((n) => (
-                        <option key={n} value={n}>
-                          Top {n}
-                        </option>
-                      ))}
-                    </select>
+                    <FieldSelect
+                      value={String(limit)}
+                      onChange={(v) => setLimit(Number(v))}
+                      options={[5, 8, 10, 12, 15, 20].map((n) => ({
+                        value: String(n),
+                        label: `Top ${n}`,
+                      }))}
+                    />
                   </label>
                 </>
               )}
               <label className="text-xs">
                 Width
-                <select
-                  className={fieldClass}
-                  value={w}
-                  onChange={(e) => setW(Number(e.target.value) as WidgetWidth)}
-                >
-                  {[3, 4, 6, 8, 12].map((n) => (
-                    <option key={n} value={n}>
-                      {n}/12
-                    </option>
-                  ))}
-                </select>
+                <FieldSelect
+                  value={String(w)}
+                  onChange={(v) => setW(Number(v) as WidgetWidth)}
+                  options={[3, 4, 6, 8, 12].map((n) => ({
+                    value: String(n),
+                    label: `${n}/12`,
+                  }))}
+                />
               </label>
             </div>
 

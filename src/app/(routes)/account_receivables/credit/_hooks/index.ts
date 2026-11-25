@@ -28,21 +28,12 @@ export const useCustomerInvoices = (customerId: string) =>
     enabled: !!customerId,
   });
 
+/** The create endpoint links `invoiceId` itself, so no follow-up apply call is needed. */
 export const useCreateCreditNote = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      payload,
-      invoiceId,
-    }: {
-      payload: CreateCreditNotePayload;
-      invoiceId?: string;
-    }) => {
-      const created = await creditNoteApi.create(payload);
-      return invoiceId
-        ? creditNoteApi.applyToInvoice(created.uuid, invoiceId)
-        : created;
-    },
+    mutationFn: (payload: CreateCreditNotePayload) =>
+      creditNoteApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: creditNoteKeys.all });
       toast.success('Credit note created');

@@ -1,4 +1,4 @@
-/** Section navigations use NextTopLoader — keep the shell visible without a spinner. */
+/** Keep previous page visible during navigation; top progress bar handles feedback. */
 export default function Loading() {
   return null;
 }

@@ -6,6 +6,12 @@ import { formatAmount, formatDate, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard, StatusBadge } from '../../../_shared/states';
 import { useBalanceSheet } from '../hooks';
 import ReportSection from './ReportSection';
+import { StatementPdfActions } from './StatementPdfActions';
+
+const toLines = (lines?: Record<string, number>, hideZero?: boolean) =>
+  Object.entries(lines ?? {})
+    .filter(([, amount]) => !hideZero || Math.abs(Number(amount)) >= 0.005)
+    .map(([label, amount]) => ({ label, amount: Number(amount) }));
 
 function flattenSection(section: string, lines?: Record<string, number>, hideZero?: boolean) {
   return Object.entries(lines ?? {})
@@ -46,6 +52,46 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
       <ListToolbar
         className="print:hidden"
         actions={
+          <div className="flex flex-wrap items-center gap-2">
+          <StatementPdfActions
+            filename={`balance-sheet-${asOfDate}`}
+            disabled={!data || !!isEmpty}
+            statement={{
+              title: 'Balance sheet',
+              period: `As of ${asOfDate}`,
+              sections: [
+                {
+                  title: 'Assets',
+                  lines: toLines(data?.assets, hideZero),
+                  total: data?.totalAssets,
+                },
+                {
+                  title: 'Liabilities',
+                  lines: toLines(data?.liabilities, hideZero),
+                  total: data?.totalLiabilities,
+                },
+                {
+                  title: 'Equity',
+                  lines: toLines(
+                    {
+                      ...data?.equity,
+                      ...(Math.abs(retainedEarnings) >= 0.005
+                        ? { 'Current period result (revenue − expenses)': retainedEarnings }
+                        : {}),
+                    },
+                    hideZero,
+                  ),
+                  total: data?.totalEquity,
+                },
+              ],
+              summary: [
+                {
+                  label: 'Total liabilities + equity',
+                  amount: (data?.totalLiabilities ?? 0) + (data?.totalEquity ?? 0),
+                },
+              ],
+            }}
+          />
           <ExportButton
             filename={`balance-sheet-${asOfDate}`}
             rows={exportRows}
@@ -60,6 +106,7 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
             ]}
             disabled={!exportRows.length}
           />
+          </div>
         }
       >
         <DatePicker

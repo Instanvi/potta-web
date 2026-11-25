@@ -6,7 +6,7 @@ export const LoadingState = ({ label = 'Loading…' }: { label?: string }) => <I
 
 /** Page canvas used by every books page (payroll DashboardPage). */
 export const PageContainer = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <div className={cn('min-h-full bg-main-bg p-5 md:p-6', className)}>{children}</div>
+  <div className={cn('min-h-full bg-white p-5 md:p-6', className)}>{children}</div>
 );
 
 /**
@@ -134,32 +134,20 @@ export const ErrorState = ({
 };
 
 /**
- * Page chrome matching Home / Books overview: large title left, actions right.
- * Description is optional — omit when the heading alone is enough.
+ * Actions-only page chrome — navbar already owns the title/description.
+ * `title` / `description` props are accepted for call-site compatibility but ignored.
  */
 export const PageHeader = ({
-  title,
-  description,
   actions,
 }: {
   title?: string;
   description?: ReactNode;
   actions?: ReactNode;
 }) => {
-  if (!title && !description && !actions) return null;
+  if (!actions) return null;
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-      {(title || description) && (
-        <div className="min-w-0">
-          {title ? (
-            <h2 className="text-xl font-medium tracking-tight text-foreground">{title}</h2>
-          ) : null}
-          {description ? (
-            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
-          ) : null}
-        </div>
-      )}
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+    <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
 import Search from '@potta/components/search';
+import Select from '@potta/components/select';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, StatCard } from '../../../_shared/states';
@@ -27,6 +28,9 @@ const GeneralLedgerTab = () => {
     endDate: endDate ? `${endDate}T23:59:59.999Z` : undefined,
   });
 
+  // TODO: search/source filters are client-only on the current page. Backend searchableColumns for
+  // /ledgers/general is only accountNumber + accountName (no journal #, description or source), so
+  // pass `search` to the API once those columns are added (parallel backend task).
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
     return (data?.data ?? []).filter((row) => {
@@ -148,19 +152,16 @@ const GeneralLedgerTab = () => {
           onClear={() => setSearch('')}
           className="w-full max-w-sm"
         />
-        <select
-          className="h-10 w-44 shrink-0 rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm leading-none text-foreground shadow-none outline-none transition-colors focus-visible:border-primary focus-visible:ring-0"
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          aria-label="Filter by source"
-        >
-          <option value="all">All sources</option>
-          {sources.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <Select
+          name="Filter by source"
+          SelectClass="w-44 shrink-0"
+          selectedValue={sourceFilter}
+          onChange={setSourceFilter}
+          options={[
+            { value: 'all', label: 'All sources' },
+            ...sources.map((s) => ({ value: s, label: s })),
+          ]}
+        />
         {isFetching && !isLoading && (
           <span className="pb-2.5 text-sm text-muted-foreground">Refreshing…</span>
         )}

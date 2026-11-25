@@ -1,9 +1,9 @@
-import React, { useState, useEffect, ChangeEvent, useRef, useCallback } from 'react';
+import React, { useState, useEffect, ChangeEvent, useMemo, useRef } from 'react';
 import { ChevronDown, ChevronRight, MoreVertical, Plus, FileDown, Sprout } from 'lucide-react';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import SliderAccount from './sliderAccount';
-import { accountsApi } from '../utils/api';
+import { useAccountTree, useSeedAccounts } from '../_hooks/useAccounts';
 import { ACCOUNT_TYPES } from '../utils/validations';
 import { StatCard, StatusBadge } from '../../_shared/states';
 import {
@@ -14,7 +14,6 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { Can, useCan } from '@/components/auth/can';
 import { exportRows } from '@/lib/export-file';
-import { toast } from 'sonner';
 
 interface AccountNode {
   uuid: string;
@@ -39,76 +38,42 @@ const TableAccount = () => {
   const { canAccess } = useCan();
   const containerRef = useRef<HTMLDivElement>(null);
   const [availableHeight, setAvailableHeight] = useState(400);
-  const [accounts, setAccounts] = useState<AccountNode[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: treeData, isLoading } = useAccountTree();
+  const accounts = useMemo<AccountNode[]>(
+    () => (Array.isArray(treeData) ? treeData : []),
+    [treeData]
+  );
   const [isCreateDrawer, setCreateDrawer] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredAccounts, setFilteredAccounts] = useState<AccountNode[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<AccountNode | null>(
     null
   );
   const [selectedAccountType, setSelectedAccountType] = useState<string>('All');
-  const [totalBalance, setTotalBalance] = useState<{ [key: string]: number }>(
-    {}
-  );
-  const [isSeeding, setIsSeeding] = useState(false);
+  const seedAccounts = useSeedAccounts();
+  const isSeeding = seedAccounts.isPending;
+  const seenRootIds = useRef<Set<string>>(new Set());
   const canSeed =
     canAccess('Accounts', 'seed-accounts') || canAccess('Accounts', 'create');
 
-  const refreshAccounts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await accountsApi.getAll();
-      setAccounts(response);
-      setFilteredAccounts(response);
-
-      const balances: { [key: string]: number } = {};
-      const calculateBalances = (accountList: AccountNode[]) => {
-        accountList.forEach((account) => {
-          if (!balances[account.type]) {
-            balances[account.type] = 0;
-          }
-          balances[account.type] += Number(account.currentBalance) || 0;
-          if (account.children && account.children.length > 0) {
-            calculateBalances(account.children);
-          }
-        });
-      };
-      calculateBalances(response);
-      setTotalBalance(balances);
-
-      const initialExpandedState: Record<string, boolean> = {};
-      response.forEach((account: AccountNode) => {
-        initialExpandedState[account.uuid] = true;
+  const totalBalance = useMemo(() => {
+    const balances: { [key: string]: number } = {};
+    const calculateBalances = (accountList: AccountNode[]) => {
+      accountList.forEach((account) => {
+        balances[account.type] =
+          (balances[account.type] ?? 0) + (Number(account.currentBalance) || 0);
+        if (account.children && account.children.length > 0) {
+          calculateBalances(account.children);
+        }
       });
-      setExpandedRows(initialExpandedState);
-    } catch {
-      setAccounts([]);
-      setFilteredAccounts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    };
+    calculateBalances(accounts);
+    return balances;
+  }, [accounts]);
 
-  const seedLedgerAccounts = async () => {
+  const seedLedgerAccounts = () => {
     if (isSeeding) return;
-    setIsSeeding(true);
-    try {
-      const result = await accountsApi.seedAccounts();
-      if (result.reason === 'already_seeded') {
-        toast.message('Accounts already set up for this organization');
-      } else {
-        toast.success('Accounts set up');
-      }
-      await refreshAccounts();
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || 'Could not set up accounts',
-      );
-    } finally {
-      setIsSeeding(false);
-    }
+    seedAccounts.mutate();
   };
 
   const getHierarchyColors = (level: number) => {
@@ -119,9 +84,19 @@ const TableAccount = () => {
     };
   };
 
+  // Expand newly loaded root accounts once; later refetches keep the user's toggles.
   useEffect(() => {
-    void refreshAccounts();
-  }, [refreshAccounts]);
+    const fresh = accounts.filter((a) => !seenRootIds.current.has(a.uuid));
+    if (fresh.length === 0) return;
+    fresh.forEach((a) => seenRootIds.current.add(a.uuid));
+    setExpandedRows((prev) => {
+      const next = { ...prev };
+      fresh.forEach((a) => {
+        next[a.uuid] = true;
+      });
+      return next;
+    });
+  }, [accounts]);
 
   // Calculate available height for the table
   useEffect(() => {
@@ -163,88 +138,65 @@ const TableAccount = () => {
   }, []);
 
   // Filter accounts by type and search term
-  useEffect(() => {
-    // First filter by account type if not "All"
+  const { filteredAccounts, searchExpandIds } = useMemo(() => {
     let typeFiltered = accounts;
     if (selectedAccountType !== 'All') {
-      const filterByType = (accountList: AccountNode[]): AccountNode[] => {
-        return accountList.reduce((filtered: AccountNode[], account) => {
+      const filterByType = (accountList: AccountNode[]): AccountNode[] =>
+        accountList.reduce((filtered: AccountNode[], account) => {
           if (account.type === selectedAccountType) {
             filtered.push(account);
           } else if (account.children && account.children.length > 0) {
             const filteredChildren = filterByType(account.children);
             if (filteredChildren.length > 0) {
-              filtered.push({
-                ...account,
-                children: filteredChildren,
-              });
+              filtered.push({ ...account, children: filteredChildren });
             }
           }
           return filtered;
         }, []);
-      };
-
       typeFiltered = filterByType(accounts);
     }
 
-    // Then apply search term filter if any
     if (searchTerm.trim() === '') {
-      setFilteredAccounts(typeFiltered);
-      return;
+      return { filteredAccounts: typeFiltered, searchExpandIds: [] as string[] };
     }
 
     const searchTermLower = searchTerm.toLowerCase();
+    const expandIds: string[] = [];
 
-    // Helper function to search through account hierarchy
     const searchAccounts = (accountList: AccountNode[]): AccountNode[] => {
       const result: AccountNode[] = [];
-
       for (const account of accountList) {
-        // Check if current account matches search
-        const nameMatches = account.name
-          .toLowerCase()
-          .includes(searchTermLower);
-        const codeMatches = account.code
-          .toLowerCase()
-          .includes(searchTermLower);
-        const typeMatches = account.type
-          .toLowerCase()
-          .includes(searchTermLower);
-
-        // Search through children
+        const nameMatches = account.name.toLowerCase().includes(searchTermLower);
+        const codeMatches = account.code.toLowerCase().includes(searchTermLower);
+        const typeMatches = account.type.toLowerCase().includes(searchTermLower);
         const matchingChildren =
           account.children.length > 0 ? searchAccounts(account.children) : [];
 
-        // If this account or any of its children match, include it
-        if (
-          nameMatches ||
-          codeMatches ||
-          typeMatches ||
-          matchingChildren.length > 0
-        ) {
-          // Create a copy of the account with only matching children
-          const matchedAccount = {
-            ...account,
-            children: matchingChildren,
-          };
-          result.push(matchedAccount);
-
+        if (nameMatches || codeMatches || typeMatches || matchingChildren.length > 0) {
+          result.push({ ...account, children: matchingChildren });
           // Ensure the row is expanded if it has matching children
-          if (matchingChildren.length > 0) {
-            setExpandedRows((prev) => ({
-              ...prev,
-              [account.uuid]: true,
-            }));
-          }
+          if (matchingChildren.length > 0) expandIds.push(account.uuid);
         }
       }
-
       return result;
     };
 
-    const filtered = searchAccounts(typeFiltered);
-    setFilteredAccounts(filtered);
+    return {
+      filteredAccounts: searchAccounts(typeFiltered),
+      searchExpandIds: expandIds,
+    };
   }, [searchTerm, accounts, selectedAccountType]);
+
+  useEffect(() => {
+    if (searchExpandIds.length === 0) return;
+    setExpandedRows((prev) => {
+      const next = { ...prev };
+      searchExpandIds.forEach((id) => {
+        next[id] = true;
+      });
+      return next;
+    });
+  }, [searchExpandIds]);
 
   // Toggle row expansion
   const toggleRowExpansion = (rowId: string) => {
@@ -402,7 +354,7 @@ const TableAccount = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="rounded-[2px] p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                      className="rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
                       <MoreVertical className="h-4 w-4" />
                     </button>
@@ -476,7 +428,7 @@ const TableAccount = () => {
               text={isSeeding ? 'Setting up…' : 'Setup account'}
               icon={<Sprout className="h-4 w-4" />}
               theme="outline"
-              onClick={() => void seedLedgerAccounts()}
+              onClick={seedLedgerAccounts}
               disabled={isSeeding}
             />
           )}
@@ -547,7 +499,7 @@ const TableAccount = () => {
                             text={isSeeding ? 'Setting up…' : 'Setup account'}
                             icon={<Sprout className="h-4 w-4" />}
                             theme="default"
-                            onClick={() => void seedLedgerAccounts()}
+                            onClick={seedLedgerAccounts}
                             disabled={isSeeding}
                           />
                         )}
@@ -569,7 +521,6 @@ const TableAccount = () => {
         account={selectedAccount}
         onAccountSaved={() => {
           setCreateDrawer(false);
-          void refreshAccounts();
         }}
       />
     </div>

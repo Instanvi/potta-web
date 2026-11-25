@@ -27,8 +27,16 @@ import {
 } from 'recharts';
 import { paletteColors } from '@/lib/dashboards/chart-types';
 import { formatMetricValue } from '@/lib/dashboards/format';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shadcn/select';
 import type { DashboardWidget } from '@/lib/dashboards/types';
-import { ErrorState, LoadingState } from '../../_shared/states';
+import { ErrorState } from '../../_shared/states';
+import { ChartWidgetSkeleton } from './WidgetSkeletons';
 import { useAggregate } from '../hooks';
 
 type ChartWidgetProps = {
@@ -47,7 +55,7 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
     toDate: widget.config.toDate,
   });
 
-  if (isLoading) return <LoadingState label="Loading chart…" />;
+  if (isLoading) return <ChartWidgetSkeleton />;
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const colors = paletteColors(widget.config.colorPalette);
@@ -77,26 +85,30 @@ export function ChartWidget({ widget, onChartTypeChange }: ChartWidgetProps) {
           </p>
         </div>
         {onChartTypeChange ? (
-          <select
-            className="rounded-[2px] border border-black/10 bg-white px-2.5 py-1.5 text-sm text-muted-foreground"
+          <Select
             value={chartType}
-            aria-label="Chart type"
-            onChange={(e) =>
-              onChartTypeChange(e.target.value as typeof chartType)
-            }
+            onValueChange={(v) => onChartTypeChange(v as typeof chartType)}
           >
-            <option value="bar">Bar</option>
-            <option value="horizontal_bar">Horizontal</option>
-            <option value="stacked_bar">Stacked</option>
-            <option value="line">Line</option>
-            <option value="area">Area</option>
-            <option value="composed">Combo</option>
-            <option value="pie">Pie</option>
-            <option value="donut">Donut</option>
-            <option value="radar">Radar</option>
-            <option value="radial">Radial</option>
-            <option value="table">Table</option>
-          </select>
+            <SelectTrigger
+              aria-label="Chart type"
+              className="h-auto w-auto min-w-[8rem] gap-2 px-2.5 py-1.5 text-sm text-muted-foreground"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="bar">Bar</SelectItem>
+              <SelectItem value="horizontal_bar">Horizontal</SelectItem>
+              <SelectItem value="stacked_bar">Stacked</SelectItem>
+              <SelectItem value="line">Line</SelectItem>
+              <SelectItem value="area">Area</SelectItem>
+              <SelectItem value="composed">Combo</SelectItem>
+              <SelectItem value="pie">Pie</SelectItem>
+              <SelectItem value="donut">Donut</SelectItem>
+              <SelectItem value="radar">Radar</SelectItem>
+              <SelectItem value="radial">Radial</SelectItem>
+              <SelectItem value="table">Table</SelectItem>
+            </SelectContent>
+          </Select>
         ) : (
           <span className="rounded-[2px] bg-muted px-2.5 py-1 text-xs font-normal uppercase tracking-wide text-muted-foreground">
             {chartType.replace(/_/g, ' ')}

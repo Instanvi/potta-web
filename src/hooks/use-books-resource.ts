@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   booksApi,
+  extractBooksMeta,
   extractBooksRows,
   rowId,
   type BooksResourceClient,
@@ -28,7 +29,8 @@ export function useBooksResourceList(
     queryKey: booksResourceKeys.list(resourcePath, filter, params),
     queryFn: async () => {
       const raw = await api.list(resourcePath, filter, params);
-      return extractBooksRows(raw);
+      // Keep pagination meta from the API (nestjs-paginate `meta`) alongside the rows.
+      return { rows: extractBooksRows(raw), meta: extractBooksMeta(raw) };
     },
     enabled: Boolean(resourcePath) && enabled,
     placeholderData: (prev) => prev,

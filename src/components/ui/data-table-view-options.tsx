@@ -46,7 +46,7 @@ export function DataTableViewOptions<TData>({
         <Button
           variant="outline"
           size="sm"
-          className="ml-auto h-9 gap-1.5 text-sm font-normal"
+          className="ml-auto h-9 gap-1.5 rounded-full text-sm font-normal"
         >
           <Settings2 className="size-4" />
           Columns

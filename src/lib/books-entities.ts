@@ -1,4 +1,5 @@
 import { booksApi, extractBooksRows } from '@/lib/books-api';
+import type { PdfSeller } from '@/lib/org-to-seller';
 import { customerApi } from '@/app/(routes)/customers/utils/api';
 import {
   fetchPurchaseOrders,
@@ -147,7 +148,6 @@ export async function loadPurchaseOrderForReceipt(
   });
   return { vendorId, linesJson: JSON.stringify(lines) };
 }
-
 export async function downloadBooksPdf(opts: {
   title: string;
   subtitle?: string;
@@ -158,56 +158,24 @@ export async function downloadBooksPdf(opts: {
     unitPrice?: number;
     totalAmount?: number;
   }>;
+  /** Org letterhead; pass `orgToSeller(org)` from the caller. */
+  seller?: PdfSeller;
+  currency?: string;
 }) {
-  const { downloadPreviewAsPdf } = await import('@/lib/print-preview');
+  const [{ createElement }, { downloadReactPdf }, { GenericDocumentPdf }] =
+    await Promise.all([
+      import('react'),
+      import('@/lib/download-react-pdf'),
+      import('@/components/documents/generic-document-pdf'),
+    ]);
 
-  const linesHtml = (opts.lines ?? [])
-    .map(
-      (line) =>
-        `<tr>
-          <td style="padding:8px;border-bottom:1px solid #e5e5e5">${line.description || '—'}</td>
-          <td style="padding:8px;border-bottom:1px solid #e5e5e5;text-align:right">${line.quantity ?? ''}</td>
-          <td style="padding:8px;border-bottom:1px solid #e5e5e5;text-align:right">${line.unitPrice ?? ''}</td>
-          <td style="padding:8px;border-bottom:1px solid #e5e5e5;text-align:right">${line.totalAmount ?? ''}</td>
-        </tr>`
-    )
-    .join('');
-
-  const fieldsHtml = opts.fields
-    .map(
-      (f) =>
-        `<div style="display:flex;justify-content:space-between;gap:16px;padding:4px 0;font-size:13px">
-          <span style="color:#666">${f.label}</span><strong>${f.value || '—'}</strong>
-        </div>`
-    )
-    .join('');
-
-  const host = window.document.createElement('div');
-  host.setAttribute('data-books-pdf-host', '1');
-  host.style.cssText =
-    'position:fixed;left:-12000px;top:0;width:800px;background:#fff;padding:32px;font-family:Inter,Arial,sans-serif;color:#111;';
-  host.innerHTML = `
-    <h1 style="font-size:20px;margin:0 0 4px;font-weight:600">${opts.title}</h1>
-    ${opts.subtitle ? `<p style="margin:0 0 16px;color:#666">${opts.subtitle}</p>` : ''}
-    ${fieldsHtml}
-    ${
-      opts.lines?.length
-        ? `<table style="width:100%;border-collapse:collapse;margin-top:20px;font-size:13px">
-            <thead><tr>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Item</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Qty</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Price</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #ccc;font-weight:500">Total</th>
-            </tr></thead>
-            <tbody>${linesHtml}</tbody>
-          </table>`
-        : ''
-    }`;
-
-  window.document.body.appendChild(host);
-  try {
-    await downloadPreviewAsPdf(host, opts.title);
-  } finally {
-    host.remove();
-  }
+  const element = createElement(GenericDocumentPdf, {
+    title: opts.title,
+    subtitle: opts.subtitle,
+    fields: opts.fields,
+    lines: opts.lines,
+    currency: opts.currency,
+    seller: opts.seller ?? { name: 'Your organization' },
+  });
+  await downloadReactPdf(element, opts.title || 'document');
 }

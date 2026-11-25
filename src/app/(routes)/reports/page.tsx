@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { PanelCard, PanelCardContent, PanelCardHeader } from '@/components/ui/panel-card';
 import { Input } from '@/components/shadcn/input';
 import { Button } from '@/components/shadcn/button';
+import Select from '@potta/components/select';
 
 const FAV_KEY = 'potta.report.favourites';
 
@@ -208,21 +209,23 @@ function ReportsHub() {
           </div>
           <div className="w-full max-w-xs">
             <label className="mb-1 block text-sm font-medium text-foreground">Scope</label>
-            <select
-              className="flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-field px-3 text-sm text-foreground outline-none focus-visible:border-primary"
-              value={canOrgWide ? scope : 'branch'}
-              disabled={!canOrgWide}
-              onChange={(e) => {
-                const next = e.target.value as ReportScopeMode;
+            <Select
+              name="Scope"
+              selectedValue={canOrgWide ? scope : 'branch'}
+              isDisabled={!canOrgWide}
+              onChange={(v) => {
+                const next = v as ReportScopeMode;
                 setScope(next);
                 saveReportScope(next);
               }}
-            >
-              <option value="branch">
-                Branch{activeLocation?.name ? `: ${activeLocation.name}` : ''}
-              </option>
-              <option value="organization">Organization-wide</option>
-            </select>
+              options={[
+                {
+                  value: 'branch',
+                  label: `Branch${activeLocation?.name ? `: ${activeLocation.name}` : ''}`,
+                },
+                { value: 'organization', label: 'Organization-wide' },
+              ]}
+            />
           </div>
           {!canOrgWide ? (
             <p className="w-full text-xs text-muted-foreground">Org-wide locked (needs permission)</p>
