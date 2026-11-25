@@ -113,3 +113,29 @@ export function documentChannelOptions(params: {
     },
   ];
 }
+
+/** Pull email/phone from a document row or nested customer/vendor party. */
+export function partyContactFromRecord(
+  record?: Record<string, unknown> | null,
+): { email?: string; phone?: string } {
+  if (!record) return {};
+  const nestedCandidates = [
+    record.customer,
+    record.vendor,
+    record.salePerson,
+    record.party,
+  ];
+  let nested: { email?: unknown; phone?: unknown } | undefined;
+  for (const candidate of nestedCandidates) {
+    if (candidate && typeof candidate === 'object') {
+      nested = candidate as { email?: unknown; phone?: unknown };
+      break;
+    }
+  }
+  const email = String(nested?.email ?? record.email ?? '').trim();
+  const phone = String(nested?.phone ?? record.phone ?? '').trim();
+  return {
+    email: email || undefined,
+    phone: phone || undefined,
+  };
+}
