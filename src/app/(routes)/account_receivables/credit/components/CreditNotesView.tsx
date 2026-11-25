@@ -63,7 +63,6 @@ const CreditNotesView = () => {
   const deleteMutation = useDeleteCreditNote();
   const approveMutation = useApproveCreditNote();
   const { table, onTableChange } = useDataTableHandle<CreditNote>();
-  const { table, onTableChange } = useDataTableHandle<CreditNote>();
 
   const columns = useMemo<ColumnDef<CreditNote>[]>(
     () => [
