@@ -466,7 +466,7 @@ export function PhoneInput({
       </div>
       <div
         className={cn(
-          'flex h-10 w-full rounded-[2px] border bg-field transition-colors focus-within:border-primary',
+          'flex h-10 w-full rounded-t-[2px] rounded-b-none border-0 border-b bg-zinc-50 transition-colors focus-within:border-primary',
           invalid ? 'border-destructive' : 'border-black/15',
         )}
       >
@@ -474,7 +474,7 @@ export function PhoneInput({
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex h-10 min-w-[7.5rem] items-center justify-between gap-2 border-r border-black/15 bg-field px-3 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 min-w-[7.5rem] items-center justify-between gap-2 border-r border-black/10 bg-zinc-50 px-3 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading}
             aria-label="Select country code"
           >
