@@ -9,44 +9,43 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
-import { isExpenseReportId } from '@/lib/expense-reports';
+import { toast } from 'sonner';
 import { exportRows } from '@/lib/export-file';
+import { downloadReportDocx } from '@/lib/export-docx';
 import { ReportPdfDocument } from '@/components/documents/report-pdf-document';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { orgToSeller } from '@/lib/org-to-seller';
-import {
-  reportsApi,
-  type ReportColumn,
-  type ReportExportFormat,
-  type ReportRunParams,
-} from '@/app/(routes)/reports/utils/api';
+import type { ReportColumn } from '@/app/(routes)/reports/utils/api';
 
-const FORMATS: { format: ReportExportFormat; label: string }[] = [
+export type ReportDownloadFormat = 'pdf' | 'docx' | 'xlsx' | 'csv';
+
+const FORMATS: { format: ReportDownloadFormat; label: string }[] = [
+  { format: 'pdf', label: 'PDF (.pdf)' },
+  { format: 'docx', label: 'Word (.docx)' },
   { format: 'xlsx', label: 'Excel (.xlsx)' },
   { format: 'csv', label: 'CSV (.csv)' },
-  { format: 'pdf', label: 'PDF (.pdf)' },
 ];
 
 type Props = {
   reportId: string;
   title: string;
-  params: ReportRunParams;
   columns: ReportColumn[];
   rows: Record<string, unknown>[];
+  totals?: Record<string, number>;
   disabled?: boolean;
   /** Period / as-of label printed under the title on generated PDFs. */
   period?: string;
   description?: string;
 };
 
-/** Format picker: backend export for catalog reports; client fallback for expense-proxied ids. */
+/** Download the report on screen as PDF, Word, Excel, or CSV. */
 export function ReportExportMenu({
   reportId,
   title,
-  params,
   columns,
   rows,
+  totals,
   disabled,
   period,
   description,
@@ -54,37 +53,51 @@ export function ReportExportMenu({
   const [busy, setBusy] = useState(false);
   const { data: org } = useOrganizationProfile();
 
-  const onExport = async (format: ReportExportFormat) => {
+  const onExport = async (format: ReportDownloadFormat) => {
     if (busy || disabled) return;
     setBusy(true);
+    const filename = (title || reportId).trim() || 'report';
     try {
-      if (isExpenseReportId(reportId)) {
-        if (format === 'pdf') {
-          await downloadReactPdf(
-            <ReportPdfDocument
-              seller={orgToSeller(org)}
-              title={title || reportId}
-              description={description}
-              period={period}
-              columns={columns}
-              rows={rows}
-            />,
-            title || reportId,
-          );
-          return;
-        }
+      if (!columns.length) throw new Error('This report has no columns to download');
+      const sheetRows = rowsWithTotals(rows, columns, totals);
+      if (format === 'pdf') {
+        await downloadReactPdf(
+          <ReportPdfDocument
+            seller={orgToSeller(org)}
+            title={filename}
+            description={description}
+            period={period}
+            columns={columns}
+            rows={rows}
+            totals={totals}
+          />,
+          filename,
+        );
+      } else if (format === 'docx') {
+        await downloadReportDocx({
+          filename,
+          title: filename,
+          description,
+          period,
+          columns,
+          rows: sheetRows,
+        });
+      } else {
         await exportRows({
-          filename: title || reportId,
-          rows,
-          columns: columns.map((c) => ({
-            key: c.key,
-            header: c.label,
+          filename,
+          rows: sheetRows,
+          columns: columns.map((column) => ({
+            key: column.key,
+            header: column.label,
+            value: (row) => spreadsheetCell(row, column),
           })),
           format,
         });
-        return;
       }
-      await reportsApi.export(reportId, { ...params, format });
+      toast.success(`Downloaded ${filename}`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not download this report. Try again.');
     } finally {
       setBusy(false);
     }
@@ -95,15 +108,15 @@ export function ReportExportMenu({
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          text={busy ? 'Exporting…' : 'Export'}
+          text={busy ? 'Downloading…' : 'Download'}
           theme="lightBlue"
           color
           disabled={disabled || busy || rows.length === 0}
-          icon={<i className="ri-upload-2-line" />}
+          icon={<i className="ri-download-2-line" />}
           rightIcon={<ChevronDown className="size-4" />}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 bg-white">
+      <DropdownMenuContent align="end" className="w-48 bg-white">
         {FORMATS.map(({ format, label }) => (
           <DropdownMenuItem
             key={format}
@@ -116,4 +129,37 @@ export function ReportExportMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function spreadsheetCell(row: Record<string, unknown>, column: ReportColumn) {
+  const value = row[column.key];
+  if (column.type === 'money' || column.type === 'number') {
+    const amount = Number(value);
+    return Number.isFinite(amount) ? amount : value == null || value === '' ? '' : String(value);
+  }
+  return value == null || value === '' ? '' : String(value);
+}
+
+function rowsWithTotals(
+  rows: Record<string, unknown>[],
+  columns: ReportColumn[],
+  totals?: Record<string, number>,
+) {
+  if (!totals || !Object.keys(totals).length || columns.length === 0) return rows;
+  const matched = columns.some((column) => totals[column.key] != null);
+  if (matched) {
+    const totalRow: Record<string, unknown> = {};
+    columns.forEach((column, index) => {
+      if (totals[column.key] != null) totalRow[column.key] = totals[column.key];
+      else if (index === 0) totalRow[column.key] = 'Total';
+    });
+    return [...rows, totalRow];
+  }
+  return [
+    ...rows,
+    ...Object.entries(totals).map(([label, amount]) => ({
+      [columns[0].key]: label,
+      [columns[Math.min(1, columns.length - 1)].key]: amount,
+    })),
+  ];
 }

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
 import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
-import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { DatePicker, DateRangePicker } from '@potta/components/ui/date-picker';
 import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
@@ -16,11 +15,6 @@ import { useReportRun } from '../hooks';
 import type { ReportColumn } from '../utils/api';
 import { ReportPageShell } from './ReportPageShell';
 import { loadReportScope } from '@/lib/reports-catalog';
-import { ReportPdfDocument } from '@/components/documents/report-pdf-document';
-import { useOrganizationProfile } from '@/hooks/use-organization-profile';
-import { orgToSeller } from '@/lib/org-to-seller';
-import { printReactPdf } from '@/lib/print-react-pdf';
-import { toast } from 'sonner';
 
 function formatCell(value: unknown, type: ReportColumn['type']) {
   if (value == null || value === '') return '—';
@@ -71,37 +65,11 @@ export function ReportRunner({
   }, [mode, asOfDate, compareEnd, range, search]);
 
   const { data, isLoading, error, refetch } = useReportRun(reportId, params);
-  const { data: org } = useOrganizationProfile();
-  const [printing, setPrinting] = useState(false);
 
   const periodLabel =
     mode === 'asOf' || mode === 'compare'
       ? `As of ${asOfDate}`
       : `Period ${range.from ?? '—'} – ${range.to ?? '—'}`;
-
-  const onPrint = async () => {
-    if (!data?.rows?.length || printing) return;
-    setPrinting(true);
-    try {
-      await printReactPdf(
-        <ReportPdfDocument
-          seller={orgToSeller(org)}
-          title={title}
-          description={description}
-          period={periodLabel}
-          columns={data.columns}
-          rows={data.rows}
-          totals={data.totals}
-        />,
-        title || reportId,
-      );
-    } catch (err) {
-      console.error(err);
-      toast.error('Could not generate PDF');
-    } finally {
-      setPrinting(false);
-    }
-  };
 
   const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
   const columns = useMemo<ColumnDef<Record<string, unknown>>[]>(() => {
@@ -143,23 +111,14 @@ export function ReportRunner({
           actions={
             <div className="flex flex-wrap items-center gap-2">
               {table ? <DataTableViewOptions table={table} /> : null}
-              <Button
-                type="button"
-                text={printing ? 'Preparing…' : 'Print'}
-                theme="lightBlue"
-                color
-                disabled={!data?.rows?.length || printing}
-                icon={<i className="ri-printer-line" />}
-                onClick={() => void onPrint()}
-              />
               <ReportExportMenu
                 reportId={reportId}
                 title={title}
-                params={params}
                 period={periodLabel}
                 description={description}
                 columns={data?.columns ?? []}
                 rows={data?.rows ?? []}
+                totals={data?.totals}
                 disabled={!data?.rows?.length}
               />
             </div>
