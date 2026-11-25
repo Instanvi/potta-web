@@ -4,6 +4,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import moment from 'moment';
+import { toast } from 'sonner';
 import { ColumnDef } from '@tanstack/react-table';
 import { DateRangePicker } from '@potta/components/ui/date-picker';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -15,10 +16,20 @@ import {
 } from '@potta/components/document-master-detail';
 import Button from '@potta/components/button';
 import DynamicFilter from '@potta/components/dynamic-filter';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@potta/components/shadcn/dropdown';
+import ConfirmModal from '../../../_shared/ConfirmModal';
 import { ErrorState, ListToolbar } from '../../../_shared/states';
 import { Skeleton } from '@potta/components/ui/loaders';
 import { IFilter } from '../_utils/types';
 import useGetAllInvoice from '../_hooks/useGetAllInvoice';
+import useDeleteInvoice from '../_hooks/useDeleteInvoice';
+import useSendInvoice from '../_hooks/useSendInvoice';
 import { useInvoiceFilter } from '../_context/InvoiceFilterContext';
 import {
   InvoiceDetailPanel,
@@ -30,6 +41,7 @@ import { ExportButton } from '@/components/export-button';
 import type { ExportColumn } from '@/lib/export-file';
 import { fetchAllPages } from '@/lib/fetch-all-pages';
 import { invoiceApi } from '../_utils/api';
+import type { DocumentChannel } from '@/components/document-channel-menu';
 
 const startOfLocalDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -154,6 +166,13 @@ const InvoiceTable = () => {
 
   const { data, isLoading, error, refetch } = useGetAllInvoice(filter);
   const { table, onTableChange } = useDataTableHandle<Invoice>();
+  const deleteMutation = useDeleteInvoice();
+  const sendMutation = useSendInvoice();
+  const [toDelete, setToDelete] = useState<Invoice | null>(null);
+  const [sendTarget, setSendTarget] = useState<{
+    invoice: Invoice;
+    channel: DocumentChannel;
+  } | null>(null);
 
   const filteredData = useMemo(
     () =>
@@ -257,8 +276,108 @@ const InvoiceTable = () => {
           <span className={statusClass(original.status)}>{original.status}</span>
         ),
       },
+      {
+        id: 'actions',
+        enableHiding: false,
+        header: '',
+        cell: ({ row: { original } }) => {
+          const customerEmail = (original.customer?.email || '').trim();
+          const customerPhone = (original.customer?.phone || '').trim();
+          const hasCustomer = Boolean(original.customer);
+          const sending = sendMutation.isPending;
+
+          return (
+            <div
+              className="flex justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="rounded-full p-2 hover:bg-black/[0.04]"
+                    aria-label="Invoice actions"
+                  >
+                    <i className="ri-more-2-fill text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => setSelectedId(original.uuid)}
+                  >
+                    <i className="ri-eye-line mr-2" />
+                    View
+                  </DropdownMenuItem>
+                  {hasCustomer ? (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        disabled={!customerEmail || sending}
+                        title={
+                          customerEmail
+                            ? `Email download link to ${customerEmail}`
+                            : 'Add a customer email first'
+                        }
+                        className="cursor-pointer"
+                        onClick={() => {
+                          if (!customerEmail) return;
+                          setSendTarget({
+                            invoice: original,
+                            channel: 'email',
+                          });
+                        }}
+                      >
+                        <i className="ri-mail-line mr-2" />
+                        <span className="flex min-w-0 flex-col">
+                          <span>Send by email</span>
+                          <span className="truncate text-xs text-muted-foreground">
+                            {customerEmail || 'No email on file'}
+                          </span>
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={!customerPhone || sending}
+                        title={
+                          customerPhone
+                            ? `Text download link to ${customerPhone}`
+                            : 'Add a customer phone first'
+                        }
+                        className="cursor-pointer"
+                        onClick={() => {
+                          if (!customerPhone) return;
+                          setSendTarget({
+                            invoice: original,
+                            channel: 'sms',
+                          });
+                        }}
+                      >
+                        <i className="ri-message-2-line mr-2" />
+                        <span className="flex min-w-0 flex-col">
+                          <span>Send by SMS</span>
+                          <span className="truncate text-xs text-muted-foreground">
+                            {customerPhone || 'No phone on file'}
+                          </span>
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  ) : null}
+                  <DropdownMenuItem
+                    className="cursor-pointer text-destructive"
+                    onClick={() => setToDelete(original)}
+                  >
+                    <i className="ri-delete-bin-line mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        },
+      },
     ],
-    []
+    [sendMutation.isPending, setSelectedId]
   );
 
   const { pageCount } = tableProps(data?.meta, data?.data?.length);
@@ -474,6 +593,108 @@ const InvoiceTable = () => {
           {...tableProps(data?.meta, data?.data?.length)}
         />
       )}
+
+      <ConfirmModal
+        open={Boolean(toDelete)}
+        title="Delete invoice?"
+        message={`Delete ${
+          toDelete?.invoiceNumber || toDelete?.invoiceId || 'this invoice'
+        }? This cannot be undone.`}
+        confirmText="Delete"
+        danger
+        isLoading={deleteMutation.isPending}
+        onClose={() => {
+          if (!deleteMutation.isPending) setToDelete(null);
+        }}
+        onConfirm={() => {
+          if (!toDelete) return;
+          deleteMutation.mutate(toDelete.uuid, {
+            onSuccess: () => {
+              toast.success('Invoice deleted');
+              setToDelete(null);
+            },
+            onError: (err: unknown) => {
+              const message =
+                err && typeof err === 'object' && 'response' in err
+                  ? String(
+                      (
+                        err as {
+                          response?: { data?: { message?: string } };
+                        }
+                      ).response?.data?.message || '',
+                    )
+                  : '';
+              toast.error(message || 'Failed to delete invoice');
+            },
+          });
+        }}
+      />
+      <ConfirmModal
+        open={Boolean(sendTarget)}
+        title={
+          sendTarget?.channel === 'sms'
+            ? 'Send invoice by SMS?'
+            : 'Send invoice by email?'
+        }
+        message={
+          sendTarget?.channel === 'sms'
+            ? `Text a download link for ${
+                sendTarget.invoice.invoiceNumber ||
+                sendTarget.invoice.invoiceId
+              } to ${sendTarget.invoice.customer?.phone?.trim() || 'the customer'}?`
+            : `Email a download link for ${
+                sendTarget?.invoice.invoiceNumber ||
+                sendTarget?.invoice.invoiceId ||
+                ''
+              } to ${
+                sendTarget?.invoice.customer?.email?.trim() || 'the customer'
+              }?`
+        }
+        confirmText="Send"
+        isLoading={sendMutation.isPending}
+        onClose={() => {
+          if (!sendMutation.isPending) setSendTarget(null);
+        }}
+        onConfirm={() => {
+          if (!sendTarget) return;
+          const { invoice, channel } = sendTarget;
+          const email = (invoice.customer?.email || '').trim();
+          const phone = (invoice.customer?.phone || '').trim();
+          sendMutation.mutate(
+            {
+              invoiceId: invoice.uuid,
+              data: {
+                channel,
+                to: channel === 'email' ? email : undefined,
+                phone: channel === 'sms' ? phone : undefined,
+              },
+            },
+            {
+              onSuccess: (res) => {
+                toast.success(
+                  res?.channel === 'sms' || channel === 'sms'
+                    ? `Invoice texted to ${res?.to || phone}`
+                    : `Invoice emailed to ${res?.to || email}`,
+                );
+                setSendTarget(null);
+              },
+              onError: (err: unknown) => {
+                const message =
+                  err && typeof err === 'object' && 'response' in err
+                    ? String(
+                        (
+                          err as {
+                            response?: { data?: { message?: string } };
+                          }
+                        ).response?.data?.message || '',
+                      )
+                    : '';
+                toast.error(message || 'Failed to send invoice download link');
+              },
+            },
+          );
+        }}
+      />
     </div>
   );
 };
