@@ -1,15 +1,5 @@
-'use client';
-
-import AgingTab from '../../accounting/ledger/components/AgingTab';
-import { ReportPageShell } from '../components/ReportPageShell';
+import { redirect } from 'next/navigation';
 
 export default function ArAgeingPage() {
-  return (
-    <ReportPageShell
-      title="Accounts receivable ageing"
-      description="Customer balances by ageing bucket. Scoped to the active branch unless you have org-wide access."
-    >
-      <AgingTab type="AR" />
-    </ReportPageShell>
-  );
+  redirect('/reports/view/ar-ageing-summary');
 }

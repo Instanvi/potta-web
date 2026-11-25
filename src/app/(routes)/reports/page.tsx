@@ -46,7 +46,7 @@ function ReportRow({
   favourite: boolean;
   onToggleFavourite: () => void;
 }) {
-  const href = report.live && report.href ? report.href : `/reports/view/${report.id}`;
+  const href = `/reports/view/${report.id}`;
   return (
     <div className="group flex items-center gap-2 border-b border-neutral-50 py-2.5 last:border-b-0">
       <Link href={href} className="min-w-0 flex-1 text-sm text-foreground hover:text-primary">

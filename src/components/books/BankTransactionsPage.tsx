@@ -18,18 +18,23 @@ import {
 import { FIELD_INPUT, SHEET_FIELD_INPUT, SHEET_FIELD_LABEL } from '@/lib/field-styles';
 import { DatePicker } from '@/components/ui/date-picker';
 import { booksApi, cellValue, extractBooksRows, rowId } from '@/lib/books-api';
+import { loadBooksEntityOptions, type BooksEntityOption } from '@/lib/books-entities';
+import Select from '@potta/components/select';
+import axios from 'config/axios.config';
 import { cn } from '@/lib/utils';
+
+type BankAccount = { uuid?: string; id?: string; name?: string; account_name?: string; accountName?: string };
 
 const COLUMNS = [
   { key: 'transactionDate', label: 'Date' },
   { key: 'description', label: 'Description' },
   { key: 'amount', label: 'Amount' },
+  { key: 'accountLabel', label: 'Account' },
   { key: 'status', label: 'Status' },
   { key: 'reference', label: 'Reference' },
 ];
 
 const FIELDS = [
-  { key: 'bankAccountId', label: 'Bank account ID' },
   { key: 'transactionDate', label: 'Date', type: 'date' },
   { key: 'amount', label: 'Amount', type: 'number' },
   { key: 'description', label: 'Description' },
@@ -48,6 +53,8 @@ export function BankTransactionsPage() {
   const [matchAr, setMatchAr] = useState('');
   const [matchAp, setMatchAp] = useState('');
   const [saving, setSaving] = useState(false);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [chartAccounts, setChartAccounts] = useState<BooksEntityOption[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,6 +79,36 @@ export function BankTransactionsPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    void loadBooksEntityOptions('account').then(setChartAccounts).catch(() => setChartAccounts([]));
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await axios.get('/bank-accounts', { params: { page: 1, limit: 100 } });
+        const list = extractBooksRows(res.data);
+        setAccounts(list.length ? (list as BankAccount[]) : Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setAccounts([]);
+      }
+    })();
+  }, []);
+
+  const applyRules = async () => {
+    setSaving(true);
+    try {
+      const res = await axios.post('/bank-transactions/apply-rules');
+      const applied = Number(res.data?.applied ?? res.data?.data?.applied ?? 0);
+      toast.success(applied ? `Applied rules to ${applied} transaction${applied === 1 ? '' : 's'}` : 'No matching transactions');
+      await load();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Could not apply bank rules');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleCreate = async () => {
     setSaving(true);
@@ -159,7 +196,16 @@ export function BankTransactionsPage() {
             </>
           }
         />
-        <ListToolbar actions={table ? <DataTableViewOptions table={table} /> : null}>
+        <ListToolbar
+          actions={
+            <>
+              {table ? <DataTableViewOptions table={table} /> : null}
+              <Button type="button" variant="outline" size="sm" onClick={() => void applyRules()} disabled={saving}>
+                Apply rules
+              </Button>
+            </>
+          }
+        >
           <input
             type="search"
             value={search}
@@ -176,7 +222,11 @@ export function BankTransactionsPage() {
           ) : (
             <BooksListTable
               columns={COLUMNS}
-              rows={rows}
+              rows={rows.map((row): Record<string, unknown> => {
+                const accountId = String(row.accountId ?? '');
+                const account = chartAccounts.find((item) => item.value === accountId);
+                return { ...row, accountLabel: account?.label || (accountId ? accountId : '—') };
+              })}
               storageKey="books-bank-transactions-table"
               isLoading={loading}
               emptyMessage="No bank transactions"
@@ -196,6 +246,16 @@ export function BankTransactionsPage() {
               <SheetTitle>New bank transaction</SheetTitle>
             </SheetHeader>
             <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
+              <Select
+                name="Bank account"
+                selectedValue={form.bankAccountId ?? ''}
+                onChange={(value) => setForm((p) => ({ ...p, bankAccountId: value }))}
+                options={accounts.map((account) => {
+                  const id = String(account.uuid ?? account.id ?? '');
+                  const label = account.name ?? account.account_name ?? account.accountName ?? id;
+                  return { value: id, label };
+                })}
+              />
               {FIELDS.map((f) =>
                 f.type === 'date' ? (
                   <DatePicker

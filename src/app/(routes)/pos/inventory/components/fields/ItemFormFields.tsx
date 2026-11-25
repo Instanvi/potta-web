@@ -31,8 +31,8 @@ export const FormSection = ({
   description?: string;
   children: ReactNode;
 }) => (
-  <section className="rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-    <div className="mb-4">
+  <section className="space-y-4">
+    <div>
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
     </div>
