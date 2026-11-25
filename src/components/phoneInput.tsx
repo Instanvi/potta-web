@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, AlertCircle } from 'lucide-react';
 import { Country } from 'country-state-city';
+import { FIELD_LABEL } from '@/lib/field-styles';
+import { cn } from '@potta/lib/utils';
 
 interface BaseInputProps {
   label?: string;
@@ -442,19 +444,19 @@ export function PhoneInput({
     // You could notify the parent component about the WhatsApp status change here if needed
   };
 
-  // Determine input border color based on validation state
-  const getBorderClass = () => {
-    if (!phoneNumber || phoneNumber.length === 0) return 'border-gray-200'; // Default
-    if (errors || validationError) return 'border-red-500'; // Error (external or internal)
-    return 'border-green-500'; // Valid
-  };
+  const invalid = Boolean(errors || validationError);
 
   return (
-    <div className="flex flex-col gap-1 w-full">
-      <div className="flex justify-between items-center">
-        <p className="font-medium mb-1 w-fit">
-          {label} {required && <span className="text-red-500">*</span>}
-        </p>
+    <div className="flex w-full flex-col">
+      <div className="flex items-center justify-between">
+        {label ? (
+          <span className={FIELD_LABEL}>
+            {label}
+            {required && <span className="text-red-500">*</span>}
+          </span>
+        ) : (
+          <span />
+        )}
         {whatsapp && (
           <WhatsAppToggle
             checked={isWhatsApp}
@@ -462,31 +464,33 @@ export function PhoneInput({
           />
         )}
       </div>
-      <div className="flex gap-[1px]">
-        {/* Country code dropdown */}
-        <div className="relative" ref={dropdownRef}>
+      <div
+        className={cn(
+          'flex h-10 w-full rounded-[2px] border bg-field transition-colors focus-within:border-primary',
+          invalid ? 'border-destructive' : 'border-black/15',
+        )}
+      >
+        <div className="relative shrink-0" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`flex items-center py-2.5 border border-r-0 ${
-              errors || validationError ? 'border-red-500' : 'border-gray-200'
-            } px-3 bg-white cursor-pointer focus:ring-2 focus:ring-green-500 outline-none min-w-[90px] justify-between`}
+            className="flex h-10 min-w-[7.5rem] items-center justify-between gap-2 border-r border-black/15 bg-field px-3 text-sm text-foreground outline-none disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isLoading}
             aria-label="Select country code"
           >
             <div className="flex items-center gap-2">
               {selectedCountryInfo && (
-                <div className="w-5 h-4 relative overflow-hidden">
+                <div className="relative h-4 w-5 overflow-hidden">
                   <img
                     src={selectedCountryInfo.flag}
                     alt={`${selectedCountryInfo.country} flag`}
-                    className="object-cover w-full h-full"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               )}
               <span>{selectedCountryCode}</span>
             </div>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="h-4 w-4 opacity-50" />
           </button>
 
           {/* Country dropdown menu */}
@@ -532,15 +536,14 @@ export function PhoneInput({
           placeholder={placeholder || 'Enter phone number'}
           value={phoneNumber}
           onChange={handleInputChange}
-          className={`outline-none focus:ring-2 focus:ring-green-500 border ${getBorderClass()} p-2 flex-1 py-2.5`}
+          className="h-10 min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-foreground outline-none placeholder:text-black/35"
           aria-label="Phone number"
-          aria-invalid={!!(errors || validationError)}
+          aria-invalid={invalid}
         />
       </div>
       
-      {/* Display selected country info */}
       {selectedCountryInfo && (
-        <div className="text-xs text-gray-500 mt-1">
+        <div className="mt-1 text-xs text-muted-foreground">
           {selectedCountryInfo.country} ({selectedCountryInfo.code}) - Expected
           length: {selectedCountryInfo.minLength}
           {selectedCountryInfo.minLength !== selectedCountryInfo.maxLength
