@@ -2,22 +2,27 @@
 
 import { ReactNode } from 'react';
 import { cn } from '@potta/lib/utils';
+import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
 
-/** Document canvas used by Invoice and Bill create screens — centered container on main-bg. */
+/** Document canvas used by Invoice and Bill create screens — wide, responsive on main-bg. */
 export function DocumentFormShell({
   className,
   children,
+  showLetterhead = true,
 }: {
   className?: string;
   children: ReactNode;
+  /** Letterhead logo / tagline / accent controls at the top of the form. */
+  showLetterhead?: boolean;
 }) {
   return (
     <div
       className={cn(
-        'mx-auto flex w-full max-w-4xl flex-col gap-3 bg-white p-4 md:p-5',
+        'mx-auto flex w-full max-w-6xl flex-col gap-3 bg-white px-3 py-4 sm:px-5 md:px-8 md:py-6 lg:px-10',
         className,
       )}
     >
+      {showLetterhead ? <DocumentLetterheadControls flush /> : null}
       {children}
     </div>
   );

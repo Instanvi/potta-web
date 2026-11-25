@@ -6,7 +6,8 @@ import {
   orgDisplayName,
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
-import { orgLogoOrPotta } from '@/lib/brand';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
+import { resolveLetterheadLogoUrl } from '@/lib/brand';
 import { cn } from '@/lib/utils';
 import type { OrganizationProfile } from '@/types/auth';
 
@@ -14,10 +15,14 @@ function SellerBlock({
   org,
   className,
   compact,
+  logoSrc,
+  tagline,
 }: {
   org: OrganizationProfile;
   className?: string;
   compact?: boolean;
+  logoSrc?: string | null;
+  tagline?: string;
 }) {
   const name = orgDisplayName(org);
   const address = formatOrgAddress(org);
@@ -25,21 +30,23 @@ function SellerBlock({
   const phone = org.businessPhone;
   const reg = org.registrationNumber;
   const tax = org.taxIdentificationNumber;
-  const logoSrc = orgLogoOrPotta(org.logo, 'svg');
 
   return (
     <div className={cn('flex gap-3 text-sm', className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={logoSrc}
-        alt={name || 'Potta'}
-        className={cn(
-          'shrink-0 object-contain',
-          compact ? 'h-10 w-10' : 'h-14 w-14',
-        )}
-      />
+      {logoSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logoSrc}
+          alt={name || 'Brand'}
+          className={cn(
+            'shrink-0 object-contain',
+            compact ? 'h-10 w-10' : 'h-14 w-14',
+          )}
+        />
+      ) : null}
       <div className="min-w-0 space-y-0.5 text-muted-foreground">
         {name ? <p className="font-medium text-foreground">{name}</p> : null}
+        {tagline ? <p className="text-foreground/80">{tagline}</p> : null}
         {email ? <p>{email}</p> : null}
         {phone ? <p>{phone}</p> : null}
         {address.map((line) => (
@@ -63,6 +70,7 @@ export function DocumentSellerHeader({
   compact?: boolean;
 }) {
   const { data: org, isLoading, isError } = useOrganizationProfile();
+  const { prefs } = useDocumentLetterhead();
 
   if (isLoading) {
     return (
@@ -89,10 +97,17 @@ export function DocumentSellerHeader({
     );
   }
 
+  const logoSrc = resolveLetterheadLogoUrl(prefs.logo, org.logo, 'svg');
+
   return (
     <div className={cn('min-w-[140px] flex-1', className)}>
       {label ? <p className="mb-1 font-medium text-foreground">{label}</p> : null}
-      <SellerBlock org={org} compact={compact} />
+      <SellerBlock
+        org={org}
+        compact={compact}
+        logoSrc={logoSrc}
+        tagline={prefs.tagline}
+      />
     </div>
   );
 }
@@ -102,16 +117,30 @@ export function DocumentSellerBlockFromProfile({
   label = 'From',
   className,
   compact,
+  logoSrc,
+  tagline,
 }: {
   org: OrganizationProfile;
   label?: string;
   className?: string;
   compact?: boolean;
+  logoSrc?: string | null;
+  tagline?: string;
 }) {
+  const { prefs } = useDocumentLetterhead();
+  const resolvedLogo =
+    logoSrc !== undefined
+      ? logoSrc
+      : resolveLetterheadLogoUrl(prefs.logo, org.logo, 'svg');
   return (
     <div className={cn('min-w-[140px] flex-1', className)}>
       {label ? <p className="mb-1 font-medium text-foreground">{label}</p> : null}
-      <SellerBlock org={org} compact={compact} />
+      <SellerBlock
+        org={org}
+        compact={compact}
+        logoSrc={resolvedLogo}
+        tagline={tagline ?? prefs.tagline}
+      />
     </div>
   );
 }
