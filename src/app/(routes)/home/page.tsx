@@ -63,7 +63,7 @@ export default function HomePage() {
       <PageContainer>
         <PageHeader
           title={chosen?.name ?? BUILTIN_DASHBOARD_NAME}
-          description="Default books metrics. Customize to create your own KPIs and charts."
+          description="Key balances plus invoice, bill, and journal trends. Customize to add your own charts."
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <Select
