@@ -1,5 +1,4 @@
 'use client'; // For Next.js 13+ App Directory
-import Input from '@potta/components/input';
 import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect, useRef } from 'react';
 import DynamicTable from './newtableInvoice';
@@ -24,6 +23,7 @@ import {
 import { FIELD_TEXTAREA } from '@/lib/field-styles';
 import { useRouter } from 'next/navigation';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
+import { GeneratedNumberField } from '@potta/components/generated-number-field';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -344,14 +344,12 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
               />
             </div>
             <div className={`md:col-span-5 ${errors.receiptNumber ? 'error-field' : ''}`}>
-              <Input
-                type="text"
+              <GeneratedNumberField
                 label="Receipt number"
                 name="receiptNumber"
                 value={invoiceNumber}
-                onchange={(e: any) =>
-                  handleInputChange('receiptNumber', e.target.value)
-                }
+                onChange={(value) => handleInputChange('receiptNumber', value)}
+                placeholder="Leave blank to assign one"
                 errors={
                   errors.receiptNumber
                     ? { message: errors.receiptNumber }
@@ -435,8 +433,7 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
                 error={errors.paymentMethod}
               />
               <div className={errors.paymentReference ? 'error-field' : ''}>
-                <Input
-                  type="text"
+                <GeneratedNumberField
                   label={
                     <>
                       Payment reference
@@ -445,9 +442,7 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
                   }
                   name="paymentReference"
                   value={paymentReference}
-                  onchange={(e: any) =>
-                    handleInputChange('paymentReference', e.target.value)
-                  }
+                  onChange={(value) => handleInputChange('paymentReference', value)}
                   placeholder="Enter payment reference"
                   errors={
                     errors.paymentReference

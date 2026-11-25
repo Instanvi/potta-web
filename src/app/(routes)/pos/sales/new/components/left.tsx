@@ -1,5 +1,4 @@
 'use client'; // For Next.js 13+ App Directory
-import Input from '@potta/components/input';
 import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -28,6 +27,7 @@ import {
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { FIELD_TEXTAREA } from '@/lib/field-styles';
+import { GeneratedNumberField } from '@potta/components/generated-number-field';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -186,6 +186,7 @@ const Left = () => {
   // In your Left component, update the handleSaveInvoice function
 
   const handleSaveInvoice = () => {
+    if (mutation.isPending) return;
     setFormSubmitted(true);
 
     // Validate form
@@ -258,14 +259,12 @@ const Left = () => {
               />
             </div>
             <div className={`md:col-span-5 ${errors.receiptNumber ? 'error-field' : ''}`}>
-              <Input
-                type="text"
+              <GeneratedNumberField
                 label="Receipt number"
                 name="receiptNumber"
                 value={invoiceNumber}
-                onchange={(e: any) =>
-                  handleInputChange('receiptNumber', e.target.value)
-                }
+                onChange={(value) => handleInputChange('receiptNumber', value)}
+                placeholder="Leave blank to assign one"
                 errors={
                   errors.receiptNumber
                     ? { message: errors.receiptNumber }
@@ -345,8 +344,7 @@ const Left = () => {
                   error={errors.paymentMethod}
                 />
                 <div className={errors.paymentReference ? 'error-field' : ''}>
-                  <Input
-                    type="text"
+                  <GeneratedNumberField
                     label={
                       <>
                         Payment reference
@@ -355,9 +353,7 @@ const Left = () => {
                     }
                     name="paymentReference"
                     value={paymentReference}
-                    onchange={(e: any) =>
-                      handleInputChange('paymentReference', e.target.value)
-                    }
+                    onChange={(value) => handleInputChange('paymentReference', value)}
                     placeholder="Enter payment reference"
                     errors={
                       errors.paymentReference
@@ -384,7 +380,9 @@ const Left = () => {
             </div>
             <div className="flex items-end justify-end lg:col-span-5">
               <Button
-                text="Save receipt"
+                text={mutation.isPending ? 'Saving…' : 'Save receipt'}
+                isLoading={mutation.isPending}
+                disabled={mutation.isPending}
                 onClick={handleSaveInvoice}
                 type="button"
               />

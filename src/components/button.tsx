@@ -45,10 +45,11 @@ const Button = ({
   return (
     <button
       type={type}
-      disabled={disabled}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
       className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[2px] text-base font-normal shadow-none transition-colors ${
         color ? 'text-black' : 'text-white'
-      } ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${
+      } ${disabled || isLoading ? 'cursor-not-allowed' : 'cursor-pointer'} ${
         width ? 'w-full' : ''
       } ${theme ? themes[theme] : themes.default} ${
         rounded ? '!rounded-full' : ''
@@ -57,8 +58,15 @@ const Button = ({
       } ${className}`}
       onClick={onClick}
     >
-      {icon && icon}
-      {isLoading ? 'Loading...' : text}
+      {isLoading ? (
+        <span
+          className="inline-block size-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent"
+          aria-hidden
+        />
+      ) : (
+        icon
+      )}
+      {text}
     </button>
   );
 };

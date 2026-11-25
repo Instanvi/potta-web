@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from '@potta/components/ui/sheet';
 import Button from '@potta/components/button';
+import { GenerateNumberButton } from '@potta/components/generated-number-field';
 import Input from '@potta/components/input';
 import { FormDatePicker } from '@potta/components/ui/date-picker';
 import Select from '@potta/components/select';
@@ -250,13 +251,19 @@ const CashbookEntrySheet = ({ open, entry, onClose }: Props) => {
             placeholder="Customer, vendor or person"
             register={register}
           outlined />
-          <Input
-            type="text"
-            name="reference"
-            label="Reference"
-            placeholder="Receipt or voucher number"
-            register={register}
-          outlined />
+          <div>
+            <Input
+              type="text"
+              name="reference"
+              label="Reference"
+              placeholder="Receipt or voucher number"
+              register={register}
+              outlined
+            />
+            <GenerateNumberButton
+              onGenerate={(value) => setValue('reference', value, { shouldDirty: true })}
+            />
+          </div>
           <Input
             type="text"
             name="narration"

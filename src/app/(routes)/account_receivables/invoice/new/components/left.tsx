@@ -30,6 +30,7 @@ import {
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
+import { GeneratedNumberField } from '@potta/components/generated-number-field';
 
 // Import Option interface from SearchableSelect to avoid conflicts
 import type { Option as SearchableSelectOption } from '@potta/components/searchableSelect';
@@ -749,12 +750,11 @@ const Left = ({
               />
             </div>
             <div className="md:col-span-1">
-              <Input
-                type="text"
+              <GeneratedNumberField
                 label="Invoice no."
                 name="invoiceNumber"
                 value={invoiceNumber}
-                onchange={(e: any) => handleInputChange('invoiceNumber', e.target.value)}
+                onChange={(value) => handleInputChange('invoiceNumber', value)}
               />
             </div>
             <div className={`md:col-span-2 ${errors.currency ? 'error-field' : ''}`}>
@@ -838,16 +838,12 @@ const Left = ({
                   error={errors.paymentMethod}
                 />
                 <div className={errors.paymentReference ? 'error-field' : ''}>
-                  <Input
-                    type="text"
+                  <GeneratedNumberField
                     label="Payment reference"
                     name="paymentReference"
                     value={paymentReference}
-                    onchange={(e: any) =>
-                      handleInputChange('paymentReference', e.target.value)
-                    }
+                    onChange={(value) => handleInputChange('paymentReference', value)}
                     errors={errors.paymentReference}
-                    inputClass="!bg-white"
                   />
                 </div>
               </div>

@@ -519,6 +519,8 @@ const Left = () => {
                 ? 'Creating Purchase Order...'
                 : 'Create Purchase Order'
             }
+            isLoading={mutation.isPending}
+            disabled={mutation.isPending}
             onClick={handleSavePurchaseOrder}
             type="button"
           />

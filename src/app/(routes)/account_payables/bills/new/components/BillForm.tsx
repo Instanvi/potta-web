@@ -21,6 +21,7 @@ import { apiErrorMessage, formatDate, today, toDateInput } from '../../../../_sh
 import { usePurchaseOrderOptions, useVendorOptions } from '../../../hooks';
 import { apLookupsApi } from '../../../utils/api';
 import { formatMoney } from '../../../utils/format';
+import { GenerateNumberButton, generateDocumentNumber } from '@potta/components/generated-number-field';
 import { useCreateBill } from '../../hooks';
 import { BillCurrency, PaymentMethod } from '../../utils/types';
 import { BillFormValues, billSchema, lineTotals } from '../validations/billValidation';
@@ -278,6 +279,11 @@ const BillForm = ({
               register={register}
               errors={errors.vendorInvoiceNumber}
               inputClass="!bg-white"
+            />
+            <GenerateNumberButton
+              onGenerate={(value) =>
+                setValue('vendorInvoiceNumber', value, { shouldDirty: true, shouldValidate: true })
+              }
             />
           </div>
           <div className="md:col-span-2">

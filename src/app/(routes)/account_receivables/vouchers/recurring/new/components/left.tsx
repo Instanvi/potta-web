@@ -15,6 +15,7 @@ import { DatePicker } from '@potta/components/ui/date-picker';
 
 import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
+import { GeneratedNumberField } from '@potta/components/generated-number-field';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -625,14 +626,11 @@ const Left = () => {
             </p>
           )}
 
-          <Input
-            type="text"
+          <GeneratedNumberField
             label="Payment Reference"
             name="paymentReference"
             value={paymentReference}
-            onchange={(e: any) =>
-              handleInputChange('paymentReference', e.target.value)
-            }
+            onChange={(value) => handleInputChange('paymentReference', value)}
           />
           <Input
             type="number"
@@ -663,7 +661,9 @@ const Left = () => {
 
       <div className="mt-5 w-full flex justify-end">
         <Button
-          text={'Save Recurring Invoice'}
+          text={mutation.isPending ? 'Saving…' : 'Save Recurring Invoice'}
+          isLoading={mutation.isPending}
+          disabled={mutation.isPending}
           onClick={handleSaveInvoice}
           type={'button'}
         />
