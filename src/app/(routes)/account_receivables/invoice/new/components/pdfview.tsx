@@ -1,7 +1,6 @@
 'use client';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
-import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
 import {
   InvoicePdfDocument,
   type InvoicePdfProps,
@@ -13,8 +12,10 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
+import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { pdf } from '@react-pdf/renderer';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface TableItem {
   name: string;
@@ -79,31 +80,16 @@ const PdfView = ({
     : 'Not set';
 
   const invoiceType = contextData.invoiceType || 'Invoice';
-  const invoiceNumber = contextData.invoiceNumber || '0025';
+  const invoiceNumber = withDocumentAcronym(
+    String(contextData.invoiceNumber || ''),
+    'INV',
+  );
   const billingAddress = contextData.billing || '';
   const shippingAddress = contextData.shipping || '';
   const paymentTerms = contextData.paymentTerms || '';
   const paymentReference = contextData.paymentReference || '';
-  const taxRate = contextData.taxRate || 0;
 
-  const getCurrencySymbol = (currencyCode: string): string => {
-    switch (currencyCode) {
-      case 'USD':
-        return '$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      case 'XAF':
-        return 'XAF';
-      default:
-        return currencyCode;
-    }
-  };
-  const currencySymbol = getCurrencySymbol(contextData.currency || 'USD');
-
-  // Use the getOneCustomer hook with the customer ID
-  const { data: customerData, isLoading: customerLoading } = useGetOneCustomer(
+  const { data: customerData } = useGetOneCustomer(
     customerId || ''
   );
   const customerDetails: Customer | null = customerData || null;
@@ -151,7 +137,7 @@ const PdfView = ({
         email: org?.businessEmail,
         phone: org?.businessPhone,
         addressLines: formatOrgAddress(org),
-        logoUrl: org?.logo,
+        logoUrl: null,
         registrationNumber: org?.registrationNumber,
         taxId: org?.taxIdentificationNumber,
       },
@@ -212,10 +198,37 @@ const PdfView = ({
     [pdfProps],
   );
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPreviewError(null);
+    pdf(documentNode)
+      .toBlob()
+      .then((blob) => {
+        if (cancelled) return;
+        const objectUrl = URL.createObjectURL(blob);
+        setPreviewUrl((current) => {
+          if (current) URL.revokeObjectURL(current);
+          return objectUrl;
+        });
+      })
+      .catch((error) => {
+        console.error('Invoice PDF failed', error);
+        if (!cancelled) setPreviewError('Could not build the invoice PDF.');
+      });
+    return () => {
+      cancelled = true;
+      setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return null;
+      });
+    };
+  }, [documentNode]);
+
   const download = useCallback(async () => {
-    const filename = pdfProps.invoiceNumber
-      ? `invoice-${pdfProps.invoiceNumber}`
-      : 'draft-invoice';
+    const filename = pdfProps.invoiceNumber || 'INV-draft';
     await downloadReactPdf(documentNode, filename);
   }, [documentNode, pdfProps.invoiceNumber]);
 
@@ -260,176 +273,18 @@ const PdfView = ({
           </div>
         </div>
       </div>
-      <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
-        <div
-          className="h-36 w-full flex items-center justify-between px-8"
-          style={{ backgroundColor: invoiceColor }}
-        >
-          <div>
-            <p className="text-3xl font-medium text-white">{invoiceType}</p>
-            <p className="text-white mt-2">#{invoiceNumber}</p>
-          </div>
-          <div className="text-right text-white">
-            <p>
-              <strong>Issue Date:</strong> {formattedIssueDate}
-            </p>
-            <p>
-              <strong>Due Date:</strong> {formattedDueDate}
-            </p>
-            <p>
-              <strong>Currency:</strong> {contextData.currency || 'USD'}
-            </p>
-          </div>
-        </div>
-        <div className="p-5 space-y-16 bg-white">
-          <div className="mt-5 w-full flex space-x-5">
-            <DocumentSellerHeader className="w-[40%]" />
-            <div className="flex space-x-2">
-              <h3 className="font-medium">To: </h3>
-              <div className="space-y-2 text-sm text-gray-600 flex-col">
-                {customerLoading ? (
-                  <p>Loading customer details...</p>
-                ) : customerDetails ? (
-                  <>
-                    <p>
-                      {customerDetails.firstName} {customerDetails.lastName}
-                    </p>
-                    <p>{customerDetails.email || 'No email'}</p>
-                    <p>
-                      {billingAddress ||
-                        customerDetails.address?.address ||
-                        'No address'}
-                    </p>
-                    <p>{customerDetails.phone || 'No phone'}</p>
-                  </>
-                ) : (
-                  <p>No customer selected</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {shippingAddress && (
-            <div className="mt-4">
-              <h3 className="font-medium">Shipping Address:</h3>
-              <p className="text-sm text-gray-600">{shippingAddress}</p>
-            </div>
-          )}
-
-          <table className="min-w-full h-40 table-auto mt-10">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Item
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Qty
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tax
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((item: TableItem, index: number) => {
-                const price = Number(item.price);
-                const qty = Number(item.qty);
-                const tax = Number(item.tax);
-                const itemTotal = price * qty;
-                const itemTax = (itemTotal * tax) / 100;
-                const totalWithTax = itemTotal + itemTax;
-
-                return (
-                  <tr key={item.id || index}>
-                    <td className="border-b px-4 py-2">{index + 1}</td>
-                    <td className="border-b px-4 py-2">{item.name}</td>
-                    <td className="border-b px-4 py-2">{qty}</td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {price.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {itemTax.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {totalWithTax.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {/* Subtotal and Tax Rows */}
-          <div className="w-full mt-10 pb-4 flex">
-            <div className="w-[50%]">
-              {/* Payment Method and Notes */}
-              <div className="pl-4">
-                <p>
-                  <strong>Payment Method:</strong>{' '}
-                  {paymentMethodLabel || 'Not selected'}
-                </p>
-
-                {paymentReference && (
-                  <p className="mt-2">
-                    <strong>Payment Reference:</strong> {paymentReference}
-                  </p>
-                )}
-
-                {paymentTerms && (
-                  <div className="mt-2">
-                    <strong>Payment Terms:</strong>
-                    <p className="text-gray-600 mt-1">{paymentTerms}</p>
-                  </div>
-                )}
-
-                {contextData.note && (
-                  <div className="mt-4">
-                    <strong>Notes:</strong>
-                    <p className="text-gray-600 mt-1">{contextData.note}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="w-[50%]">
-              <div className="mt-4 flex justify-between">
-                <div className="w-1/2">Sub Total:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {currencySymbol}
-                  {subtotal.toFixed(2)}
-                </div>
-              </div>
-
-              <div className="mt-2 flex justify-between">
-                <div className="w-1/2">Tax ({taxRate || 0}%):</div>
-                <div className="w-1/2 text-right pr-20">
-                  {currencySymbol}
-                  {totalTax.toFixed(2)}
-                </div>
-              </div>
-              {/* Horizontal Line */}
-              <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-medium">
-                <div className="w-1/2">Total:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {currencySymbol}
-                  {total.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="h-[78vh] w-full bg-white">
+        {previewError ? (
+          <p className="p-8 text-sm text-destructive">{previewError}</p>
+        ) : previewUrl ? (
+          <iframe
+            title="Invoice PDF"
+            src={previewUrl}
+            className="h-full w-full border-0 bg-white"
+          />
+        ) : (
+          <p className="p-8 text-sm text-muted-foreground">Building invoice PDF…</p>
+        )}
       </div>
     </div>
   );

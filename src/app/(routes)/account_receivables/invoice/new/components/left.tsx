@@ -30,7 +30,11 @@ import {
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
-import { GeneratedNumberField } from '@potta/components/generated-number-field';
+import {
+  GeneratedNumberField,
+  generateDocumentNumber,
+  withDocumentAcronym,
+} from '@potta/components/generated-number-field';
 
 // Import Option interface from SearchableSelect to avoid conflicts
 import type { Option as SearchableSelectOption } from '@potta/components/searchableSelect';
@@ -126,7 +130,9 @@ const Left = ({
   const [invoice, setInvoice] = useState('Invoice');
   const [customerName, setCustomerName] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Option | null>(null);
-  const [invoiceNumber, setInvoiceNumber] = useState('0025');
+  const [invoiceNumber, setInvoiceNumber] = useState(() =>
+    generateDocumentNumber('INV'),
+  );
   const [currency, setCurrency] = useState('USD');
   const [invoiceType, setInvioceType] = useState(
     initialInvoiceType ? mapTypeToLabel(initialInvoiceType) : 'Invoice'
@@ -240,12 +246,27 @@ const Left = ({
       setPaymentTerms(context.data.paymentTerms || '');
       setPaymentReference(context.data.paymentReference || '');
       setTaxRate(context.data.taxRate || 0);
-      setInvoiceNumber(context.data.invoiceNumber || '');
+      if (context.data.invoiceNumber) {
+        setInvoiceNumber(
+          withDocumentAcronym(String(context.data.invoiceNumber), 'INV'),
+        );
+      }
       setCurrency(context.data.currency || 'USD');
       setInvioceType(context.data.invoiceType || 'Invoice');
       // Add more fields as needed
     }
   }, [context?.data]);
+
+  // The preview reads the shared form context, so publish the INV- number once.
+  useEffect(() => {
+    if (!context?.setData) return;
+    const current = String(context.data?.invoiceNumber || '').trim();
+    if (current) return;
+    context.setData((prevData: any) => ({
+      ...prevData,
+      invoiceNumber,
+    }));
+  }, [context, invoiceNumber]);
 
   const handleInputChange = async (key: string, value: any) => {
     console.log(`Changing ${key} to:`, value);
@@ -423,7 +444,7 @@ const Left = ({
       paymentReference: paymentReference, // or generate a unique reference
       notes: note,
       paymentMethod: selectedPaymentMethod,
-      invoiceNumber: invoiceNumber,
+      invoiceNumber: withDocumentAcronym(invoiceNumber, 'INV'),
       // discountAmount: 0, // Add default or actual value if available
       customerId: customerName, // Using the customer UUID as customerId
       // salePersonId: 'c9c0c3a4-353f-4907-a342-ae64e629936f', // property salePersonId should not exist
@@ -753,6 +774,7 @@ const Left = ({
               <GeneratedNumberField
                 label="Invoice no."
                 name="invoiceNumber"
+                acronym="INV"
                 value={invoiceNumber}
                 onChange={(value) => handleInputChange('invoiceNumber', value)}
               />

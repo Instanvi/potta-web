@@ -21,7 +21,7 @@ import { apiErrorMessage, formatDate, today, toDateInput } from '../../../../_sh
 import { usePurchaseOrderOptions, useVendorOptions } from '../../../hooks';
 import { apLookupsApi } from '../../../utils/api';
 import { formatMoney } from '../../../utils/format';
-import { GenerateNumberButton, generateDocumentNumber } from '@potta/components/generated-number-field';
+import { GenerateNumberButton, withDocumentAcronym } from '@potta/components/generated-number-field';
 import { useCreateBill } from '../../hooks';
 import { BillCurrency, PaymentMethod } from '../../utils/types';
 import { BillFormValues, billSchema, lineTotals } from '../validations/billValidation';
@@ -173,7 +173,9 @@ const BillForm = ({
       {
         vendorId: values.vendorId,
         purchaseOrderId: values.purchaseOrderId || undefined,
-        vendorInvoiceNumber: values.vendorInvoiceNumber?.trim() || undefined,
+        vendorInvoiceNumber: values.vendorInvoiceNumber?.trim()
+          ? withDocumentAcronym(values.vendorInvoiceNumber, 'BILL')
+          : undefined,
         issueDate: values.issueDate,
         dueDate: values.dueDate,
         currency: values.currency,
@@ -275,12 +277,13 @@ const BillForm = ({
               type="text"
               name="vendorInvoiceNumber"
               label="Bill no."
-              placeholder="e.g. INV-0042"
+              placeholder="BILL-"
               register={register}
               errors={errors.vendorInvoiceNumber}
               inputClass="!bg-white"
             />
             <GenerateNumberButton
+              acronym="BILL"
               onGenerate={(value) =>
                 setValue('vendorInvoiceNumber', value, { shouldDirty: true, shouldValidate: true })
               }

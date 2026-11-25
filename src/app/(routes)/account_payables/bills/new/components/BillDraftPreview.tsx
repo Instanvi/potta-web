@@ -12,6 +12,7 @@ import {
   orgDisplayName,
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
+import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { formatDate } from '../../../../_shared/format';
 import { paymentMethodLabel } from '../../utils/types';
@@ -63,7 +64,9 @@ function buildPdfProps(input: {
     { subtotal: 0, discount: 0, tax: 0, total: 0 },
   );
 
-  const billNumber = input.billNo?.trim() || undefined;
+  const billNumber = input.billNo?.trim()
+    ? withDocumentAcronym(input.billNo, 'BILL')
+    : undefined;
   const title = billNumber ? `Bill ${billNumber}` : 'Draft bill';
 
   return {
@@ -80,7 +83,7 @@ function buildPdfProps(input: {
       email: input.sellerEmail,
       phone: input.sellerPhone,
       addressLines: input.sellerAddress,
-      logoUrl: input.sellerLogo,
+      logoUrl: null,
       registrationNumber: input.sellerReg,
       taxId: input.sellerTax,
     },
@@ -167,9 +170,7 @@ export default function BillDraftPreview({
   const documentNode = useMemo(() => <BillPdfDocument {...pdfProps} />, [pdfProps]);
 
   const download = useCallback(async () => {
-    const filename = pdfProps.billNumber
-      ? `bill-${pdfProps.billNumber}`
-      : 'draft-bill';
+    const filename = pdfProps.billNumber || 'BILL-draft';
     await downloadReactPdf(documentNode, filename);
   }, [documentNode, pdfProps.billNumber]);
 

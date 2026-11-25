@@ -15,6 +15,7 @@ type Props = {
   placeholder?: string;
   register?: UseFormRegister<any>;
   onchange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   value?: string | number;
   height?: boolean;
   required?: boolean;
@@ -40,6 +41,7 @@ const Input: React.FC<Props> = ({
   value,
   height,
   onchange,
+  onBlur,
   labelClass,
   autocomplete,
   inputClass,
@@ -72,6 +74,7 @@ const Input: React.FC<Props> = ({
         max={max}
         min={min}
         value={value}
+        onBlur={onBlur}
         {...inputProps}
         placeholder={placeholder}
         className={cn(
