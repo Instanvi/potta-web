@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 
@@ -10,6 +10,10 @@ import { DataProvider } from '@potta/components/providers/DataProvider';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(false);
+  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    setDownloadPdf(() => fn);
+  }, []);
   const openPreview = () => setShowPreview(true);
   const closePreview = () => setShowPreview(false);
 
@@ -42,8 +46,9 @@ const NewSalesReciept = () => {
           onOpenChange={(open) => !open && closePreview()}
           downloadTitle="Sale receipt"
           dialogTitle="Sale preview"
+          onDownloadPdf={downloadPdf ?? undefined}
         >
-          <PdfView />
+          <PdfView onRegisterDownload={registerDownload} />
         </DocumentPreviewDialog>
       </DataProvider>
     </DocumentWorkspace>

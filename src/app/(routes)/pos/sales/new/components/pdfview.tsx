@@ -1,9 +1,19 @@
 'use client';
-import Button from '@potta/components/button';
+import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
+import { Customer } from '@potta/app/(routes)/customers/utils/types';
+import {
+  SalesReceiptPdfDocument,
+  type SalesReceiptPdfProps,
+} from '@/components/documents/sales-receipt-pdf-document';
 import { ContextData } from '@potta/components/providers/DataProvider';
-import React, { useContext, useEffect, useState } from 'react';
-import { Customer } from '../../../../customers/utils/types';
-import useGetOneCustomer from '../../../../customers/hooks/useGetOneCustomer';
+import {
+  formatOrgAddress,
+  orgDisplayName,
+  useOrganizationProfile,
+} from '@/hooks/use-organization-profile';
+import { downloadReactPdf } from '@/lib/download-react-pdf';
+import { pdf } from '@react-pdf/renderer';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { PAYMENT_METHODS } from '../../../utils/sale';
 
 interface TableItem {
@@ -16,221 +26,155 @@ interface TableItem {
   id: number;
 }
 
-const PdfView = () => {
+const PdfView = ({
+  onRegisterDownload,
+}: {
+  onRegisterDownload?: (download: () => Promise<void>) => void;
+} = {}) => {
   const context = useContext(ContextData);
-  const [currentCustomerId, setCurrentCustomerId] = useState<string>('');
-
-  // Get the latest context data on each render
+  const [currentCustomerId, setCurrentCustomerId] = useState('');
+  const { data: org } = useOrganizationProfile();
   const contextData = context?.data || {};
   const tableData: TableItem[] = contextData.table || [];
 
-  // Track customer ID changes from context
   useEffect(() => {
-    if (
-      contextData.customerName &&
-      contextData.customerName !== currentCustomerId
-    ) {
+    if (contextData.customerName && contextData.customerName !== currentCustomerId) {
       setCurrentCustomerId(contextData.customerName);
     }
-  }, [contextData.customerName]);
+  }, [contextData.customerName, currentCustomerId]);
 
-  const getCurrencySymbol = (currencyCode: string): string => {
-    switch (currencyCode) {
-      case 'USD':
-        return '$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      case 'XAF':
-        return 'XAF';
-      default:
-        return currencyCode;
-    }
-  };
-
-  const currencySymbol = getCurrencySymbol(contextData.currency || '');
-
-  // Use the getOneCustomer hook with the customer ID from state
-  // This will re-fetch when currentCustomerId changes
-  const { data: customerData, isLoading: customerLoading } = useGetOneCustomer(
-    currentCustomerId || ''
-  );
-
+  const { data: customerData } = useGetOneCustomer(currentCustomerId || '');
   const customerDetails: Customer | null = customerData || null;
 
-  // Calculate totals
-  const subtotal = tableData.reduce((sum: number, item: TableItem) => {
-    const price = Number(item.price);
-    const qty = Number(item.qty);
-    return sum + price * qty;
+  const subtotal = tableData.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+  const totalTax = tableData.reduce((sum, item) => {
+    const line = Number(item.price) * Number(item.qty);
+    return sum + (line * Number(item.tax)) / 100;
   }, 0);
-
-  const totalTax = tableData.reduce((sum: number, item: TableItem) => {
-    const price = Number(item.price);
-    const qty = Number(item.qty);
-    const tax = Number(item.tax);
-    return sum + (price * qty * tax) / 100;
-  }, 0);
-
   const total = subtotal + totalTax;
 
+  const rawPayment =
+    typeof contextData.payment_method === 'string'
+      ? contextData.payment_method
+      : contextData.payment_method?.[0] || contextData.paymentMethod || '';
+  const methodLabel = PAYMENT_METHODS.find((method) => method.value === rawPayment)?.label || rawPayment || '';
+  const saleDateLabel = contextData.saleDate
+    ? new Date(contextData.saleDate).toLocaleDateString()
+    : 'Not set';
+  const receiptNumber = contextData.receiptNumber || contextData.invoiceNumber || undefined;
+
+  const pdfProps: SalesReceiptPdfProps = useMemo(() => {
+    const customerName = customerDetails
+      ? `${customerDetails.firstName ?? ''} ${customerDetails.lastName ?? ''}`.trim()
+      : '';
+    return {
+      title: 'Sales receipt',
+      receiptNumber: receiptNumber ? String(receiptNumber) : undefined,
+      saleDate: saleDateLabel,
+      currency: contextData.currency || 'XAF',
+      paymentMethod: methodLabel || undefined,
+      paymentReference: contextData.paymentReference || undefined,
+      notes: contextData.note || undefined,
+      seller: {
+        name: orgDisplayName(org) || 'Your organization',
+        email: org?.businessEmail,
+        phone: org?.businessPhone,
+        addressLines: formatOrgAddress(org),
+        logoUrl: org?.logo,
+        registrationNumber: org?.registrationNumber,
+        taxId: org?.taxIdentificationNumber,
+      },
+      customer: customerDetails
+        ? {
+            name: customerName || 'Customer',
+            email: customerDetails.email,
+            phone: customerDetails.phone,
+            address: customerDetails.address?.address || undefined,
+          }
+        : null,
+      lines: tableData.map((item) => {
+        const price = Number(item.price) || 0;
+        const qty = Number(item.qty) || 0;
+        const taxPct = Number(item.tax) || 0;
+        const lineSub = price * qty;
+        return {
+          description: item.name || 'Item or service',
+          quantity: qty,
+          unitPrice: price,
+          taxRate: taxPct,
+          lineTotal: lineSub + (lineSub * taxPct) / 100,
+        };
+      }),
+      subtotal,
+      tax: totalTax,
+      total,
+      draft: true,
+    };
+  }, [
+    contextData.currency,
+    contextData.note,
+    contextData.paymentReference,
+    customerDetails,
+    methodLabel,
+    org,
+    receiptNumber,
+    saleDateLabel,
+    subtotal,
+    tableData,
+    total,
+    totalTax,
+  ]);
+
+  const documentNode = useMemo(() => <SalesReceiptPdfDocument {...pdfProps} />, [pdfProps]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPreviewError(null);
+    pdf(documentNode)
+      .toBlob()
+      .then((blob) => {
+        if (cancelled) return;
+        const objectUrl = URL.createObjectURL(blob);
+        setPreviewUrl((current) => {
+          if (current) URL.revokeObjectURL(current);
+          return objectUrl;
+        });
+      })
+      .catch((error) => {
+        console.error('Sales receipt PDF failed', error);
+        if (!cancelled) setPreviewError('Could not build the sales receipt PDF.');
+      });
+    return () => {
+      cancelled = true;
+      setPreviewUrl((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return null;
+      });
+    };
+  }, [documentNode]);
+
+  const download = useCallback(async () => {
+    const filename = pdfProps.receiptNumber
+      ? `sales-receipt-${pdfProps.receiptNumber}`
+      : 'draft-sales-receipt';
+    await downloadReactPdf(documentNode, filename);
+  }, [documentNode, pdfProps.receiptNumber]);
+
+  useEffect(() => {
+    onRegisterDownload?.(download);
+  }, [download, onRegisterDownload]);
+
   return (
-    <div className="flex  flex-col items-center justify-center overflow-y-auto w-full bg-white">
-      <div className="flex min-w-[30rem] justify-between w-full p-8">
-        <h3 className="text-xl font-medium">PDF Preview</h3>
-      </div>
-      <div className="max-w-[48rem] bg-white space-y-4 min-w-[45rem] w-full">
-        <div className="h-36 w-full flex items-center justify-between px-4 bg-green-800">
-          <p className="text-3xl mt-5 font-medium text-white">
-            Sales Receipt
-          </p>
-          <div className="text-right text-white">
-            <p>Date: {contextData.saleDate || 'Not set'}</p>
-            <p>Currency: {contextData.currency || 'USD'}</p>
-          </div>
-        </div>
-        <div className="p-5 space-y-16 bg-white">
-          <div className="mt-5 w-full flex space-x-5">
-            <div className="flex w-[40%] space-x-2">
-              <h3>From : </h3>
-              <div className="space-y-2 text-sm text-gray-400 flex-col">
-                <p>ABC Company</p>
-                <p>hello@ABCcompany.com</p>
-                <p>ABC, Street, D'la Cameroon</p>
-                <p>+237 695904751</p>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <h3>To : </h3>
-              <div className="space-y-2 text-sm text-gray-400 flex-col">
-                {customerLoading ? (
-                  <p>Loading customer details...</p>
-                ) : customerDetails ? (
-                  <>
-                    <p>
-                      {customerDetails.firstName} {customerDetails.lastName}
-                    </p>
-                    <p>{customerDetails.email || 'No email'}</p>
-                    <p>{customerDetails.address.address || 'No address'}</p>
-                    <p>{customerDetails.phone || 'No phone'}</p>
-                  </>
-                ) : (
-                  <p>No customer selected</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <table className="min-w-full h-40 mt-5 ">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Item
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Qty
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tax
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((item: TableItem, index: number) => {
-                const price = Number(item.price);
-                const qty = Number(item.qty);
-                const tax = Number(item.tax);
-                const itemTotal = price * qty;
-                const itemTax = (itemTotal * tax) / 100;
-                const totalWithTax = itemTotal + itemTax;
-
-                return (
-                  <tr className="h-fit" key={item.id || index}>
-                    <td className="border-b px-4 h-fit">{index + 1}</td>
-                    <td className="border-b px-4 h-fit">{item.name}</td>
-                    <td className="border-b px-4 h-fit">{qty}</td>
-                    <td className="border-b px-4 h-fit">
-                      {price.toFixed(2)}
-                      {currencySymbol}
-                    </td>
-                    <td className="border-b px-4 h-fit">
-                      {itemTax.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 h-fit">
-                      {totalWithTax.toFixed(2)}
-                      {currencySymbol}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {/* Subtotal and Tax Rows */}
-          <div className="w-full mt-10 pb-4 flex">
-            <div className="w-[50%]">
-              {/* Payment Method and Notes */}
-              <div className="pl-4">
-                <p>
-                  <strong>Payment Method:</strong>{' '}
-                  {(() => {
-                    const raw =
-                      typeof contextData.payment_method === 'string'
-                        ? contextData.payment_method
-                        : contextData.payment_method?.[0] ||
-                          contextData.paymentMethod ||
-                          '';
-                    const match = PAYMENT_METHODS.find((m) => m.value === raw);
-                    return match?.label || raw || 'Not selected';
-                  })()}
-                </p>
-                {contextData.note && (
-                  <div className="mt-4">
-                    <strong>Notes:</strong>
-                    <p className="text-gray-600 mt-1">{contextData.note}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="w-[50%]">
-              <div className="mt-4 flex justify-between ">
-                <div className="w-1/2">Sub Total:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {subtotal.toFixed(2)}
-                  {currencySymbol}
-                </div>
-              </div>
-
-              <div className="mt-2 flex justify-between ">
-                <div className="w-1/2">Tax:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {totalTax.toFixed(2)}
-                  {currencySymbol}
-                </div>
-              </div>
-              {/* Horizontal Line */}
-              <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-medium">
-                <div className="w-1/2">Total:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {total.toFixed(2)}
-                  {currencySymbol}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex h-full min-h-0 w-full flex-col bg-white">
+      {previewError ? (
+        <p className="p-8 text-sm text-destructive">{previewError}</p>
+      ) : previewUrl ? (
+        <iframe title="Sales receipt PDF" src={previewUrl} className="h-full min-h-[70vh] w-full border-0 bg-white" />
+      ) : (
+        <p className="p-8 text-sm text-muted-foreground">Building sales receipt PDF…</p>
+      )}
     </div>
   );
 };

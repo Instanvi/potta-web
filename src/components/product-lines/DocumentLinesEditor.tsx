@@ -19,6 +19,7 @@ import { productApi } from '@potta/app/(routes)/pos/inventory/_utils/api';
 import type { Product } from '@potta/app/(routes)/pos/inventory/_utils/types';
 import { isStockTracked } from '@potta/app/(routes)/pos/utils/sale';
 import { priceCatalogSelection } from '@/lib/catalog-price';
+import { FIELD_SELECT } from '@/lib/field-styles';
 import { cn } from '@potta/lib/utils';
 
 export type DocumentLine = {
@@ -90,7 +91,7 @@ function ProductCombobox({
           role="combobox"
           aria-expanded={open}
           disabled={loading}
-          className="h-10 w-full justify-start gap-2 rounded-[2px] px-3 font-normal"
+          className={cn(FIELD_SELECT, 'justify-start gap-2 font-normal hover:bg-field')}
         >
           <Package size={16} className="shrink-0 text-primary" weight="duotone" />
           <span
