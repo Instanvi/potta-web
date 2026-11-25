@@ -1,4 +1,4 @@
-/** Soften root loading — avoid full-page spinner flash; top progress bar handles feedback. */
+/** Route transitions use NextTopLoader in the root layout — no full-page spinner. */
 export default function Loading() {
   return null;
 }

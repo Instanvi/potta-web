@@ -1,4 +1,5 @@
 import { Font, Image, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { resolvePdfLogoUrl } from '@/lib/brand';
 import type { PdfSeller } from '@/lib/org-to-seller';
 
 try {
@@ -188,8 +189,6 @@ export const pdfShellStyles = StyleSheet.create({
   },
 });
 
-const isHttpUrl = (v?: string | null): v is string => !!v && /^https?:\/\//i.test(v);
-
 /** Accent-coloured letterhead: seller identity left, document title/meta right. */
 export function LetterheadHeader({
   seller,
@@ -205,12 +204,13 @@ export function LetterheadHeader({
   accent?: string;
 }) {
   const s = pdfShellStyles;
+  const logoSrc = resolvePdfLogoUrl(seller.logoUrl);
   return (
     <View style={[s.header, { backgroundColor: accent }]}>
       <View style={s.headerSeller}>
-        {isHttpUrl(seller.logoUrl) ? (
+        {logoSrc ? (
           // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
-          <Image src={seller.logoUrl} style={s.headerLogo} />
+          <Image src={logoSrc} style={s.headerLogo} />
         ) : null}
         <View>
           <Text style={s.headerSellerName}>{seller.name || 'Your organization'}</Text>

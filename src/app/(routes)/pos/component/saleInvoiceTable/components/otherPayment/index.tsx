@@ -5,6 +5,7 @@ import OrderSummary from '../orderSummary';
 import CustomerPicker from '../CustomerPicker';
 import { useCheckout } from '../useCheckout';
 import type { PaymentMethod } from '@potta/app/(routes)/pos/utils/sale';
+import { ReceiptPrinterFormatSelect } from '../../../print/ReceiptPrinterFormatSelect';
 
 type Option = { id: string; method: PaymentMethod; label: string; icons: string[]; hint: string; referenceLabel: string };
 
@@ -40,9 +41,12 @@ const OtherPayment = () => {
 
   return (
     <div className="p-8 h-full bg-white">
-      <div className="mb-6">
-        <h3 className="text-2xl font-medium text-gray-800 mb-2">Other Payment Methods</h3>
-        <p className="text-gray-600">Select how the customer pays</p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 className="text-2xl font-medium text-gray-800 mb-2">Other Payment Methods</h3>
+          <p className="text-gray-600">Select how the customer pays</p>
+        </div>
+        <ReceiptPrinterFormatSelect printer={printer} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

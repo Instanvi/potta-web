@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import HoldOrderButton from '../holdOn';
 import CustomerPicker from '../CustomerPicker';
 import { useCheckout } from '../useCheckout';
+import { ReceiptPrinterFormatSelect } from '../../../print/ReceiptPrinterFormatSelect';
 
 const PayCash = () => {
   const { totals, checkout, reprint, lastOrder, printer, isPending, items, canSell } = useCheckout();
@@ -33,17 +34,20 @@ const PayCash = () => {
 
   return (
     <div className="p-4 h-full bg-white ">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <h3 className="text-2xl font-medium text-gray-800">Cash Payment</h3>
-        {lastOrder && (
-          <button
-            onClick={reprint}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 bg-gray-100 transition-colors"
-          >
-            <i className="w-4 h-4 ri-printer-line"></i>
-            Reprint Last Receipt
-          </button>
-        )}
+        <div className="flex flex-wrap items-end gap-3">
+          <ReceiptPrinterFormatSelect printer={printer} />
+          {lastOrder && (
+            <button
+              onClick={reprint}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 bg-gray-100 transition-colors"
+            >
+              <i className="w-4 h-4 ri-printer-line"></i>
+              Reprint Last Receipt
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

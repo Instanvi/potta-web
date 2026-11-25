@@ -1,14 +1,13 @@
 'use client';
 import { useEffect } from 'react';
 import useGetUser from '../app/(routes)/auth/hooks/useGetUser';
-import { PageLoader } from '@potta/components/ui/loaders';
 
 interface UserDataLoaderProps {
   children: React.ReactNode;
 }
 
+/** Auth bootstrap — no full-page spinner; NextTopLoader covers navigations. */
 const UserDataLoader: React.FC<UserDataLoaderProps> = ({ children }) => {
-    // This will load user data and update context, but only when this component mounts
   const { isLoading, error } = useGetUser();
 
   useEffect(() => {
@@ -17,12 +16,10 @@ const UserDataLoader: React.FC<UserDataLoaderProps> = ({ children }) => {
     }
   }, [error]);
 
-  // Show loading state while user data is being fetched
   if (isLoading) {
-    return <PageLoader />;
+    return <div className="min-h-screen bg-main-bg" aria-busy="true" aria-live="polite" />;
   }
 
-  // Once user data is loaded, render children
   return <>{children}</>;
 };
 

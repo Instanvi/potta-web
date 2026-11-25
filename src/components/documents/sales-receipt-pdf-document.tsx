@@ -1,4 +1,5 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { resolvePdfLogoUrl } from '@/lib/brand';
 import type { PdfSeller } from '@/lib/org-to-seller';
 
 try {
@@ -264,10 +265,13 @@ export function SalesReceiptPdfDocument({
           <View style={styles.parties}>
             <View style={styles.partyCol}>
               <Text style={styles.partyLabel}>From</Text>
-              {seller.logoUrl && /^https?:\/\//i.test(seller.logoUrl) ? (
-                // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
-                <Image src={seller.logoUrl} style={styles.logo} />
-              ) : null}
+              {(() => {
+                const logoSrc = resolvePdfLogoUrl(seller.logoUrl);
+                return logoSrc ? (
+                  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
+                  <Image src={logoSrc} style={styles.logo} />
+                ) : null;
+              })()}
               <Text style={styles.partyName}>{seller.name || 'Your organization'}</Text>
               {seller.email ? <Text style={styles.partyLine}>{seller.email}</Text> : null}
               {seller.phone ? <Text style={styles.partyLine}>{seller.phone}</Text> : null}

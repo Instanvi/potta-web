@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PageLoader } from '@potta/components/ui/loaders';
 import { NAV_MODULES } from '@/lib/navigation';
 import { useCanOpenRoute } from '@/lib/use-can-open-route';
 import { useAuthContextStore } from '@/store/use-auth-context-store';
@@ -30,5 +29,5 @@ export default function RootRedirect() {
     router.replace(first?.href ?? '/pos');
   }, [permissionsReady, waited, canOpen, router]);
 
-  return <PageLoader />;
+  return <div className="min-h-screen bg-main-bg" aria-busy="true" aria-live="polite" />;
 }

@@ -34,7 +34,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans bg-[var(--main-bg)] antialiased">
-        <NextTopLoader color="#0b5d1e" showSpinner={false} height={2} />
+        <NextTopLoader
+          color="#0b5d1e"
+          height={2}
+          showSpinner={false}
+          crawlSpeed={150}
+          speed={200}
+          shadow={false}
+        />
         <Suspense fallback={null}>
           <AppProviders>{children}</AppProviders>
         </Suspense>
