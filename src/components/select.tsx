@@ -52,10 +52,12 @@ const Select: React.FC<SelectProps> = ({
   placeholder,
 }) => {
   const hasEmptyOption = options.some((option) => option.value === '');
+  // Always a string so the select stays controlled. `undefined` switches it
+  // to uncontrolled and warns once a default value is cleared.
   const value =
     selectedValue === '' && hasEmptyOption
       ? EMPTY_OPTION_VALUE
-      : selectedValue || undefined;
+      : selectedValue || '';
   const emptyLabel = placeholder || name || 'Select…';
 
   return (
