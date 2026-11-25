@@ -201,7 +201,7 @@ export function DocumentPreviewShell({
       <div
         ref={contentRef}
         data-document-preview
-        className="min-h-0 flex-1 overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden [&>*]:h-full [&>*]:min-h-0 [&>*]:overflow-auto"
       >
         {children}
       </div>

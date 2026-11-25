@@ -1,46 +1,37 @@
 'use client';
 import DocumentWorkspace from '@potta/components/document-workspace';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
-import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
+import {
+  DocumentEditorSplit,
+  DocumentPreviewToggle,
+} from '@potta/components/document-editor-split';
 import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 
 const NewPurchaseOrderPage = () => {
-  const [showPreview, setShowPreview] = useState(false);
-  const openPreview = () => setShowPreview(true);
-  const closePreview = () => setShowPreview(false);
+  const [showPreview, setShowPreview] = useState(true);
+  const togglePreview = () => setShowPreview((v) => !v);
 
   return (
     <DocumentWorkspace
       title="Purchase order"
       closeHref="/account_payables/purchase"
+      bodyClassName="flex flex-col overflow-hidden"
       headerActions={
         <>
           <LocationSwitcher />
-          <button
-            type="button"
-            onClick={openPreview}
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-3 text-sm text-foreground hover:bg-accent"
-          >
-            <i className="ri-eye-line" />
-            Preview
-          </button>
+          <DocumentPreviewToggle open={showPreview} onToggle={togglePreview} />
         </>
       }
     >
-      <div className="flex h-full min-h-0 justify-center overflow-y-auto bg-main-bg p-4 pb-8 md:p-5">
-        <Left />
-      </div>
-
-      <DocumentPreviewDialog
+      <DocumentEditorSplit
         open={showPreview}
-        onOpenChange={(open) => !open && closePreview()}
+        onOpenChange={setShowPreview}
         downloadTitle="Purchase order"
-        dialogTitle="Purchase order preview"
-      >
-        <PdfView />
-      </DocumentPreviewDialog>
+        editor={<Left />}
+        preview={<PdfView />}
+      />
     </DocumentWorkspace>
   );
 };
