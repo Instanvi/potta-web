@@ -375,7 +375,7 @@ const Left = () => {
   const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
 
   return (
-    <div className="max-w-5xl min-w-5xl px-2 bg-transparent overflow-y-auto scroll bg-white ">
+    <div className="mx-auto w-full max-w-4xl scroll overflow-y-auto bg-white px-4 md:px-5">
       <div className="w-full grid grid-cols-4 gap-4">
         <div>
           <Select

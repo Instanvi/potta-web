@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               ) : (
                 <ImprovedCustomNavbar />
               )}
-              <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-white">{children}</main>
+              <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--main-bg)]">{children}</main>
             </div>
           </div>
         </div>

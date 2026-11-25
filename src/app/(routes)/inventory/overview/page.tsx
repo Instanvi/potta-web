@@ -1,7 +1,6 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { InventoryOverviewPage } from '@/components/books/InventoryOverviewPage';
-
+/** Trade Overview removed — land on products. */
 export default function Page() {
-  return <InventoryOverviewPage />;
+  redirect('/inventory');
 }

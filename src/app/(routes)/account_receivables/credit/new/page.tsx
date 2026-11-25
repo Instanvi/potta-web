@@ -5,14 +5,8 @@ import Left from './components/left';
 import PdfView from './components/pdfview';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import DocumentWorkspace from '@potta/components/document-workspace';
-import { DocumentPreviewShell } from '@potta/components/document-master-detail';
+import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@potta/components/shadcn/dialog';
 
 export default function NewCreditNotePage() {
   const [showPreview, setShowPreview] = useState(false);
@@ -50,29 +44,22 @@ export default function NewCreditNotePage() {
       }
     >
       <FileExtractDropzone onExtract={extractInvoiceData} extracting={extracting}>
-        <div className="flex h-full min-h-0 flex-col bg-white">
-          <div className="h-full min-h-0 overflow-y-auto bg-white">
+        <div className="flex h-full min-h-0 flex-col bg-main-bg">
+          <div className="h-full min-h-0 overflow-y-auto bg-main-bg">
             <Left onOpenPreview={openPreview} />
           </div>
         </div>
       </FileExtractDropzone>
 
-      <Dialog open={showPreview} onOpenChange={(open) => !open && closePreview()}>
-        <DialogContent className="flex h-[min(92vh,900px)] w-[min(96vw,920px)] max-w-none flex-col gap-0 overflow-hidden p-0">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Credit note preview</DialogTitle>
-          </DialogHeader>
-          <DocumentPreviewShell
-            title="Preview"
-            downloadTitle="Credit note"
-            onClose={closePreview}
-            onDownloadPdf={downloadPdf ?? undefined}
-            className="h-full min-h-0"
-          >
-            <PdfView onRegisterDownload={registerDownload} />
-          </DocumentPreviewShell>
-        </DialogContent>
-      </Dialog>
+      <DocumentPreviewDialog
+        open={showPreview}
+        onOpenChange={(open) => !open && closePreview()}
+        downloadTitle="Credit note"
+        dialogTitle="Credit note preview"
+        onDownloadPdf={downloadPdf ?? undefined}
+      >
+        <PdfView onRegisterDownload={registerDownload} />
+      </DocumentPreviewDialog>
     </DocumentWorkspace>
   );
 }

@@ -354,7 +354,7 @@ const Left = () => {
 
   return (
     <>
-      <div className="scroll w-full min-w-5xl max-w-5xl gap-4 overflow-y-auto bg-white px-2 pb-20">
+      <div className="scroll mx-auto w-full max-w-4xl gap-4 overflow-y-auto bg-white px-4 pb-20 md:px-5">
         <DocumentFormCard flush className="mb-3">
           <div className="mb-6 grid grid-cols-2 gap-4">
             <div className={`${errors.orderDate ? 'error-field' : ''}`}>

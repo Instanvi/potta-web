@@ -172,7 +172,6 @@ export const NAV_MODULES: NavModule[] = [
     icon: Package,
     matchPrefixes: ['/inventory', '/pos/inventory', '/account_payables/purchase'],
     items: [
-      { title: 'Overview', href: '/inventory/overview', icon: ChartPieSlice, appIcon: APP_ICONS.analytics },
       { title: 'Products and services', href: '/inventory', icon: Package, exact: true },
       { title: 'Categories', href: '/inventory/categories', icon: Tag },
       { title: 'Attributes', href: '/inventory/attributes', icon: SquaresFour },

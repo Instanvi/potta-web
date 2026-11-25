@@ -230,7 +230,7 @@ const Left = () => {
 
   return (
     <>
-      <DocumentFormShell className="w-full max-w-5xl">
+      <DocumentFormShell>
         <DocumentFormCard flush>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
             <div className="md:col-span-3">

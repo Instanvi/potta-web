@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 import { cn } from '@potta/lib/utils';
 
-/** Document canvas used by Invoice and Bill create screens — main-bg with white field cards. */
+/** Document canvas used by Invoice and Bill create screens — centered container on main-bg. */
 export function DocumentFormShell({
   className,
   children,
@@ -12,7 +12,12 @@ export function DocumentFormShell({
   children: ReactNode;
 }) {
   return (
-    <div className={cn('flex w-full flex-col gap-3 bg-white p-4 md:p-5', className)}>
+    <div
+      className={cn(
+        'mx-auto flex w-full max-w-4xl flex-col gap-3 bg-white p-4 md:p-5',
+        className,
+      )}
+    >
       {children}
     </div>
   );

@@ -97,6 +97,8 @@ interface LeftProps {
   isEditMode?: boolean;
   originalInvoice?: any;
   onSave?: () => void;
+  onOpenPreview?: () => void;
+  /** @deprecated Prefer onOpenPreview */
   onTogglePreview?: () => void;
   showPreview?: boolean;
 }
@@ -106,8 +108,8 @@ const Left = ({
   isEditMode = false,
   originalInvoice,
   onSave,
+  onOpenPreview,
   onTogglePreview,
-  showPreview = true,
 }: LeftProps) => {
   const context = useContext(ContextData);
   const router = useRouter();
@@ -889,11 +891,12 @@ const Left = ({
           <>
             <DocumentFooterLink
               onClick={() => {
-                if (onTogglePreview) onTogglePreview();
-                else toast.info('Preview is available in the side panel.');
+                if (onOpenPreview) onOpenPreview();
+                else if (onTogglePreview) onTogglePreview();
+                else toast.info('Preview is available from the header.');
               }}
             >
-              {showPreview ? 'Hide preview' : 'Print or Preview'}
+              Print or Preview
             </DocumentFooterLink>
             <DocumentFooterLink href="/account_receivables/recurring">
               Make recurring

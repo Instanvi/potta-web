@@ -34,6 +34,7 @@ import {
   DocumentFooterLink,
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
+import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
 
 const CURRENCIES: { value: BillCurrency; label: string }[] = [
@@ -56,6 +57,9 @@ interface BillFormProps {
   /** Called after save (with the new bill id) or cancel; defaults to navigating back to the bills list. */
   onDone?: (billId?: string) => void;
   showPreview?: boolean;
+  onOpenPreview?: () => void;
+  onClosePreview?: () => void;
+  /** @deprecated Prefer onOpenPreview — kept for older callers that toggle. */
   onTogglePreview?: () => void;
   /** When set, wraps form + preview under FormProvider for the split layout. */
   renderSplit?: (
@@ -68,7 +72,9 @@ interface BillFormProps {
 const BillForm = ({
   variant = 'page',
   onDone,
-  showPreview = true,
+  showPreview = false,
+  onOpenPreview,
+  onClosePreview,
   onTogglePreview,
   renderSplit,
 }: BillFormProps) => {
@@ -421,11 +427,12 @@ const BillForm = ({
         center={
           <DocumentFooterLink
             onClick={() => {
-              if (onTogglePreview) onTogglePreview();
-              else toast.info('Preview is available in the side panel.');
+              if (onOpenPreview) onOpenPreview();
+              else if (onTogglePreview) onTogglePreview();
+              else toast.info('Preview is available from the header.');
             }}
           >
-            {showPreview ? 'Hide preview' : 'Print or Preview'}
+            Print or Preview
           </DocumentFooterLink>
         }
         right={
@@ -463,7 +470,23 @@ const BillForm = ({
     );
   }
 
-  return <FormProvider {...methods}>{formColumn}</FormProvider>;
+  return (
+    <FormProvider {...methods}>
+      {formColumn}
+      <DocumentPreviewDialog
+        open={showPreview}
+        onOpenChange={(open) => {
+          if (open) onOpenPreview?.();
+          else onClosePreview?.();
+        }}
+        downloadTitle="Bill"
+        dialogTitle="Bill preview"
+        onDownloadPdf={downloadPdf ?? undefined}
+      >
+        <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />
+      </DocumentPreviewDialog>
+    </FormProvider>
+  );
 };
 
 export default BillForm;

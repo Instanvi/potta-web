@@ -200,7 +200,6 @@ const Left = ({ onOpenPreview }: LeftProps) => {
   return (
     <>
       <DocumentFormShell className="bg-white">
-        <div className="mx-auto w-full max-w-4xl space-y-3">
           {/* Customer + invoice + amount */}
           <DocumentFormCard flush>
             <div className="flex flex-wrap items-start justify-between gap-6">
@@ -316,7 +315,6 @@ const Left = ({ onOpenPreview }: LeftProps) => {
               )}
             </div>
           </DocumentFormCard>
-        </div>
       </DocumentFormShell>
 
       <DocumentFormFooter

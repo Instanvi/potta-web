@@ -18,6 +18,7 @@ import {
   DocumentFormCard,
   DocumentFormFooter,
   DocumentFormShell,
+  DocumentFooterLink,
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { FIELD_TEXTAREA } from '@/lib/field-styles';
@@ -80,7 +81,7 @@ interface SaleReceiptDto {
   lineItems: LineItemsDto[];
 }
 
-const Left = () => {
+const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
   const router = useRouter();
   const context = useContext(ContextData);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
@@ -315,7 +316,7 @@ const Left = () => {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto">
-      <DocumentFormShell className="w-full max-w-5xl pb-6">
+      <DocumentFormShell className="pb-6">
         <DocumentFormCard flush>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
             <div className="md:col-span-3">
@@ -485,6 +486,13 @@ const Left = () => {
           >
             Cancel
           </ShadcnButton>
+        }
+        center={
+          onOpenPreview ? (
+            <DocumentFooterLink onClick={onOpenPreview}>
+              Print or Preview
+            </DocumentFooterLink>
+          ) : null
         }
         right={
           <ShadcnButton
