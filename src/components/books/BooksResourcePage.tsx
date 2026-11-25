@@ -52,6 +52,8 @@ import { fetchAllPages } from '@/lib/fetch-all-pages';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import {
   DocumentChannelMenu,
+  documentChannelOptions,
+  partyContactFromRecord,
   type DocumentChannel,
 } from '@/components/document-channel-menu';
 import { sendPartyDocument } from '@/lib/document-send';
@@ -487,10 +489,9 @@ export function BooksResourcePage({
                 <DocumentChannelMenu
                   label={selected.lastSentAt ? 'Resend' : 'Send'}
                   disabled={sending}
-                  options={[
-                    { channel: 'email', label: 'Email', description: 'Party email on file' },
-                    { channel: 'sms', label: 'SMS', description: 'Party phone on file' },
-                  ]}
+                  options={documentChannelOptions(
+                    partyContactFromRecord(selected),
+                  )}
                   onSelect={(channel) => setSendChannel(channel)}
                 />
               ) : null}
@@ -534,7 +535,12 @@ export function BooksResourcePage({
             const id = rowId(selected);
             if (!id) return;
             setSending(true);
-            void sendPartyDocument(documentKind, id, { channel: sendChannel })
+            const party = partyContactFromRecord(selected);
+            void sendPartyDocument(documentKind, id, {
+              channel: sendChannel,
+              to: sendChannel === 'email' ? party.email : undefined,
+              phone: sendChannel === 'sms' ? party.phone : undefined,
+            })
               .then((res) => {
                 toast.success(
                   res.channel === 'sms'

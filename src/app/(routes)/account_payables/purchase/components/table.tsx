@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
 import { MoreVertical } from 'lucide-react';
@@ -16,8 +17,11 @@ import { MoreVertical } from 'lucide-react';
 import Button from '@potta/components/button';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import ConfirmModal from '../../../_shared/ConfirmModal';
 import { ErrorState, ListToolbar } from '../../../_shared/states';
 import { exportRows } from '@/lib/export-file';
+import { sendPartyDocument } from '@/lib/document-send';
+import type { DocumentChannel } from '@/components/document-channel-menu';
 
 import useGetAllPurchaseOrders from '../hooks/useGetAllPurchaseOrders';
 import useApprovePurchaseOrder from '../hooks/useApprovePurchaseOrder';
@@ -41,6 +45,8 @@ interface PurchaseOrder {
   orderTotal: number;
   salePerson: {
     name: string;
+    email?: string | null;
+    phone?: string | null;
   };
 }
 
@@ -63,6 +69,11 @@ const InvoiceTable = () => {
   const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = useState<
     string | null
   >(null);
+  const [sendTarget, setSendTarget] = useState<{
+    order: PurchaseOrder;
+    channel: DocumentChannel;
+  } | null>(null);
+  const [sending, setSending] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
@@ -280,54 +291,106 @@ const InvoiceTable = () => {
       id: 'actions',
       enableHiding: false,
       header: '',
-      cell: ({ row }) => (
-        <div className="flex justify-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-1 hover:bg-gray-100 rounded">
-                <MoreVertical size={16} />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => handleViewPurchaseOrder(row.original)}
-              >
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleEditPurchaseOrder(row.original)}
-                disabled={
-                  row.original.status === 'APPROVED' ||
-                  row.original.status === 'SHIPPED'
-                }
-              >
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleApprovePurchaseOrder(row.original)}
-                disabled={
-                  row.original.status === 'APPROVED' ||
-                  row.original.status === 'SHIPPED' ||
-                  approveMutation.isPending
-                }
-              >
-                {approveMutation.isPending ? 'Approving...' : 'Approve'}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleDeletePurchaseOrder(row.original)}
-                disabled={
-                  row.original.status === 'APPROVED' ||
-                  row.original.status === 'SHIPPED' ||
-                  deleteMutation.isPending
-                }
-                className="text-red-600 focus:text-red-700"
-              >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const order = row.original;
+        const vendorEmail = (order.salePerson?.email || '').trim();
+        const vendorPhone = (order.salePerson?.phone || '').trim();
+        const hasVendor = Boolean(order.salePerson);
+
+        return (
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-1 hover:bg-gray-100 rounded">
+                  <MoreVertical size={16} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onClick={() => handleViewPurchaseOrder(order)}
+                >
+                  View Details
+                </DropdownMenuItem>
+                {hasVendor ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      disabled={!vendorEmail || sending}
+                      title={
+                        vendorEmail
+                          ? `Email download link to ${vendorEmail}`
+                          : 'Add a vendor email first'
+                      }
+                      onClick={() => {
+                        if (!vendorEmail) return;
+                        setSendTarget({ order, channel: 'email' });
+                      }}
+                    >
+                      <i className="ri-mail-line mr-2" />
+                      <span className="flex min-w-0 flex-col">
+                        <span>Send by email</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {vendorEmail || 'No email on file'}
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={!vendorPhone || sending}
+                      title={
+                        vendorPhone
+                          ? `Text download link to ${vendorPhone}`
+                          : 'Add a vendor phone first'
+                      }
+                      onClick={() => {
+                        if (!vendorPhone) return;
+                        setSendTarget({ order, channel: 'sms' });
+                      }}
+                    >
+                      <i className="ri-message-2-line mr-2" />
+                      <span className="flex min-w-0 flex-col">
+                        <span>Send by SMS</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {vendorPhone || 'No phone on file'}
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                ) : null}
+                <DropdownMenuItem
+                  onClick={() => handleEditPurchaseOrder(order)}
+                  disabled={
+                    order.status === 'APPROVED' || order.status === 'SHIPPED'
+                  }
+                >
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleApprovePurchaseOrder(order)}
+                  disabled={
+                    order.status === 'APPROVED' ||
+                    order.status === 'SHIPPED' ||
+                    approveMutation.isPending
+                  }
+                >
+                  {approveMutation.isPending ? 'Approving...' : 'Approve'}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleDeletePurchaseOrder(order)}
+                  disabled={
+                    order.status === 'APPROVED' ||
+                    order.status === 'SHIPPED' ||
+                    deleteMutation.isPending
+                  }
+                  className="text-red-600 focus:text-red-700"
+                >
+                  {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
     },
   ];
 
@@ -413,6 +476,64 @@ const InvoiceTable = () => {
         open={viewModalOpen}
         setOpen={setViewModalOpen}
         purchaseOrderId={selectedPurchaseOrderId}
+      />
+      <ConfirmModal
+        open={Boolean(sendTarget)}
+        title={
+          sendTarget?.channel === 'sms'
+            ? 'Send purchase order by SMS?'
+            : 'Send purchase order by email?'
+        }
+        message={
+          sendTarget?.channel === 'sms'
+            ? `Text a download link for ${sendTarget.order.orderNumber} to ${
+                sendTarget.order.salePerson?.phone?.trim() || 'the vendor'
+              }?`
+            : `Email a download link for ${sendTarget?.order.orderNumber || ''} to ${
+                sendTarget?.order.salePerson?.email?.trim() || 'the vendor'
+              }?`
+        }
+        confirmText="Send"
+        isLoading={sending}
+        onClose={() => {
+          if (!sending) setSendTarget(null);
+        }}
+        onConfirm={() => {
+          if (!sendTarget) return;
+          const { order, channel } = sendTarget;
+          const email = (order.salePerson?.email || '').trim();
+          const phone = (order.salePerson?.phone || '').trim();
+          setSending(true);
+          void sendPartyDocument('purchase_order', order.uuid, {
+            channel,
+            to: channel === 'email' ? email : undefined,
+            phone: channel === 'sms' ? phone : undefined,
+          })
+            .then((res) => {
+              toast.success(
+                res.channel === 'sms'
+                  ? `Purchase order texted to ${res.to}`
+                  : `Purchase order emailed to ${res.to}`,
+              );
+              setSendTarget(null);
+            })
+            .catch((err: unknown) => {
+              const message =
+                err && typeof err === 'object' && 'response' in err
+                  ? String(
+                      (
+                        err as {
+                          response?: { data?: { message?: string } };
+                        }
+                      ).response?.data?.message || '',
+                    )
+                  : '';
+              toast.error(
+                message || 'Failed to send purchase order download link',
+              );
+            })
+            .finally(() => setSending(false));
+        }}
       />
     </div>
   );

@@ -5,8 +5,14 @@ import {
   CreditNotePdfDocument,
   type CreditNotePdfProps,
 } from '@/components/documents/credit-note-pdf-document';
+import {
+  DocumentChannelMenu,
+  documentChannelOptions,
+  type DocumentChannel,
+} from '@/components/document-channel-menu';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
+import { sendPartyDocument } from '@/lib/document-send';
 import { orgToSeller } from '@/lib/org-to-seller';
 import { printReactPdf } from '@/lib/print-react-pdf';
 import {
@@ -15,6 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@potta/components/ui/sheet';
+import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate } from '../../../_shared/format';
 import { ErrorState, LoadingState } from '../../../_shared/states';
 import { useCreditNote } from '../_hooks';
@@ -37,8 +44,13 @@ const CreditNoteDetailsSheet = ({ creditNoteId, onClose }: Props) => {
   const { data, isLoading, error, refetch } = useCreditNote(creditNoteId ?? '');
   const { data: org } = useOrganizationProfile();
   const [pdfBusy, setPdfBusy] = useState<'download' | 'print' | null>(null);
+  const [confirmSend, setConfirmSend] = useState<DocumentChannel | null>(null);
+  const [sending, setSending] = useState(false);
   const currency = data?.currency || data?.invoice?.currency || undefined;
   const lineItems = Array.isArray(data?.lineItems) ? data.lineItems : [];
+  const party = data?.customer || data?.salePerson || null;
+  const partyEmail = (party?.email || '').trim();
+  const partyPhone = (party?.phone || '').trim();
 
   const buildPdf = () => {
     if (!data) return null;
@@ -109,7 +121,16 @@ const CreditNoteDetailsSheet = ({ creditNoteId, onClose }: Props) => {
             <ErrorState error={error} onRetry={() => refetch()} />
           ) : data ? (
             <div>
-              <div className="mb-3 flex justify-end gap-2">
+              <div className="mb-3 flex flex-wrap justify-end gap-2">
+                <DocumentChannelMenu
+                  label="Send"
+                  disabled={sending}
+                  options={documentChannelOptions({
+                    email: partyEmail,
+                    phone: partyPhone,
+                  })}
+                  onSelect={(channel) => setConfirmSend(channel)}
+                />
                 <button
                   type="button"
                   className="inline-flex items-center gap-1.5 border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 hover:bg-gray-50 disabled:opacity-50"
@@ -194,6 +215,59 @@ const CreditNoteDetailsSheet = ({ creditNoteId, onClose }: Props) => {
           ) : null}
         </div>
       </SheetContent>
+      <ConfirmModal
+        open={Boolean(confirmSend && data)}
+        title={
+          confirmSend === 'sms'
+            ? 'Send credit note by SMS?'
+            : 'Send credit note by email?'
+        }
+        message={
+          confirmSend === 'sms'
+            ? `Text a download link for ${data?.creditNoteId || 'this credit note'} to ${
+                partyPhone || 'the customer'
+              }?`
+            : `Email a download link for ${data?.creditNoteId || 'this credit note'} to ${
+                partyEmail || 'the customer'
+              }?`
+        }
+        confirmText="Send"
+        isLoading={sending}
+        onClose={() => {
+          if (!sending) setConfirmSend(null);
+        }}
+        onConfirm={() => {
+          if (!data || !confirmSend) return;
+          setSending(true);
+          void sendPartyDocument('credit_note', data.uuid, {
+            channel: confirmSend,
+            to: confirmSend === 'email' ? partyEmail : undefined,
+            phone: confirmSend === 'sms' ? partyPhone : undefined,
+          })
+            .then((res) => {
+              toast.success(
+                res.channel === 'sms'
+                  ? `Credit note texted to ${res.to}`
+                  : `Credit note emailed to ${res.to}`,
+              );
+              setConfirmSend(null);
+            })
+            .catch((err: unknown) => {
+              const message =
+                err && typeof err === 'object' && 'response' in err
+                  ? String(
+                      (
+                        err as {
+                          response?: { data?: { message?: string } };
+                        }
+                      ).response?.data?.message || '',
+                    )
+                  : '';
+              toast.error(message || 'Failed to send credit note download link');
+            })
+            .finally(() => setSending(false));
+        }}
+      />
     </Sheet>
   );
 };
