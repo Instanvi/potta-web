@@ -23,6 +23,8 @@ const NewSalesReciept = () => {
     <DocumentWorkspace
       title="Sales receipt"
       closeHref="/account_receivables/sales_receipts"
+      className="bg-white"
+      bodyClassName="bg-white"
       headerActions={
         <>
           <LocationSwitcher />
@@ -37,8 +39,8 @@ const NewSalesReciept = () => {
         </>
       }
     >
-      <div className="flex h-full min-h-0 flex-col bg-main-bg">
-        <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-main-bg">
+      <div className="flex h-full min-h-0 flex-col bg-white">
+        <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-white">
           <Left onOpenPreview={openPreview} />
         </div>
       </div>
