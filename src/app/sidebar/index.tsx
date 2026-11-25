@@ -214,6 +214,8 @@ const Sidebars = () => {
 
   const top = modules.filter((m) => m.placement !== 'bottom');
   const bottom = modules.filter((m) => m.placement === 'bottom');
+  // Home already is the dashboard. The links panel would only repeat Home and All dashboards.
+  const hidePanel = pathname === '/home';
 
   return (
     <aside
@@ -276,7 +278,7 @@ const Sidebars = () => {
         </div>
       </div>
 
-      {!collapsed && active && (
+      {!collapsed && active && !hidePanel && (
         <div
           className="flex min-w-0 flex-col border-l border-black/[0.06]"
           style={{ width: SIDEBAR_PANEL_WIDTH }}

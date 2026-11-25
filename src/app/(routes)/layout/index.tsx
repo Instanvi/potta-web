@@ -3,16 +3,19 @@ import ImprovedCustomNavbar from '../../../components/improved-custom-navbar';
 import Sidebars from '@potta/app/sidebar';
 import Navbar from './navbar';
 import { Suspense, useContext } from 'react';
+import { usePathname } from 'next/navigation';
 import { ContextData } from '../../../components/providers/DataProvider';
 import React from 'react';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const context = useContext(ContextData);
+  const pathname = usePathname();
   const useSidebar = context?.layoutMode === 'sidebar';
-  // Keep a stable content offset: rail only (56) vs rail + links panel (264).
-  // Dashboards/Home use the same shell as every other module — no top-nav swap.
+  // Home keeps the icon rail only. The links panel would sit beside it as a second sidebar.
+  const railOnly = !!context?.toggle || pathname === '/home';
+  // Rail is 56px; rail plus the links panel is 264px.
   const contentPad = useSidebar
-    ? context?.toggle
+    ? railOnly
       ? 'w-full pl-14'
       : 'w-full pl-[264px]'
     : 'w-full';
