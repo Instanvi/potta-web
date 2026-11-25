@@ -56,13 +56,13 @@ type SearchableSelectProps =
   | SearchableSelectSingleProps
   | SearchableSelectMultiProps;
 
-const FIELD_BG = '#fafafa';
+const FIELD_BG = '#f1f2f4';
 
 function buildStyles(error?: string) {
   return {
     control: (provided: any, state: any) => ({
       ...provided,
-      borderWidth: '0 0 1px 0',
+      borderWidth: '1px',
       borderStyle: 'solid',
       borderColor: error
         ? '#e5181b'
@@ -70,7 +70,7 @@ function buildStyles(error?: string) {
           ? '#0b5d1e'
           : 'rgba(0,0,0,0.15)',
       boxShadow: 'none',
-      borderRadius: '2px 2px 0 0',
+      borderRadius: '2px',
       paddingTop: '0',
       paddingBottom: '0',
       paddingLeft: '0.25rem',

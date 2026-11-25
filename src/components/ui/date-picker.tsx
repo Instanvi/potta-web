@@ -6,6 +6,7 @@ import { CalendarIcon, X } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { cn } from '@potta/lib/utils';
+import { FIELD_SELECT } from '@/lib/field-styles';
 import { Calendar } from '@potta/components/shadcn/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@potta/components/shadcn/popover';
 
@@ -34,11 +35,11 @@ const triggerClass = (
   _outlined?: boolean,
 ) =>
   cn(
-    'flex h-10 w-full items-center gap-2 rounded-t-[2px] rounded-b-none border-0 border-b bg-zinc-50 px-3 text-left text-sm font-normal leading-none shadow-none transition-colors',
-    'focus:outline-none focus-visible:border-primary focus-visible:ring-0',
-    error ? 'border-destructive' : 'border-black/15',
+    FIELD_SELECT,
+    'gap-2 text-left',
+    error && 'border-destructive',
     !hasValue && 'text-black/35',
-    disabled && 'cursor-not-allowed opacity-60'
+    disabled && 'cursor-not-allowed opacity-60',
   );
 
 const FieldLabel = ({ label, required, htmlFor }: { label?: React.ReactNode; required?: boolean; htmlFor?: string }) =>

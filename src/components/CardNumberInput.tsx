@@ -46,7 +46,7 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
         maxLength={19}
         autoComplete="cc-number"
         placeholder={placeholder}
-        className="mt-2 h-10 w-full tracking-widest rounded-t-[2px] rounded-b-none border-0 border-b border-black/15 bg-white px-3 text-sm font-normal leading-none text-foreground outline-none shadow-none placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0"
+        className="mt-2 h-10 w-full tracking-widest rounded-[2px] border border-black/15 bg-field px-3 text-sm font-normal leading-none text-foreground outline-none shadow-none placeholder:text-black/35 focus-visible:border-primary focus-visible:ring-0"
         inputMode="numeric"
         pattern="[0-9 ]*"
       />
