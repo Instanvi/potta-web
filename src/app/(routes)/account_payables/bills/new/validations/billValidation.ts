@@ -56,16 +56,16 @@ export const billSchema = yup.object({
   vendorId: yup.string().required('Select a vendor'),
   purchaseOrderId: yup.string().optional(),
   vendorInvoiceNumber: yup.string().trim().max(100, 'At most 100 characters').optional(),
-  issueDate: yup.string().required('Issue date is required'),
+  issueDate: yup.string().optional(),
   dueDate: yup
     .string()
-    .required('Due date is required')
+    .optional()
     .test('after-issue', 'Due date cannot be before the issue date', function (value) {
       const { issueDate } = this.parent as BillFormValues;
       return !value || !issueDate || value >= issueDate;
     }),
-  currency: yup.mixed<BillCurrency>().oneOf(['XAF', 'USD', 'EUR']).required(),
-  paymentMethod: yup.string().trim().required('Select a payment method'),
+  currency: yup.mixed<BillCurrency>().oneOf(['XAF', 'USD', 'EUR']).optional(),
+  paymentMethod: yup.string().trim().optional(),
   expenseAccountCode: yup
     .string()
     .trim()

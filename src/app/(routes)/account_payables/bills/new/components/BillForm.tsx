@@ -286,7 +286,7 @@ const BillForm = ({
 
       <DocumentFormCard flush={!inSheet}>
         <DocumentSectionTitle>Bill details</DocumentSectionTitle>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Input
               type="text"
@@ -304,8 +304,8 @@ const BillForm = ({
               }
             />
           </div>
-          <FormDatePicker control={control} name="issueDate" label="Bill date" required />
-          <FormDatePicker control={control} name="dueDate" label="Due date" required min={issueDate} />
+          <FormDatePicker control={control} name="issueDate" label="Bill date" />
+          <FormDatePicker control={control} name="dueDate" label="Due date" min={issueDate} />
           <Controller
             control={control}
             name="currency"
@@ -328,17 +328,20 @@ const BillForm = ({
             errors={errors.expenseAccountCode}
             inputClass="!bg-white"
           />
-          <Controller
-            control={control}
-            name="paymentMethod"
-            render={({ field }) => (
-              <PaymentMethodSelect
-                value={field.value}
-                onChange={(code) => field.onChange(code as PaymentMethod)}
-                error={errors.paymentMethod?.message}
-              />
-            )}
-          />
+          <div className="sm:col-span-2 lg:col-span-3">
+            <Controller
+              control={control}
+              name="paymentMethod"
+              render={({ field }) => (
+                <PaymentMethodSelect
+                  value={field.value}
+                  onChange={(code) => field.onChange(code as PaymentMethod)}
+                  error={errors.paymentMethod?.message}
+                  required={false}
+                />
+              )}
+            />
+          </div>
         </div>
       </DocumentFormCard>
 

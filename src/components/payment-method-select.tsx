@@ -28,7 +28,7 @@ export function PaymentMethodSelect({
   onChange,
   error,
   label = 'Payment method',
-  required = true,
+  required = false,
   allowCreate = true,
   extraOptions = [],
 }: Props) {
@@ -89,7 +89,6 @@ export function PaymentMethodSelect({
           placeholder="Select payment method"
           error={error}
         />
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
       </div>
       {allowCreate && (
         <button
