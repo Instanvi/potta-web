@@ -1,6 +1,7 @@
 'use client';
 import { Check } from '@phosphor-icons/react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useGetAllSalesReceipts } from '../hooks/useGetAllReceipts';
 import { Filters, SalesReceipt } from '../utils/types';
 import DynamicFilter from '@potta/components/dynamic-filter';
@@ -12,6 +13,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from '@potta/components/shadcn/dropdown';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
@@ -20,7 +22,10 @@ import { DataTableViewOptions } from '@potta/components/ui/data-table-view-optio
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
+import ConfirmModal from '../../../_shared/ConfirmModal';
 import { exportRows } from '@/lib/export-file';
+import { sendPartyDocument } from '@/lib/document-send';
+import type { DocumentChannel } from '@/components/document-channel-menu';
 
 
 /** saleDate range for a date preset, as a nestjs-paginate $btw filter (local days). */
@@ -98,6 +103,11 @@ const SaleTable = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [receiptDetails, setReceiptDetails] =
     useState<ResponseSalesReceipt | null>(null);
+  const [sendTarget, setSendTarget] = useState<{
+    receipt: ResponseSalesReceipt;
+    channel: DocumentChannel;
+  } | null>(null);
+  const [sending, setSending] = useState(false);
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
@@ -232,6 +242,10 @@ const SaleTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row: { original } }) => {
+        const customerEmail = (original.customer?.email || '').trim();
+        const customerPhone = (original.customer?.phone || '').trim();
+        const hasCustomer = Boolean(original.customer);
+
         return (
           <div className="flex justify-center">
             <DropdownMenu>
@@ -244,7 +258,7 @@ const SaleTable = () => {
                   <i className="ri-more-2-fill text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -257,6 +271,56 @@ const SaleTable = () => {
                   <i className="ri-eye-line mr-2" />
                   View
                 </DropdownMenuItem>
+                {hasCustomer ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      disabled={!customerEmail || sending}
+                      title={
+                        customerEmail
+                          ? `Email download link to ${customerEmail}`
+                          : 'Add a customer email first'
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!customerEmail) return;
+                        setSendTarget({ receipt: original, channel: 'email' });
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <i className="ri-mail-line mr-2" />
+                      <span className="flex min-w-0 flex-col">
+                        <span>Send by email</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {customerEmail || 'No email on file'}
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={!customerPhone || sending}
+                      title={
+                        customerPhone
+                          ? `Text download link to ${customerPhone}`
+                          : 'Add a customer phone first'
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!customerPhone) return;
+                        setSendTarget({ receipt: original, channel: 'sms' });
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <i className="ri-message-2-line mr-2" />
+                      <span className="flex min-w-0 flex-col">
+                        <span>Send by SMS</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {customerPhone || 'No phone on file'}
+                        </span>
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                ) : null}
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -372,6 +436,65 @@ const SaleTable = () => {
           setOpen={setIsViewOpen}
         />
       )}
+      <ConfirmModal
+        open={Boolean(sendTarget)}
+        title={
+          sendTarget?.channel === 'sms'
+            ? 'Send receipt by SMS?'
+            : 'Send receipt by email?'
+        }
+        message={
+          sendTarget?.channel === 'sms'
+            ? `Text a download link for receipt ${
+                sendTarget.receipt.receiptNumber ||
+                sendTarget.receipt.saleReceiptId
+              } to ${sendTarget.receipt.customer?.phone?.trim() || 'the customer'}?`
+            : `Email a download link for receipt ${
+                sendTarget?.receipt.receiptNumber ||
+                sendTarget?.receipt.saleReceiptId ||
+                ''
+              } to ${sendTarget?.receipt.customer?.email?.trim() || 'the customer'}?`
+        }
+        confirmText="Send"
+        isLoading={sending}
+        onClose={() => {
+          if (!sending) setSendTarget(null);
+        }}
+        onConfirm={() => {
+          if (!sendTarget) return;
+          const { receipt, channel } = sendTarget;
+          const email = (receipt.customer?.email || '').trim();
+          const phone = (receipt.customer?.phone || '').trim();
+          setSending(true);
+          void sendPartyDocument('sales_receipt', receipt.uuid, {
+            channel,
+            to: channel === 'email' ? email : undefined,
+            phone: channel === 'sms' ? phone : undefined,
+          })
+            .then((res) => {
+              toast.success(
+                res.channel === 'sms'
+                  ? `Receipt texted to ${res.to}`
+                  : `Receipt emailed to ${res.to}`,
+              );
+              setSendTarget(null);
+            })
+            .catch((err: unknown) => {
+              const message =
+                err && typeof err === 'object' && 'response' in err
+                  ? String(
+                      (
+                        err as {
+                          response?: { data?: { message?: string } };
+                        }
+                      ).response?.data?.message || '',
+                    )
+                  : '';
+              toast.error(message || 'Failed to send receipt download link');
+            })
+            .finally(() => setSending(false));
+        }}
+      />
     </div>
   );
 };
