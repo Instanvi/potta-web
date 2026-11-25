@@ -348,10 +348,7 @@ const Left = ({ onOpenPreview }: LeftProps) => {
         }
       />
 
-      <SliderCustomer
-        open={isAddCustomerDrawer}
-        setOpen={setIsAddCustomerDrawer}
-      />
+      <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} showTrigger={false} />
     </>
   );
 };

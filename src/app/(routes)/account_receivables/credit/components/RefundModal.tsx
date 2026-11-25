@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import Modal from '@potta/components/modal';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
-import Select from '@potta/components/select';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { useRefundCreditNote } from '../_hooks';
-import { CreditNote, REFUND_METHODS, RefundMethod } from '../_utils/types';
+import { CreditNote } from '../_utils/types';
 
 interface Props {
   creditNote: CreditNote | null;
@@ -15,7 +15,7 @@ interface Props {
 const RefundModal = ({ creditNote, onClose }: Props) => {
   const refund = useRefundCreditNote();
   const [amount, setAmount] = useState('');
-  const [method, setMethod] = useState<RefundMethod>('CASH');
+  const [method, setMethod] = useState('CASH');
   const [bankDetails, setBankDetails] = useState('');
   const [description, setDescription] = useState('');
 
@@ -31,9 +31,10 @@ const RefundModal = ({ creditNote, onClose }: Props) => {
   const max = Number(creditNote?.creditAmount ?? 0);
   const value = Number(amount);
   const invalid = !value || value <= 0 || value > max;
+  const isBank = method === 'BANK_TRANSFER' || /bank/i.test(method);
 
   const submit = () => {
-    if (!creditNote || invalid) return;
+    if (!creditNote || invalid || !method) return;
     refund.mutate(
       {
         id: creditNote.uuid,
@@ -41,13 +42,11 @@ const RefundModal = ({ creditNote, onClose }: Props) => {
           refundAmount: value,
           refundMethod: method,
           bankDetails:
-            method === 'BANK_TRANSFER' && bankDetails.trim()
-              ? bankDetails.trim()
-              : undefined,
+            isBank && bankDetails.trim() ? bankDetails.trim() : undefined,
           description: description.trim() || undefined,
         },
       },
-      { onSuccess: onClose }
+      { onSuccess: onClose },
     );
   };
 
@@ -58,7 +57,7 @@ const RefundModal = ({ creditNote, onClose }: Props) => {
       title={`Refund ${creditNote?.creditNoteId ?? ''}`}
       width="max-w-lg"
     >
-      <div className="px-6 pb-6 space-y-4">
+      <div className="space-y-4 px-6 pb-6">
         <Input
           type="number"
           name="refundAmount"
@@ -73,14 +72,13 @@ const RefundModal = ({ creditNote, onClose }: Props) => {
               : undefined
           }
         />
-        <Select
+        <PaymentMethodSelect
           label="Refund method"
-          options={REFUND_METHODS}
-          selectedValue={method}
-          onChange={(v: RefundMethod) => setMethod(v)}
-          bg="bg-white"
+          value={method}
+          onChange={setMethod}
+          extraOptions={[{ label: 'Account credit', value: 'ACCOUNT_CREDIT' }]}
         />
-        {method === 'BANK_TRANSFER' && (
+        {isBank && (
           <Input
             type="text"
             name="bankDetails"
@@ -100,11 +98,11 @@ const RefundModal = ({ creditNote, onClose }: Props) => {
         <div className="flex justify-end gap-2 pt-2">
           <Button text="Cancel" type="button" theme="gray" color onClick={onClose} />
           <Button
-            text="Process refund"
+            text="Refund"
             type="button"
-            onClick={submit}
             isLoading={refund.isPending}
-            disabled={invalid || refund.isPending}
+            disabled={refund.isPending || invalid || !method}
+            onClick={submit}
           />
         </div>
       </div>

@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="item-receipt"
       title="Item receipt"
+      createHref="/inventory/receipts/new"
       documentKind="item_receipt"
       columns={[
         { key: 'purchaseOrderId', label: 'PO' },

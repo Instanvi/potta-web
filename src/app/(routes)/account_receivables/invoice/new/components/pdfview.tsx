@@ -12,6 +12,8 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
+import { resolveLetterheadLogoUrl, absoluteBrandUrl } from '@/lib/brand';
+import { formatPartyAddress } from '@/lib/party-address';
 import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { pdf } from '@react-pdf/renderer';
@@ -137,7 +139,10 @@ const PdfView = ({
         email: org?.businessEmail,
         phone: org?.businessPhone,
         addressLines: formatOrgAddress(org),
-        logoUrl: null,
+        logoUrl: (() => {
+          const src = resolveLetterheadLogoUrl(letterhead.logo, org?.logo, 'png');
+          return src ? absoluteBrandUrl(src) : null;
+        })(),
         registrationNumber: org?.registrationNumber,
         taxId: org?.taxIdentificationNumber,
       },
@@ -148,7 +153,7 @@ const PdfView = ({
             phone: customerDetails.phone,
             address:
               billingAddress ||
-              customerDetails.address?.address ||
+              formatPartyAddress(customerDetails.address) ||
               undefined,
           }
         : null,
@@ -182,6 +187,7 @@ const PdfView = ({
     invoiceColor,
     invoiceNumber,
     invoiceType,
+    letterhead.logo,
     org,
     paymentMethodLabel,
     paymentReference,

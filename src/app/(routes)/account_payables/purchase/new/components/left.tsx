@@ -6,6 +6,7 @@ import DynamicTable from './newtableInvoice';
 import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllVendors from '@potta/app/(routes)/vendors/hooks/useGetAllVendors';
+import SliderVendor from '@potta/app/(routes)/vendors/components/vendorSlider';
 import { toast } from 'sonner';
 import TextArea from '@potta/components/textArea';
 import useCreatePurchaseOrder from '../hooks/useCreatePurchase';
@@ -67,7 +68,11 @@ const Left = () => {
     useState<string>('');
 
   // Vendor data fetch
-  const { data: vendorData, isLoading: vendorsLoading } = useGetAllVendors({
+  const {
+    data: vendorData,
+    isLoading: vendorsLoading,
+    refetch: refetchVendors,
+  } = useGetAllVendors({
     page: 1,
     limit: 100,
   });
@@ -78,6 +83,7 @@ const Left = () => {
   const [requiredDate, setRequiredDate] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [selectedVendor, setSelectedVendor] = useState<Option | null>(null);
+  const [addVendorOpen, setAddVendorOpen] = useState(false);
   const [shipDate, setShipDate] = useState('');
   const [status, setStatus] = useState('PENDING');
   const [shippingAddress, setShippingAddress] = useState('');
@@ -396,31 +402,44 @@ const Left = () => {
 
           <div className="mt-2 grid grid-cols-2 gap-4">
             <div className={`${errors.vendorId ? 'error-field' : ''}`}>
-              <SearchSelect
-                label={
-                  <>
-                    Vendor
-                    <RequiredMark />
-                  </>
-                }
-                options={vendorOptions}
-                value={selectedVendor}
-                onChange={(option: Option | null) => {
-                  setSelectedVendor(option);
-                  handleInputChange('vendorId', option?.value || '');
+              <div className="flex items-end gap-2">
+                <div className="min-w-0 flex-1">
+                  <SearchSelect
+                    label={
+                      <>
+                        Vendor
+                        <RequiredMark />
+                      </>
+                    }
+                    options={vendorOptions}
+                    value={selectedVendor}
+                    onChange={(option: Option | null) => {
+                      setSelectedVendor(option);
+                      handleInputChange('vendorId', option?.value || '');
 
-                  if (option) {
-                    context?.setData((prevData: any) => ({
-                      ...prevData,
-                      vendorName: option.label,
-                    }));
-                  }
-                }}
-                isLoading={vendorsLoading}
-                placeholder="Select a vendor..."
-                isClearable={true}
-                isSearchable={true}
-              />
+                      if (option) {
+                        context?.setData((prevData: any) => ({
+                          ...prevData,
+                          vendorName: option.label,
+                        }));
+                      }
+                    }}
+                    isLoading={vendorsLoading}
+                    placeholder="Select a vendor..."
+                    isClearable={true}
+                    isSearchable={true}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAddVendorOpen(true)}
+                  className="mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+                  aria-label="Add vendor"
+                  title="Add vendor"
+                >
+                  <i className="ri-add-line text-xl" />
+                </button>
+              </div>
               {errors.vendorId && (
                 <p className="mt-1 text-sm text-red-500">{errors.vendorId}</p>
               )}
@@ -528,6 +547,30 @@ const Left = () => {
           />
         </div>
       </div>
+      <SliderVendor
+        open={addVendorOpen}
+        setOpen={setAddVendorOpen}
+        showTrigger={false}
+        onCreated={(id) => {
+          void refetchVendors().then((res) => {
+            const list = res.data?.data ?? [];
+            const created = id ? list.find((v: { uuid: string }) => v.uuid === id) : list[0];
+            if (!created) return;
+            const option = {
+              label:
+                created.name ||
+                `Vendor ${created.vendorId || created.uuid.slice(0, 8)}`,
+              value: created.uuid,
+            };
+            setSelectedVendor(option);
+            handleInputChange('vendorId', created.uuid);
+            context?.setData((prevData: any) => ({
+              ...prevData,
+              vendorName: option.label,
+            }));
+          });
+        }}
+      />
     </>
   );
 };

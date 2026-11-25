@@ -40,7 +40,7 @@ export function DocumentWorkspace({
   };
 
   return (
-    <div className={cn('fixed inset-0 z-[100] flex flex-col bg-main-bg', className)}>
+    <div className={cn('fixed inset-0 z-[100] flex flex-col bg-white', className)}>
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-black/10 bg-white px-3 py-3 sm:gap-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <div className="hidden items-center gap-2 border-r border-black/10 pr-3 sm:flex">
@@ -82,7 +82,7 @@ export function DocumentWorkspace({
           </button>
         </div>
       </header>
-      <div className={cn('min-h-0 flex-1 overflow-y-auto bg-main-bg', bodyClassName)}>
+      <div className={cn('min-h-0 flex-1 overflow-y-auto bg-white', bodyClassName)}>
         {children}
       </div>
       {footer != null && (

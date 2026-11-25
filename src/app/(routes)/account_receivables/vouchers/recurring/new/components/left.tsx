@@ -16,6 +16,7 @@ import { DatePicker } from '@potta/components/ui/date-picker';
 import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
 import { GeneratedNumberField } from '@potta/components/generated-number-field';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
 
 // Define Option interface to match the one in SearchSelect component
@@ -229,23 +230,15 @@ const Left = () => {
     }));
   };
 
-  const handlePaymentMethodClick = (option: string) => {
-    // If clicking the same option, don't deselect it
-    if (selectedPaymentMethod === option) {
-      return;
-    }
-
-    setSelectedPaymentMethod(option);
-
-    // Clear payment method error if it exists
+  const handlePaymentMethodChange = (code: string) => {
+    setSelectedPaymentMethod(code);
     if (errors.paymentMethod) {
       setErrors((prev) => ({ ...prev, paymentMethod: undefined }));
     }
-
-    // Update context data with single payment method
     context?.setData((prevData: any) => ({
       ...prevData,
-      payment_method: [option], // Array with single value
+      payment_method: code,
+      paymentMethod: code,
     }));
   };
 
@@ -591,43 +584,16 @@ const Left = () => {
 
       <hr className="my-5" />
       <h3 className="text-lg font-medium my-2">
-        Payment Methods
+        Payment method
         <RequiredMark />
       </h3>
-      <div className={`mt-2 ${errors.paymentMethod ? 'error-field' : ''}`}>
-        <div className="grid grid-cols-2 py-4 gap-4">
-          {['Credit Card', 'Bank Transfer', 'Other', 'ACH Transfer'].map(
-            (option) => (
-              <div
-                key={option}
-                onClick={() => handlePaymentMethodClick(option)}
-                className={`p-4 border cursor-pointer ${
-                  selectedPaymentMethod === option
-                    ? 'border-green-500 text-green-500'
-                    : errors.paymentMethod && formSubmitted
-                    ? 'border-red-500'
-                    : 'border-gray-300'
-                }`}
-              >
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedPaymentMethod === option}
-                    onChange={() => handlePaymentMethodClick(option)}
-                    className="mr-2 text-xl"
-                    name="paymentMethod"
-                  />
-                  <span>{option.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
-                </div>
-              </div>
-            )
-          )}
-          {errors.paymentMethod && (
-            <p className="text-red-500 text-sm col-span-2">
-              {errors.paymentMethod}
-            </p>
-          )}
-
+      <div className={`mt-2 space-y-4 ${errors.paymentMethod ? 'error-field' : ''}`}>
+        <PaymentMethodSelect
+          value={selectedPaymentMethod}
+          onChange={handlePaymentMethodChange}
+          error={errors.paymentMethod}
+        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <GeneratedNumberField
             label="Payment Reference"
             name="paymentReference"
@@ -670,10 +636,7 @@ const Left = () => {
           type={'button'}
         />
       </div>
-      <SliderCustomer
-        open={isAddCustomerDrawer}
-        setOpen={setIsAddCustomerDrawer}
-      />
+      <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} showTrigger={false} />
     </div>
   );
 };

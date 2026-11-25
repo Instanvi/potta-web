@@ -73,6 +73,10 @@ interface DataTableProps<TData> {
   onPaginationChange?: OnChangeFn<PaginationState>;
   /** Total rows on server (for pagination footer when manualPagination). */
   totalRows?: number;
+  /** Server-side sorting: skip client getSortedRowModel; parent owns sort state. */
+  manualSorting?: boolean;
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
   /** Called with the selected rows whenever the selection changes. */
   onSelectionChange?: (rows: TData[]) => void;
   /** Extra content rendered to the left of the Columns toggle. */
@@ -128,6 +132,9 @@ export function DataTable<TData>({
   pagination: controlledPagination,
   onPaginationChange: controlledOnPaginationChange,
   totalRows: serverTotalRows,
+  manualSorting = false,
+  sorting: controlledSorting,
+  onSortingChange: controlledOnSortingChange,
   onSelectionChange,
   toolbar,
   showViewOptions = false,
@@ -135,7 +142,7 @@ export function DataTable<TData>({
   onTableChange,
   emptyMessage = 'No results.',
 }: DataTableProps<TData>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [internalSorting, setInternalSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(() => loadVisibility(storageKey));
@@ -145,6 +152,8 @@ export function DataTable<TData>({
       pageSize,
     });
 
+  const sorting = controlledSorting ?? internalSorting;
+  const onSortingChange = controlledOnSortingChange ?? setInternalSorting;
   const pagination = controlledPagination ?? internalPagination;
   const onPaginationChange =
     controlledOnPaginationChange ?? setInternalPagination;
@@ -255,8 +264,8 @@ export function DataTable<TData>({
           pageCount: pageCount ?? -1,
         }
       : { getPaginationRowModel: getPaginationRowModel() }),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
+    ...(manualSorting ? { manualSorting: true } : { getSortedRowModel: getSortedRowModel() }),
+    onSortingChange,
     onPaginationChange,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: handleColumnVisibilityChange,

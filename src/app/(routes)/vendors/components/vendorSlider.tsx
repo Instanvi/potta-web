@@ -1,5 +1,5 @@
 'use client';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Input from '@potta/components/input';
 
 import Slider from '@potta/components/slideover';
@@ -15,15 +15,47 @@ import Notes from './note';
 import Tax from './tax';
 import useCreateVendor from '../hooks/useCreateVendor';
 import { toast } from 'sonner';
+import { PhoneInput } from '@potta/components/phoneInput';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { orgDefaultCallingCode } from '@/lib/org-phone-country';
 
-const SliderVendor = () => {
+interface VendorCreateProps {
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
+  /** When false, hide the default list-page trigger (use with external + button). */
+  showTrigger?: boolean;
+  onCreated?: (vendorId?: string) => void;
+}
+
+type PhoneMetadata = {
+  formattedValue: string;
+  countryCode: string;
+  rawInput: string;
+};
+
+const SliderVendor: React.FC<VendorCreateProps> = ({
+  open: controlledOpen,
+  setOpen: setControlledOpen,
+  showTrigger = true,
+  onCreated,
+}) => {
   const [tabs, setTabs] = useState<string>('Address');
-  const [isSliderOpen, setIsSliderOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const isSliderOpen = controlledOpen ?? localOpen;
+  const setIsSliderOpen = setControlledOpen ?? setLocalOpen;
   const context = useContext(ContextData);
+  const { data: org } = useOrganizationProfile();
+  const defaultCalling = orgDefaultCallingCode(org);
+  const [phoneMetadata, setPhoneMetadata] = useState<PhoneMetadata>({
+    formattedValue: '',
+    countryCode: defaultCalling,
+    rawInput: '',
+  });
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<VendorPayload>({
@@ -95,6 +127,23 @@ const SliderVendor = () => {
   ];
   const mutation = useCreateVendor();
 
+  useEffect(() => {
+    setPhoneMetadata((prev) =>
+      prev.rawInput ? prev : { ...prev, countryCode: defaultCalling },
+    );
+  }, [defaultCalling]);
+
+  useEffect(() => {
+    if (!isSliderOpen) {
+      reset();
+      setPhoneMetadata({
+        formattedValue: '',
+        countryCode: defaultCalling,
+        rawInput: '',
+      });
+    }
+  }, [isSliderOpen, reset, defaultCalling]);
+
   const onSubmit = async (data: VendorPayload) => {
     // The API names the field taxId and rejects empty optional strings.
     const { taxID, industry, creditLimit, ...rest } = data;
@@ -105,10 +154,19 @@ const SliderVendor = () => {
       ...(creditLimit ? { creditLimit: Number(creditLimit) } : {}),
     } as VendorPayload;
     try {
-      await mutation.mutateAsync(payload);
+      const created = await mutation.mutateAsync(payload);
       toast.success('Vendor created successfully!');
       reset();
       setIsSliderOpen(false);
+      const id =
+        created && typeof created === 'object'
+          ? String(
+              (created as { uuid?: string; data?: { uuid?: string } }).uuid ??
+                (created as { data?: { uuid?: string } }).data?.uuid ??
+                '',
+            )
+          : '';
+      onCreated?.(id || undefined);
     } catch (error: any) {
       const message = error?.response?.data?.message;
       toast.error(`Failed to create vendor${message ? `: ${Array.isArray(message) ? message.join(', ') : message}` : ''}`);
@@ -120,7 +178,7 @@ const SliderVendor = () => {
       setOpen={setIsSliderOpen}
       edit={false}
       title={'Create New Vendor'}
-      buttonText="vendor"
+      buttonText={showTrigger ? 'vendor' : undefined}
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -227,16 +285,19 @@ const SliderVendor = () => {
         <hr />
         <div className="mt-2">
           <h1 className="text-xl">Contact Information </h1>
-          <div className="w-full grid mt-7 grid-cols-2 gap-3">
+          <div className="mt-7 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <Input
-                type="tel"
-                label={'Phone Number'}
-                name={'phone'}
-                placeholder="(555) 123-4567"
-                register={register}
-                errors={errors.phone}
+              <PhoneInput
+                label="Phone Number"
+                placeholder="Enter phone number"
+                value={phoneMetadata.formattedValue}
+                countryCode={phoneMetadata.countryCode}
                 required
+                errors={errors.phone?.message}
+                onChange={(combined, metadata) => {
+                  setPhoneMetadata(metadata);
+                  setValue('phone', combined, { shouldValidate: true });
+                }}
               />
             </div>
             <div>

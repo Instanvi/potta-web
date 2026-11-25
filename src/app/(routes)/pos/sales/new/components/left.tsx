@@ -391,10 +391,7 @@ const Left = () => {
         </DocumentFormCard>
       </DocumentFormShell>
 
-      <SliderCustomer
-        open={isAddCustomerDrawer}
-        setOpen={setIsAddCustomerDrawer}
-      />
+      <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} showTrigger={false} />
     </>
   );
 };

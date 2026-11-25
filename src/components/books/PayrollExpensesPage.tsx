@@ -29,6 +29,21 @@ function normalizeTx(row: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
+function isNetworkError(error: unknown): boolean {
+  const err = error as {
+    code?: string;
+    message?: string;
+    response?: unknown;
+  } | null;
+  if (!err) return false;
+  if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED') return true;
+  if (!err.response && typeof err.message === 'string') {
+    const m = err.message.toLowerCase();
+    return m.includes('network') || m.includes('failed to fetch');
+  }
+  return false;
+}
+
 export function PayrollExpensesPage() {
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,9 +74,16 @@ export function PayrollExpensesPage() {
     void load();
   }, [load]);
 
+  const displayError =
+    error && isNetworkError(error)
+      ? new Error(
+          `Could not reach the payroll expense API. Set NEXT_PUBLIC_PAYROLL_API_URL in your environment (see .env.example) and ensure the service is running.`
+        )
+      : error;
+
   return (
     <RootLayout>
-      <PageContainer>
+      <PageContainer className="bg-white">
         <PageHeader
           title="Expenses"
           actions={
@@ -91,8 +113,8 @@ export function PayrollExpensesPage() {
         </ListToolbar>
 
         <div className="mt-4">
-          {error ? (
-            <ErrorState error={error} onRetry={() => void load()} />
+          {displayError ? (
+            <ErrorState error={displayError} onRetry={() => void load()} />
           ) : (
             <BooksListTable
               columns={COLUMNS}

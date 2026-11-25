@@ -67,8 +67,8 @@ const NewInvoiceInner = () => {
       }
     >
       <FileExtractDropzone onExtract={extractInvoiceData} extracting={extracting}>
-        <div className="flex h-full min-h-0 flex-col bg-main-bg">
-          <div className="h-full min-h-0 overflow-y-auto bg-main-bg">
+        <div className="flex h-full min-h-0 flex-col bg-white">
+          <div className="h-full min-h-0 overflow-y-auto bg-white">
             <Left
               initialInvoiceType={initialInvoiceType}
               onOpenPreview={openPreview}

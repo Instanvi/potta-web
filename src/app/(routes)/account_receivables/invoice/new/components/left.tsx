@@ -35,6 +35,12 @@ import {
   generateDocumentNumber,
   withDocumentAcronym,
 } from '@potta/components/generated-number-field';
+import {
+  formatOrgAddress,
+  orgDisplayName,
+  useOrganizationProfile,
+} from '@/hooks/use-organization-profile';
+import { formatPartyAddress } from '@/lib/party-address';
 
 // Import Option interface from SearchableSelect to avoid conflicts
 import type { Option as SearchableSelectOption } from '@potta/components/searchableSelect';
@@ -152,6 +158,9 @@ const Left = ({
   const [taxRate, setTaxRate] = useState(0);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const { data: org } = useOrganizationProfile();
+  const sellerName = orgDisplayName(org) || 'Your organization';
+  const sellerAddressLines = formatOrgAddress(org);
 
   // Use a ref to track if initial selection has been made
   const initialSelectionMade = useRef(false);
@@ -676,8 +685,12 @@ const Left = ({
                         );
                         const cust = customers.find((c) => c.uuid === value);
                         setCustomerEmail(cust?.email || '');
-                        if (cust?.address?.address) {
-                          handleInputChange('billing', cust.address.address);
+                        const partyAddress = formatPartyAddress(cust?.address);
+                        if (partyAddress) {
+                          handleInputChange('billing', partyAddress);
+                          if (!shippingAddress.trim()) {
+                            handleInputChange('shipping', partyAddress);
+                          }
                         }
                       }}
                       placeholder="Select a customer"
@@ -718,21 +731,26 @@ const Left = ({
             </div>
             <DocumentBalanceDue amount={money(balanceDue)} />
           </div>
+          {(sellerName || sellerAddressLines.length > 0) && (
+            <div className="mt-4 border-t border-black/[0.06] pt-4 text-sm text-muted-foreground">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-black/45">
+                From (your organization)
+              </p>
+              <p className="mt-1 font-medium text-foreground">{sellerName}</p>
+              {sellerAddressLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+              {org?.businessPhone ? <p>{org.businessPhone}</p> : null}
+              {org?.businessEmail ? <p>{org.businessEmail}</p> : null}
+            </div>
+          )}
         </DocumentFormCard>
 
-        {/* Billing meta */}
+        {/* Dates / terms / number */}
         <DocumentFormCard flush>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-            <div className={`md:col-span-3 ${errors.billingAddress ? 'error-field' : ''}`}>
-              <TextArea
-                label="Billing address"
-                name="billing"
-                value={billingAddress}
-                onchange={(e: any) => handleInputChange('billing', e.target.value)}
-                errors={errors.billingAddress}
-              />
-            </div>
-            <div className={`md:col-span-2 ${errors.paymentTerms ? 'error-field' : ''}`}>
+          <DocumentSectionTitle>Invoice details</DocumentSectionTitle>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+            <div className={errors.paymentTerms ? 'error-field' : ''}>
               <Select
                 label="Terms"
                 options={[
@@ -747,7 +765,7 @@ const Left = ({
                 error={errors.paymentTerms}
               />
             </div>
-            <div className={`md:col-span-2 ${errors.issueDate ? 'error-field' : ''}`}>
+            <div className={errors.issueDate ? 'error-field' : ''}>
               <DatePicker
                 label="Invoice date"
                 name="issueDate"
@@ -758,7 +776,7 @@ const Left = ({
                 error={errors.issueDate}
               />
             </div>
-            <div className={`md:col-span-2 ${errors.dueDate ? 'error-field' : ''}`}>
+            <div className={errors.dueDate ? 'error-field' : ''}>
               <DatePicker
                 label="Due date"
                 name="dueDate"
@@ -770,7 +788,7 @@ const Left = ({
                 error={errors.dueDate}
               />
             </div>
-            <div className="md:col-span-1">
+            <div>
               <GeneratedNumberField
                 label="Invoice no."
                 name="invoiceNumber"
@@ -779,7 +797,7 @@ const Left = ({
                 onChange={(value) => handleInputChange('invoiceNumber', value)}
               />
             </div>
-            <div className={`md:col-span-2 ${errors.currency ? 'error-field' : ''}`}>
+            <div className={errors.currency ? 'error-field' : ''}>
               <Select
                 label="Currency"
                 options={[
@@ -793,18 +811,7 @@ const Left = ({
                 error={errors.currency}
               />
             </div>
-          </div>
-          <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-            <div className={`min-w-[12rem] ${errors.shippingAddress ? 'error-field' : ''}`}>
-              <TextArea
-                label="Shipping address"
-                name="shipping"
-                value={shippingAddress}
-                onchange={(e: any) => handleInputChange('shipping', e.target.value)}
-                errors={errors.shippingAddress}
-              />
-            </div>
-            <div className="ml-auto flex flex-wrap items-end gap-4">
+            <div className="flex flex-wrap items-end gap-4">
               <div className={errors.taxRate ? 'error-field' : ''}>
                 <Input
                   type="number"
@@ -815,15 +822,42 @@ const Left = ({
                   errors={errors.taxRate}
                 />
               </div>
-              <Select
-                label="Amounts are"
-                options={[
-                  { label: 'Exclusive of Tax', value: 'exclusive' },
-                  { label: 'Inclusive of Tax', value: 'inclusive' },
-                ]}
-                selectedValue={amountsAre}
-                onChange={(value: any) => setAmountsAre(value)}
-                bg="bg-white"
+            </div>
+          </div>
+          <div className="mt-4 max-w-xs">
+            <Select
+              label="Amounts are"
+              options={[
+                { label: 'Exclusive of Tax', value: 'exclusive' },
+                { label: 'Inclusive of Tax', value: 'inclusive' },
+              ]}
+              selectedValue={amountsAre}
+              onChange={(value: any) => setAmountsAre(value)}
+              bg="bg-white"
+            />
+          </div>
+        </DocumentFormCard>
+
+        {/* Addresses */}
+        <DocumentFormCard flush>
+          <DocumentSectionTitle>Addresses</DocumentSectionTitle>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className={errors.billingAddress ? 'error-field' : ''}>
+              <TextArea
+                label="Billing address"
+                name="billing"
+                value={billingAddress}
+                onchange={(e: any) => handleInputChange('billing', e.target.value)}
+                errors={errors.billingAddress}
+              />
+            </div>
+            <div className={errors.shippingAddress ? 'error-field' : ''}>
+              <TextArea
+                label="Shipping address"
+                name="shipping"
+                value={shippingAddress}
+                onchange={(e: any) => handleInputChange('shipping', e.target.value)}
+                errors={errors.shippingAddress}
               />
             </div>
           </div>
@@ -944,7 +978,11 @@ const Left = ({
         }
       />
 
-      <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} />
+      <SliderCustomer
+        open={isAddCustomerDrawer}
+        setOpen={setIsAddCustomerDrawer}
+        showTrigger={false}
+      />
     </>
   );
 };

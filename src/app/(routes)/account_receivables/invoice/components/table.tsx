@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import moment from 'moment';
 import { toast } from 'sonner';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, SortingState, Updater } from '@tanstack/react-table';
 import { DateRangePicker } from '@potta/components/ui/date-picker';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -139,6 +139,9 @@ const InvoiceTable = () => {
   const selectedId = searchParams.get('id');
 
   const [searchValue, setSearchValue] = useState('');
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'createdAt', desc: true },
+  ]);
   const { dateRange, setDateRange, statusFilter, setStatusFilter } =
     useInvoiceFilter();
   const debouncedSearch = useDebouncedValue(searchValue.trim(), 300);
@@ -148,16 +151,39 @@ const InvoiceTable = () => {
   const issuedTo = dateRange?.from
     ? endOfLocalDay(dateRange.to ?? dateRange.from).toISOString()
     : undefined;
+  const sortColumnId = sorting[0]?.id || 'createdAt';
+  const sortOrder: IFilter['sortOrder'] = sorting[0]?.desc === false ? 'ASC' : 'DESC';
+  const apiSortFields = new Set<NonNullable<IFilter['sortBy']>>([
+    'createdAt',
+    'updatedAt',
+    'issuedDate',
+    'dueDate',
+    'invoiceTotal',
+  ]);
+  const apiSortBy: NonNullable<IFilter['sortBy']> = apiSortFields.has(
+    sortColumnId as NonNullable<IFilter['sortBy']>,
+  )
+    ? (sortColumnId as NonNullable<IFilter['sortBy']>)
+    : 'createdAt';
   const { page, limit, setPagination, tableProps } = useServerPagination({
     pageSize: 20,
-    resetOn: [statusFilter, debouncedSearch, issuedFrom, issuedTo],
+    resetOn: [statusFilter, debouncedSearch, issuedFrom, issuedTo, apiSortBy, sortOrder],
   });
+
+  const handleSortingChange = useCallback((updater: Updater<SortingState>) => {
+    setSorting((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      const first = next[0];
+      if (!first) return [{ id: 'createdAt', desc: true }];
+      return [first];
+    });
+  }, []);
 
   const filter: IFilter = {
     limit,
     page,
-    sortOrder: 'DESC',
-    sortBy: 'createdAt',
+    sortOrder,
+    sortBy: apiSortBy,
     status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined,
     search: debouncedSearch || undefined,
     issuedFrom,
@@ -240,6 +266,7 @@ const InvoiceTable = () => {
       {
         id: 'customer',
         header: 'Customer',
+        enableSorting: false,
         cell: ({ row: { original } }) => (
           <span className="truncate">{customerLabel(original)}</span>
         ),
@@ -279,6 +306,7 @@ const InvoiceTable = () => {
       {
         id: 'actions',
         enableHiding: false,
+        enableSorting: false,
         header: '',
         cell: ({ row: { original } }) => {
           const customerEmail = (original.customer?.email || '').trim();
@@ -534,7 +562,7 @@ const InvoiceTable = () => {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 bg-main-bg p-4 md:p-5">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 bg-white p-4 md:p-5">
       <ListToolbar
         actions={
           <>
@@ -590,6 +618,9 @@ const InvoiceTable = () => {
           emptyMessage="No invoices yet"
           showViewOptions={false}
           onTableChange={onTableChange}
+          manualSorting
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
           {...tableProps(data?.meta, data?.data?.length)}
         />
       )}

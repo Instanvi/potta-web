@@ -4,33 +4,21 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
-import Select from '@potta/components/select';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { Can } from '@/components/auth/can';
 import RootLayout from '../../../layout';
 import { PageContainer, PageHeader } from '../../../_shared/states';
 import useGetOneInvoice from '../../invoice/_hooks/useGetOneInvoice';
 import usePayInvoice from '../../invoice/_hooks/usePayInvoice';
-import {
-  INVOICE_PAYMENT_METHODS,
-  InvoicePaymentMethod,
-} from '../../invoice/_utils/types';
 
 const PAYABLE_STATUSES = ['APPROVED', 'OVERDUE'];
-
-const methodLabel = (method: string) =>
-  method
-    .replace('ACH_TRANSAFER', 'ACH_TRANSFER')
-    .split('_')
-    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-    .join(' ');
 
 const PayNowPage = () => {
   const params = useParams();
   const invoiceId = (params?.invoiceid as string) || '';
   const { data: invoice, isLoading, error } = useGetOneInvoice(invoiceId);
   const payMutation = usePayInvoice(invoiceId);
-  const [paymentMethod, setPaymentMethod] =
-    useState<InvoicePaymentMethod>('CASH');
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paymentReference, setPaymentReference] = useState('');
 
   const total = Number(invoice?.invoiceTotal ?? 0);
@@ -44,6 +32,7 @@ const PayNowPage = () => {
     : '';
 
   const handlePay = () => {
+    if (!paymentMethod) return;
     payMutation.mutate({
       paymentMethod,
       amount: total,
@@ -95,17 +84,10 @@ const PayNowPage = () => {
               ) : (
                 <Can resource="Invoice" action={['pay', 'update']}>
                   <div className="flex flex-col gap-4">
-                    <Select
+                    <PaymentMethodSelect
+                      value={paymentMethod}
+                      onChange={setPaymentMethod}
                       label="Payment method"
-                      options={INVOICE_PAYMENT_METHODS.map((m) => ({
-                        value: m,
-                        label: methodLabel(m),
-                      }))}
-                      selectedValue={paymentMethod}
-                      onChange={(value: InvoicePaymentMethod) =>
-                        setPaymentMethod(value)
-                      }
-                      bg="bg-white"
                     />
                     <Input
                       type="text"
@@ -124,7 +106,7 @@ const PayNowPage = () => {
                       text={`Record payment of ${total.toLocaleString()} ${currency}`}
                       type="button"
                       isLoading={payMutation.isPending}
-                      disabled={payMutation.isPending}
+                      disabled={payMutation.isPending || !paymentMethod}
                       width="full"
                     />
                   </div>

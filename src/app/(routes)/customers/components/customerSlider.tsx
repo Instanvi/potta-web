@@ -16,10 +16,14 @@ import useCreateCustomer from '../hooks/useCreateCustomer';
 import { toast } from 'sonner';
 import { PhoneInput } from '@potta/components/phoneInput';
 import { FormDatePicker } from '@potta/components/ui/date-picker';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { orgDefaultCallingCode } from '@/lib/org-phone-country';
 
 interface CustomerCreateProps {
   open?: boolean; // Optional controlled open state
   setOpen?: (open: boolean) => void; // Optional setter from parent
+  /** When false, hide the default list-page trigger (use with external + button). */
+  showTrigger?: boolean;
 }
 
 // Define the PhoneMetadata interface to match what our PhoneInput component provides
@@ -32,6 +36,7 @@ interface PhoneMetadata {
 const SliderCustomer: React.FC<CustomerCreateProps> = ({
   open: controlledOpen, // Renamed to avoid naming conflict
   setOpen: setControlledOpen,
+  showTrigger = true,
 }) => {
   const [tabs, setTabs] = useState<string>('Address');
   // Local state as fallback if no controlled state is provided
@@ -39,7 +44,7 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
   // Track phone metadata separately to maintain all parts of the phone number
   const [phoneMetadata, setPhoneMetadata] = useState<PhoneMetadata>({
     formattedValue: '',
-    countryCode: '+237', // Default to Cameroon
+    countryCode: '+237', // Default to Cameroon / org country
     rawInput: '',
   });
 
@@ -47,6 +52,14 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
   const isOpen = controlledOpen ?? localOpen;
   const setIsOpen = setControlledOpen ?? setLocalOpen;
   const context = useContext(ContextData);
+  const { data: org } = useOrganizationProfile();
+  const defaultCalling = orgDefaultCallingCode(org);
+
+  useEffect(() => {
+    setPhoneMetadata((prev) =>
+      prev.rawInput ? prev : { ...prev, countryCode: defaultCalling },
+    );
+  }, [defaultCalling]);
   const {
     register,
     handleSubmit,
@@ -124,11 +137,11 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
       reset();
       setPhoneMetadata({
         formattedValue: '',
-        countryCode: '+237',
+        countryCode: defaultCalling,
         rawInput: '',
       });
     }
-  }, [isOpen, reset]);
+  }, [isOpen, reset, defaultCalling]);
 
   return (
     <Slider
@@ -136,7 +149,7 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
       setOpen={setIsOpen} // Use controlled or local setter
       edit={false}
       title={'Create Customer'}
-      buttonText="customer"
+      buttonText={showTrigger ? 'customer' : undefined}
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
