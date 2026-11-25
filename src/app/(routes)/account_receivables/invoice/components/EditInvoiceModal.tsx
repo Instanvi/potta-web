@@ -8,6 +8,7 @@ import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 import { toast } from 'sonner';
 
@@ -68,6 +69,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
 }) => {
   const [showPreview, setShowPreview] = useState(true);
   const [extracting, setExtracting] = useState(false);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const context = useContext(ContextData);
   const hasPopulatedContext = useRef(false);
 
@@ -159,6 +161,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
               open={showPreview}
               onOpenChange={setShowPreview}
               downloadTitle="Invoice"
+              onDownloadPdf={onDownloadPdf}
               editor={
                 <Left
                   isEditMode={true}
@@ -167,7 +170,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                   onOpenPreview={() => setShowPreview(true)}
                 />
               }
-              preview={<PdfView />}
+              preview={<PdfView onRegisterDownload={registerDownload} />}
             />
           </FileExtractDropzone>
         </div>
