@@ -65,7 +65,7 @@ const RailButton = ({
       onMouseEnter={() => onPrefetch?.(module)}
       onFocus={() => onPrefetch?.(module)}
       className={cn(
-        'flex size-10 items-center justify-center rounded-full transition-colors',
+        'flex size-10 items-center justify-center rounded-md transition-colors',
         active
           ? 'bg-primary text-primary-foreground'
           : 'text-foreground/70 hover:bg-brand-subtle hover:text-primary'
@@ -222,7 +222,7 @@ const Sidebars = () => {
       onMouseLeave={handleMouseLeave}
     >
       <div className="flex w-14 shrink-0 flex-col items-center gap-2 py-3">
-        <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-full">
+        <Link href="/" aria-label="Potta" className="mb-2 flex size-10 items-center justify-center rounded-md">
           <img src="/icons/Potta.svg" alt="Potta" className="size-8 object-contain" />
         </Link>
         <nav aria-label="Modules" className="flex flex-1 flex-col items-center gap-2">
@@ -253,7 +253,7 @@ const Sidebars = () => {
             onMouseEnter={openFromHover}
             onFocus={openFromHover}
             onClick={() => context?.setToggle(!collapsed)}
-            className="flex size-10 items-center justify-center rounded-full text-foreground/60 hover:bg-brand-subtle hover:text-primary"
+            className="flex size-10 items-center justify-center rounded-md text-foreground/60 hover:bg-brand-subtle hover:text-primary"
           >
             {collapsed ? <CaretDoubleRight size={18} /> : <CaretDoubleLeft size={18} />}
           </button>
@@ -264,7 +264,7 @@ const Sidebars = () => {
             aria-pressed={pinned}
             onClick={() => setPinnedPersist(!pinned)}
             className={cn(
-              'flex size-10 items-center justify-center rounded-full transition-colors',
+              'flex size-10 items-center justify-center rounded-md transition-colors',
               pinned
                 ? 'bg-brand-subtle text-primary'
                 : 'text-foreground/60 hover:bg-brand-subtle hover:text-primary'

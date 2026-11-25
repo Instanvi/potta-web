@@ -35,7 +35,6 @@ const Section = <T,>({
         className="rounded-none border-x-0 border-b-0"
         columns={columns}
         data={rows}
-        withRowSelection={false}
         pageSize={10}
         pageSizeOptions={[10, 20, 50, 100]}
       

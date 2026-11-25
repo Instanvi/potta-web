@@ -112,7 +112,6 @@ export default function AuditLogsPanel() {
           data={rows}
           isLoading={isLoading}
           emptyMessage="No activity found"
-          withRowSelection={false}
           onRowClick={setSelected}
           pageSizeOptions={[25, 50, 100]}
           {...tableProps(data?.meta, pageRows.length)}

@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
+import type { Table } from '@tanstack/react-table';
 import { DataTable } from '@potta/components/ui/data-table';
 import {
   DropdownMenu,
@@ -22,8 +23,10 @@ import { useServerPagination } from '@/hooks/use-server-pagination';
 
 const InventoryTable = ({
   onRowsChange,
+  onTableChange,
 }: {
   onRowsChange?: (rows: Product[]) => void;
+  onTableChange?: (table: Table<Product>) => void;
 } = {}) => {
   const [openViewModal, setOpenViewModal] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState<string | null>(null);
@@ -243,6 +246,7 @@ const InventoryTable = ({
     <div>
       <DataTable
         columns={columns}
+        onTableChange={onTableChange}
         data={rows}
         isLoading={isLoading}
         onRowClick={handleRowClick}

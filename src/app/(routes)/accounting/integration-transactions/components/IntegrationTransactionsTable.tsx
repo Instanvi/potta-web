@@ -5,7 +5,8 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Check, X } from 'lucide-react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
@@ -77,6 +78,7 @@ const IntegrationTransactionsTable = () => {
 
   const rows = data?.data ?? [];
 
+  const { table, onTableChange } = useDataTableHandle<IntegrationTransaction>();
   const columns: ColumnDef<IntegrationTransaction>[] = [
     {
       accessorKey: 'createdAt',
@@ -178,6 +180,7 @@ const IntegrationTransactionsTable = () => {
       <ListToolbar
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="integration-transactions"
               rows={rows}
@@ -280,11 +283,11 @@ const IntegrationTransactionsTable = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           emptyMessage="No integration transactions"
           columns={columns}
           data={rows}
           isLoading={isLoading}
-          withRowSelection={false}
           pageSizeOptions={[20, 50, 100]}
           {...tableProps(data?.meta, rows.length)}
         

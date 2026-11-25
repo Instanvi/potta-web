@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 import Filter from './filters';
@@ -64,6 +64,7 @@ const TableComponents = () => {
   const [customerDetails, setCustomerDetails] =
     useState<UpdateCustomerPayload | null>(null);
 
+  const { table, onTableChange } = useDataTableHandle<any>();
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'firstName',
@@ -196,6 +197,7 @@ const TableComponents = () => {
   return (
     <div>
       <Filter
+        table={table}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         rows={customer?.data ?? []}
@@ -204,6 +206,7 @@ const TableComponents = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           columns={columns}
           data={customer?.data ?? []}
           isLoading={isLoading}

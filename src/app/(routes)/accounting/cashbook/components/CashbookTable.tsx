@@ -275,7 +275,6 @@ const CashbookTable = () => {
             data={rows}
             isLoading={isLoading}
             emptyMessage="No cashbook entries"
-            withRowSelection={false}
             pageSizeOptions={[20, 50, 100]}
             {...tableProps(data?.meta, rows.length)}
           

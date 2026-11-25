@@ -13,6 +13,8 @@ import DynamicFilter from '@potta/components/dynamic-filter';
 import useImportFromPay from '../_hooks/useImportFromPay';
 import { PayImportResult } from '../_utils/payImportApi';
 import { Can } from '@/components/auth/can';
+import type { Table } from '@tanstack/react-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { ListToolbar } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import type { Product } from '../_utils/types';
@@ -51,7 +53,7 @@ const productTypeLabel = (product: Product) => {
   return 'Inventory';
 };
 
-const Filter = ({ rows = [] }: { rows?: Product[] }) => {
+const Filter = ({ rows = [], table }: { rows?: Product[]; table?: Table<Product> | null }) => {
   const { filters, setFilters } = useInventory();
 
   const [selectedValue, setSelectedValue] = useState(filters.sort);
@@ -144,6 +146,7 @@ const Filter = ({ rows = [] }: { rows?: Product[] }) => {
         className="mb-4"
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="inventory"
               rows={rows}

@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import TableActionPopover, {
   PopoverAction,
 } from '@potta/components/tableActionsPopover';
@@ -64,6 +65,7 @@ const VoucherTable = () => {
   const { data, isLoading, error, refetch } = useGetAllVouchers(filter);
   const rows = data?.data ?? [];
 
+  const { table, onTableChange } = useDataTableHandle<any>();
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'code',
@@ -159,6 +161,7 @@ const VoucherTable = () => {
       <ListToolbar
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="vouchers"
               rows={rows as any[]}
@@ -211,6 +214,7 @@ const VoucherTable = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           columns={columns}
           data={rows}
           isLoading={isLoading}

@@ -20,7 +20,8 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 
 // Updated type to match the actual response structure
 type ResponseSalesReceipt = {
@@ -179,6 +180,7 @@ const SaleTable = () => {
 
   const receiptsData: ResponseSalesReceipt[] = data?.data ?? [];
 
+  const { table, onTableChange } = useDataTableHandle<ResponseSalesReceipt>();
   const columns: ColumnDef<ResponseSalesReceipt>[] = [
     {
       accessorKey: 'saleDate',
@@ -297,6 +299,7 @@ const SaleTable = () => {
       <ListToolbar
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {table ? <DataTableViewOptions table={table} /> : null}
             <Button
               text={'Export'}
               icon={<img src="/images/export.svg" alt="" />}
@@ -362,6 +365,7 @@ const SaleTable = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           columns={columns}
           data={receiptsData}
           onRowClick={handleRowClick}

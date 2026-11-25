@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { toast } from 'sonner';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import Button from '@potta/components/button';
 import Select from '@potta/components/select';
 import Slider from '@potta/components/slideover';
@@ -312,6 +313,7 @@ const AdjustmentsManager = () => {
     }
   };
 
+  const { table, onTableChange } = useDataTableHandle<ProductAdjustment>();
   const columns: ColumnDef<ProductAdjustment>[] = [
     { id: 'date', header: 'Date', cell: ({ row }) => formatDate(row.original.createdAt) },
     { id: 'item', header: 'Item', cell: ({ row }) => <ItemCell product={row.original.product} /> },
@@ -353,7 +355,12 @@ const AdjustmentsManager = () => {
     <div className="w-full">
       <ListToolbar
         className="mb-4"
-        actions={<Button text="New adjustment" type="button" onClick={openSheet} />}
+        actions={
+          <>
+            {table ? <DataTableViewOptions table={table} /> : null}
+            <Button text="New adjustment" type="button" onClick={openSheet} />
+          </>
+        }
       >
         <MovementFilters
           search={search}
@@ -375,6 +382,7 @@ const AdjustmentsManager = () => {
         />
       </ListToolbar>
       <DataTable
+        onTableChange={onTableChange}
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}

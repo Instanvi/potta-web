@@ -64,6 +64,8 @@ interface DataTableProps<TData> {
   showPagination?: boolean;
   className?: string;
   withRowSelection?: boolean;
+  /** Leading `#` index column. Default true. */
+  withRowNumbers?: boolean;
   /** Server-side: omit client page slicing; use pageCount + controlled pagination. */
   manualPagination?: boolean;
   pageCount?: number;
@@ -75,7 +77,11 @@ interface DataTableProps<TData> {
   onSelectionChange?: (rows: TData[]) => void;
   /** Extra content rendered to the left of the Columns toggle. */
   toolbar?: React.ReactNode;
-  /** Show Columns visibility dropdown. Default true. */
+  /**
+   * Show Columns toggle in DataTable's own toolbar row.
+   * Prefer false + `useDataTableHandle` so Columns sits in ListToolbar with Export/CTA.
+   * Default false to avoid a second toolbar row.
+   */
   showViewOptions?: boolean;
   /** Persist column visibility under this key in localStorage. */
   storageKey?: string;
@@ -116,6 +122,7 @@ export function DataTable<TData>({
   showPagination = true,
   className,
   withRowSelection = true,
+  withRowNumbers = true,
   manualPagination = false,
   pageCount,
   pagination: controlledPagination,
@@ -123,7 +130,7 @@ export function DataTable<TData>({
   totalRows: serverTotalRows,
   onSelectionChange,
   toolbar,
-  showViewOptions = true,
+  showViewOptions = false,
   storageKey,
   onTableChange,
   emptyMessage = 'No results.',
@@ -174,43 +181,69 @@ export function DataTable<TData>({
       if (id !== 'actions') return col;
       return { ...col, size: 48, maxSize: 48, minSize: 48 };
     });
-    if (!withRowSelection) return baseColumns;
 
-    const selectionColumn: ColumnDef<TData> = {
-      id: 'select',
-      size: 48,
-      maxSize: 48,
-      minSize: 48,
-      header: ({ table }) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && 'indeterminate')
-            }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all rows"
-          />
-        </div>
-      ),
-      cell: ({ row }) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-            onClick={(event) => event.stopPropagation()}
-          />
-        </div>
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    };
+    const leading: ColumnDef<TData>[] = [];
 
-    return [selectionColumn, ...baseColumns];
-  }, [column, columns, withRowSelection]);
+    if (withRowSelection) {
+      leading.push({
+        id: 'select',
+        size: 48,
+        maxSize: 48,
+        minSize: 48,
+        header: ({ table: tbl }) => (
+          <div className="flex items-center justify-center">
+            <Checkbox
+              checked={
+                tbl.getIsAllPageRowsSelected() ||
+                (tbl.getIsSomePageRowsSelected() && 'indeterminate')
+              }
+              onCheckedChange={(value) => tbl.toggleAllPageRowsSelected(!!value)}
+              aria-label="Select all rows"
+            />
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="flex items-center justify-center">
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              aria-label="Select row"
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      });
+    }
 
-  const iconColIds = React.useMemo(() => new Set(['select', 'actions']), []);
+    if (withRowNumbers) {
+      leading.push({
+        id: 'rowNumber',
+        size: 48,
+        maxSize: 48,
+        minSize: 48,
+        header: () => <span className="tabular-nums">#</span>,
+        cell: ({ row, table: tbl }) => {
+          const { pageIndex, pageSize: ps } = tbl.getState().pagination;
+          return (
+            <span className="tabular-nums text-muted-foreground">
+              {pageIndex * ps + row.index + 1}
+            </span>
+          );
+        },
+        enableSorting: false,
+        enableHiding: false,
+      });
+    }
+
+    return [...leading, ...baseColumns];
+  }, [column, columns, withRowSelection, withRowNumbers]);
+
+  const iconColIds = React.useMemo(
+    () => new Set(['select', 'actions', 'rowNumber']),
+    [],
+  );
 
   const table = useReactTable({
     data: data ?? [],
@@ -380,11 +413,7 @@ export function DataTable<TData>({
             )}
           </TableBody>
         </Table>
-        {!tableLoading &&
-          showPagination &&
-          (manualPagination
-            ? (serverTotalRows ?? 0) > 0 || (data?.length ?? 0) > 0
-            : table.getFilteredRowModel().rows.length > 0) && (
+        {!tableLoading && showPagination ? (
             <DataTablePagination
               table={table}
               pageSizeOptions={pageSizeOptions}
@@ -392,7 +421,7 @@ export function DataTable<TData>({
                 manualPagination ? serverTotalRows : undefined
               }
             />
-          )}
+          ) : null}
       </div>
     </div>
   );

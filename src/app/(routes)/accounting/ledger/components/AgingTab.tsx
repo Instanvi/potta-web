@@ -1,7 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import Search from '@potta/components/search';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatAmount, today } from '../../../_shared/format';
@@ -50,6 +51,7 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
 
   const partyLabel = type === 'AR' ? 'Customer' : 'Vendor';
 
+  const { table, onTableChange } = useDataTableHandle<AgingRow>();
   const columns: ColumnDef<AgingRow>[] = [
     {
       id: 'party',
@@ -74,27 +76,30 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
     <div className="flex flex-col gap-4">
       <ListToolbar
         actions={
-          <ExportButton
-            filename={`${type === 'AR' ? 'ar' : 'ap'}-aging`}
-            rows={rows}
-            columns={[
-              {
-                key: 'party',
-                header: partyLabel,
-                value: (row) => row.referenceName || row.referenceId,
-              },
-              ...BUCKETS.map((b) => ({
-                key: b.key,
-                header: b.label,
-                value: (row: AgingRow) => formatAmount(row.aging?.[b.key]),
-              })),
-              {
-                key: 'balance',
-                header: 'Balance',
-                value: (row: AgingRow) => formatAmount(row.currentBalance),
-              },
-            ]}
-          />
+          <>
+            {table ? <DataTableViewOptions table={table} /> : null}
+            <ExportButton
+              filename={`${type === 'AR' ? 'ar' : 'ap'}-aging`}
+              rows={rows}
+              columns={[
+                {
+                  key: 'party',
+                  header: partyLabel,
+                  value: (row) => row.referenceName || row.referenceId,
+                },
+                ...BUCKETS.map((b) => ({
+                  key: b.key,
+                  header: b.label,
+                  value: (row: AgingRow) => formatAmount(row.aging?.[b.key]),
+                })),
+                {
+                  key: 'balance',
+                  header: 'Balance',
+                  value: (row: AgingRow) => formatAmount(row.currentBalance),
+                },
+              ]}
+            />
+          </>
         }
       >
         <DatePicker
@@ -128,10 +133,10 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
             />
           </div>
           <DataTable
+            onTableChange={onTableChange}
             columns={columns}
             data={rows}
             emptyMessage={`No ${type === 'AR' ? 'receivables' : 'payables'}`}
-            withRowSelection={false}
             pageSize={20}
             pageSizeOptions={[10, 20, 50, 100]}
             onRowClick={setSelected}

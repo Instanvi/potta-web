@@ -9,6 +9,8 @@ import {
   Tabs,
 } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
+import { useDataTableHandle } from '@/components/ui/data-table';
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { booksApi, extractBooksRows, rowId } from '@/lib/books-api';
@@ -36,6 +38,7 @@ export function BooksTransactionsHub({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const [search, setSearch] = useState('');
+  const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
 
   const active = tabs.find((t) => t.id === tab) ?? tabs[0];
 
@@ -88,7 +91,7 @@ export function BooksTransactionsHub({
     () => [{ key: '_type', label: 'Type' }, ...columns],
     [columns],
   );
-  const hubRows = useMemo(
+  const hubRows = useMemo<Record<string, unknown>[]>(
     () =>
       rows.map((row) => ({
         ...row,
@@ -107,6 +110,8 @@ export function BooksTransactionsHub({
         />
         <ListToolbar
           actions={
+            <>
+              {table ? <DataTableViewOptions table={table} /> : null}
             <Button
               type="button"
               variant="outline"
@@ -119,6 +124,7 @@ export function BooksTransactionsHub({
             >
               <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
             </Button>
+            </>
           }
         >
           <input
@@ -143,6 +149,7 @@ export function BooksTransactionsHub({
               storageKey="books-transactions-hub-table"
               isLoading={loading}
               emptyMessage="No transactions"
+              onTableChange={onTableChange}
             />
           )}
         </div>

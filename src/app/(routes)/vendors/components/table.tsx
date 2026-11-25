@@ -1,6 +1,6 @@
 'use client';
 import React, { ComponentProps, useState } from 'react';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
 import {
   getCountryCallingCode,
   parsePhoneNumberFromString,
@@ -113,6 +113,7 @@ const TableComponents = () => {
       </Badge>
     );
 
+  const { table, onTableChange } = useDataTableHandle<any>();
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'name',
@@ -248,6 +249,7 @@ const TableComponents = () => {
   return (
     <div>
       <Filter
+        table={table}
         searchValue={searchValue}
         onSearchChange={(e) => setSearchValue(e.target.value)}
         onSearchClear={() => setSearchValue('')}
@@ -261,6 +263,7 @@ const TableComponents = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           columns={columns}
           data={vendor?.data ?? []}
           isLoading={isLoading}

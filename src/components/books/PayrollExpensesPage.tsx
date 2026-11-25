@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import RootLayout from '@/app/(routes)/layout';
 import { ErrorState, ListToolbar, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
+import { useDataTableHandle } from '@/components/ui/data-table';
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { extractBooksRows } from '@/lib/books-api';
@@ -32,6 +34,7 @@ export function PayrollExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const [search, setSearch] = useState('');
+  const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,7 +79,7 @@ export function PayrollExpensesPage() {
             </Button>
           }
         />
-        <ListToolbar>
+        <ListToolbar actions={table ? <DataTableViewOptions table={table} /> : null}>
           <input
             type="search"
             value={search}
@@ -97,6 +100,7 @@ export function PayrollExpensesPage() {
               storageKey="payroll-expenses-table"
               isLoading={loading}
               emptyMessage="No expense transactions"
+              onTableChange={onTableChange}
             />
           )}
         </div>

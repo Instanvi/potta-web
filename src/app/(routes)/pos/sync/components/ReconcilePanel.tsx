@@ -90,7 +90,6 @@ const ReconcilePanel = () => {
                 gl: n(gl.expense_debit_629),
               },
             ]}
-            withRowSelection={false}
             showPagination={false}
             storageKey="pos-sync-reconcile-table"
           />

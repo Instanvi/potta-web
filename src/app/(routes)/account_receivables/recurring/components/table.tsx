@@ -4,7 +4,8 @@ import React, { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreVertical } from 'lucide-react';
 import Link from 'next/link';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import Button from '@potta/components/button';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -101,6 +102,7 @@ const InvoiceTable = () => {
     );
   }, [data?.data, searchValue]);
 
+  const { table, onTableChange } = useDataTableHandle<Invoice>();
   const columns: ColumnDef<Invoice>[] = [
     {
       accessorKey: 'issuedDate',
@@ -192,6 +194,7 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="recurring-invoices"
               rows={rows}
@@ -252,6 +255,7 @@ const InvoiceTable = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           columns={columns}
           data={rows}
           isLoading={isLoading}

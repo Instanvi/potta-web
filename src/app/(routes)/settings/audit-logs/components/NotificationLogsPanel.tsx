@@ -169,7 +169,6 @@ export default function NotificationLogsPanel() {
           columns={columns}
           data={rows}
           isLoading={isLoading}
-          withRowSelection={false}
           pageSizeOptions={[25, 50, 100]}
           {...tableProps(data?.meta, rows.length)}
         

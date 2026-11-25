@@ -9,6 +9,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@potta/components/shadcn/dropdown';
+import type { Table } from '@tanstack/react-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { ListToolbar } from '../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useContactToolbarStart } from '@/components/shared/contact-toolbar';
@@ -17,9 +19,11 @@ interface FilterProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   rows?: any[];
+  /** DataTable instance (from useDataTableHandle) for the Columns toggle. */
+  table?: Table<any> | null;
 }
 
-const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [] }) => {
+const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [], table }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -30,6 +34,7 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [] 
       <ListToolbar
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="customers"
               rows={rows}

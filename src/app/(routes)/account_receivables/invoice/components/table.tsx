@@ -419,7 +419,7 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
-            {table && filteredData.length > 0 && <DataTableViewOptions table={table} />}
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="invoices"
               rows={filteredData}

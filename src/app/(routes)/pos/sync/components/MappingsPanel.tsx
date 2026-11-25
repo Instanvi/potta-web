@@ -78,7 +78,6 @@ const MappingsPanel = () => {
           columns={columns}
           data={rows}
           isLoading={isLoading}
-          withRowSelection={false}
           {...pager.tableProps({ nextCursor: data?.next_cursor, hasMore: data?.has_more }, rows.length)}
         
           storageKey="pos-sync-mappings-table"

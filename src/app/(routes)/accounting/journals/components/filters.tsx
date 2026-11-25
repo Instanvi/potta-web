@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Search from '@potta/components/search';
 import { Can } from '@/components/auth/can';
+import type { Table } from '@tanstack/react-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { ListToolbar } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { formatAmount, formatDate } from '../../../_shared/format';
@@ -15,9 +17,10 @@ interface FilterProps {
   search: string;
   onSearchChange: (value: string) => void;
   rows?: Journal[];
+  table?: Table<Journal> | null;
 }
 
-const Filter = ({ search, onSearchChange, rows = [] }: FilterProps) => {
+const Filter = ({ search, onSearchChange, rows = [], table }: FilterProps) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   return (
@@ -25,6 +28,7 @@ const Filter = ({ search, onSearchChange, rows = [] }: FilterProps) => {
       className="mb-4"
       actions={
         <>
+          {table ? <DataTableViewOptions table={table} /> : null}
           <ExportButton
             filename="journals"
             rows={rows}

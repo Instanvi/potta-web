@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, Table } from '@tanstack/react-table';
 import { Eye, Trash2 } from 'lucide-react';
 import { DataTable } from '@potta/components/ui/data-table';
 import { Can } from '@/components/auth/can';
@@ -27,9 +27,11 @@ const useDebounced = <T,>(value: T, delay = 300) => {
 const JournalEntriesTable = ({
   search = '',
   onRowsChange,
+  onTableChange,
 }: {
   search?: string;
   onRowsChange?: (rows: Journal[]) => void;
+  onTableChange?: (table: Table<Journal>) => void;
 }) => {
   const term = useDebounced(search.trim());
   const { page, limit, tableProps } = useServerPagination({ pageSize: 20, resetOn: [term] });
@@ -114,7 +116,7 @@ const JournalEntriesTable = ({
         data={rows}
         isLoading={isLoading}
         emptyMessage={term ? 'No matching entries' : 'No journal entries'}
-        withRowSelection={false}
+        onTableChange={onTableChange}
         onRowClick={(row) => setViewId(row.uuid)}
         storageKey="journals-table"
         {...tableProps(data?.meta, rows.length)}

@@ -128,7 +128,7 @@ const TaxTable = () => {
       <ListToolbar
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            {table && rows.length > 0 && <DataTableViewOptions table={table} />}
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="taxes"
               rows={rows}
@@ -248,7 +248,6 @@ const TaxTable = () => {
           columns={columns}
           data={rows}
           isLoading={isLoading}
-          withRowSelection={false}
           {...tableProps(data?.meta, rows.length)}
           pageSizeOptions={[5, 10, 20, 50, 100]}
           showViewOptions={false}

@@ -1,7 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import Search from '@potta/components/search';
 import Select from '@potta/components/select';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
@@ -67,6 +68,7 @@ const GeneralLedgerTab = () => {
     [rows]
   );
 
+  const { table, onTableChange } = useDataTableHandle<GeneralLedgerEntry>();
   const columns: ColumnDef<GeneralLedgerEntry>[] = [
     {
       accessorKey: 'transactionDate',
@@ -108,34 +110,37 @@ const GeneralLedgerTab = () => {
     <div className="flex flex-col gap-4">
       <ListToolbar
         actions={
-          <ExportButton
-            filename="general-ledger"
-            rows={rows}
-            columns={[
-              {
-                key: 'transactionDate',
-                header: 'Date',
-                value: (row) => formatDate(row.transactionDate),
-              },
-              { key: 'journalEntryNumber', header: 'Journal #' },
-              { key: 'accountNumber', header: 'Account' },
-              { key: 'accountName', header: 'Account name' },
-              { key: 'description', header: 'Description' },
-              {
-                key: 'debitAmount',
-                header: 'Debit',
-                value: (row) =>
-                  Number(row.debitAmount) ? formatAmount(row.debitAmount) : '',
-              },
-              {
-                key: 'creditAmount',
-                header: 'Credit',
-                value: (row) =>
-                  Number(row.creditAmount) ? formatAmount(row.creditAmount) : '',
-              },
-              { key: 'sourceModule', header: 'Source' },
-            ]}
-          />
+          <>
+            {table ? <DataTableViewOptions table={table} /> : null}
+            <ExportButton
+              filename="general-ledger"
+              rows={rows}
+              columns={[
+                {
+                  key: 'transactionDate',
+                  header: 'Date',
+                  value: (row) => formatDate(row.transactionDate),
+                },
+                { key: 'journalEntryNumber', header: 'Journal #' },
+                { key: 'accountNumber', header: 'Account' },
+                { key: 'accountName', header: 'Account name' },
+                { key: 'description', header: 'Description' },
+                {
+                  key: 'debitAmount',
+                  header: 'Debit',
+                  value: (row) =>
+                    Number(row.debitAmount) ? formatAmount(row.debitAmount) : '',
+                },
+                {
+                  key: 'creditAmount',
+                  header: 'Credit',
+                  value: (row) =>
+                    Number(row.creditAmount) ? formatAmount(row.creditAmount) : '',
+                },
+                { key: 'sourceModule', header: 'Source' },
+              ]}
+            />
+          </>
         }
       >
         <DateRangePicker
@@ -177,11 +182,11 @@ const GeneralLedgerTab = () => {
             <StatCard label="Credit (this page)" value={formatAmount(pageTotals.credit)} />
           </div>
           <DataTable
+            onTableChange={onTableChange}
             columns={columns}
             data={rows}
             isLoading={isLoading}
             emptyMessage="No ledger entries in this period"
-            withRowSelection={false}
             manualPagination={!search && sourceFilter === 'all'}
             pageCount={
               search || sourceFilter !== 'all' ? undefined : (data?.meta?.totalPages ?? 1)

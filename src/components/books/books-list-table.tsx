@@ -18,6 +18,8 @@ type BooksListTableProps<T extends Record<string, unknown>> = {
   showPagination?: boolean;
   storageKey?: string;
   showViewOptions?: boolean;
+  /** Row checkboxes. Default true. */
+  withRowSelection?: boolean;
   /** Spread `useServerPagination().tableProps(meta, rows.length)` for API-driven pages. */
   serverPagination?: ServerTableProps;
   /** Lift the table instance so Columns can render inside a parent ListToolbar. */
@@ -34,6 +36,7 @@ export function BooksListTable<T extends Record<string, unknown>>({
   showPagination,
   storageKey,
   showViewOptions,
+  withRowSelection = true,
   serverPagination,
   onTableChange,
 }: BooksListTableProps<T>) {
@@ -54,7 +57,7 @@ export function BooksListTable<T extends Record<string, unknown>>({
       columns={defs}
       isLoading={isLoading}
       emptyMessage={emptyMessage}
-      withRowSelection={false}
+      withRowSelection={withRowSelection}
       onRowClick={onRowClick}
       showPagination={showPagination ?? (serverPagination ? true : rows.length > 10)}
       pageSize={10}

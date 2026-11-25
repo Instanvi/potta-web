@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
 import { ErrorState, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
+import { useDataTableHandle } from '@/components/ui/data-table';
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
@@ -32,6 +34,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
   const [form, setForm] = useState({ name: '', periodStart: '', periodEnd: '' });
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const [saving, setSaving] = useState(false);
+  const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -88,6 +91,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
           title={mode === 'prepare' ? 'Prepare tax filing' : 'Submit tax filing'}
           actions={
             <>
+              {table ? <DataTableViewOptions table={table} /> : null}
               <Button
                 type="button"
                 variant="outline"
@@ -123,6 +127,7 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
               storageKey="tax-filing-workflow-table"
               isLoading={loading}
               emptyMessage="No tax filings"
+              onTableChange={onTableChange}
               onRowClick={(row) => setSelected(row)}
             />
           )}

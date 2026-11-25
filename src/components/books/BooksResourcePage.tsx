@@ -325,7 +325,7 @@ export function BooksResourcePage({
         <ListToolbar
           actions={
             <>
-              {table && rows.length > 0 && <DataTableViewOptions table={table} />}
+              {table ? <DataTableViewOptions table={table} /> : null}
               <ExportButton
                 filename={resourcePath.replace(/\//g, '-')}
                 rows={rows}

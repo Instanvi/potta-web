@@ -8,7 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import RootLayout from '../layout';
 import Button from '@potta/components/button';
 import ConfirmDialog from '@potta/components/shared/ConfirmDialog';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import {
   useClearAllNotifications,
@@ -52,6 +53,7 @@ export default function NotificationsPage() {
     return items;
   }, [filter, items]);
 
+  const { table, onTableChange } = useDataTableHandle<NotificationItem>();
   const columns: ColumnDef<NotificationItem>[] = [
     {
       id: 'notification',
@@ -139,6 +141,7 @@ export default function NotificationsPage() {
         <ListToolbar
           actions={
             <>
+              {table ? <DataTableViewOptions table={table} /> : null}
               <Button
                 type="button"
                 theme="default"
@@ -180,10 +183,10 @@ export default function NotificationsPage() {
           />
         ) : (
           <DataTable
+            onTableChange={onTableChange}
             columns={columns}
             data={visible}
             isLoading={isLoading}
-            withRowSelection={false}
             {...tableProps(data?.meta, items.length)}
           
           storageKey="notifications-table"

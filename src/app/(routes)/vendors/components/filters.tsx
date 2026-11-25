@@ -5,6 +5,8 @@ import React, { useState } from 'react';
 import SliderVendor from './vendorSlider';
 import BulkSlider from '@potta/app/(routes)/customers/components/bulkSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
+import type { Table } from '@tanstack/react-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { ListToolbar } from '../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useContactToolbarStart } from '@/components/shared/contact-toolbar';
@@ -18,6 +20,8 @@ interface FilterProps {
   kycFilter: string;
   onKycFilterChange: (value: string) => void;
   rows?: any[];
+  /** DataTable instance (from useDataTableHandle) for the Columns toggle. */
+  table?: Table<any> | null;
 }
 
 const Filter: React.FC<FilterProps> = ({
@@ -29,6 +33,7 @@ const Filter: React.FC<FilterProps> = ({
   kycFilter,
   onKycFilterChange,
   rows = [],
+  table,
 }) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const toolbarStart = useContactToolbarStart();
@@ -67,6 +72,7 @@ const Filter: React.FC<FilterProps> = ({
     <ListToolbar
       actions={
         <>
+          {table ? <DataTableViewOptions table={table} /> : null}
           <ExportButton
             filename="vendors"
             rows={rows}

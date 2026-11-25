@@ -11,6 +11,8 @@ import {
   type CreateEmployeePayload,
 } from '@/app/(routes)/accounting/employees/utils/validations';
 import { BooksListTable } from '@/components/books/books-list-table';
+import { useDataTableHandle } from '@/components/ui/data-table';
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/shadcn/button';
 import Input from '@/components/input';
 import {
@@ -42,6 +44,7 @@ const defaultValues: CreateEmployeePayload = {
 export function PayrollEmployeesPage() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
   const [createOpen, setCreateOpen] = useState(false);
 
   const { data: rows = [], isLoading, isFetching, error, refetch } = useGetEmployees({
@@ -101,7 +104,7 @@ export function PayrollEmployeesPage() {
             </>
           }
         />
-        <ListToolbar>
+        <ListToolbar actions={table ? <DataTableViewOptions table={table} /> : null}>
           <input
             type="search"
             value={searchInput}
@@ -122,6 +125,7 @@ export function PayrollEmployeesPage() {
               storageKey="payroll-employees-table"
               isLoading={isLoading}
               emptyMessage="No employees"
+              onTableChange={onTableChange}
             />
           )}
         </div>

@@ -15,7 +15,8 @@ import {
 } from '@potta/components/shadcn/dropdown';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
@@ -166,6 +167,7 @@ const SaleTable = () => {
     },
   ];
 
+  const { table, onTableChange } = useDataTableHandle<ResponseSalesReceipt>();
   const columns: ColumnDef<ResponseSalesReceipt>[] = [
     {
       accessorKey: 'saleDate',
@@ -283,6 +285,7 @@ const SaleTable = () => {
         className="items-center"
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <Button
               text={'Export'}
               icon={<img src="/images/export.svg" alt="" />}
@@ -342,6 +345,7 @@ const SaleTable = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           columns={columns}
           data={receiptsData}
           onRowClick={handleRowClick}

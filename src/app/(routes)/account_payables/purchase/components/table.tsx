@@ -2,7 +2,8 @@
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 
 import {
   DropdownMenu,
@@ -220,6 +221,7 @@ const InvoiceTable = () => {
     },
   ];
 
+  const { table, onTableChange } = useDataTableHandle<PurchaseOrder>();
   const columns: ColumnDef<PurchaseOrder>[] = [
     {
       accessorKey: 'orderNumber',
@@ -334,6 +336,7 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <Button
               text={'Export'}
               icon={<i className="ri-upload-2-line"></i>}
@@ -395,6 +398,7 @@ const InvoiceTable = () => {
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : (
         <DataTable
+          onTableChange={onTableChange}
           data={(data?.data ?? []) as PurchaseOrder[]}
           columns={columns}
           loading={isLoading}

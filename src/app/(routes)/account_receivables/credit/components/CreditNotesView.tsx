@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import Button from '@potta/components/button';
 import Select from '@potta/components/select';
 import {
@@ -61,6 +62,8 @@ const CreditNotesView = () => {
   const [toApply, setToApply] = useState<CreditNote | null>(null);
   const deleteMutation = useDeleteCreditNote();
   const approveMutation = useApproveCreditNote();
+  const { table, onTableChange } = useDataTableHandle<CreditNote>();
+  const { table, onTableChange } = useDataTableHandle<CreditNote>();
 
   const columns = useMemo<ColumnDef<CreditNote>[]>(
     () => [
@@ -172,6 +175,7 @@ const CreditNotesView = () => {
       <ListToolbar
         actions={
           <>
+            {table ? <DataTableViewOptions table={table} /> : null}
             <ExportButton
               filename="credit-notes"
               rows={rows}
@@ -241,8 +245,8 @@ const CreditNotesView = () => {
           columns={columns}
           data={rows}
           isLoading={isLoading}
-          withRowSelection={false}
           onRowClick={(row) => setViewId(row.uuid)}
+          onTableChange={onTableChange}
           storageKey="credit-notes-table"
           manualPagination
           pageCount={data?.meta?.totalPages ?? 1}

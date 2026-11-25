@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { DatePicker, DateRangePicker } from '@potta/components/ui/date-picker';
@@ -102,6 +103,7 @@ export function ReportRunner({
     }
   };
 
+  const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
   const columns = useMemo<ColumnDef<Record<string, unknown>>[]>(() => {
     return (data?.columns ?? []).map((col: ReportColumn) => ({
       id: col.key,
@@ -140,6 +142,7 @@ export function ReportRunner({
           className="print:hidden"
           actions={
             <div className="flex flex-wrap items-center gap-2">
+              {table ? <DataTableViewOptions table={table} /> : null}
               <Button
                 type="button"
                 text={printing ? 'Preparing…' : 'Print'}
@@ -245,6 +248,7 @@ export function ReportRunner({
               data={data.rows}
               storageKey={`report-${reportId}-table`}
               withRowSelection={false}
+              onTableChange={onTableChange}
             />
           </div>
         )}
