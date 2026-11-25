@@ -22,6 +22,7 @@ import {
   orgDisplayName,
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
+import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import {
   DocumentChannelMenu,
@@ -197,12 +198,15 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
               ? `${invoice.customer.firstName ?? ''} ${invoice.customer.lastName ?? ''}`.trim()
               : '';
             const filename =
-              invoice.invoiceNumber || invoice.invoiceId || 'invoice';
+              withDocumentAcronym(
+                String(invoice.invoiceNumber || invoice.invoiceId || ''),
+                'INV',
+              ) || 'INV-draft';
             try {
               await downloadReactPdf(
                 <InvoicePdfDocument
                   title={invoice.invoiceType || 'Invoice'}
-                  invoiceNumber={invoice.invoiceNumber || invoice.invoiceId}
+                  invoiceNumber={filename === 'INV-draft' ? undefined : filename}
                   issueDate={moment(invoice.issuedDate).format('MMM DD, YYYY')}
                   dueDate={moment(invoice.dueDate).format('MMM DD, YYYY')}
                   currency={invoice.currency || 'USD'}
@@ -215,7 +219,11 @@ export function InvoiceDetailPanel({ invoiceId, fallback }: InvoiceDetailPanelPr
                     email: org?.businessEmail,
                     phone: org?.businessPhone,
                     addressLines: formatOrgAddress(org),
-                    logoUrl: org?.logo,
+                    logoUrl:
+                      typeof org?.logo === 'string' &&
+                      (/^https?:\/\//i.test(org.logo) || org.logo.startsWith('data:'))
+                        ? org.logo
+                        : null,
                     registrationNumber: org?.registrationNumber,
                     taxId: org?.taxIdentificationNumber,
                   }}

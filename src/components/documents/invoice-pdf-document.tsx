@@ -106,11 +106,11 @@ const styles = StyleSheet.create({
   },
   parties: {
     flexDirection: 'row',
-    gap: 24,
     marginBottom: 28,
   },
   partyCol: {
-    flex: 1,
+    width: '50%',
+    paddingRight: 12,
   },
   partyLabel: {
     fontSize: 9,
@@ -264,7 +264,7 @@ export function InvoicePdfDocument({
           <View>
             <Text style={styles.headerTitle}>INVOICE</Text>
             <Text style={styles.headerSub}>
-              {invoiceNumber ? `#${invoiceNumber}` : title}
+              {invoiceNumber || title}
               {draft ? '  ·  Draft' : ''}
             </Text>
           </View>
@@ -279,13 +279,10 @@ export function InvoicePdfDocument({
           <View style={styles.parties}>
             <View style={styles.partyCol}>
               <Text style={styles.partyLabel}>From</Text>
-              {(() => {
-                const logoSrc = resolvePdfLogoUrl(seller.logoUrl);
-                return logoSrc ? (
-                  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
-                  <Image src={logoSrc} style={styles.logo} />
-                ) : null;
-              })()}
+              {seller.logoUrl ? (
+                // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
+                <Image src={resolvePdfLogoUrl(seller.logoUrl)} style={styles.logo} />
+              ) : null}
               <Text style={styles.partyName}>{seller.name || 'Your organization'}</Text>
               {seller.email ? <Text style={styles.partyLine}>{seller.email}</Text> : null}
               {seller.phone ? <Text style={styles.partyLine}>{seller.phone}</Text> : null}

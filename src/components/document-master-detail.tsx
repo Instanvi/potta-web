@@ -160,17 +160,7 @@ export function DocumentPreviewShell({
       else await downloadPreviewAsPdf(contentRef.current, downloadTitle || title);
     } catch (err) {
       console.error('PDF download failed', err);
-      try {
-        // Prefer a real file over Chrome's print dialog when react-pdf fails.
-        if (onDownloadPdf) {
-          await downloadPreviewAsPdf(contentRef.current, downloadTitle || title);
-        } else {
-          throw err;
-        }
-      } catch (fallbackErr) {
-        console.error('PDF fallback failed', fallbackErr);
-        toast.error('Could not download PDF. Try again.');
-      }
+      toast.error('Could not download PDF. Try again.');
     } finally {
       setDownloading(false);
     }

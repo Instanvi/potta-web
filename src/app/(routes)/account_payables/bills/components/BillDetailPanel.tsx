@@ -22,6 +22,7 @@ import {
   orgDisplayName,
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
+import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import {
   DocumentChannelMenu,
@@ -179,11 +180,16 @@ export function BillDetailPanel({ billId }: { billId: string }) {
         icon={<i className="ri-download-2-line" />}
         onClick={() => {
           void (async () => {
+            const billNumber =
+              withDocumentAcronym(
+                String(bill.code || bill.vendorInvoiceNumber || ''),
+                'BILL',
+              ) || undefined;
             try {
               await downloadReactPdf(
                 <BillPdfDocument
-                  title={bill.code ? `Bill ${bill.code}` : 'Bill'}
-                  billNumber={bill.code || bill.vendorInvoiceNumber || undefined}
+                  title={billNumber ? `Bill ${billNumber}` : 'Bill'}
+                  billNumber={billNumber}
                   issueDate={formatDate(bill.issuedDate)}
                   dueDate={formatDate(bill.dueDate)}
                   currency={bill.currency || 'XAF'}
@@ -195,7 +201,11 @@ export function BillDetailPanel({ billId }: { billId: string }) {
                     email: org?.businessEmail,
                     phone: org?.businessPhone,
                     addressLines: formatOrgAddress(org),
-                    logoUrl: org?.logo,
+                    logoUrl:
+                      typeof org?.logo === 'string' &&
+                      (/^https?:\/\//i.test(org.logo) || org.logo.startsWith('data:'))
+                        ? org.logo
+                        : null,
                     registrationNumber: org?.registrationNumber,
                     taxId: org?.taxIdentificationNumber,
                   }}
@@ -222,7 +232,7 @@ export function BillDetailPanel({ billId }: { billId: string }) {
                   total={total}
                   draft={bill.status === 'DRAFT'}
                 />,
-                bill.code || 'bill',
+                billNumber || 'BILL-draft',
               );
             } catch {
               toast.error('Could not generate PDF');

@@ -26,15 +26,36 @@ export async function downloadPreviewAsPdf(
     (source.firstElementChild as HTMLElement | null) ||
     source;
 
-  const canvas = await html2canvas(target, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-    windowWidth: Math.max(target.scrollWidth, target.clientWidth),
-    windowHeight: Math.max(target.scrollHeight, target.clientHeight),
-  });
+  // Capture a clone at A4 width. Measuring the live preview (often a narrow
+  // overflow-hidden pane) stretches a few letters across a full page.
+  const A4_PX = 794;
+  const host = window.document.createElement('div');
+  host.setAttribute('data-pdf-host', '1');
+  host.style.cssText =
+    'position:fixed;left:-12000px;top:0;width:794px;background:#ffffff;z-index:-1;';
+  const clone = target.cloneNode(true) as HTMLElement;
+  clone.style.width = `${A4_PX}px`;
+  clone.style.maxWidth = `${A4_PX}px`;
+  clone.style.minWidth = '0';
+  clone.style.height = 'auto';
+  clone.style.overflow = 'visible';
+  host.appendChild(clone);
+  window.document.body.appendChild(host);
+
+  let canvas: HTMLCanvasElement;
+  try {
+    canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: A4_PX,
+      windowWidth: A4_PX,
+    });
+  } finally {
+    host.remove();
+  }
 
   const imgData = canvas.toDataURL('image/png');
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
