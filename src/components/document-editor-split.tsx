@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useCallback, useRef } from 'react';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -8,6 +8,22 @@ import {
 } from '@potta/components/resizable';
 import { DocumentPreviewShell } from '@potta/components/document-master-detail';
 import { cn } from '@potta/lib/utils';
+
+/**
+ * Keeps the latest PDF download in a ref.
+ * Storing it in state re-renders the editor, which rebuilds the callback and
+ * registers it again until React hits the maximum update depth.
+ */
+export function usePreviewDownload() {
+  const downloadRef = useRef<(() => Promise<void>) | null>(null);
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    downloadRef.current = fn;
+  }, []);
+  const onDownloadPdf = useCallback(async () => {
+    await downloadRef.current?.();
+  }, []);
+  return { registerDownload, onDownloadPdf };
+}
 
 /** Header control that shows or hides the side-by-side document preview. */
 export function DocumentPreviewToggle({

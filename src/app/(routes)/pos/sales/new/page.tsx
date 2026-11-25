@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 
@@ -8,15 +8,13 @@ import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 import { DataProvider } from '@potta/components/providers/DataProvider';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(true);
-  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
-  const registerDownload = useCallback((fn: () => Promise<void>) => {
-    setDownloadPdf(() => fn);
-  }, []);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 
   // Own provider: this form keeps its state in `data`, which would otherwise clobber the till's cart.
@@ -37,7 +35,7 @@ const NewSalesReciept = () => {
           open={showPreview}
           onOpenChange={setShowPreview}
           downloadTitle="Sale receipt"
-          onDownloadPdf={downloadPdf ?? undefined}
+          onDownloadPdf={onDownloadPdf}
           editor={<Left />}
           preview={<PdfView onRegisterDownload={registerDownload} />}
         />

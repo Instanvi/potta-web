@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 
@@ -8,16 +8,12 @@ import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 
 const NewSalesReciept = () => {
   const [showPreview, setShowPreview] = useState(true);
-  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
-    null,
-  );
-  const registerDownload = useCallback((fn: () => Promise<void>) => {
-    setDownloadPdf(() => fn);
-  }, []);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
 
   const togglePreview = () => setShowPreview((v) => !v);
 
@@ -38,7 +34,7 @@ const NewSalesReciept = () => {
         open={showPreview}
         onOpenChange={setShowPreview}
         downloadTitle="Sales receipt"
-        onDownloadPdf={downloadPdf ?? undefined}
+        onDownloadPdf={onDownloadPdf}
         editor={<Left onOpenPreview={() => setShowPreview(true)} />}
         preview={<PdfView onRegisterDownload={registerDownload} />}
       />

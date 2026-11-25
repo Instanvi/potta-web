@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
@@ -8,18 +8,14 @@ import DocumentWorkspace from '@potta/components/document-workspace';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 
 export default function NewCreditNotePage() {
   const [showPreview, setShowPreview] = useState(true);
   const [extracting, setExtracting] = useState(false);
-  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
-    null,
-  );
-  const registerDownload = useCallback((fn: () => Promise<void>) => {
-    setDownloadPdf(() => fn);
-  }, []);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 
   const extractInvoiceData = async (_file: File) => {
@@ -44,7 +40,7 @@ export default function NewCreditNotePage() {
           open={showPreview}
           onOpenChange={setShowPreview}
           downloadTitle="Credit note"
-          onDownloadPdf={downloadPdf ?? undefined}
+          onDownloadPdf={onDownloadPdf}
           editor={<Left onOpenPreview={() => setShowPreview(true)} />}
           preview={<PdfView onRegisterDownload={registerDownload} />}
         />

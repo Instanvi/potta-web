@@ -58,6 +58,8 @@ function getCurrencySymbol(currencyCode: string): string {
   }
 }
 
+const EMPTY_TABLE: TableItem[] = [];
+
 const PdfView = ({
   onRegisterDownload,
 }: {
@@ -66,7 +68,9 @@ const PdfView = ({
 } = {}) => {
   const context = useContext(ContextData);
   const contextData = context?.data || {};
-  const tableData: TableItem[] = contextData.table || [];
+  const tableData: TableItem[] = Array.isArray(contextData.table)
+    ? contextData.table
+    : EMPTY_TABLE;
   const customerId = contextData.customerName; // Get customer ID from context
   const { data: org } = useOrganizationProfile();
   const { prefs: letterhead, setPrefs: setLetterhead } = useDocumentLetterhead();

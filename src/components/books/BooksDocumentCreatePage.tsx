@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import DocumentWorkspace from '@/components/document-workspace';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@/components/document-editor-split';
 import {
   DocumentFooterLink,
@@ -64,10 +65,7 @@ export function BooksDocumentCreatePage({
   const [acting, setActing] = useState(false);
 
   const [showPreview, setShowPreview] = useState(true);
-  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
-  const registerDownload = useCallback((fn: () => Promise<void>) => {
-    setDownloadPdf(() => fn);
-  }, []);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
 
   const { partyFields, dateFields, lineFields, noteFields, detailFields } = useMemo(() => {
     const party: BooksField[] = [];
@@ -169,7 +167,7 @@ export function BooksDocumentCreatePage({
         open={showPreview}
         onOpenChange={setShowPreview}
         downloadTitle={title}
-        onDownloadPdf={downloadPdf ?? undefined}
+        onDownloadPdf={onDownloadPdf}
         editor={
           <div className="flex min-h-full flex-col bg-white">
             <DocumentFormShell className="flex-1 bg-white">

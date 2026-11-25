@@ -26,6 +26,8 @@ interface TableItem {
   id: number;
 }
 
+const EMPTY_TABLE: TableItem[] = [];
+
 const PdfView = ({
   onRegisterDownload,
 }: {
@@ -37,7 +39,9 @@ const PdfView = ({
   const { data: org } = useOrganizationProfile();
 
   const contextData = context?.data || {};
-  const tableData: TableItem[] = contextData.table || [];
+  const tableData: TableItem[] = Array.isArray(contextData.table)
+    ? contextData.table
+    : EMPTY_TABLE;
 
   useEffect(() => {
     if (

@@ -244,26 +244,25 @@ const Left = ({
     }
   }, [initialInvoiceType]);
 
-  // Sync local state with context.data when it changes (for dummy data fill)
+  // Copy filled invoice data into the form. The provider starts as an empty
+  // array, and publishing the invoice number stores a partial object — only
+  // apply fields that are actually present so defaults stay selected.
   useEffect(() => {
-    if (context?.data) {
-      setIssueDate(context.data.issueDate || '');
-      setDueDate(context.data.dueDate || '');
-      setBillingAddress(context.data.billing || '');
-      setShippingAddress(context.data.shipping || '');
-      setNote(context.data.note || '');
-      setPaymentTerms(context.data.paymentTerms || '');
-      setPaymentReference(context.data.paymentReference || '');
-      setTaxRate(context.data.taxRate || 0);
-      if (context.data.invoiceNumber) {
-        setInvoiceNumber(
-          withDocumentAcronym(String(context.data.invoiceNumber), 'INV'),
-        );
-      }
-      setCurrency(context.data.currency || 'USD');
-      setInvioceType(context.data.invoiceType || 'Invoice');
-      // Add more fields as needed
+    const source = context?.data;
+    if (!source || Array.isArray(source)) return;
+    if (source.issueDate) setIssueDate(source.issueDate);
+    if (source.dueDate) setDueDate(source.dueDate);
+    if (source.billing) setBillingAddress(source.billing);
+    if (source.shipping) setShippingAddress(source.shipping);
+    if (source.note) setNote(source.note);
+    if (source.paymentTerms) setPaymentTerms(source.paymentTerms);
+    if (source.paymentReference) setPaymentReference(source.paymentReference);
+    if (source.taxRate != null && source.taxRate !== '') setTaxRate(source.taxRate);
+    if (source.invoiceNumber) {
+      setInvoiceNumber(withDocumentAcronym(String(source.invoiceNumber), 'INV'));
     }
+    if (source.currency) setCurrency(source.currency);
+    if (source.invoiceType) setInvioceType(source.invoiceType);
   }, [context?.data]);
 
   // The preview reads the shared form context, so publish the INV- number once.

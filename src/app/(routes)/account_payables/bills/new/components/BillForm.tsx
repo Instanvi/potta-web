@@ -1,5 +1,5 @@
 'use client';
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Controller,
@@ -37,6 +37,7 @@ import {
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
+import { usePreviewDownload } from '@potta/components/document-editor-split';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
 
 const CURRENCIES: { value: BillCurrency; label: string }[] = [
@@ -87,10 +88,7 @@ const BillForm = ({
     useVendorOptions();
   const [copyingLines, setCopyingLines] = useState(false);
   const [addVendorOpen, setAddVendorOpen] = useState(false);
-  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
-  const registerDownload = useCallback((fn: () => Promise<void>) => {
-    setDownloadPdf(() => fn);
-  }, []);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
 
   const methods = useForm<BillFormValues>({
     resolver: yupResolver(billSchema) as unknown as Resolver<BillFormValues>,
@@ -493,7 +491,7 @@ const BillForm = ({
         {renderSplit(
           formColumn,
           <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />,
-          { onDownloadPdf: downloadPdf ?? undefined },
+          { onDownloadPdf },
         )}
         {vendorCreateSheet}
       </FormProvider>
@@ -511,7 +509,7 @@ const BillForm = ({
         }}
         downloadTitle="Bill"
         dialogTitle="Bill preview"
-        onDownloadPdf={downloadPdf ?? undefined}
+        onDownloadPdf={onDownloadPdf}
       >
         <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />
       </DocumentPreviewDialog>

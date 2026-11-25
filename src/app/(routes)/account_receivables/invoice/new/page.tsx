@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useState, useContext, Suspense } from 'react';
+import React, { useState, useContext, Suspense } from 'react';
 import Left from './components/left';
 import PdfView from './components/pdfview';
 import { useSearchParams } from 'next/navigation';
@@ -11,18 +11,14 @@ import DocumentWorkspace from '@potta/components/document-workspace';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import { Skeleton } from '@potta/components/ui/loaders';
 
 const NewInvoiceInner = () => {
   const [showPreview, setShowPreview] = useState(true);
-  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
-    null,
-  );
-  const registerDownload = useCallback((fn: () => Promise<void>) => {
-    setDownloadPdf(() => fn);
-  }, []);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const searchParams = useSearchParams();
   const initialInvoiceType = searchParams.get('type');
   const [extracting, setExtracting] = useState(false);
@@ -67,7 +63,7 @@ const NewInvoiceInner = () => {
           open={showPreview}
           onOpenChange={setShowPreview}
           downloadTitle="Invoice"
-          onDownloadPdf={downloadPdf ?? undefined}
+          onDownloadPdf={onDownloadPdf}
           editor={
             <Left
               initialInvoiceType={initialInvoiceType}
