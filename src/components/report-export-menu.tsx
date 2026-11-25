@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { ChevronDown } from 'lucide-react';
+import type { DocumentProps } from '@react-pdf/renderer';
+import { toast } from 'sonner';
 import Button from '@potta/components/button';
 import {
   DropdownMenu,
@@ -9,82 +11,68 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
-import { isExpenseReportId } from '@/lib/expense-reports';
-import { exportRows } from '@/lib/export-file';
-import { ReportPdfDocument } from '@/components/documents/report-pdf-document';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
-import { downloadReactPdf } from '@/lib/download-react-pdf';
-import { orgToSeller } from '@/lib/org-to-seller';
+import { saveBlob } from '@/lib/export-file';
+import { orgToSeller, type PdfSeller } from '@/lib/org-to-seller';
 import {
-  reportsApi,
-  type ReportColumn,
-  type ReportExportFormat,
-  type ReportRunParams,
-} from '@/app/(routes)/reports/utils/api';
-
-const FORMATS: { format: ReportExportFormat; label: string }[] = [
-  { format: 'xlsx', label: 'Excel (.xlsx)' },
-  { format: 'csv', label: 'CSV (.csv)' },
-  { format: 'pdf', label: 'PDF (.pdf)' },
-];
+  buildReportDownload,
+  REPORT_DOWNLOAD_FORMATS,
+  type ReportDownloadFormat,
+} from '@/lib/report-download';
+import type { ReportColumn } from '@/app/(routes)/reports/utils/api';
 
 type Props = {
   reportId: string;
   title: string;
-  params: ReportRunParams;
   columns: ReportColumn[];
   rows: Record<string, unknown>[];
+  totals?: Record<string, number>;
   disabled?: boolean;
-  /** Period / as-of label printed under the title on generated PDFs. */
+  /** Period / as-of label printed under the title. */
   period?: string;
   description?: string;
+  /** Statement PDFs (profit and loss, balance sheet) keep their section layout. */
+  renderPdf?: (seller: PdfSeller) => ReactElement<DocumentProps>;
 };
 
-/** Format picker: backend export for catalog reports; client fallback for expense-proxied ids. */
+/** Download the report on screen as PDF, Word, Excel, or CSV. */
 export function ReportExportMenu({
   reportId,
   title,
-  params,
   columns,
   rows,
+  totals,
   disabled,
   period,
   description,
+  renderPdf,
 }: Props) {
   const [busy, setBusy] = useState(false);
   const { data: org } = useOrganizationProfile();
 
-  const onExport = async (format: ReportExportFormat) => {
+  const onExport = async (format: ReportDownloadFormat) => {
     if (busy || disabled) return;
     setBusy(true);
+    const filename = (title || reportId).trim() || 'report';
     try {
-      if (isExpenseReportId(reportId)) {
-        if (format === 'pdf') {
-          await downloadReactPdf(
-            <ReportPdfDocument
-              seller={orgToSeller(org)}
-              title={title || reportId}
-              description={description}
-              period={period}
-              columns={columns}
-              rows={rows}
-            />,
-            title || reportId,
-          );
-          return;
-        }
-        await exportRows({
-          filename: title || reportId,
-          rows,
-          columns: columns.map((c) => ({
-            key: c.key,
-            header: c.label,
-          })),
-          format,
-        });
-        return;
-      }
-      await reportsApi.export(reportId, { ...params, format });
+      const seller = orgToSeller(org);
+      const built = await buildReportDownload({
+        format,
+        filename,
+        title: filename,
+        description,
+        period,
+        columns,
+        rows,
+        totals,
+        seller,
+        pdfDocument: renderPdf?.(seller),
+      });
+      saveBlob(built.blob, built.filename);
+      toast.success(`Downloaded ${built.filename}`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not download this report. Try again.');
     } finally {
       setBusy(false);
     }
@@ -95,16 +83,20 @@ export function ReportExportMenu({
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          text={busy ? 'Exporting…' : 'Export'}
+          text={
+            <span className="inline-flex items-center gap-1">
+              {busy ? 'Downloading…' : 'Download'}
+              <ChevronDown className="size-4" />
+            </span>
+          }
           theme="lightBlue"
           color
           disabled={disabled || busy || rows.length === 0}
-          icon={<i className="ri-upload-2-line" />}
-          rightIcon={<ChevronDown className="size-4" />}
+          icon={<i className="ri-download-2-line" />}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 bg-white">
-        {FORMATS.map(({ format, label }) => (
+      <DropdownMenuContent align="end" className="w-48 bg-white">
+        {REPORT_DOWNLOAD_FORMATS.map(({ format, label }) => (
           <DropdownMenuItem
             key={format}
             className="cursor-pointer"
@@ -117,3 +109,5 @@ export function ReportExportMenu({
     </DropdownMenu>
   );
 }
+
+export type { ReportDownloadFormat };

@@ -1,7 +1,8 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { DateRangePicker, parseDateValue } from '@potta/components/ui/date-picker';
-import { ExportButton } from '@/components/export-button';
+import { ReportExportMenu } from '@/components/report-export-menu';
+import { StatementPdfDocument } from '@/components/documents/report-pdf-document';
 import {
   formatAmount,
   formatDate,
@@ -11,7 +12,6 @@ import {
 import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard } from '../../../_shared/states';
 import { useIncomeStatement } from '../hooks';
 import ReportSection from './ReportSection';
-import { StatementPdfActions } from './StatementPdfActions';
 
 const toLines = (lines?: Record<string, number>, hideZero?: boolean) =>
   Object.entries(lines ?? {})
@@ -55,45 +55,43 @@ const IncomeStatementReport = ({ hideZero }: { hideZero: boolean }) => {
         className="print:hidden"
         actions={
           <div className="flex flex-wrap items-center gap-2">
-          <StatementPdfActions
-            filename={`profit-and-loss-${startDate}-${endDate}`}
-            disabled={!data || !!isEmpty || invalidRange}
-            statement={{
-              title: 'Income statement (Profit & Loss)',
-              period: `${startDate} – ${endDate}`,
-              sections: [
-                {
-                  title: 'Income',
-                  lines: toLines(data?.incomes, hideZero),
-                  total: sum(data?.incomes),
-                },
-                {
-                  title: 'Expenses',
-                  lines: toLines(data?.expenses, hideZero),
-                  total: sum(data?.expenses),
-                },
-              ],
-              summary: [
-                {
-                  label: (data?.netProfitLoss ?? 0) >= 0 ? 'Net profit' : 'Net loss',
-                  amount: Number(data?.netProfitLoss) || 0,
-                },
-              ],
-            }}
-          />
-          <ExportButton
-            filename={`profit-and-loss-${startDate}-${endDate}`}
-            rows={exportRows}
-            columns={[
-              { key: 'section', header: 'Section' },
-              { key: 'account', header: 'Account' },
-              {
-                key: 'amount',
-                header: 'Amount',
-                value: (row) => formatAmount(row.amount),
-              },
-            ]}
+          <ReportExportMenu
+            reportId="profit-and-loss"
+            title="Income statement"
+            description="Profit and loss"
+            period={`${startDate} – ${endDate}`}
             disabled={!exportRows.length || invalidRange}
+            columns={[
+              { key: 'section', label: 'Section', type: 'text' },
+              { key: 'account', label: 'Account', type: 'text' },
+              { key: 'amount', label: 'Amount', type: 'money' },
+            ]}
+            rows={exportRows}
+            renderPdf={(seller) => (
+              <StatementPdfDocument
+                seller={seller}
+                title="Income statement (Profit & Loss)"
+                period={`${startDate} – ${endDate}`}
+                sections={[
+                  {
+                    title: 'Income',
+                    lines: toLines(data?.incomes, hideZero),
+                    total: sum(data?.incomes),
+                  },
+                  {
+                    title: 'Expenses',
+                    lines: toLines(data?.expenses, hideZero),
+                    total: sum(data?.expenses),
+                  },
+                ]}
+                summary={[
+                  {
+                    label: (data?.netProfitLoss ?? 0) >= 0 ? 'Net profit' : 'Net loss',
+                    amount: Number(data?.netProfitLoss) || 0,
+                  },
+                ]}
+              />
+            )}
           />
           </div>
         }
