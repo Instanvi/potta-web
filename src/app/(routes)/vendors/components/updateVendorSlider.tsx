@@ -72,6 +72,9 @@ import Notes from './note';
 import Tax from './tax';
 import useUpdateVendor from '../hooks/useUpdateVendor';
 import { toast } from 'sonner';
+import { PhoneInput } from '@potta/components/phoneInput';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { orgDefaultCallingCode } from '@/lib/org-phone-country';
 
 interface EditVendorProps {
   vendor: VendorFormData | null; // Existing vendor data
@@ -94,11 +97,16 @@ const EditVendor: React.FC<EditVendorProps> = ({
   const setIsOpen = setControlledOpen ?? setLocalOpen;
   const [tabs, setTabs] = useState<string>('Address');
   const context = useContext(ContextData);
+  const { data: org } = useOrganizationProfile();
+  const defaultCalling = orgDefaultCallingCode(org);
+  const [phoneDisplay, setPhoneDisplay] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState(defaultCalling);
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<VendorFormData>({
@@ -135,8 +143,17 @@ const EditVendor: React.FC<EditVendorProps> = ({
   useEffect(() => {
     if (vendor) {
       reset(vendor);
+      const raw = (vendor.phone || '').trim();
+      const match = raw.match(/^(\+\d{1,4})(.*)$/);
+      if (match) {
+        setPhoneCountry(match[1]);
+        setPhoneDisplay(match[2].replace(/\D/g, ''));
+      } else {
+        setPhoneCountry(defaultCalling);
+        setPhoneDisplay(raw.replace(/\D/g, ''));
+      }
     }
-  }, [vendor, reset]);
+  }, [vendor, reset, defaultCalling]);
 
   const VendorTypeEnum = [
     { value: 'individual', label: 'Individual' },
@@ -293,15 +310,19 @@ const EditVendor: React.FC<EditVendorProps> = ({
         </div>
         <hr />
         <h1 className="text-xl mt-2">Contact Information</h1>
-        <div className="w-full grid mt-7 grid-cols-2 gap-3">
-          <Input
-            type="tel"
+        <div className="mt-7 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+          <PhoneInput
             label="Phone Number"
-            name="phone"
-            placeholder="(555) 123-4567"
-            register={register}
-            errors={errors.phone}
+            placeholder="Enter phone number"
+            value={phoneDisplay}
+            countryCode={phoneCountry}
             required
+            errors={typeof errors.phone?.message === 'string' ? errors.phone.message : undefined}
+            onChange={(combined, metadata) => {
+              setPhoneCountry(metadata.countryCode);
+              setPhoneDisplay(metadata.formattedValue);
+              setValue('phone', combined, { shouldValidate: true });
+            }}
           />
           <Input
             type="text"

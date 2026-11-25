@@ -15,6 +15,8 @@ type Props = {
   required?: boolean;
   /** When true, show a + control to add a custom method. */
   allowCreate?: boolean;
+  /** Extra options appended after org methods (e.g. Account credit for refunds). */
+  extraOptions?: { label: string; value: string }[];
 };
 
 /**
@@ -28,6 +30,7 @@ export function PaymentMethodSelect({
   label = 'Payment method',
   required = true,
   allowCreate = true,
+  extraOptions = [],
 }: Props) {
   const { data, isLoading } = usePaymentMethods({ page: 1, limit: 100 });
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -48,8 +51,14 @@ export function PaymentMethodSelect({
     const fromApi = (data?.data ?? [])
       .filter((m) => m.isActive)
       .map((m) => ({ label: m.name, value: m.code }));
-    return fromApi.length > 0 ? fromApi : fallbackOptions;
-  }, [data?.data, fallbackOptions]);
+    const base = fromApi.length > 0 ? fromApi : fallbackOptions;
+    if (!extraOptions.length) return base;
+    const seen = new Set(base.map((o) => o.value));
+    return [
+      ...base,
+      ...extraOptions.filter((o) => o.value && !seen.has(o.value)),
+    ];
+  }, [data?.data, fallbackOptions, extraOptions]);
 
   const onCreated = (method: OrgPaymentMethod) => {
     onChange(method.code);

@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="estimate"
       title="Estimate"
+      createHref="/account_receivables/estimates/new"
       documentKind="estimate"
       columns={[
         { key: 'customerId', label: 'Customer' },

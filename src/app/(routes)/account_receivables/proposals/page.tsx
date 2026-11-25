@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="proposal"
       title="Proposal"
+      createHref="/account_receivables/proposals/new"
       documentKind="proposal"
       columns={[
         { key: 'title', label: 'Title' },

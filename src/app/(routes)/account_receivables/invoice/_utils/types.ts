@@ -30,7 +30,8 @@ export const INVOICE_PAYMENT_METHODS = [
 export type InvoicePaymentMethod = (typeof INVOICE_PAYMENT_METHODS)[number];
 
 export type RecordInvoicePaymentPayload = {
-  paymentMethod: InvoicePaymentMethod;
+  /** Org payment-method code from GET /payment-method. */
+  paymentMethod: string;
   amount?: number;
   paymentReference?: string;
 };

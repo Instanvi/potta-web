@@ -17,6 +17,7 @@ import SearchableSelect from '@potta/components/searchableSelect';
 import TextArea from '@potta/components/textArea';
 import { FormDatePicker } from '@potta/components/ui/date-picker';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
+import SliderVendor from '@potta/app/(routes)/vendors/components/vendorSlider';
 import { apiErrorMessage, formatDate, today, toDateInput } from '../../../../_shared/format';
 import { usePurchaseOrderOptions, useVendorOptions } from '../../../hooks';
 import { apLookupsApi } from '../../../utils/api';
@@ -82,8 +83,10 @@ const BillForm = ({
   const router = useRouter();
   const inSheet = variant === 'sheet';
   const createBill = useCreateBill();
-  const { data: vendors = [], isLoading: vendorsLoading } = useVendorOptions();
+  const { data: vendors = [], isLoading: vendorsLoading, refetch: refetchVendors } =
+    useVendorOptions();
   const [copyingLines, setCopyingLines] = useState(false);
+  const [addVendorOpen, setAddVendorOpen] = useState(false);
   const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
   const registerDownload = useCallback((fn: () => Promise<void>) => {
     setDownloadPdf(() => fn);
@@ -207,23 +210,36 @@ const BillForm = ({
               control={control}
               name="vendorId"
               render={({ field }) => (
-                <SearchableSelect
-                  label="Vendor"
-                  required
-                  options={vendors.map((v) => ({ label: v.name, value: v.uuid }))}
-                  selectedValue={field.value}
-                  onChange={(value: string) => {
-                    field.onChange(value);
-                    setValue('purchaseOrderId', '');
-                    const vendor = vendors.find((v) => v.uuid === value);
-                    const vendorCurrency = CURRENCIES.find((c) => c.value === vendor?.currency)
-                      ?.value;
-                    if (vendorCurrency) setValue('currency', vendorCurrency);
-                  }}
-                  placeholder={vendorsLoading ? 'Loading vendors…' : 'Select a vendor'}
-                  isDisabled={vendorsLoading}
-                  error={errors.vendorId?.message}
-                />
+                <div className="flex items-end gap-2">
+                  <div className="min-w-0 flex-1">
+                    <SearchableSelect
+                      label="Vendor"
+                      required
+                      options={vendors.map((v) => ({ label: v.name, value: v.uuid }))}
+                      selectedValue={field.value}
+                      onChange={(value: string) => {
+                        field.onChange(value);
+                        setValue('purchaseOrderId', '');
+                        const vendor = vendors.find((v) => v.uuid === value);
+                        const vendorCurrency = CURRENCIES.find((c) => c.value === vendor?.currency)
+                          ?.value;
+                        if (vendorCurrency) setValue('currency', vendorCurrency);
+                      }}
+                      placeholder={vendorsLoading ? 'Loading vendors…' : 'Select a vendor'}
+                      isDisabled={vendorsLoading}
+                      error={errors.vendorId?.message}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAddVendorOpen(true)}
+                    className="mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+                    aria-label="Add vendor"
+                    title="Add vendor"
+                  >
+                    <i className="ri-add-line text-xl" />
+                  </button>
+                </div>
               )}
             />
             <Controller
@@ -271,8 +287,9 @@ const BillForm = ({
       </DocumentFormCard>
 
       <DocumentFormCard flush={!inSheet}>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-          <div className="md:col-span-2">
+        <DocumentSectionTitle>Bill details</DocumentSectionTitle>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          <div>
             <Input
               type="text"
               name="vendorInvoiceNumber"
@@ -289,51 +306,41 @@ const BillForm = ({
               }
             />
           </div>
-          <div className="md:col-span-2">
-            <FormDatePicker control={control} name="issueDate" label="Bill date" required />
-          </div>
-          <div className="md:col-span-2">
-            <FormDatePicker control={control} name="dueDate" label="Due date" required min={issueDate} />
-          </div>
-          <div className="md:col-span-2">
-            <Controller
-              control={control}
-              name="currency"
-              render={({ field }) => (
-                <Select
-                  label="Currency"
-                  options={CURRENCIES}
-                  selectedValue={field.value}
-                  onChange={(v: BillCurrency) => field.onChange(v)}
-                  bg="bg-white"
-                />
-              )}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <Input
-              type="text"
-              name="expenseAccountCode"
-              label="Expense account"
-              required
-              register={register}
-              errors={errors.expenseAccountCode}
-              inputClass="!bg-white"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <Controller
-              control={control}
-              name="paymentMethod"
-              render={({ field }) => (
-                <PaymentMethodSelect
-                  value={field.value}
-                  onChange={(code) => field.onChange(code as PaymentMethod)}
-                  error={errors.paymentMethod?.message}
-                />
-              )}
-            />
-          </div>
+          <FormDatePicker control={control} name="issueDate" label="Bill date" required />
+          <FormDatePicker control={control} name="dueDate" label="Due date" required min={issueDate} />
+          <Controller
+            control={control}
+            name="currency"
+            render={({ field }) => (
+              <Select
+                label="Currency"
+                options={CURRENCIES}
+                selectedValue={field.value}
+                onChange={(v: string) => field.onChange(v as BillCurrency)}
+                bg="bg-white"
+              />
+            )}
+          />
+          <Input
+            type="text"
+            name="expenseAccountCode"
+            label="Expense account"
+            required
+            register={register}
+            errors={errors.expenseAccountCode}
+            inputClass="!bg-white"
+          />
+          <Controller
+            control={control}
+            name="paymentMethod"
+            render={({ field }) => (
+              <PaymentMethodSelect
+                value={field.value}
+                onChange={(code) => field.onChange(code as PaymentMethod)}
+                error={errors.paymentMethod?.message}
+              />
+            )}
+          />
         </div>
       </DocumentFormCard>
 
@@ -467,6 +474,19 @@ const BillForm = ({
     </form>
   );
 
+  const vendorCreateSheet = (
+    <SliderVendor
+      open={addVendorOpen}
+      setOpen={setAddVendorOpen}
+      showTrigger={false}
+      onCreated={(id) => {
+        void refetchVendors().then(() => {
+          if (id) setValue('vendorId', id, { shouldValidate: true });
+        });
+      }}
+    />
+  );
+
   if (renderSplit) {
     return (
       <FormProvider {...methods}>
@@ -475,6 +495,7 @@ const BillForm = ({
           <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />,
           { onDownloadPdf: downloadPdf ?? undefined },
         )}
+        {vendorCreateSheet}
       </FormProvider>
     );
   }
@@ -494,6 +515,7 @@ const BillForm = ({
       >
         <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />
       </DocumentPreviewDialog>
+      {vendorCreateSheet}
     </FormProvider>
   );
 };

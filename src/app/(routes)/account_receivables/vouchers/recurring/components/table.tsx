@@ -222,7 +222,7 @@ const InvoiceTable = () => {
                 { key: 'invoiceTotal', header: 'Amount' },
               ]}
             />
-            <Link href={'/account_receivables/recurring/new'}>
+            <Link href={'/account_receivables/vouchers/recurring/new'}>
               <Button
                 text={'Create Invoice'}
                 icon={<i className="ri-file-add-line"></i>}

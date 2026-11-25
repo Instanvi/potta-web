@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import Modal from '@potta/components/modal';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
-import Select from '@potta/components/select';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { formatMoney } from '../../utils/format';
 import { usePayBill } from '../hooks';
-import { BILL_PAYMENT_METHODS, Bill, PaymentMethod } from '../utils/types';
+import { Bill } from '../utils/types';
 
 interface Props {
   bill: Bill | null;
@@ -16,14 +16,13 @@ interface Props {
 const PayBillModal = ({ bill, onClose }: Props) => {
   const pay = usePayBill();
   const total = Number(bill?.invoiceTotal ?? 0);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BANK_TRANSFER');
+  const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER');
   const [paymentReference, setPaymentReference] = useState('');
   const [amount, setAmount] = useState('');
 
   useEffect(() => {
     if (!bill) return;
-    const preferred = BILL_PAYMENT_METHODS.find((m) => m.value === bill.paymentMethod);
-    setPaymentMethod(preferred?.value ?? 'BANK_TRANSFER');
+    setPaymentMethod((bill.paymentMethod || 'BANK_TRANSFER').trim() || 'BANK_TRANSFER');
     setPaymentReference('');
     setAmount(String(Number(bill.invoiceTotal ?? 0)));
   }, [bill]);
@@ -33,8 +32,8 @@ const PayBillModal = ({ bill, onClose }: Props) => {
     amount === '' || !Number.isFinite(amountNumber)
       ? 'Enter the amount paid'
       : Math.abs(amountNumber - total) > 0.01
-      ? `Bills are settled in full: the amount must equal ${formatMoney(total, bill?.currency)}`
-      : undefined;
+        ? `Bills are settled in full: the amount must equal ${formatMoney(total, bill?.currency)}`
+        : undefined;
 
   return (
     <Modal
@@ -48,12 +47,10 @@ const PayBillModal = ({ bill, onClose }: Props) => {
           Records a payment made outside Potta (bank, cash, mobile money) and settles the vendor payable
           in the books.
         </p>
-        <Select
+        <PaymentMethodSelect
+          value={paymentMethod}
+          onChange={setPaymentMethod}
           label="Payment method"
-          options={BILL_PAYMENT_METHODS}
-          selectedValue={paymentMethod}
-          onChange={(v: PaymentMethod) => setPaymentMethod(v)}
-          bg="bg-white"
         />
         <Input
           type="text"
@@ -78,7 +75,7 @@ const PayBillModal = ({ bill, onClose }: Props) => {
             text="Record payment"
             type="button"
             isLoading={pay.isPending}
-            disabled={pay.isPending || !!amountError}
+            disabled={pay.isPending || !!amountError || !paymentMethod}
             onClick={() =>
               bill &&
               pay.mutate(
@@ -90,7 +87,7 @@ const PayBillModal = ({ bill, onClose }: Props) => {
                     paymentReference: paymentReference.trim() || undefined,
                   },
                 },
-                { onSuccess: onClose }
+                { onSuccess: onClose },
               )
             }
           />

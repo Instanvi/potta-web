@@ -1,18 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
 import { ErrorState, ListToolbar, PageContainer } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { Button } from '@/components/shadcn/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/shadcn/select';
 import {
   Sheet,
   SheetContent,
@@ -20,14 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import {
-  FIELD_INPUT,
-  FIELD_LABEL,
-  FIELD_NO_SPIN,
-  FIELD_SELECT,
-  FIELD_TEXTAREA,
-} from '@/lib/field-styles';
-import { DatePicker } from '@/components/ui/date-picker';
+import { FIELD_INPUT } from '@/lib/field-styles';
 import {
   booksApi,
   cellValue,
@@ -37,14 +24,7 @@ import {
   rowId,
 } from '@/lib/books-api';
 import { cn } from '@/lib/utils';
-import SearchableSelect from '@/components/searchableSelect';
-import { BooksLinesEditor } from '@/components/books/BooksLinesEditor';
-import {
-  BooksEntityKind,
-  downloadBooksPdf,
-  loadBooksEntityOptions,
-  loadPurchaseOrderForReceipt,
-} from '@/lib/books-entities';
+import { downloadBooksPdf } from '@/lib/books-entities';
 import { useDataTableHandle } from '@/components/ui/data-table';
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { ExportButton } from '@/components/export-button';
@@ -66,34 +46,15 @@ import {
   useBooksResourceUpdate,
 } from '@/hooks/use-books-resource';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import {
+  BooksFormFields,
+  buildPayload,
+  type BooksAction,
+  type BooksField,
+} from '@/components/books/books-form-fields';
 
+export type { BooksAction, BooksField };
 export type BooksColumn = { key: string; label: string };
-export type BooksField = {
-  key: string;
-  label: string;
-  /**
-   * text | number | textarea | checkbox | date | lines | select | json |
-   * customer | vendor | estimate | purchaseOrder | salesOrder |
-   * invoice | bill | opportunity | lead | proposal | account
-   */
-  type?: string;
-  options?: { value: string; label: string }[];
-};
-
-const ENTITY_FIELD_TYPES = new Set<string>([
-  'customer',
-  'vendor',
-  'estimate',
-  'purchaseOrder',
-  'salesOrder',
-  'invoice',
-  'bill',
-  'opportunity',
-  'lead',
-  'proposal',
-  'account',
-]);
-export type BooksAction = { label: string; action: string; confirm?: boolean };
 
 export type BooksResourcePageProps = {
   resourcePath: string;
@@ -101,6 +62,8 @@ export type BooksResourcePageProps = {
   columns: BooksColumn[];
   fields: BooksField[];
   actions?: BooksAction[];
+  /** When set, New navigates here instead of opening the create sheet. */
+  createHref?: string;
   /** When set, shows Email/SMS send (versioned download links). */
   documentKind?:
     | 'estimate'
@@ -119,44 +82,18 @@ export type BooksResourcePageProps = {
   api?: BooksResourceClient;
 };
 
-function coerceFormValue(type: string | undefined, raw: string): unknown {
-  if (type === 'number') {
-    if (raw.trim() === '') return undefined;
-    const n = Number(raw);
-    return Number.isFinite(n) ? n : raw;
-  }
-  if (type === 'checkbox' || type === 'boolean') return raw === 'true' || raw === 'on';
-  if (type === 'json' || type === 'lines') {
-    if (!raw.trim()) return undefined;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      throw new Error(type === 'lines' ? 'Invalid line items' : 'Invalid JSON');
-    }
-  }
-  return raw === '' ? undefined : raw;
-}
-
-function buildPayload(fields: BooksField[], values: Record<string, string>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const f of fields) {
-    const raw = values[f.key] ?? '';
-    const coerced = coerceFormValue(f.type, raw);
-    if (coerced !== undefined) out[f.key] = coerced;
-  }
-  return out;
-}
-
 export function BooksResourcePage({
   resourcePath,
   title,
   columns,
   fields,
   actions = [],
+  createHref,
   documentKind,
   listParams,
   api = booksApi,
 }: BooksResourcePageProps) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [searchApplied, setSearchApplied] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -226,6 +163,10 @@ export function BooksResourcePage({
     });
 
   const openCreate = () => {
+    if (createHref) {
+      router.push(createHref);
+      return;
+    }
     const initial: Record<string, string> = {};
     for (const f of fields) initial[f.key] = f.type === 'checkbox' ? 'false' : '';
     setForm(initial);
@@ -382,30 +323,32 @@ export function BooksResourcePage({
           )}
         </div>
 
-        <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-          <SheetContent side="right" className="bg-white">
-            <SheetHeader>
-              <SheetTitle>New {title}</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
-              <BooksFormFields
-                fields={fields}
-                values={form}
-                resourcePath={resourcePath}
-                onChange={(key, v) => setForm((prev) => ({ ...prev, [key]: v }))}
-                onPatch={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
-              />
-            </div>
-            <SheetFooter>
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="button" onClick={() => void handleCreate()} disabled={saving}>
-                {saving ? 'Saving…' : 'Create'}
-              </Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
+        {!createHref ? (
+          <Sheet open={createOpen} onOpenChange={setCreateOpen}>
+            <SheetContent side="right" className="bg-white">
+              <SheetHeader>
+                <SheetTitle>New {title}</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
+                <BooksFormFields
+                  fields={fields}
+                  values={form}
+                  resourcePath={resourcePath}
+                  onChange={(key, v) => setForm((prev) => ({ ...prev, [key]: v }))}
+                  onPatch={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+                />
+              </div>
+              <SheetFooter>
+                <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="button" onClick={() => void handleCreate()} disabled={saving}>
+                  {saving ? 'Saving…' : 'Create'}
+                </Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+        ) : null}
 
         <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
           <SheetContent side="right" className="bg-white">
@@ -575,216 +518,6 @@ export function BooksResourcePage({
         />
       </PageContainer>
     </RootLayout>
-  );
-}
-
-function BooksFormFields({
-  fields,
-  values,
-  resourcePath,
-  onChange,
-  onPatch,
-}: {
-  fields: BooksField[];
-  values: Record<string, string>;
-  resourcePath: string;
-  onChange: (key: string, value: string) => void;
-  onPatch: (patch: Record<string, string>) => void;
-}) {
-  const [loadingPo, setLoadingPo] = useState(false);
-  const confirmQuantities = resourcePath === 'item-receipt';
-
-  const handleFieldChange = async (field: BooksField, next: string) => {
-    onChange(field.key, next);
-
-    // Goods receipt: selecting a PO loads vendor + ordered lines for qty confirmation.
-    if (
-      field.type === 'purchaseOrder' &&
-      field.key === 'purchaseOrderId' &&
-      resourcePath === 'item-receipt' &&
-      next
-    ) {
-      setLoadingPo(true);
-      try {
-        const loaded = await loadPurchaseOrderForReceipt(next);
-        onPatch({
-          purchaseOrderId: next,
-          ...(loaded.vendorId ? { vendorId: loaded.vendorId } : {}),
-          lines: loaded.linesJson,
-        });
-        toast.success('Purchase order lines loaded — confirm received quantities');
-      } catch (e: any) {
-        toast.error(e?.response?.data?.message || e?.message || 'Could not load purchase order');
-      } finally {
-        setLoadingPo(false);
-      }
-    }
-  };
-
-  return (
-    <>
-      {loadingPo ? (
-        <p className="text-sm text-muted-foreground">Loading purchase order lines…</p>
-      ) : null}
-      {fields.map((f) => (
-        <FieldInput
-          key={f.key}
-          field={f}
-          value={values[f.key] ?? ''}
-          confirmQuantities={confirmQuantities && f.type === 'lines'}
-          onChange={(v) => void handleFieldChange(f, v)}
-        />
-      ))}
-    </>
-  );
-}
-
-function FieldInput({
-  field,
-  value,
-  onChange,
-  confirmQuantities = false,
-}: {
-  field: BooksField;
-  value: string;
-  onChange: (v: string) => void;
-  confirmQuantities?: boolean;
-}) {
-  const type = field.type || 'text';
-  if (type === 'lines') {
-    return (
-      <BooksLinesEditor
-        label={field.label}
-        value={value}
-        onChange={onChange}
-        confirmQuantities={confirmQuantities}
-      />
-    );
-  }
-  if (ENTITY_FIELD_TYPES.has(type)) {
-    return (
-      <EntitySelectField
-        entity={type as BooksEntityKind}
-        label={field.label}
-        value={value}
-        onChange={onChange}
-      />
-    );
-  }
-  if (type === 'select') {
-    const options = field.options ?? [];
-    return (
-      <label className="block space-y-1">
-        <span className={FIELD_LABEL}>{field.label}</span>
-        <Select value={value || undefined} onValueChange={onChange}>
-          <SelectTrigger className={cn(FIELD_SELECT, 'h-10')}>
-            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </label>
-    );
-  }
-  if (type === 'textarea' || type === 'json') {
-    return (
-      <label className="block space-y-1">
-        <span className={FIELD_LABEL}>{field.label}</span>
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          rows={type === 'json' ? 6 : 3}
-          className={FIELD_TEXTAREA}
-          placeholder={field.label}
-        />
-      </label>
-    );
-  }
-  if (type === 'checkbox' || type === 'boolean') {
-    return (
-      <label className="flex items-center gap-2 text-sm text-foreground">
-        <input
-          type="checkbox"
-          checked={value === 'true'}
-          onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
-          className="size-4 rounded-[2px] border border-black/20"
-        />
-        <span>{field.label}</span>
-      </label>
-    );
-  }
-  if (type === 'date') {
-    return (
-      <DatePicker
-        label={field.label}
-        value={value}
-        onChange={(v) => onChange(v)}
-        outlined
-      />
-    );
-  }
-  return (
-    <label className="block space-y-1">
-      <span className={FIELD_LABEL}>{field.label}</span>
-      <input
-        type={type === 'number' ? 'number' : 'text'}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={cn(FIELD_INPUT, type === 'number' && FIELD_NO_SPIN)}
-        placeholder={field.label}
-      />
-    </label>
-  );
-}
-
-function EntitySelectField({
-  entity,
-  label,
-  value,
-  onChange,
-}: {
-  entity: BooksEntityKind;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [options, setOptions] = useState<{ value: string; label: string }[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const next = await loadBooksEntityOptions(entity);
-        if (!cancelled) setOptions(next.filter((o) => o.value));
-      } catch {
-        if (!cancelled) setOptions([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [entity]);
-
-  return (
-    <SearchableSelect
-      label={label}
-      required={entity === 'customer' || entity === 'purchaseOrder'}
-      options={options}
-      selectedValue={value}
-      onChange={onChange}
-      placeholder={loading ? 'Loading…' : `Select ${label.toLowerCase()}`}
-      isDisabled={loading}
-      outlined
-    />
   );
 }
 

@@ -102,7 +102,8 @@ export interface CreateCreditNotePayload {
 
 export interface RefundPayload {
   refundAmount: number;
-  refundMethod: RefundMethod;
+  /** Org payment-method code, or ACCOUNT_CREDIT. */
+  refundMethod: string;
   bankDetails?: string;
   description?: string;
 }

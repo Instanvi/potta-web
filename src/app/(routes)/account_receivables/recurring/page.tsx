@@ -1,16 +1,55 @@
 'use client';
 
-import RootLayout from '../../layout';
-import InvoiceTableComponents from './components/table';
-import { PageContainer } from '../../_shared/states';
+import { BooksResourcePage } from '@/components/books/BooksResourcePage';
 
-const Invoice = () => (
-  <RootLayout>
-    <PageContainer>
-      
-      <InvoiceTableComponents />
-    </PageContainer>
-  </RootLayout>
-);
+const DOCUMENT_TYPES = [
+  { value: 'invoice', label: 'Invoice' },
+  { value: 'sales_receipt', label: 'Sales receipt' },
+  { value: 'credit_note', label: 'Credit note' },
+];
 
-export default Invoice;
+const FREQUENCIES = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'quarterly', label: 'Quarterly' },
+  { value: 'yearly', label: 'Yearly' },
+];
+
+/** AR recurring list + create via books recurring-template API. */
+export default function Page() {
+  return (
+    <BooksResourcePage
+      resourcePath="recurring-template"
+      title="Recurring"
+      columns={[
+        { key: 'name', label: 'Name' },
+        { key: 'documentType', label: 'Document type' },
+        { key: 'frequency', label: 'Frequency' },
+        { key: 'isActive', label: 'Active' },
+        { key: 'nextRunDate', label: 'Next run' },
+      ]}
+      fields={[
+        { key: 'name', label: 'Name' },
+        {
+          key: 'documentType',
+          label: 'Document type',
+          type: 'select',
+          options: DOCUMENT_TYPES,
+        },
+        {
+          key: 'frequency',
+          label: 'Frequency',
+          type: 'select',
+          options: FREQUENCIES,
+        },
+        { key: 'isActive', label: 'Active', type: 'checkbox' },
+        { key: 'nextRunDate', label: 'Next run date', type: 'date' },
+        { key: 'endDate', label: 'End date', type: 'date' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
+        { key: 'lines', label: 'Line items', type: 'lines' },
+        { key: 'notes', label: 'Notes', type: 'textarea' },
+      ]}
+    />
+  );
+}

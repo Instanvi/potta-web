@@ -5,6 +5,7 @@ import {
   fetchPurchaseOrders,
   getPurchaseOrderDetails,
 } from '@/app/(routes)/account_payables/purchase/utils/api';
+import { billsApi } from '@/app/(routes)/account_payables/bills/utils/api';
 
 export type BooksEntityKind =
   | 'customer'
@@ -148,6 +149,49 @@ export async function loadPurchaseOrderForReceipt(
   });
   return { vendorId, linesJson: JSON.stringify(lines) };
 }
+
+export type LoadedBillLines = {
+  vendorId?: string;
+  linesJson: string;
+};
+
+/** Map a bill's line items into books document `lines` JSON for supplier credit. */
+export async function loadBillForSupplierCredit(
+  billId: string
+): Promise<LoadedBillLines> {
+  // Bills use `/bills/:id` (not the books `/bill/details/:id` shape).
+  const bill = await billsApi.get(billId);
+  const vendorId = bill?.vendor?.uuid ? String(bill.vendor.uuid) : undefined;
+  const lines = (bill?.lineItems ?? []).map((item) => {
+    const quantity = Number(item.quantity) || 0;
+    const unitPrice = Number(item.unitPrice) || 0;
+    const taxRate = Number(item.taxRate) || 0;
+    const discountAmount = Number(item.discountAmount) || 0;
+    const net = Math.max(0, quantity * unitPrice - discountAmount);
+    const taxAmount =
+      item.taxAmount != null && String(item.taxAmount) !== ''
+        ? Number(item.taxAmount) || 0
+        : Number(((net * taxRate) / 100).toFixed(2));
+    const totalFromBill =
+      item.totalAmount != null && String(item.totalAmount) !== ''
+        ? Number(item.totalAmount)
+        : NaN;
+    return {
+      productId: item.product?.uuid,
+      description: item.description || item.product?.name || 'Line',
+      quantity,
+      unitPrice,
+      taxRate: taxRate || undefined,
+      taxAmount: taxAmount || undefined,
+      discountAmount: discountAmount || undefined,
+      totalAmount: Number.isFinite(totalFromBill)
+        ? totalFromBill
+        : Number((net + taxAmount).toFixed(2)),
+    };
+  });
+  return { vendorId, linesJson: JSON.stringify(lines) };
+}
+
 export async function downloadBooksPdf(opts: {
   title: string;
   subtitle?: string;

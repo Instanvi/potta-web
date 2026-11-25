@@ -117,7 +117,8 @@ export interface CreateBillPayload {
 }
 
 export interface PayBillPayload {
-  paymentMethod: PaymentMethod;
+  /** Org payment-method code from GET /payment-method. */
+  paymentMethod: string;
   amount?: number;
   paymentReference?: string;
 }

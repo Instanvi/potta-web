@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { DISCOUNT_TYPES, PAYMENT_METHOD_VALUES, type SalePayload } from './sale';
+import { DISCOUNT_TYPES, type SalePayload } from './sale';
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -22,7 +22,11 @@ const salesReceiptSchema = yup.object({
   totalAmount: yup.number().required().min(0, 'Total amount cannot be negative'),
   paymentReference: yup.string(),
   notes: yup.string(),
-  paymentMethod: yup.string().required('Payment method is required').oneOf([...PAYMENT_METHOD_VALUES, 'OTHER'], 'Invalid payment method'),
+  paymentMethod: yup
+    .string()
+    .trim()
+    .required('Payment method is required')
+    .max(64, 'Payment method code is too long'),
   receiptNumber: yup.string(),
   discountAmount: yup.number().min(0, 'Discount amount cannot be negative'),
   customerId: yup.string().matches(uuidRegex, { message: 'Customer ID must be a valid UUID', excludeEmptyString: true }),
