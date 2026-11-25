@@ -1,12 +1,12 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { DatePicker, parseDateValue } from '@potta/components/ui/date-picker';
-import { ExportButton } from '@/components/export-button';
+import { ReportExportMenu } from '@/components/report-export-menu';
+import { StatementPdfDocument } from '@/components/documents/report-pdf-document';
 import { formatAmount, formatDate, today } from '../../../_shared/format';
 import { EmptyState, ErrorState, ListToolbar, LoadingState, StatCard, StatusBadge } from '../../../_shared/states';
 import { useBalanceSheet } from '../hooks';
 import ReportSection from './ReportSection';
-import { StatementPdfActions } from './StatementPdfActions';
 
 const toLines = (lines?: Record<string, number>, hideZero?: boolean) =>
   Object.entries(lines ?? {})
@@ -53,58 +53,55 @@ const BalanceSheetReport = ({ hideZero }: { hideZero: boolean }) => {
         className="print:hidden"
         actions={
           <div className="flex flex-wrap items-center gap-2">
-          <StatementPdfActions
-            filename={`balance-sheet-${asOfDate}`}
-            disabled={!data || !!isEmpty}
-            statement={{
-              title: 'Balance sheet',
-              period: `As of ${asOfDate}`,
-              sections: [
-                {
-                  title: 'Assets',
-                  lines: toLines(data?.assets, hideZero),
-                  total: data?.totalAssets,
-                },
-                {
-                  title: 'Liabilities',
-                  lines: toLines(data?.liabilities, hideZero),
-                  total: data?.totalLiabilities,
-                },
-                {
-                  title: 'Equity',
-                  lines: toLines(
-                    {
-                      ...data?.equity,
-                      ...(Math.abs(retainedEarnings) >= 0.005
-                        ? { 'Current period result (revenue − expenses)': retainedEarnings }
-                        : {}),
-                    },
-                    hideZero,
-                  ),
-                  total: data?.totalEquity,
-                },
-              ],
-              summary: [
-                {
-                  label: 'Total liabilities + equity',
-                  amount: (data?.totalLiabilities ?? 0) + (data?.totalEquity ?? 0),
-                },
-              ],
-            }}
-          />
-          <ExportButton
-            filename={`balance-sheet-${asOfDate}`}
-            rows={exportRows}
-            columns={[
-              { key: 'section', header: 'Section' },
-              { key: 'account', header: 'Account' },
-              {
-                key: 'amount',
-                header: 'Amount',
-                value: (row) => formatAmount(row.amount),
-              },
-            ]}
+          <ReportExportMenu
+            reportId="balance-sheet"
+            title="Balance sheet"
+            period={`As of ${asOfDate}`}
             disabled={!exportRows.length}
+            columns={[
+              { key: 'section', label: 'Section', type: 'text' },
+              { key: 'account', label: 'Account', type: 'text' },
+              { key: 'amount', label: 'Amount', type: 'money' },
+            ]}
+            rows={exportRows}
+            renderPdf={(seller) => (
+              <StatementPdfDocument
+                seller={seller}
+                title="Balance sheet"
+                period={`As of ${asOfDate}`}
+                sections={[
+                  {
+                    title: 'Assets',
+                    lines: toLines(data?.assets, hideZero),
+                    total: data?.totalAssets,
+                  },
+                  {
+                    title: 'Liabilities',
+                    lines: toLines(data?.liabilities, hideZero),
+                    total: data?.totalLiabilities,
+                  },
+                  {
+                    title: 'Equity',
+                    lines: toLines(
+                      {
+                        ...data?.equity,
+                        ...(Math.abs(retainedEarnings) >= 0.005
+                          ? { 'Current period result (revenue − expenses)': retainedEarnings }
+                          : {}),
+                      },
+                      hideZero,
+                    ),
+                    total: data?.totalEquity,
+                  },
+                ]}
+                summary={[
+                  {
+                    label: 'Total liabilities + equity',
+                    amount: (data?.totalLiabilities ?? 0) + (data?.totalEquity ?? 0),
+                  },
+                ]}
+              />
+            )}
           />
           </div>
         }
