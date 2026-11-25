@@ -24,6 +24,10 @@ const AS_OF_IDS = new Set([
   'collections',
   'statement-list',
   'business-snapshot',
+  'balance-sheet',
+  'balance-sheet-acct',
+  'invoice-list',
+  'unpaid-bills',
 ]);
 
 const COMPARE_IDS = new Set(['balance-sheet-comparison', 'pl-comparison', 'pl-ytd']);

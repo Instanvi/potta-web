@@ -169,53 +169,48 @@ const ProductStepperModal: React.FC<ProductStepperModalProps> = ({
       noPanelScroll
       sliderContentClass="!mt-0 !justify-start !px-0 min-h-0"
     >
-      <div className="flex h-full min-h-0 w-full">
-        {/* Stepper */}
-        <div className="w-40 shrink-0 space-y-5 border-r border-black/[0.08] px-4 pt-2 text-sm">
-          <div onClick={() => setActive('create')}>
-            <p
-              className={`whitespace-nowrap ${
-                active === 'create' && 'text-green-700 font-medium'
-              } cursor-pointer text-left`}
-            >
-              Details
-            </p>
-          </div>
-
-          {(productType === 'ASSEMBLY' || productType === 'SIMPLEGROUPS') && (
-            <div onClick={() => setActive('components')}>
-              <p
-                className={`whitespace-nowrap ${
-                  ['components', 'confirm', 'upload'].includes(active) &&
-                  'text-green-700 font-medium'
-                } cursor-pointer text-left`}
-              >
-                {productType === 'ASSEMBLY' ? 'Components' : 'Group items'}
-              </p>
-            </div>
-          )}
-
-          <div
-            onClick={() => {
-              if (isUploadStepEnabled()) {
-                setActive('confirm');
-              }
-            }}
+      <div className="flex h-full min-h-0 w-full flex-col">
+        <div className="flex shrink-0 gap-6 border-b border-black/[0.08] px-6 text-sm">
+          <button
+            type="button"
+            onClick={() => setActive('create')}
+            className={`border-b-2 py-3 ${
+              active === 'create'
+                ? 'border-green-700 font-medium text-green-700'
+                : 'border-transparent text-foreground'
+            }`}
           >
-            <p
-              className={`whitespace-nowrap ${
-                ['confirm', 'upload'].includes(active) &&
-                'text-green-700 font-medium'
-              } cursor-pointer text-left ${
-                !isUploadStepEnabled() ? 'opacity-50 cursor-not-allowed' : ''
+            Details
+          </button>
+          {(productType === 'ASSEMBLY' || productType === 'SIMPLEGROUPS') && (
+            <button
+              type="button"
+              onClick={() => setActive('components')}
+              className={`border-b-2 py-3 ${
+                ['components', 'confirm', 'upload'].includes(active)
+                  ? 'border-green-700 font-medium text-green-700'
+                  : 'border-transparent text-foreground'
               }`}
             >
-              Images
-            </p>
-          </div>
+              {productType === 'ASSEMBLY' ? 'Components' : 'Group items'}
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={!isUploadStepEnabled()}
+            onClick={() => {
+              if (isUploadStepEnabled()) setActive('confirm');
+            }}
+            className={`border-b-2 py-3 ${
+              ['confirm', 'upload'].includes(active)
+                ? 'border-green-700 font-medium text-green-700'
+                : 'border-transparent text-foreground'
+            } disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            Images
+          </button>
         </div>
 
-        {/* Content: scroll body, footer actions stay pinned */}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           {active === 'create' && (
             <CreateProductForm

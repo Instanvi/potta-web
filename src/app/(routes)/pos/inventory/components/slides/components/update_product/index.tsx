@@ -237,8 +237,8 @@ const EditProduct: React.FC<EditProductProps> = ({ product, productId, onSuccess
         <CatalogPeripheralsEditor value={catalog} onChange={setCatalog} />
 
         {images.length > 0 && (
-          <section className="rounded-[2px] border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-            <h3 className="mb-3 text-sm font-semibold">Images</h3>
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold">Images</h3>
             <div className="flex flex-wrap gap-2">
               {images.map((url, idx) => (
                 <div key={url + idx} className="relative">
