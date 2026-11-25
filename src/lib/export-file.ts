@@ -15,7 +15,7 @@ function cellValue<T>(row: T, col: ExportColumn<T>) {
   return typeof v === 'object' ? JSON.stringify(v) : String(v);
 }
 
-function downloadBlob(blob: Blob, filename: string) {
+export function saveBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -36,8 +36,7 @@ function toCsv<T>(rows: T[], columns: ExportColumn<T>[]) {
   return lines.join('\n');
 }
 
-/** Minimal XLSX (SheetJS-compatible) writer via dynamic import when available; CSV fallback. */
-export async function exportRows<T>({
+export async function buildSpreadsheetBlob<T>({
   filename,
   rows,
   columns,
@@ -47,29 +46,38 @@ export async function exportRows<T>({
   rows: T[];
   columns: ExportColumn<T>[];
   format?: ExportFormat;
-}) {
-  const base = filename.replace(/\.(xlsx|csv)$/i, '');
+}): Promise<{ blob: Blob; filename: string }> {
+  const base = filename.replace(/\.(xlsx|csv)$/i, '') || 'export';
   if (format === 'csv') {
-    downloadBlob(new Blob([toCsv(rows, columns)], { type: 'text/csv;charset=utf-8' }), `${base}.csv`);
-    return;
+    return {
+      blob: new Blob([toCsv(rows, columns)], { type: 'text/csv;charset=utf-8' }),
+      filename: `${base}.csv`,
+    };
   }
-  try {
-    const XLSX = await import('xlsx');
-    const data = [
-      columns.map((c) => c.header),
-      ...rows.map((row) => columns.map((c) => cellValue(row, c) ?? '')),
-    ];
-    const sheet = XLSX.utils.aoa_to_sheet(data);
-    const book = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(book, sheet, 'Export');
-    const buf = XLSX.write(book, { bookType: 'xlsx', type: 'array' });
-    downloadBlob(
-      new Blob([buf], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      }),
-      `${base}.xlsx`,
-    );
-  } catch {
-    downloadBlob(new Blob([toCsv(rows, columns)], { type: 'text/csv;charset=utf-8' }), `${base}.csv`);
-  }
+  const XLSX = await import('xlsx');
+  const data = [
+    columns.map((c) => c.header),
+    ...rows.map((row) => columns.map((c) => cellValue(row, c) ?? '')),
+  ];
+  const sheet = XLSX.utils.aoa_to_sheet(data);
+  const book = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(book, sheet, 'Export');
+  const buf = XLSX.write(book, { bookType: 'xlsx', type: 'array' });
+  return {
+    blob: new Blob([buf], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }),
+    filename: `${base}.xlsx`,
+  };
+}
+
+/** Download rows as Excel or CSV. */
+export async function exportRows<T>(input: {
+  filename: string;
+  rows: T[];
+  columns: ExportColumn<T>[];
+  format?: ExportFormat;
+}) {
+  const built = await buildSpreadsheetBlob(input);
+  saveBlob(built.blob, built.filename);
 }

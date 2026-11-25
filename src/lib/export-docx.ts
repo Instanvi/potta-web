@@ -9,20 +9,12 @@ import {
   TextRun,
   WidthType,
 } from 'docx';
+import { saveBlob } from '@/lib/export-file';
 
 export type DocxColumn = {
   key: string;
   label: string;
 };
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename.endsWith('.docx') ? filename : `${filename}.docx`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 function cell(text: string, bold = false) {
   return new TableCell({
@@ -34,22 +26,19 @@ function cell(text: string, bold = false) {
   });
 }
 
-/** Download a Word table of the report currently on screen. */
-export async function downloadReportDocx({
-  filename,
+export async function buildReportDocxBlob({
   title,
   description,
   period,
   columns,
   rows,
 }: {
-  filename: string;
   title: string;
   description?: string;
   period?: string;
   columns: DocxColumn[];
   rows: Record<string, unknown>[];
-}) {
+}): Promise<Blob> {
   const header = new TableRow({
     tableHeader: true,
     children: columns.map((column) => cell(column.label, true)),
@@ -85,7 +74,22 @@ export async function downloadReportDocx({
     ],
   });
 
-  const blob = await Packer.toBlob(doc);
+  return Packer.toBlob(doc);
+}
+
+/** Download a Word table of the report currently on screen. */
+export async function downloadReportDocx({
+  filename,
+  ...input
+}: {
+  filename: string;
+  title: string;
+  description?: string;
+  period?: string;
+  columns: DocxColumn[];
+  rows: Record<string, unknown>[];
+}) {
+  const blob = await buildReportDocxBlob(input);
   const base = filename.replace(/\.(docx|pdf|xlsx|csv)$/i, '') || 'report';
-  downloadBlob(blob, `${base}.docx`);
+  saveBlob(blob, `${base}.docx`);
 }
