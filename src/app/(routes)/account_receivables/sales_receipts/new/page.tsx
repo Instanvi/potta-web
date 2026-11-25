@@ -5,10 +5,13 @@ import PdfView from './components/pdfview';
 
 import DocumentWorkspace from '@potta/components/document-workspace';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
-import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
+import {
+  DocumentEditorSplit,
+  DocumentPreviewToggle,
+} from '@potta/components/document-editor-split';
 
 const NewSalesReciept = () => {
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
     null,
   );
@@ -16,44 +19,29 @@ const NewSalesReciept = () => {
     setDownloadPdf(() => fn);
   }, []);
 
-  const openPreview = () => setShowPreview(true);
-  const closePreview = () => setShowPreview(false);
+  const togglePreview = () => setShowPreview((v) => !v);
 
   return (
     <DocumentWorkspace
       title="Sales receipt"
       closeHref="/account_receivables/sales_receipts"
       className="bg-white"
-      bodyClassName="bg-white"
+      bodyClassName="flex flex-col overflow-hidden bg-white"
       headerActions={
         <>
           <LocationSwitcher />
-          <button
-            type="button"
-            onClick={openPreview}
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-3 text-sm text-foreground hover:bg-accent"
-          >
-            <i className="ri-eye-line" />
-            Preview
-          </button>
+          <DocumentPreviewToggle open={showPreview} onToggle={togglePreview} />
         </>
       }
     >
-      <div className="flex h-full min-h-0 flex-col bg-white">
-        <div className="flex h-full min-h-0 flex-col overflow-y-auto bg-white">
-          <Left onOpenPreview={openPreview} />
-        </div>
-      </div>
-
-      <DocumentPreviewDialog
+      <DocumentEditorSplit
         open={showPreview}
-        onOpenChange={(open) => !open && closePreview()}
+        onOpenChange={setShowPreview}
         downloadTitle="Sales receipt"
-        dialogTitle="Sales receipt preview"
         onDownloadPdf={downloadPdf ?? undefined}
-      >
-        <PdfView onRegisterDownload={registerDownload} />
-      </DocumentPreviewDialog>
+        editor={<Left onOpenPreview={() => setShowPreview(true)} />}
+        preview={<PdfView onRegisterDownload={registerDownload} />}
+      />
     </DocumentWorkspace>
   );
 };

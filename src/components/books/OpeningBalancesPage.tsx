@@ -11,7 +11,8 @@ import { Button } from '@/components/shadcn/button';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { DatePicker } from '@/components/ui/date-picker';
 import SearchableSelect from '@/components/searchableSelect';
-import { FIELD_INPUT, FIELD_NO_SPIN } from '@/lib/field-styles';
+import { FIELD_INPUT, FIELD_LABEL, FIELD_NO_SPIN, FIELD_SELECT } from '@/lib/field-styles';
+import { StatementFilePicker } from '@/components/statement-file-picker';
 import { booksApi, extractBooksMeta, extractBooksRows, rowId } from '@/lib/books-api';
 import { loadBooksEntityOptions, type BooksEntityOption } from '@/lib/books-entities';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -364,43 +365,44 @@ export function OpeningBalancesPage() {
             <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
               <DatePicker value={asOfDate} onChange={setAsOfDate} placeholder="As of" outlined />
               <SearchableSelect
+                label="Account"
                 options={accounts}
                 selectedValue={accountId}
                 onChange={setAccountId}
                 placeholder="Account"
               />
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Amount"
-                  className={cn(FIELD_INPUT, FIELD_NO_SPIN)}
-                />
-                <select
-                  value={side}
-                  onChange={(e) => setSide(e.target.value as 'debit' | 'credit')}
-                  className={cn(FIELD_INPUT, 'max-w-[8rem]')}
-                >
-                  <option value="debit">Debit</option>
-                  <option value="credit">Credit</option>
-                </select>
-                <Button type="button" variant="outline" onClick={addLine}>
-                  Add
-                </Button>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_9rem]">
+                <label className="block space-y-1">
+                  <span className={FIELD_LABEL}>Amount</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    className={cn(FIELD_INPUT, FIELD_NO_SPIN)}
+                  />
+                </label>
+                <label className="block space-y-1">
+                  <span className={FIELD_LABEL}>Side</span>
+                  <select
+                    value={side}
+                    onChange={(e) => setSide(e.target.value as 'debit' | 'credit')}
+                    className={FIELD_SELECT}
+                  >
+                    <option value="debit">Debit</option>
+                    <option value="credit">Credit</option>
+                  </select>
+                </label>
               </div>
-              <label className="block text-sm text-foreground">
-                <input
-                  type="file"
-                  accept=".csv,text/csv"
-                  className="block w-full text-sm"
-                  onChange={(e) => void onStatement(e.target.files?.[0])}
-                />
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  Statement CSV: account, amount, memo. Rows without an account use the account selected above.
-                </span>
-              </label>
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={addLine}>
+                Add line
+              </Button>
+              <StatementFilePicker
+                label="Import a statement"
+                hint="CSV columns: account, amount, memo. Rows without an account use the account selected above."
+                onFile={onStatement}
+              />
               <ul className="space-y-2 text-sm">
                 {lines.map((line, index) => (
                   <li key={`${line.accountId}-${index}`} className="flex items-center justify-between gap-3">

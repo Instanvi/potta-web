@@ -1,10 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import DocumentWorkspace from '@/components/document-workspace';
 import {
+  DocumentEditorSplit,
+  DocumentPreviewToggle,
+} from '@/components/document-editor-split';
+import {
+  DocumentFooterLink,
   DocumentFormCard,
   DocumentFormFooter,
   DocumentFormShell,
@@ -12,6 +17,8 @@ import {
 } from '@/components/document-form-layout';
 import { Button } from '@/components/shadcn/button';
 import { LocationSwitcher } from '@/components/shell/location-switcher';
+import { BooksDocumentPreview } from '@/components/books/BooksDocumentPreview';
+import { SelectedParty } from '@/components/books/selected-party';
 import {
   BooksFormFields,
   buildPayload,
@@ -56,22 +63,31 @@ export function BooksDocumentCreatePage({
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [acting, setActing] = useState(false);
 
-  const { partyFields, dateFields, lineFields, otherFields } = useMemo(() => {
+  const [showPreview, setShowPreview] = useState(true);
+  const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(null);
+  const registerDownload = useCallback((fn: () => Promise<void>) => {
+    setDownloadPdf(() => fn);
+  }, []);
+
+  const { partyFields, dateFields, lineFields, noteFields, detailFields } = useMemo(() => {
     const party: BooksField[] = [];
     const dates: BooksField[] = [];
     const lines: BooksField[] = [];
-    const other: BooksField[] = [];
+    const notes: BooksField[] = [];
+    const details: BooksField[] = [];
     for (const f of fields) {
       if (f.type === 'lines') lines.push(f);
       else if (f.type && PARTY_TYPES.has(f.type)) party.push(f);
       else if (f.type === 'date') dates.push(f);
-      else other.push(f);
+      else if (f.type === 'textarea' || f.type === 'json') notes.push(f);
+      else details.push(f);
     }
     return {
       partyFields: party,
       dateFields: dates,
       lineFields: lines,
-      otherFields: other,
+      noteFields: notes,
+      detailFields: details,
     };
   }, [fields]);
 
@@ -127,129 +143,182 @@ export function BooksDocumentCreatePage({
     }
   };
 
+  const customerId = form.customerId ?? '';
+  const vendorId = form.vendorId ?? '';
+  const asksForParty = partyFields.some(
+    (field) => field.type === 'customer' || field.type === 'vendor',
+  );
+
   return (
     <DocumentWorkspace
       title={`New ${title}`}
       closeHref={closeHref}
       className="bg-white"
-      bodyClassName="bg-white"
-      headerActions={<LocationSwitcher />}
+      bodyClassName="flex flex-col overflow-hidden bg-white"
+      headerActions={
+        <>
+          <LocationSwitcher />
+          <DocumentPreviewToggle
+            open={showPreview}
+            onToggle={() => setShowPreview((open) => !open)}
+          />
+        </>
+      }
     >
-      <div className="flex h-full min-h-0 flex-col bg-white">
-        <div className="min-h-0 flex-1 overflow-y-auto bg-white">
-          <DocumentFormShell className="bg-white">
-            {partyFields.length > 0 ? (
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Party</DocumentSectionTitle>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <DocumentEditorSplit
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        downloadTitle={title}
+        onDownloadPdf={downloadPdf ?? undefined}
+        editor={
+          <div className="flex min-h-full flex-col bg-white">
+            <DocumentFormShell className="flex-1 bg-white">
+              {partyFields.length > 0 ? (
+                <DocumentFormCard flush>
+                  <DocumentSectionTitle>Who it&apos;s for</DocumentSectionTitle>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <BooksFormFields
+                      fields={partyFields}
+                      values={form}
+                      resourcePath={resourcePath}
+                      onChange={onChange}
+                      onPatch={onPatch}
+                    />
+                    {customerId ? <SelectedParty kind="customer" id={customerId} /> : null}
+                    {vendorId ? <SelectedParty kind="vendor" id={vendorId} /> : null}
+                    {asksForParty && !customerId && !vendorId ? (
+                      <p className="text-sm text-muted-foreground md:col-span-2">
+                        Select a customer or vendor to see their contact details.
+                      </p>
+                    ) : null}
+                  </div>
+                </DocumentFormCard>
+              ) : null}
+
+              {dateFields.length > 0 ? (
+                <DocumentFormCard flush>
+                  <DocumentSectionTitle>Dates</DocumentSectionTitle>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <BooksFormFields
+                      fields={dateFields}
+                      values={form}
+                      resourcePath={resourcePath}
+                      onChange={onChange}
+                      onPatch={onPatch}
+                    />
+                  </div>
+                </DocumentFormCard>
+              ) : null}
+
+              {detailFields.length > 0 ? (
+                <DocumentFormCard flush>
+                  <DocumentSectionTitle>Details</DocumentSectionTitle>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <BooksFormFields
+                      fields={detailFields}
+                      values={form}
+                      resourcePath={resourcePath}
+                      onChange={onChange}
+                      onPatch={onPatch}
+                    />
+                  </div>
+                </DocumentFormCard>
+              ) : null}
+
+              {noteFields.length > 0 ? (
+                <DocumentFormCard flush>
+                  <DocumentSectionTitle>Notes</DocumentSectionTitle>
                   <BooksFormFields
-                    fields={partyFields}
+                    fields={noteFields}
                     values={form}
                     resourcePath={resourcePath}
                     onChange={onChange}
                     onPatch={onPatch}
                   />
-                </div>
-              </DocumentFormCard>
-            ) : null}
+                </DocumentFormCard>
+              ) : null}
 
-            {dateFields.length > 0 ? (
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Dates</DocumentSectionTitle>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+              {lineFields.length > 0 ? (
+                <DocumentFormCard flush>
+                  <DocumentSectionTitle>Line items</DocumentSectionTitle>
                   <BooksFormFields
-                    fields={dateFields}
+                    fields={lineFields}
                     values={form}
                     resourcePath={resourcePath}
                     onChange={onChange}
                     onPatch={onPatch}
                   />
-                </div>
-              </DocumentFormCard>
-            ) : null}
+                </DocumentFormCard>
+              ) : null}
+            </DocumentFormShell>
 
-            {otherFields.length > 0 ? (
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Details</DocumentSectionTitle>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <BooksFormFields
-                    fields={otherFields}
-                    values={form}
-                    resourcePath={resourcePath}
-                    onChange={onChange}
-                    onPatch={onPatch}
-                  />
-                </div>
-              </DocumentFormCard>
-            ) : null}
-
-            {lineFields.length > 0 ? (
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Line items</DocumentSectionTitle>
-                <BooksFormFields
-                  fields={lineFields}
-                  values={form}
-                  resourcePath={resourcePath}
-                  onChange={onChange}
-                  onPatch={onPatch}
-                />
-              </DocumentFormCard>
-            ) : null}
-          </DocumentFormShell>
-        </div>
-
-        <DocumentFormFooter
-          left={
-            <Button
-              type="button"
-              variant="outline"
-              className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-              onClick={() => router.push(closeHref)}
-            >
-              Cancel
-            </Button>
-          }
-          right={
-            <>
-              {createdId
-                ? postActions.map((act) => (
+            <DocumentFormFooter
+              left={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                  onClick={() => router.push(closeHref)}
+                >
+                  Cancel
+                </Button>
+              }
+              center={
+                <DocumentFooterLink onClick={() => setShowPreview(true)}>
+                  Print or Preview
+                </DocumentFooterLink>
+              }
+              right={
+                <>
+                  {createdId
+                    ? postActions.map((act) => (
+                        <Button
+                          key={act.action}
+                          type="button"
+                          variant="outline"
+                          className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                          disabled={acting || saving}
+                          onClick={() => void runPostAction(act)}
+                        >
+                          {acting ? 'Working…' : act.label}
+                        </Button>
+                      ))
+                    : null}
+                  {!createdId ? (
                     <Button
-                      key={act.action}
                       type="button"
                       variant="outline"
                       className="border-white/40 bg-white text-foreground hover:bg-white/90"
-                      disabled={acting || saving}
-                      onClick={() => void runPostAction(act)}
+                      disabled={saving}
+                      onClick={() => void handleSave()}
                     >
-                      {acting ? 'Working…' : act.label}
+                      {saving ? 'Saving…' : 'Save'}
                     </Button>
-                  ))
-                : null}
-              {!createdId ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-white/40 bg-white text-foreground hover:bg-white/90"
-                  disabled={saving}
-                  onClick={() => void handleSave()}
-                >
-                  {saving ? 'Saving…' : 'Save'}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-white/40 bg-white text-foreground hover:bg-white/90"
-                  disabled={acting}
-                  onClick={() => router.push(closeHref)}
-                >
-                  Done
-                </Button>
-              )}
-            </>
-          }
-        />
-      </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                      disabled={acting}
+                      onClick={() => router.push(closeHref)}
+                    >
+                      Done
+                    </Button>
+                  )}
+                </>
+              }
+            />
+          </div>
+        }
+        preview={
+          <BooksDocumentPreview
+            title={title}
+            fields={fields}
+            values={form}
+            onRegisterDownload={registerDownload}
+          />
+        }
+      />
     </DocumentWorkspace>
   );
 }

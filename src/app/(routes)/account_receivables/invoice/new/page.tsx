@@ -8,12 +8,15 @@ import FileExtractDropzone from '@potta/components/FileExtractDropzone';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { extractInvoiceFromFile } from './api/extractInvoice';
 import DocumentWorkspace from '@potta/components/document-workspace';
-import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
+import {
+  DocumentEditorSplit,
+  DocumentPreviewToggle,
+} from '@potta/components/document-editor-split';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import { Skeleton } from '@potta/components/ui/loaders';
 
 const NewInvoiceInner = () => {
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [downloadPdf, setDownloadPdf] = useState<(() => Promise<void>) | null>(
     null,
   );
@@ -45,47 +48,36 @@ const NewInvoiceInner = () => {
     }
   };
 
-  const openPreview = () => setShowPreview(true);
-  const closePreview = () => setShowPreview(false);
+  const togglePreview = () => setShowPreview((v) => !v);
 
   return (
     <DocumentWorkspace
       title="New invoice"
       closeHref="/account_receivables/invoice"
+      bodyClassName="flex flex-col overflow-hidden"
       headerActions={
         <>
           <LocationSwitcher />
-          <button
-            type="button"
-            onClick={openPreview}
-            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[2px] border border-black/10 bg-white px-3 text-sm text-foreground hover:bg-accent"
-          >
-            <i className="ri-eye-line" />
-            Preview
-          </button>
+          <DocumentPreviewToggle open={showPreview} onToggle={togglePreview} />
         </>
       }
     >
       <FileExtractDropzone onExtract={extractInvoiceData} extracting={extracting}>
-        <div className="flex h-full min-h-0 flex-col bg-white">
-          <div className="h-full min-h-0 overflow-y-auto bg-white">
+        <DocumentEditorSplit
+          open={showPreview}
+          onOpenChange={setShowPreview}
+          downloadTitle="Invoice"
+          onDownloadPdf={downloadPdf ?? undefined}
+          editor={
             <Left
               initialInvoiceType={initialInvoiceType}
-              onOpenPreview={openPreview}
+              onOpenPreview={() => setShowPreview(true)}
+              showPreview={showPreview}
             />
-          </div>
-        </div>
+          }
+          preview={<PdfView onRegisterDownload={registerDownload} />}
+        />
       </FileExtractDropzone>
-
-      <DocumentPreviewDialog
-        open={showPreview}
-        onOpenChange={(open) => !open && closePreview()}
-        downloadTitle="Invoice"
-        dialogTitle="Invoice preview"
-        onDownloadPdf={downloadPdf ?? undefined}
-      >
-        <PdfView onRegisterDownload={registerDownload} />
-      </DocumentPreviewDialog>
     </DocumentWorkspace>
   );
 };

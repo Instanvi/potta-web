@@ -20,6 +20,8 @@ interface props {
   setOpen?: (value: boolean) => void; // Made optional
   closeButton?: boolean;
   noPanelScroll?: boolean;
+  /** Full-viewport panel, for editors that sit beside a preview. */
+  wide?: boolean;
   sliderClass?: string;
   sliderContentClass?: string;
   tabs?: Tab[];
@@ -37,6 +39,7 @@ const Slider: FC<props> = ({
   closeButton,
   sliderClass,
   noPanelScroll,
+  wide,
   sliderContentClass,
   tabs,
   defaultTab,
@@ -186,7 +189,11 @@ const Slider: FC<props> = ({
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
             {/* Every slide-over opens from the right at half the screen (full width on phones). */}
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex w-full sm:w-1/2">
+            <div
+              className={`pointer-events-none fixed inset-y-0 right-0 flex w-full ${
+                wide ? '' : 'sm:w-1/2'
+              }`}
+            >
               <DialogPanel
                 transition
                 className="pointer-events-auto h-screen w-full transform border-l border-black/[0.08] bg-white shadow-xl transition duration-300 ease-in-out data-[closed]:translate-x-full"
@@ -239,7 +246,11 @@ const Slider: FC<props> = ({
                     </div>
                   </div>
                   <div
-                    className={`custom-scrollbar flex flex-1 justify-center overflow-y-auto bg-white px-6 py-5 ${sliderContentClass}`}
+                    className={`custom-scrollbar flex flex-1 bg-white ${
+                      wide
+                        ? 'min-h-0 overflow-hidden p-0'
+                        : 'justify-center overflow-y-auto px-6 py-5'
+                    } ${sliderContentClass ?? ''}`}
                   >
                     {tabs && tabs.length > 0
                       ? tabs.find((tab) => tab.id === activeTab)?.content ||

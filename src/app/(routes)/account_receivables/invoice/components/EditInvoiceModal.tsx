@@ -5,7 +5,10 @@ import { ContextData } from '@potta/components/providers/DataProvider';
 import Left from '../new/components/left';
 import PdfView from '../new/components/pdfview';
 import FileExtractDropzone from '@potta/components/FileExtractDropzone';
-import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
+import {
+  DocumentEditorSplit,
+  DocumentPreviewToggle,
+} from '@potta/components/document-editor-split';
 import { toast } from 'sonner';
 
 interface LineItem {
@@ -63,7 +66,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
   setOpen,
   invoice,
 }) => {
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [extracting, setExtracting] = useState(false);
   const context = useContext(ContextData);
   const hasPopulatedContext = useRef(false);
@@ -134,42 +137,41 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
   return (
     <Slider
       edit={true}
+      wide
+      noPanelScroll
       title={`Edit Invoice - ${invoice.invoiceId}`}
       open={open}
       setOpen={setOpen}
     >
-      <FileExtractDropzone
-        onExtract={extractInvoiceData}
-        extracting={extracting}
-      >
-        <div className="relative max-h-[92.7vh] overflow-y-auto bg-main-bg py-4">
-          <div className="absolute right-4 top-4 z-10">
-            <button
-              type="button"
-              onClick={() => setShowPreview(true)}
-              className="inline-flex items-center gap-1.5 rounded-[2px] bg-primary px-4 py-2 text-sm text-white hover:bg-brand-hover"
-            >
-              <i className="ri-eye-line" />
-              Preview
-            </button>
-          </div>
-          <Left
-            isEditMode={true}
-            originalInvoice={invoice}
-            onSave={handleClose}
-            onOpenPreview={() => setShowPreview(true)}
+      <div className="flex h-full min-h-0 w-full flex-col">
+        <div className="flex shrink-0 items-center justify-end border-b border-black/[0.06] px-3 py-2">
+          <DocumentPreviewToggle
+            open={showPreview}
+            onToggle={() => setShowPreview((v) => !v)}
           />
         </div>
-      </FileExtractDropzone>
-
-      <DocumentPreviewDialog
-        open={showPreview}
-        onOpenChange={setShowPreview}
-        downloadTitle="Invoice"
-        dialogTitle="Invoice preview"
-      >
-        <PdfView />
-      </DocumentPreviewDialog>
+        <div className="min-h-0 flex-1">
+          <FileExtractDropzone
+            onExtract={extractInvoiceData}
+            extracting={extracting}
+          >
+            <DocumentEditorSplit
+              open={showPreview}
+              onOpenChange={setShowPreview}
+              downloadTitle="Invoice"
+              editor={
+                <Left
+                  isEditMode={true}
+                  originalInvoice={invoice}
+                  onSave={handleClose}
+                  onOpenPreview={() => setShowPreview(true)}
+                />
+              }
+              preview={<PdfView />}
+            />
+          </FileExtractDropzone>
+        </div>
+      </div>
     </Slider>
   );
 };
