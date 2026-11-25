@@ -34,6 +34,9 @@ interface SelectProps {
   placeholder?: string;
 }
 
+/** Radix forbids SelectItem value=""; map empty options through this sentinel. */
+const EMPTY_OPTION_VALUE = '__empty__';
+
 /** Shadcn-backed select adapter — keeps the legacy Select props API. */
 const Select: React.FC<SelectProps> = ({
   options,
@@ -48,7 +51,11 @@ const Select: React.FC<SelectProps> = ({
   error,
   placeholder,
 }) => {
-  const value = selectedValue || undefined;
+  const hasEmptyOption = options.some((option) => option.value === '');
+  const value =
+    selectedValue === '' && hasEmptyOption
+      ? EMPTY_OPTION_VALUE
+      : selectedValue || undefined;
   const emptyLabel = placeholder || name || 'Select…';
 
   return (
@@ -61,7 +68,9 @@ const Select: React.FC<SelectProps> = ({
       )}
       <ShadcnSelect
         value={value}
-        onValueChange={onChange}
+        onValueChange={(next) =>
+          onChange(next === EMPTY_OPTION_VALUE ? '' : next)
+        }
         disabled={isDisabled}
       >
         <SelectTrigger
@@ -71,11 +80,15 @@ const Select: React.FC<SelectProps> = ({
           <SelectValue placeholder={emptyLabel} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
-              {option.label}
-            </SelectItem>
-          ))}
+          {options.map((option) => {
+            const itemValue =
+              option.value === '' ? EMPTY_OPTION_VALUE : String(option.value);
+            return (
+              <SelectItem key={itemValue} value={itemValue}>
+                {option.label}
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </ShadcnSelect>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
