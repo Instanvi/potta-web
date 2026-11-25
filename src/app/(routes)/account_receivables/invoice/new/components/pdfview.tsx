@@ -73,23 +73,8 @@ const PdfView = ({
     : EMPTY_TABLE;
   const customerId = contextData.customerName; // Get customer ID from context
   const { data: org } = useOrganizationProfile();
-  const { prefs: letterhead, setPrefs: setLetterhead } = useDocumentLetterhead();
-
-  // Accent follows letterhead prefs (shared with the editor form).
+  const { prefs: letterhead } = useDocumentLetterhead();
   const invoiceColor = letterhead.accent || '#0b5d1e';
-  const setInvoiceColor = (value: string) => setLetterhead({ accent: value });
-
-  // Predefined color options for companies
-  const colorOptions = [
-    { name: 'Green', value: '#0b5d1e', class: 'bg-green-800' },
-    { name: 'Blue', value: '#1d4ed8', class: 'bg-blue-700' },
-    { name: 'Purple', value: '#7c3aed', class: 'bg-purple-700' },
-    { name: 'Red', value: '#dc2626', class: 'bg-red-700' },
-    { name: 'Orange', value: '#ea580c', class: 'bg-orange-700' },
-    { name: 'Teal', value: '#0f766e', class: 'bg-teal-700' },
-    { name: 'Indigo', value: '#4338ca', class: 'bg-indigo-700' },
-    { name: 'Pink', value: '#be185d', class: 'bg-pink-700' },
-  ];
 
   const formattedIssueDate = contextData.issueDate
     ? new Date(contextData.issueDate).toLocaleDateString()
@@ -242,38 +227,7 @@ const PdfView = ({
         <h3 className="text-xl font-medium">PDF Preview</h3>
       </div>
 
-      {/* Color Selection */}
-      <div className="flex items-center px-8 pb-2 space-x-4">
-        <span className="text-sm font-medium text-gray-700">
-          Invoice Color:
-        </span>
-        <div className="flex space-x-2">
-          {colorOptions.map((color) => (
-            <button
-              key={color.value}
-              onClick={() => setInvoiceColor(color.value)}
-              className={`w-8 h-8 rounded-full border-2 transition-all ${
-                invoiceColor === color.value
-                  ? 'border-gray-800 scale-110'
-                  : 'border-gray-300 hover:border-gray-500'
-              }`}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-            />
-          ))}
-          {/* Custom Color Picker */}
-          <div className="relative">
-            <input
-              type="color"
-              value={invoiceColor}
-              onChange={(e) => setInvoiceColor(e.target.value)}
-              className="w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer"
-              title="Custom Color"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="max-w-[48rem] bg-white space-y-8 min-w-[45rem] w-full mb-10">
+      <div className="mb-10 w-full min-w-[45rem] max-w-[48rem] space-y-8 bg-white">
         <div
           className="h-36 w-full flex items-center justify-between px-8"
           style={{ backgroundColor: invoiceColor }}
