@@ -55,7 +55,7 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [],
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 whitespace-nowrap rounded-[2px] bg-primary px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-hover"
+                  className="flex h-10 items-center gap-2 whitespace-nowrap rounded-[2px] bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-brand-hover"
                 >
                   <i className="ri-file-add-line"></i>
                   New Customer
@@ -88,13 +88,13 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [],
           </>
         }
       >
-        {toolbarStart}
         <Search
           placeholder="Search customers by name, email or phone..."
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           onClear={() => onSearchChange('')}
         />
+        {toolbarStart}
       </ListToolbar>
       <SliderCustomer open={isCreateOpen} setOpen={setIsCreateOpen} />
       <BulkSlider kind="customer" open={isUploadOpen} setOpen={setIsUploadOpen} />

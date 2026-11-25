@@ -26,7 +26,7 @@ import {
 import { DataTablePagination } from '@potta/components/ui/data-table-pagination';
 import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { cn } from '@potta/lib/utils';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 const STORAGE_PREFIX = 'potta-dt-visibility:';
 
@@ -304,7 +304,7 @@ export function DataTable<TData>({
   const colCount = Math.max(resolvedColumns.length, 1);
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn('mt-4 flex flex-col gap-2', className)}>
       {showToolbar && (
         <div className="flex flex-wrap items-center justify-end gap-2 print:hidden">
           {toolbar}
@@ -342,10 +342,10 @@ export function DataTable<TData>({
                             header.getContext()
                           )}
                       {!tableLoading && header.column.getIsSorted() === 'asc' && (
-                        <ChevronUp className="size-3.5 text-muted-foreground" />
+                        <ArrowUp className="size-3.5 text-muted-foreground" />
                       )}
                       {!tableLoading && header.column.getIsSorted() === 'desc' && (
-                        <ChevronDown className="size-3.5 text-muted-foreground" />
+                        <ArrowDown className="size-3.5 text-muted-foreground" />
                       )}
                     </div>
                   </TableHead>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Column } from '@tanstack/react-table';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { cn } from '@potta/lib/utils';
 
 interface DataTableColumnHeaderProps<TData, TValue>
@@ -31,9 +31,9 @@ export function DataTableColumnHeader<TData, TValue>({
       onClick={column.getToggleSortingHandler()}
     >
       {title}
-      {sorted === 'asc' && <ChevronUp className="size-3.5 text-muted-foreground" />}
+      {sorted === 'asc' && <ArrowUp className="size-3.5 text-muted-foreground" />}
       {sorted === 'desc' && (
-        <ChevronDown className="size-3.5 text-muted-foreground" />
+        <ArrowDown className="size-3.5 text-muted-foreground" />
       )}
     </button>
   );

@@ -14,6 +14,8 @@ import Scheduling from './components/scheduling';
 import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks';
 import { Loader2 } from 'lucide-react';
+import DocumentWorkspace from '@potta/components/document-workspace';
+import { cn } from '@potta/lib/utils';
 
 enum VoucherTypeEnum {
   COUPON = 'DISCOUNT',
@@ -101,23 +103,27 @@ const commonFields: Array<keyof FormData> = [
   'endDate',
 ];
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-b border-gray-200 pb-8 last:border-b-0">
-      <h2 className="mb-4 text-lg font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
+const TABS = [
+  { id: 'type', label: 'Type' },
+  { id: 'code', label: 'Code' },
+  { id: 'policy', label: 'Policy' },
+  { id: 'audience', label: 'Audience' },
+  { id: 'scheduling', label: 'Scheduling' },
+] as const;
+
+type VoucherTab = (typeof TABS)[number]['id'];
+
+function tabForError(key: string): VoucherTab {
+  if (key.startsWith('audience')) return 'audience';
+  if (key.startsWith('scheduling')) return 'scheduling';
+  if (key.startsWith('code') || key === 'programCardPrefix') return 'code';
+  if (key === 'type' || key === 'name') return 'type';
+  return 'policy';
 }
 
 export default function NewVoucherPage() {
   const [voucherType, setVoucherType] = useState<VoucherType>('ROYALTY_POINTS');
+  const [tab, setTab] = useState<VoucherTab>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
@@ -130,6 +136,7 @@ export default function NewVoucherPage() {
       type: VoucherTypeEnum.ROYALTY_POINTS,
     },
     mode: 'onBlur',
+    shouldUnregister: false,
   });
 
   const { unregister, setValue, getValues } = methods;
@@ -265,6 +272,9 @@ export default function NewVoucherPage() {
 
     setValidationErrors(newErrors);
 
+    const firstError = Object.keys(newErrors)[0];
+    if (firstError) setTab(tabForError(firstError));
+
     if (Object.keys(newErrors).length > 0) {
       const count = Object.keys(newErrors).length;
       toast.error(
@@ -314,40 +324,73 @@ export default function NewVoucherPage() {
   };
 
   return (
-    <div className="flex h-[92.7vh] overflow-hidden p-4 md:p-5">
+    <DocumentWorkspace
+      title="New voucher"
+      closeHref="/account_receivables/vouchers"
+      footer={
+        <button
+          type="submit"
+          form="new-voucher"
+          disabled={isSubmitting}
+          className="ml-auto inline-flex h-10 items-center justify-center rounded-[2px] bg-primary px-4 text-sm text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="mr-2 animate-spin" />
+              Publishing…
+            </>
+          ) : (
+            'Publish'
+          )}
+        </button>
+      }
+    >
       <FormProvider {...methods}>
         <form
+          id="new-voucher"
           onSubmit={methods.handleSubmit(onSubmit)}
-          className="flex w-full flex-col"
+          className="flex h-full min-h-0 flex-col bg-white"
         >
-          <div className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto bg-white pb-24">
-            <div className="flex flex-col gap-8 p-4 md:p-6">
-              <Section title="Type">
-                <VoucherTypeSelector
-                  selectedType={voucherType}
-                  onVoucherTypeChange={handleVoucherTypeChange}
-                />
-              </Section>
+          <div className="flex shrink-0 gap-6 overflow-x-auto border-b border-black/[0.08] px-6 text-sm">
+            {TABS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTab(item.id)}
+                className={cn(
+                  'border-b-2 py-3',
+                  tab === item.id
+                    ? 'border-green-700 font-medium text-green-700'
+                    : 'border-transparent text-foreground',
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
 
-              <Section title="Code">
-                <Code />
-              </Section>
-
-              <Section title="Policy">
-                <Policy voucherType={voucherType} />
-              </Section>
-
-              <Section title="Audience">
-                <Audience />
-              </Section>
-
-              <Section title="Scheduling">
-                <Scheduling />
-              </Section>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+            <div className={tab === 'type' ? undefined : 'hidden'}>
+              <VoucherTypeSelector
+                selectedType={voucherType}
+                onVoucherTypeChange={handleVoucherTypeChange}
+              />
+            </div>
+            <div className={tab === 'code' ? undefined : 'hidden'}>
+              <Code />
+            </div>
+            <div className={tab === 'policy' ? undefined : 'hidden'}>
+              <Policy voucherType={voucherType} />
+            </div>
+            <div className={tab === 'audience' ? undefined : 'hidden'}>
+              <Audience />
+            </div>
+            <div className={tab === 'scheduling' ? undefined : 'hidden'}>
+              <Scheduling />
             </div>
 
             {Object.keys(validationErrors).length > 0 && (
-              <div className="mx-4 mb-6 border border-red-200 bg-red-50 p-3 md:mx-6">
+              <div className="mt-6 border border-red-200 bg-red-50 p-3">
                 <h4 className="mb-2 font-medium text-red-600">
                   Please fix the following errors:
                 </h4>
@@ -359,31 +402,8 @@ export default function NewVoucherPage() {
               </div>
             )}
           </div>
-
-          <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-gray-200 bg-white p-2">
-            <div className="mx-auto flex max-w-4xl justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`flex items-center justify-center px-4 py-2 text-white ${
-                  isSubmitting
-                    ? 'cursor-not-allowed bg-gray-400'
-                    : 'bg-green-700 hover:bg-green-800'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={16} className="mr-2 animate-spin" />
-                    Publishing...
-                  </>
-                ) : (
-                  'Publish'
-                )}
-              </button>
-            </div>
-          </div>
         </form>
       </FormProvider>
-    </div>
+    </DocumentWorkspace>
   );
 }

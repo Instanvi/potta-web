@@ -109,7 +109,6 @@ const Filter: React.FC<FilterProps> = ({
         </>
       }
     >
-      {toolbarStart}
       <DynamicFilter
         searchValue={searchValue}
         onSearchChange={onSearchChange}
@@ -118,6 +117,7 @@ const Filter: React.FC<FilterProps> = ({
         filters={filterConfig}
         className="p-0"
       />
+      {toolbarStart}
     </ListToolbar>
       <BulkSlider kind="vendor" open={isUploadOpen} setOpen={setIsUploadOpen} />
     </>
