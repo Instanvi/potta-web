@@ -1,5 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@potta/components/shadcn/select';
 import { productApi } from '@potta/app/(routes)/pos/inventory/_utils/api';
 import type { Product } from '@potta/app/(routes)/pos/inventory/_utils/types';
 import { priceCatalogSelection } from '@/lib/catalog-price';
@@ -11,6 +18,40 @@ export function productNeedsChooser(product: Product) {
       product.hasModifiers ||
       (product.variations && product.variations.length) ||
       (product.packagePrices && product.packagePrices.length),
+  );
+}
+
+const NONE = '__none__';
+
+/** Optional shadcn select; choosing the placeholder row clears the value. */
+function OptionalSelect({
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <Select
+      value={value || NONE}
+      onValueChange={(v) => onChange(v === NONE ? '' : v)}
+    >
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NONE}>{placeholder}</SelectItem>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -59,34 +100,28 @@ export default function ProductChooser({
       <div className="w-full max-w-md space-y-3 rounded-[2px] bg-white p-5">
         <h3 className="text-lg font-medium">{detail?.name ?? 'Choose options'}</h3>
         {(detail?.variations?.length ?? 0) > 0 && (
-          <select className="h-12 w-full border px-3 text-sm" value={variationId} onChange={(e) => setVariationId(e.target.value)}>
-            <option value="">Variation</option>
-            {detail!.variations!.map((v) => (
-              <option key={v.uuid} value={v.uuid}>
-                {v.name || v.sku}
-              </option>
-            ))}
-          </select>
+          <OptionalSelect
+            value={variationId}
+            onChange={setVariationId}
+            placeholder="Variation"
+            options={detail!.variations!.map((v) => ({ value: v.uuid, label: v.name || v.sku || v.uuid }))}
+          />
         )}
         {packages.length > 0 && (
-          <select className="h-12 w-full border px-3 text-sm" value={packageId} onChange={(e) => setPackageId(e.target.value)}>
-            <option value="">Package</option>
-            {packages.map((p) => (
-              <option key={p.uuid} value={p.uuid}>
-                {p.packageName}
-              </option>
-            ))}
-          </select>
+          <OptionalSelect
+            value={packageId}
+            onChange={setPackageId}
+            placeholder="Package"
+            options={packages.map((p) => ({ value: p.uuid, label: p.packageName }))}
+          />
         )}
         {units.length > 0 && (
-          <select className="h-12 w-full border px-3 text-sm" value={unitId} onChange={(e) => setUnitId(e.target.value)}>
-            <option value="">Unit</option>
-            {units.map((u) => (
-              <option key={u.uuid} value={u.uuid}>
-                {u.name}
-              </option>
-            ))}
-          </select>
+          <OptionalSelect
+            value={unitId}
+            onChange={setUnitId}
+            placeholder="Unit"
+            options={units.map((u) => ({ value: u.uuid, label: u.name }))}
+          />
         )}
         {modifiers.map((m) => (
           <label key={m.uuid} className="flex gap-2 text-sm">

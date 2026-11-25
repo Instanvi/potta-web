@@ -1,4 +1,5 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import type { PdfSeller } from '@/lib/org-to-seller';
 
 try {
   Font.registerHyphenationCallback((word) => [word]);
@@ -14,15 +15,7 @@ export type SalesReceiptPdfLine = {
   lineTotal: number;
 };
 
-export type SalesReceiptPdfSeller = {
-  name: string;
-  email?: string | null;
-  phone?: string | null;
-  addressLines?: string[];
-  logoUrl?: string | null;
-  registrationNumber?: string | null;
-  taxId?: string | null;
-};
+export type SalesReceiptPdfSeller = PdfSeller;
 
 export type SalesReceiptPdfCustomer = {
   name: string;

@@ -14,6 +14,13 @@ export interface Tax {
   createdAt: string;
 }
 
+/** `search` maps to nestjs-paginate `search` (name, description, taxId, type on the backend). */
+export interface TaxListParams {
+  page: number;
+  limit: number;
+  search?: string;
+}
+
 export interface TaxPage {
   data: Tax[];
   meta: {
@@ -36,7 +43,7 @@ export interface TaxPayload {
 }
 
 export const taxApi = {
-  list: async (params: { page: number; limit: number }): Promise<TaxPage> => {
+  list: async (params: TaxListParams): Promise<TaxPage> => {
     const res = await axios.get('/tax', { params });
     return res.data;
   },
@@ -64,5 +71,5 @@ export const taxApi = {
 
 export const taxKeys = {
   all: ['taxes'] as const,
-  list: (params: { page: number; limit: number }) => ['taxes', 'list', params] as const,
+  list: (params: TaxListParams) => ['taxes', 'list', params] as const,
 };

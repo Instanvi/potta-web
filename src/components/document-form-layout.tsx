@@ -12,7 +12,7 @@ export function DocumentFormShell({
   children: ReactNode;
 }) {
   return (
-    <div className={cn('flex w-full flex-col gap-3 bg-main-bg p-4 md:p-5', className)}>
+    <div className={cn('flex w-full flex-col gap-3 bg-white p-4 md:p-5', className)}>
       {children}
     </div>
   );

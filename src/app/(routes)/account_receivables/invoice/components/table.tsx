@@ -24,7 +24,12 @@ import {
   InvoiceDetailPanel,
   InvoiceDetailPreview,
 } from './InvoiceDetailPanel';
-import { DataTable } from '@potta/components/ui/data-table';
+import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
+import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ExportButton } from '@/components/export-button';
+import type { ExportColumn } from '@/lib/export-file';
+import { fetchAllPages } from '@/lib/fetch-all-pages';
+import { invoiceApi } from '../_utils/api';
 
 const startOfLocalDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
@@ -93,6 +98,28 @@ const customerLabel = (invoice: Invoice) =>
     ? `${invoice.customer.firstName} ${invoice.customer.lastName}`
     : invoice.notes || 'No customer';
 
+const INVOICE_EXPORT_COLUMNS: ExportColumn<Invoice>[] = [
+  {
+    key: 'invoiceNumber',
+    header: 'Invoice number',
+    value: (row) => row.invoiceNumber || row.invoiceId || '',
+  },
+  { key: 'customer', header: 'Customer', value: (row) => customerLabel(row) },
+  { key: 'status', header: 'Status' },
+  { key: 'currency', header: 'Currency', value: (row) => row.currency || '' },
+  { key: 'invoiceTotal', header: 'Total', value: (row) => Number(row.invoiceTotal) },
+  {
+    key: 'issuedDate',
+    header: 'Issued',
+    value: (row) => (row.issuedDate ? moment(row.issuedDate).format('YYYY-MM-DD') : ''),
+  },
+  {
+    key: 'dueDate',
+    header: 'Due',
+    value: (row) => (row.dueDate ? moment(row.dueDate).format('YYYY-MM-DD') : ''),
+  },
+];
+
 const InvoiceTable = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -126,6 +153,7 @@ const InvoiceTable = () => {
   };
 
   const { data, isLoading, error, refetch } = useGetAllInvoice(filter);
+  const { table, onTableChange } = useDataTableHandle<Invoice>();
 
   const filteredData = useMemo(
     () =>
@@ -134,6 +162,14 @@ const InvoiceTable = () => {
       ),
     [data?.data]
   );
+
+  const fetchAllInvoices = useCallback(async () => {
+    const all = await fetchAllPages<Invoice>((p, l) =>
+      invoiceApi.getAll({ ...filter, page: p, limit: l })
+    );
+    return all.filter((invoice) => invoice.invoiceType !== 'PROFORMA_INVOICE');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, debouncedSearch, issuedFrom, issuedTo]);
 
   const selectedFromList = useMemo(
     () => filteredData.find((row: Invoice) => row.uuid === selectedId) ?? null,
@@ -382,14 +418,23 @@ const InvoiceTable = () => {
     <div className="flex min-h-0 flex-1 flex-col gap-4 bg-main-bg p-4 md:p-5">
       <ListToolbar
         actions={
-          <Link href="/account_receivables/invoice/new">
-            <Button
-              text="New invoice"
-              icon={<i className="ri-add-line" />}
-              theme="default"
-              type="button"
+          <>
+            {table && filteredData.length > 0 && <DataTableViewOptions table={table} />}
+            <ExportButton
+              filename="invoices"
+              rows={filteredData}
+              fetchAllRows={fetchAllInvoices}
+              columns={INVOICE_EXPORT_COLUMNS}
             />
-          </Link>
+            <Link href="/account_receivables/invoice/new">
+              <Button
+                text="New invoice"
+                icon={<i className="ri-add-line" />}
+                theme="default"
+                type="button"
+              />
+            </Link>
+          </>
         }
       >
         <DynamicFilter
@@ -433,6 +478,8 @@ const InvoiceTable = () => {
           onRowClick={(row) => setSelectedId(row.uuid)}
           isLoading={isLoading}
           storageKey="invoices-table"
+          showViewOptions={false}
+          onTableChange={onTableChange}
           {...tableProps(data?.meta, data?.data?.length)}
         />
       )}

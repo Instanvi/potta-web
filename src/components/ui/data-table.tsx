@@ -6,6 +6,7 @@ import {
   OnChangeFn,
   PaginationState,
   SortingState,
+  Table as TanstackTable,
   VisibilityState,
   flexRender,
   getCoreRowModel,
@@ -25,7 +26,6 @@ import {
 import { DataTablePagination } from '@potta/components/ui/data-table-pagination';
 import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
 import { cn } from '@potta/lib/utils';
-import { TableSkeleton } from '@potta/components/ui/loaders';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const STORAGE_PREFIX = 'potta-dt-visibility:';
@@ -79,6 +79,22 @@ interface DataTableProps<TData> {
   showViewOptions?: boolean;
   /** Persist column visibility under this key in localStorage. */
   storageKey?: string;
+  /**
+   * Receives the table instance on mount and whenever column visibility changes, so a parent
+   * can render `<DataTableViewOptions />` inside its own toolbar (pair with `showViewOptions={false}`).
+   * Prefer `useDataTableHandle()` to wire this up.
+   */
+  onTableChange?: (table: TanstackTable<TData>) => void;
+}
+
+/** Lifts the DataTable instance into the parent so Columns can live in a shared ListToolbar. */
+export function useDataTableHandle<TData>() {
+  const [handle, setHandle] = React.useState<{ table: TanstackTable<TData> } | null>(null);
+  const onTableChange = React.useCallback(
+    (table: TanstackTable<TData>) => setHandle({ table }),
+    [],
+  );
+  return { table: handle?.table ?? null, onTableChange };
 }
 
 export function DataTable<TData>({
@@ -103,6 +119,7 @@ export function DataTable<TData>({
   toolbar,
   showViewOptions = true,
   storageKey,
+  onTableChange,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -213,20 +230,18 @@ export function DataTable<TData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowSelection, data]);
 
+  const onTableChangeRef = React.useRef(onTableChange);
+  onTableChangeRef.current = onTableChange;
+  React.useEffect(() => {
+    onTableChangeRef.current?.(table);
+  }, [table, columnVisibility]);
+
   const tableLoading = isLoading || loading;
   const showToolbar =
     Boolean(toolbar) ||
     (showViewOptions && table.getAllColumns().some((c) => c.getCanHide()));
-
-  if (tableLoading) {
-    return (
-      <div className="mt-5">
-        {progressComponent || (
-          <TableSkeleton rows={Math.min(pageSize || 8, 10)} columns={Math.min(Math.max(resolvedColumns.length, 3), 7)} />
-        )}
-      </div>
-    );
-  }
+  const skeletonRows = Math.min(pageSize || 8, 10);
+  const colCount = Math.max(resolvedColumns.length, 1);
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -251,7 +266,7 @@ export function DataTable<TData>({
                       'h-11 bg-table-head px-4 text-sm font-normal tracking-normal text-black',
                       header.column.getCanSort() && 'cursor-pointer select-none'
                     )}
-                    onClick={header.column.getToggleSortingHandler()}
+                    onClick={tableLoading ? undefined : header.column.getToggleSortingHandler()}
                   >
                     <div className="flex items-center gap-1.5">
                       {header.isPlaceholder
@@ -260,8 +275,12 @@ export function DataTable<TData>({
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                      {header.column.getIsSorted() === 'asc' && <ChevronUp className="size-3.5 text-muted-foreground" />}
-                      {header.column.getIsSorted() === 'desc' && <ChevronDown className="size-3.5 text-muted-foreground" />}
+                      {!tableLoading && header.column.getIsSorted() === 'asc' && (
+                        <ChevronUp className="size-3.5 text-muted-foreground" />
+                      )}
+                      {!tableLoading && header.column.getIsSorted() === 'desc' && (
+                        <ChevronDown className="size-3.5 text-muted-foreground" />
+                      )}
                     </div>
                   </TableHead>
                 ))}
@@ -269,7 +288,33 @@ export function DataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {tableLoading ? (
+              progressComponent ? (
+                <TableRow>
+                  <TableCell colSpan={colCount} className="p-0">
+                    {progressComponent}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                Array.from({ length: skeletonRows }).map((_, r) => (
+                  <TableRow
+                    key={`sk-${r}`}
+                    className="border-0 border-b border-black/[0.06] last:border-b-0 hover:bg-transparent"
+                  >
+                    {Array.from({ length: colCount }).map((_, c) => (
+                      <TableCell key={c} className="px-4 py-3.5">
+                        <div
+                          className={cn(
+                            'h-3.5 animate-pulse rounded-[2px] bg-gray-200/80',
+                            ['w-3/4', 'w-1/2', 'w-2/3', 'w-5/12', 'w-1/3'][(r + c) % 5]
+                          )}
+                        />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -291,7 +336,7 @@ export function DataTable<TData>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={resolvedColumns.length || 1}
+                  colSpan={colCount}
                   className="h-32 text-center text-sm font-normal text-muted-foreground"
                 >
                   No results.
@@ -300,7 +345,8 @@ export function DataTable<TData>({
             )}
           </TableBody>
         </Table>
-        {showPagination &&
+        {!tableLoading &&
+          showPagination &&
           (manualPagination
             ? (serverTotalRows ?? 0) > 0 || (data?.length ?? 0) > 0
             : table.getFilteredRowModel().rows.length > 0) && (

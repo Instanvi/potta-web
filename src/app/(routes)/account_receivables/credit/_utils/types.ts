@@ -39,8 +39,10 @@ export interface CreditNote {
   creditNoteType?: 'CUSTOMER' | 'VENDOR';
   issueDate: string;
   creditAmount: number | string;
+  currency?: string | null;
   reason: string;
   notes?: string | null;
+  lineItems?: CreditNoteLineItem[] | null;
   status: CreditNoteStatus;
   customer?: CreditNoteParty | null;
   salePerson?: CreditNoteParty | null;
@@ -69,18 +71,33 @@ export interface CreditNoteFilter {
   status?: CreditNoteStatus;
 }
 
+/** One serialized form line, stored by the backend as jsonb on the credit note. */
+export interface CreditNoteLineItem {
+  productId?: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  /** Tax percentage, e.g. 19.25. */
+  taxRate: number;
+  /** quantity x unitPrice + tax. */
+  total: number;
+}
+
 /**
- * Mirrors potta-backend CreditNoteDto. Field names (`invoceId`, `salesPersonId`)
- * follow the DTO exactly because the API rejects unknown properties.
+ * Mirrors potta-backend CreditNoteDto. Prefer `invoiceId` / `salePersonId`; the
+ * API still accepts the legacy `invoceId` / `salesPersonId` aliases, but the
+ * form must never send them (and never send empty ids).
  */
 export interface CreateCreditNotePayload {
   customerId: string;
   issueDate: string;
   creditAmount: number;
   reason: string;
-  invoceId?: string;
-  salesPersonId: string;
-  notes: string;
+  invoiceId?: string;
+  salePersonId?: string;
+  notes?: string;
+  currency?: string;
+  lineItems?: CreditNoteLineItem[];
 }
 
 export interface RefundPayload {

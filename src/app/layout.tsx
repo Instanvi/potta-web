@@ -4,8 +4,10 @@ import 'remixicon/fonts/remixicon.css';
 import 'react-accessible-accordion/dist/fancy-example.css';
 
 import { AppProviders } from '@potta/components/providers/AppProviders';
+import NextTopLoader from 'nextjs-toploader';
 
 import { Inter } from 'next/font/google';
+import { Suspense } from 'react';
 
 // Same family as the hub (instanvi-auth-frontend). Variable font: every weight 100–900 is available.
 const inter = Inter({
@@ -24,8 +26,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { Suspense } from 'react';
-
 export default function RootLayout({
   children,
 }: {
@@ -34,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans bg-[var(--main-bg)] antialiased">
+        <NextTopLoader color="#0b5d1e" showSpinner={false} height={2} />
         <Suspense fallback={null}>
           <AppProviders>{children}</AppProviders>
         </Suspense>

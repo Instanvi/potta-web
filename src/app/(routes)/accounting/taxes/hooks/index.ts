@@ -1,9 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiErrorMessage } from '../../../_shared/format';
-import { TaxPayload, taxApi, taxKeys } from '../utils/api';
+import { TaxListParams, TaxPayload, taxApi, taxKeys } from '../utils/api';
 
-export const useTaxes = (params: { page: number; limit: number }) =>
+export const useTaxes = (params: TaxListParams) =>
   useQuery({
     queryKey: taxKeys.list(params),
     queryFn: () => taxApi.list(params),

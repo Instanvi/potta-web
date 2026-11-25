@@ -1,299 +1,375 @@
 'use client';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import Input from '@potta/components/input';
-import SearchSelect from '@potta/components/search-select';
-import { useContext, useState, useEffect, useRef } from 'react';
-import CreditNoteForm from './newtableInvoice';
-import Button from '@potta/components/button';
+import Select from '@potta/components/select';
+import SearchableSelect, {
+  Option as SearchableSelectOption,
+} from '@potta/components/searchableSelect';
+import TextArea from '@potta/components/textArea';
+import { DatePicker } from '@potta/components/ui/date-picker';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
-import Select from '@potta/components/select';
-import { DatePicker } from '@potta/components/ui/date-picker';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
+import {
+  DocumentBalanceDue,
+  DocumentFooterLink,
+  DocumentFormCard,
+  DocumentFormFooter,
+  DocumentFormShell,
+  DocumentSectionTitle,
+} from '@potta/components/document-form-layout';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
 import { Can } from '@/components/auth/can';
+import CreditNoteForm from './newtableInvoice';
+import { useCreateCreditNote, useCustomerInvoices } from '../../_hooks';
+import { CreateCreditNotePayload } from '../../_utils/types';
+import {
+  computeCreditAmount,
+  serializeLineItems,
+} from '../../_utils/lines';
 
-import { useRouter } from 'next/navigation';
-import { useCreateCreditNote } from '../../_hooks';
-
-// Define Option interface to match the one in SearchSelect component
-interface Option {
-  label: string;
-  value: string | number;
-}
-
-// Add validation errors interface
 interface ValidationErrors {
-  issueDate?: string;
   customerName?: string;
-  creditAmount?: string;
+  issueDate?: string;
   reason?: string;
-  invoiceId?: string;
+  lineItems?: string;
 }
 
-const Left = () => {
+interface LeftProps {
+  onTogglePreview?: () => void;
+  showPreview?: boolean;
+}
+
+const DEFAULT_CURRENCY = 'USD';
+
+/** Blank document state shared with the invoice/bill forms (they all use ContextData.data). */
+const freshDocumentState = () => ({ currency: DEFAULT_CURRENCY, table: [] });
+
+const Left = ({ onTogglePreview, showPreview = true }: LeftProps) => {
   const context = useContext(ContextData);
+  const router = useRouter();
+  const setContextData = context?.setData;
+
   const { data, isLoading: customersLoading } = useGetAllCustomers({
     page: 1,
     limit: 100,
   });
   const customers: Customer[] = data?.data || [];
+
   const [issueDate, setIssueDate] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState<Option | null>(null);
-  const [currency, setCurrency] = useState('USD');
+  const [customerId, setCustomerId] = useState('');
+  const [invoiceId, setInvoiceId] = useState('');
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
+  const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [isAddCustomerDrawer, setIsAddCustomerDrawer] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [formSubmitted, setFormSubmitted] = useState(false);
 
-  // Use a ref to track if initial selection has been made
-  const initialSelectionMade = useRef(false);
-  const currencySeeded = useRef(false);
-
-  // Create customer options with proper typing
-  const customerOptions: Option[] = customers.map((customer: Customer) => ({
-    label:
-      customer.firstName ||
-      customer.lastName ||
-      `Customer ${customer.customerId || customer.uuid.slice(0, 8)}`,
-    value: customer.uuid,
-  }));
-
-  // Seed default currency into context so totals match the Currency select
+  // Reset shared document state on mount (and on leave) so invoice/bill lines never leak in.
   useEffect(() => {
-    if (currencySeeded.current || !context?.setData) return;
-    currencySeeded.current = true;
-    context.setData((prevData: any) => ({
-      ...prevData,
-      currency: prevData.currency || 'USD',
-    }));
-  }, [context]);
+    setContextData?.(freshDocumentState());
+    return () => setContextData?.(freshDocumentState());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Set default customer only once when data first loads
-  useEffect(() => {
-    if (
-      customers.length > 0 &&
-      !customerName &&
-      !initialSelectionMade.current &&
-      !selectedCustomer
-    ) {
-      const firstCustomer = customers[0];
-      const firstOption = {
-        label:
-          firstCustomer.firstName ||
-          firstCustomer.lastName ||
-          `Customer ${
-            firstCustomer.customerId || firstCustomer.uuid.slice(0, 8)
-          }`,
-        value: firstCustomer.uuid,
-      };
+  const setContextField = (key: string, value: unknown) =>
+    setContextData?.((prev: any) => ({ ...prev, [key]: value }));
 
-      initialSelectionMade.current = true;
-      setCustomerName(firstCustomer.uuid);
-      setSelectedCustomer(firstOption);
-      // Update context data
-      context?.setData((prevData: any) => ({
-        ...prevData,
-        customerName: firstCustomer.uuid,
-      }));
-    }
-  }, [customers, customerName, context, selectedCustomer]);
+  const customerOptions: SearchableSelectOption[] = customers.map(
+    (customer: Customer) => ({
+      label:
+        [customer.firstName, customer.lastName].filter(Boolean).join(' ') ||
+        `Customer ${customer.customerId || customer.uuid.slice(0, 8)}`,
+      value: customer.uuid,
+    })
+  );
 
-  const handleInputChange = (key: string, value: any) => {
-    // Clear error for this field if it exists
-    if (errors[key as keyof ValidationErrors]) {
-      setErrors((prev) => ({ ...prev, [key]: undefined }));
-    }
+  const { data: invoicesData, isLoading: invoicesLoading } =
+    useCustomerInvoices(customerId);
+  const invoiceOptions: SearchableSelectOption[] = useMemo(
+    () =>
+      ((invoicesData?.data ?? []) as any[]).map((inv) => ({
+        value: inv.uuid,
+        label: `${inv.invoiceNumber || inv.invoiceId || inv.code} · ${Number(
+          inv.invoiceTotal ?? 0
+        ).toLocaleString()} ${inv.currency ?? ''}`.trim(),
+      })),
+    [invoicesData]
+  );
 
-    // Update local state
-    switch (key) {
-      case 'issueDate':
-        setIssueDate(value);
-        break;
-      case 'customerName':
-        setCustomerName(value);
-        break;
-      case 'currency':
-        setCurrency(value);
-        break;
-      case 'note':
-        setNote(value);
-        break;
-      default:
-        break;
-    }
-    // Update context data
-    context?.setData((prevData: any) => ({
-      ...prevData,
-      [key]: value,
+  const clearError = (key: keyof ValidationErrors) =>
+    setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+
+  const handleCustomerChange = (value: string) => {
+    setCustomerId(value);
+    // The invoice list belongs to the customer, so drop any previous selection.
+    setInvoiceId('');
+    clearError('customerName');
+    setContextData?.((prev: any) => ({
+      ...prev,
+      customerName: value,
+      invoiceId: '',
     }));
   };
 
+  const handleInvoiceChange = (value: string) => {
+    setInvoiceId(value);
+    setContextField('invoiceId', value);
+  };
+
+  const handleIssueDateChange = (value: string) => {
+    setIssueDate(value);
+    clearError('issueDate');
+    setContextField('issueDate', value);
+  };
+
+  const handleCurrencyChange = (value: string) => {
+    setCurrency(value);
+    setContextField('currency', value);
+  };
+
+  const handleReasonChange = (value: string) => {
+    setReason(value);
+    clearError('reason');
+    setContextField('reason', value);
+  };
+
+  const handleNoteChange = (value: string) => {
+    setNote(value);
+    setContextField('note', value);
+  };
+
+  const tableRows = context?.data?.table || [];
+  const creditAmount = computeCreditAmount(tableRows);
+  const money = (n: number) =>
+    `${currency} ${n.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+
+  // Keep the preview in sync with the amount derived from the lines.
+  useEffect(() => {
+    setContextData?.((prev: any) =>
+      Number(prev?.creditAmount) === creditAmount
+        ? prev
+        : { ...prev, creditAmount }
+    );
+  }, [creditAmount, setContextData]);
+
   const validateForm = () => {
-    const newErrors: ValidationErrors = {};
-    const contextData = context?.data || {};
-
-    // Required field validation
-    if (!issueDate) newErrors.issueDate = 'Issue date is required';
-    if (!customerName) newErrors.customerName = 'Customer is required';
-    if (!contextData.invoiceId) newErrors.invoiceId = 'Invoice is required';
-    if (!contextData.creditAmount || contextData.creditAmount <= 0)
-      newErrors.creditAmount = 'Valid credit amount is required';
-    if (!contextData.reason) newErrors.reason = 'Reason is required';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const next: ValidationErrors = {};
+    if (!customerId) next.customerName = 'Customer is required';
+    if (!issueDate) next.issueDate = 'Issue date is required';
+    if (!reason.trim()) next.reason = 'Reason is required';
+    if (serializeLineItems(tableRows).length === 0 || creditAmount <= 0) {
+      next.lineItems = 'Add at least one line with a quantity and price';
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
   const mutation = useCreateCreditNote();
-  const router = useRouter();
-  const handleSaveCreditNote = () => {
-    setFormSubmitted(true);
 
-    // Validate form
-    const isValid = validateForm();
-    if (!isValid) {
-      // Scroll to the first error
-      const firstErrorField = document.querySelector('.error-field');
-      if (firstErrorField) {
-        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+  const handleSave = () => {
+    if (!validateForm()) {
+      // Wait for the error markup to render before scrolling.
+      setTimeout(() => {
+        document
+          .querySelector('.error-field')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 0);
       return;
     }
 
-    const contextData = context?.data || {};
+    const payload: CreateCreditNotePayload = {
+      customerId,
+      issueDate,
+      creditAmount,
+      reason: reason.trim(),
+      currency,
+      lineItems: serializeLineItems(tableRows),
+      ...(invoiceId ? { invoiceId } : {}),
+      ...(note.trim() ? { notes: note.trim() } : {}),
+    };
 
-    mutation.mutate(
-      {
-        payload: {
-          customerId: customerName,
-          issueDate,
-          creditAmount: Number(contextData.creditAmount),
-          reason: contextData.reason,
-          invoceId: contextData.invoiceId,
-          salesPersonId: '',
-          notes: note,
-        },
-        invoiceId: contextData.invoiceId,
-      },
-      { onSuccess: () => router.push('/account_receivables/credit') }
-    );
+    mutation.mutate(payload, {
+      onSuccess: () => router.push('/account_receivables/credit'),
+    });
   };
 
-  // Helper function to render required field marker
-  const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
+  const RequiredMark = () => <span className="ml-1 text-red-500">*</span>;
 
   return (
-    <div className="max-w-5xl min-w-5xl px-2 bg-transparent overflow-y-auto scroll bg-white">
-      <div className="w-full grid grid-cols-3 gap-4">
-        <div>
-          <Select
-            label="Currency"
-            options={[
-              { label: 'USD($)', value: 'USD' },
-              { label: 'EUR(€)', value: 'EUR' },
-              { label: 'XAF', value: 'XAF' },
-            ]}
-            selectedValue={currency}
-            onChange={(value: any) => handleInputChange('currency', value)}
-            bg={''}
-          />
-        </div>
-        <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-          <DatePicker
-            label="Issue Date"
-            required
-            name="issueDate"
-            value={issueDate}
-            onChange={(value) => handleInputChange('issueDate', value)}
-            placeholder="Select issue date"
-            error={errors.issueDate}
-          />
-        </div>
-      </div>
-
-      <div className="mt-3 w-full flex flex-col">
-        <div
-          className={`w-[50%] flex items-center space-x-3 ${
-            errors.customerName ? 'error-field' : ''
-          }`}
-        >
-          <div className="w-full">
-            <SearchSelect
-              label="Customer"
-              options={customerOptions}
-              value={selectedCustomer}
-              onChange={(option: Option | null) => {
-                setSelectedCustomer(option);
-                handleInputChange('customerName', option?.value || '');
-              }}
-              isLoading={customersLoading}
-              placeholder="Select a customer..."
-              isClearable={true}
-              isSearchable={true}
-            />
-            {errors.customerName && (
-              <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>
-            )}
+    <>
+      <DocumentFormShell className="bg-white">
+        {/* Customer + amount */}
+        <DocumentFormCard flush>
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className={errors.customerName ? 'error-field' : ''}>
+                <div className="flex items-end gap-2">
+                  <div className="min-w-0 flex-1">
+                    <SearchableSelect
+                      label="Customer"
+                      options={customerOptions}
+                      selectedValue={customerId}
+                      onChange={handleCustomerChange}
+                      placeholder="Select a customer"
+                      isDisabled={customersLoading}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddCustomerDrawer(true)}
+                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+                    aria-label="Add customer"
+                  >
+                    <i className="ri-add-line text-xl" />
+                  </button>
+                </div>
+                {errors.customerName ? (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.customerName}
+                  </p>
+                ) : null}
+              </div>
+              {customerId ? (
+                <div>
+                  <SearchableSelect
+                    label="Invoice (optional)"
+                    options={invoiceOptions}
+                    selectedValue={invoiceId}
+                    onChange={handleInvoiceChange}
+                    placeholder={
+                      !invoicesLoading && invoiceOptions.length === 0
+                        ? 'No invoices for this customer'
+                        : 'Link an invoice'
+                    }
+                    isDisabled={invoicesLoading}
+                  />
+                </div>
+              ) : null}
+            </div>
+            <DocumentBalanceDue label="Credit amount" amount={money(creditAmount)} />
           </div>
-          <div className="h-full mt-8 flex items-center">
-            <button
-              type="button"
-              onClick={() => setIsAddCustomerDrawer(true)}
-              className="flex items-center justify-center text-white bg-green-700 rounded-full size-10"
+        </DocumentFormCard>
+
+        {/* Credit meta */}
+        <DocumentFormCard flush>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
+            <div
+              className={`md:col-span-3 ${errors.issueDate ? 'error-field' : ''}`}
             >
-              <i className="ri-add-line text-3xl"></i>
-            </button>
+              <DatePicker
+                label="Issue date"
+                name="issueDate"
+                value={issueDate}
+                onChange={handleIssueDateChange}
+                placeholder="Select date"
+                required
+                error={errors.issueDate}
+              />
+            </div>
+            <div className="md:col-span-3">
+              <Select
+                label="Currency"
+                options={[
+                  { label: 'XAF', value: 'XAF' },
+                  { label: 'USD ($)', value: 'USD' },
+                  { label: 'EUR (€)', value: 'EUR' },
+                ]}
+                selectedValue={currency}
+                onChange={handleCurrencyChange}
+                bg="bg-white"
+              />
+            </div>
+            <div
+              className={`md:col-span-6 ${errors.reason ? 'error-field' : ''}`}
+            >
+              <Input
+                type="text"
+                label="Reason"
+                name="reason"
+                required
+                value={reason}
+                placeholder="e.g. Returned goods, billing error"
+                onchange={(e: any) => handleReasonChange(e.target.value)}
+                errors={errors.reason}
+              />
+            </div>
           </div>
-        </div>
-      </div>
+        </DocumentFormCard>
 
-      <div className="my-5 pt-5">
-        <h3 className="mb-4 text-gray-900 text-lg font-medium">
-          Credit Note Details
-          <RequiredMark />
-        </h3>
-        <CreditNoteForm />
-        {(errors.invoiceId || errors.creditAmount || errors.reason) && (
-          <div className="mt-2 bg-red-50 p-3 rounded">
-            {errors.invoiceId && (
-              <p className="text-red-500 text-sm">{errors.invoiceId}</p>
-            )}
-            {errors.creditAmount && (
-              <p className="text-red-500 text-sm">{errors.creditAmount}</p>
-            )}
-            {errors.reason && (
-              <p className="text-red-500 text-sm">{errors.reason}</p>
-            )}
+        {/* Line items */}
+        <DocumentFormCard flush>
+          <DocumentSectionTitle>
+            Product / service lines <RequiredMark />
+          </DocumentSectionTitle>
+          <div className={errors.lineItems ? 'error-field' : ''}>
+            <CreditNoteForm />
+            {errors.lineItems ? (
+              <p className="mt-2 text-sm text-red-500">{errors.lineItems}</p>
+            ) : null}
           </div>
-        )}
-      </div>
+        </DocumentFormCard>
 
-      <hr className="my-5" />
-      <h3 className="text-xl font-normal my-2">Notes</h3>
-      <textarea
-        value={note}
-        onChange={(e) => handleInputChange('note', e.target.value)}
-        className="h-36 border p-2 w-full outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-   "
-        placeholder="Add any additional notes about this credit note"
-      ></textarea>
-
-      <div className="mt-5 w-full flex justify-end">
-        <Can resource="CreditNote" action="create">
-          <Button
-            text="Save Credit Note"
-            onClick={handleSaveCreditNote}
-            type="button"
-            isLoading={mutation.isPending}
+        {/* Notes */}
+        <DocumentFormCard flush>
+          <TextArea
+            label="Notes"
+            name="note"
+            value={note}
+            placeholder="Add any additional notes about this credit note"
+            onchange={(e: any) => handleNoteChange(e.target.value)}
           />
-        </Can>
-      </div>
+        </DocumentFormCard>
+      </DocumentFormShell>
+
+      <DocumentFormFooter
+        left={
+          <ShadcnButton
+            type="button"
+            variant="outline"
+            className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            onClick={() => router.push('/account_receivables/credit')}
+          >
+            Cancel
+          </ShadcnButton>
+        }
+        center={
+          <DocumentFooterLink
+            onClick={() => {
+              if (onTogglePreview) onTogglePreview();
+              else toast.info('Preview is available in the side panel.');
+            }}
+          >
+            {showPreview ? 'Hide preview' : 'Print or Preview'}
+          </DocumentFooterLink>
+        }
+        right={
+          <Can resource="CreditNote" action="create">
+            <ShadcnButton
+              type="button"
+              variant="outline"
+              className="border-white/40 bg-white text-foreground hover:bg-white/90"
+              onClick={handleSave}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? 'Saving…' : 'Save'}
+            </ShadcnButton>
+          </Can>
+        }
+      />
+
       <SliderCustomer
         open={isAddCustomerDrawer}
         setOpen={setIsAddCustomerDrawer}
       />
-    </div>
+    </>
   );
 };
 

@@ -15,6 +15,11 @@ import { useReportRun } from '../hooks';
 import type { ReportColumn } from '../utils/api';
 import { ReportPageShell } from './ReportPageShell';
 import { loadReportScope } from '@/lib/reports-catalog';
+import { ReportPdfDocument } from '@/components/documents/report-pdf-document';
+import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { orgToSeller } from '@/lib/org-to-seller';
+import { printReactPdf } from '@/lib/print-react-pdf';
+import { toast } from 'sonner';
 
 function formatCell(value: unknown, type: ReportColumn['type']) {
   if (value == null || value === '') return '—';
@@ -65,6 +70,37 @@ export function ReportRunner({
   }, [mode, asOfDate, compareEnd, range, search]);
 
   const { data, isLoading, error, refetch } = useReportRun(reportId, params);
+  const { data: org } = useOrganizationProfile();
+  const [printing, setPrinting] = useState(false);
+
+  const periodLabel =
+    mode === 'asOf' || mode === 'compare'
+      ? `As of ${asOfDate}`
+      : `Period ${range.from ?? '—'} – ${range.to ?? '—'}`;
+
+  const onPrint = async () => {
+    if (!data?.rows?.length || printing) return;
+    setPrinting(true);
+    try {
+      await printReactPdf(
+        <ReportPdfDocument
+          seller={orgToSeller(org)}
+          title={title}
+          description={description}
+          period={periodLabel}
+          columns={data.columns}
+          rows={data.rows}
+          totals={data.totals}
+        />,
+        title || reportId,
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not generate PDF');
+    } finally {
+      setPrinting(false);
+    }
+  };
 
   const columns = useMemo<ColumnDef<Record<string, unknown>>[]>(() => {
     return (data?.columns ?? []).map((col: ReportColumn) => ({
@@ -106,17 +142,19 @@ export function ReportRunner({
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                text="Print"
+                text={printing ? 'Preparing…' : 'Print'}
                 theme="lightBlue"
                 color
-                disabled={!data?.rows?.length}
+                disabled={!data?.rows?.length || printing}
                 icon={<i className="ri-printer-line" />}
-                onClick={() => window.print()}
+                onClick={() => void onPrint()}
               />
               <ReportExportMenu
                 reportId={reportId}
                 title={title}
                 params={params}
+                period={periodLabel}
+                description={description}
                 columns={data?.columns ?? []}
                 rows={data?.rows ?? []}
                 disabled={!data?.rows?.length}

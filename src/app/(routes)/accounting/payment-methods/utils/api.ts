@@ -29,14 +29,21 @@ export interface OrgPaymentMethodPayload {
   sortOrder?: number;
 }
 
+/** `search` maps to nestjs-paginate `search` (name, code, description on the backend). */
+export interface PaymentMethodListParams {
+  page: number;
+  limit: number;
+  search?: string;
+}
+
 export const paymentMethodKeys = {
   all: ['payment-methods'] as const,
-  list: (params: { page: number; limit: number }) =>
+  list: (params: PaymentMethodListParams) =>
     [...paymentMethodKeys.all, 'list', params] as const,
 };
 
 export const paymentMethodApi = {
-  list: async (params: { page: number; limit: number }): Promise<OrgPaymentMethodPage> => {
+  list: async (params: PaymentMethodListParams): Promise<OrgPaymentMethodPage> => {
     const res = await axios.get('/payment-method', { params });
     return res.data;
   },

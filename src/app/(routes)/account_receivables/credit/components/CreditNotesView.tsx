@@ -120,7 +120,7 @@ const CreditNotesView = () => {
             <div onClick={(e) => e.stopPropagation()}>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2 hover:bg-gray-100">
+                  <button className="p-2 hover:bg-gray-100 rounded-full">
                     <i className="ri-more-2-fill text-gray-600" />
                   </button>
                 </DropdownMenuTrigger>
