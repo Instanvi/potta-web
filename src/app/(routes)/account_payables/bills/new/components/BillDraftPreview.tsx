@@ -1,12 +1,12 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import {
   BillPdfDocument,
   type BillPdfProps,
 } from '@/components/documents/bill-pdf-document';
+import { PdfPreview } from '@/components/documents/pdf-preview';
 import {
   formatOrgAddress,
   orgDisplayName,
@@ -17,18 +17,6 @@ import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { formatDate } from '../../../../_shared/format';
 import { paymentMethodLabel } from '../../utils/types';
 import { BillFormValues, lineTotals } from '../validations/billValidation';
-
-const PDFViewer = dynamic(
-  () => import('@react-pdf/renderer').then((m) => m.PDFViewer),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-main-bg text-sm text-muted-foreground">
-        Loading PDF preview…
-      </div>
-    ),
-  },
-);
 
 type VendorLite = { uuid: string; name: string; email?: string | null; phone?: string | null };
 
@@ -178,18 +166,7 @@ export default function BillDraftPreview({
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
 
-  return (
-    <div className="h-full min-h-0 bg-main-bg">
-      <PDFViewer
-        width="100%"
-        height="100%"
-        showToolbar={false}
-        className="h-full w-full border-0"
-      >
-        {documentNode}
-      </PDFViewer>
-    </div>
-  );
+  return <PdfPreview document={documentNode} />;
 }
 
 export { buildPdfProps };

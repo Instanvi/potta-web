@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo } from 'react';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import useGetOneVendor from '@potta/app/(routes)/vendors/hooks/useGetOneVendor';
@@ -15,20 +14,9 @@ import {
 } from '@/components/books/selected-party';
 import type { BooksField } from '@/components/books/books-form-fields';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { PdfPreview } from '@/components/documents/pdf-preview';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { orgToSeller } from '@/lib/org-to-seller';
-
-const PDFViewer = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => mod.PDFViewer),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-main-bg text-sm text-muted-foreground">
-        Loading PDF preview…
-      </div>
-    ),
-  },
-);
 
 function linesFromValue(raw: string | undefined): GenericDocumentPdfLine[] {
   if (!raw?.trim()) return [];
@@ -131,16 +119,5 @@ export function BooksDocumentPreview({
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
 
-  return (
-    <div className="h-full min-h-0 bg-main-bg">
-      <PDFViewer
-        width="100%"
-        height="100%"
-        showToolbar={false}
-        className="h-full w-full border-0"
-      >
-        {documentNode}
-      </PDFViewer>
-    </div>
-  );
+  return <PdfPreview document={documentNode} />;
 }

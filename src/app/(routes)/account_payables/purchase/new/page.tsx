@@ -4,6 +4,7 @@ import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 import React, { useState } from 'react';
 import Left from './components/left';
@@ -11,6 +12,7 @@ import PdfView from './components/pdfview';
 
 const NewPurchaseOrderPage = () => {
   const [showPreview, setShowPreview] = useState(true);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 
   return (
@@ -29,8 +31,9 @@ const NewPurchaseOrderPage = () => {
         open={showPreview}
         onOpenChange={setShowPreview}
         downloadTitle="Purchase order"
+        onDownloadPdf={onDownloadPdf}
         editor={<Left />}
-        preview={<PdfView />}
+        preview={<PdfView onRegisterDownload={registerDownload} />}
       />
     </DocumentWorkspace>
   );

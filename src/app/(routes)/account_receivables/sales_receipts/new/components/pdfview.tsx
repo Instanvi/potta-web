@@ -1,7 +1,7 @@
 'use client';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
-import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
+import { PdfPreview } from '@/components/documents/pdf-preview';
 import {
   SalesReceiptPdfDocument,
   type SalesReceiptPdfProps,
@@ -52,23 +52,7 @@ const PdfView = ({
     }
   }, [contextData.customerName, currentCustomerId]);
 
-  const getCurrencySymbol = (currencyCode: string): string => {
-    switch (currencyCode) {
-      case 'USD':
-        return '$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      case 'XAF':
-        return 'XAF';
-      default:
-        return currencyCode;
-    }
-  };
-
-  const currencySymbol = getCurrencySymbol(contextData.currency || '');
-  const { data: customerData, isLoading: customerLoading } = useGetOneCustomer(
+  const { data: customerData } = useGetOneCustomer(
     currentCustomerId || '',
   );
   const customerDetails: Customer | null = customerData || null;
@@ -182,148 +166,8 @@ const PdfView = ({
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
 
-  return (
-    <div
-      data-pdf-capture
-      className="flex min-h-full w-full flex-col items-center justify-center overflow-y-auto scroll bg-main-bg"
-    >
-      <div className="flex w-full min-w-[30rem] justify-between p-8 pb-2">
-        <h3 className="text-xl font-medium">PDF Preview</h3>
-      </div>
-      <div className="mb-10 w-full min-w-[45rem] max-w-[48rem] space-y-4 bg-white">
-        <div className="flex h-36 w-full items-center justify-between bg-green-800 px-8">
-          <div>
-            <p className="text-3xl font-medium text-white">Sales Receipt</p>
-            {receiptNumber ? (
-              <p className="mt-2 text-white">#{receiptNumber}</p>
-            ) : null}
-          </div>
-          <div className="text-right text-white">
-            <p>Date: {saleDateLabel}</p>
-            <p>Currency: {contextData.currency || 'USD'}</p>
-          </div>
-        </div>
-        <div className="space-y-16 bg-white p-5">
-          <div className="mt-5 flex w-full space-x-5">
-            <DocumentSellerHeader className="w-[40%]" />
-            <div className="flex space-x-2">
-              <h3 className="font-medium">To: </h3>
-              <div className="flex-col space-y-2 text-sm text-gray-600">
-                {customerLoading ? (
-                  <p>Loading customer details...</p>
-                ) : customerDetails ? (
-                  <>
-                    <p>
-                      {customerDetails.firstName} {customerDetails.lastName}
-                    </p>
-                    <p>{customerDetails.email || 'No email'}</p>
-                    <p>{customerDetails.address?.address || 'No address'}</p>
-                    <p>{customerDetails.phone || 'No phone'}</p>
-                  </>
-                ) : (
-                  <p>No customer selected</p>
-                )}
-              </div>
-            </div>
-          </div>
 
-          <table className="mt-5 min-w-full table-auto">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Item
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Qty
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Tax
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((item: TableItem, index: number) => {
-                const price = Number(item.price);
-                const qty = Number(item.qty);
-                const tax = Number(item.tax);
-                const itemTotal = price * qty;
-                const itemTax = (itemTotal * tax) / 100;
-                const totalWithTax = itemTotal + itemTax;
-
-                return (
-                  <tr key={item.id || index}>
-                    <td className="border-b px-4 py-2">{index + 1}</td>
-                    <td className="border-b px-4 py-2">{item.name}</td>
-                    <td className="border-b px-4 py-2">{qty}</td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {price.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {itemTax.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {totalWithTax.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          <div className="mt-10 flex w-full pb-4">
-            <div className="w-1/2 pl-4">
-              <p>
-                <strong>Payment Method:</strong>{' '}
-                {methodLabel || 'Not selected'}
-              </p>
-              {contextData.note ? (
-                <div className="mt-4">
-                  <strong>Notes:</strong>
-                  <p className="mt-1 text-gray-600">{contextData.note}</p>
-                </div>
-              ) : null}
-            </div>
-            <div className="w-1/2">
-              <div className="mt-4 flex justify-between">
-                <div className="w-1/2">Sub Total:</div>
-                <div className="w-1/2 pr-20 text-right">
-                  {currencySymbol}
-                  {subtotal.toFixed(2)}
-                </div>
-              </div>
-              <div className="mt-2 flex justify-between">
-                <div className="w-1/2">Tax:</div>
-                <div className="w-1/2 pr-20 text-right">
-                  {currencySymbol}
-                  {totalTax.toFixed(2)}
-                </div>
-              </div>
-              <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-medium">
-                <div className="w-1/2">Total:</div>
-                <div className="w-1/2 pr-20 text-right">
-                  {currencySymbol}
-                  {total.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <PdfPreview document={documentNode} />;
 };
 
 export default PdfView;
