@@ -274,7 +274,7 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
     }, 0);
 
     // Backend recomputes totals; totalAmount is sent for client-side display parity.
-    // Omit empty/short notes — API MinLength(10) rejects "".
+    // Empty notes are omitted. Short notes are sent as entered.
     const saleReceiptData = withOptionalDocumentFields(
       {
         saleDate: date,
