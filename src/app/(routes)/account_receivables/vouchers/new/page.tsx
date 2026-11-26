@@ -14,6 +14,7 @@ import Audience from './components/audience';
 import Scheduling from './components/scheduling';
 import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks';
+import { buildCreateVoucherPayload } from '../_utils/build-create-payload';
 import DocumentWorkspace from '@potta/components/document-workspace';
 import {
   DocumentFormCard,
@@ -36,15 +37,14 @@ type FormData = {
   scheduling: {
     programStartDate: string;
     programEndDate?: string;
+    neverEnds?: boolean;
     specificDaysOnly: boolean;
-    specificDays?: [
-      {
-        day: string;
-        startTime?: string;
-        endTime?: string;
-        allDay: boolean;
-      }
-    ];
+    validDays?: Array<{
+      day: string;
+      startTime?: string;
+      endTime?: string;
+      allDay: boolean;
+    }>;
   };
   audience: {
     segment: string;
@@ -56,8 +56,8 @@ type FormData = {
   balance?: number;
   loyaltyPoints?: number;
   loyaltyAmount?: number;
-  loyaltyPointsValue?: number;
   cashbackPercent?: number;
+  cashbackMaximum?: number;
   cashbackAmount?: number;
   code?: string;
   programCardPrefix: string;
@@ -74,10 +74,10 @@ type FormData = {
 };
 
 const voucherTypeSpecificFields: Record<VoucherType, Array<keyof FormData>> = {
-  DISCOUNT: ['discountPercent', 'discountAmount'],
+  DISCOUNT: ['discountPercent', 'discountAmount', 'maximumDiscount'],
   GIFT_CARD: ['balance'],
-  ROYALTY_POINTS: ['loyaltyPoints', 'loyaltyAmount', 'loyaltyPointsValue'],
-  CASHBACK: ['cashbackPercent', 'cashbackAmount'],
+  ROYALTY_POINTS: ['loyaltyPoints', 'loyaltyAmount'],
+  CASHBACK: ['cashbackPercent', 'cashbackMaximum', 'cashbackAmount'],
 };
 
 const policyRequiredFieldsByType: Record<
@@ -93,11 +93,10 @@ const policyRequiredFieldsByType: Record<
   },
   ROYALTY_POINTS: {
     fixed: ['loyaltyPoints'],
-    proportional: ['loyaltyAmount', 'loyaltyPointsValue'],
+    proportional: ['loyaltyPoints', 'loyaltyAmount'],
   },
   CASHBACK: {
-    fixed: ['cashbackAmount'],
-    proportional: ['cashbackAmount', 'cashbackPercent'],
+    fixed: ['cashbackPercent', 'cashbackMaximum'],
   },
 };
 
@@ -123,6 +122,19 @@ export default function NewVoucherPage() {
   const methods = useForm<FormData>({
     defaultValues: {
       type: VoucherTypeEnum.ROYALTY_POINTS,
+      valueType: 'fixed',
+      advancedCodeSettings: false,
+      autoAddUsers: false,
+      canJoinOnce: false,
+      scheduling: {
+        specificDaysOnly: false,
+        neverEnds: false,
+      },
+      audience: {
+        segment: '',
+        autoAddUsers: false,
+        canJoinOnce: false,
+      },
     },
     mode: 'onBlur',
     shouldUnregister: false,
@@ -168,41 +180,18 @@ export default function NewVoucherPage() {
     }
 
     setValue('type', voucherTypeEnum);
+    setValue('valueType', 'fixed');
     unregisterIrrelevantFields(type);
     setValidationErrors({});
   };
 
-  const removeEmptyValues = (obj: any): any => {
-    if (obj === null || obj === undefined) return undefined;
-
-    if (Array.isArray(obj)) {
-      const filteredArray = obj
-        .map((item) =>
-          typeof item === 'object' ? removeEmptyValues(item) : item
-        )
-        .filter((item) => item !== null && item !== undefined && item !== '');
-      return filteredArray.length > 0 ? filteredArray : undefined;
-    }
-
-    if (typeof obj === 'object') {
-      const filteredObj = Object.entries(obj).reduce((acc, [key, value]) => {
-        const filteredValue = removeEmptyValues(value);
-        if (filteredValue !== undefined) {
-          acc[key] = filteredValue;
-        }
-        return acc;
-      }, {} as Record<string, any>);
-      return Object.keys(filteredObj).length > 0 ? filteredObj : undefined;
-    }
-
-    return obj === '' ? undefined : obj;
-  };
-
-  /** Validate the whole form before Publish (not step-by-step). */
   const validateAll = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    const currentValueType = getValues('valueType') || 'fixed';
+    const currentValueType =
+      voucherType === 'CASHBACK' || voucherType === 'GIFT_CARD'
+        ? 'fixed'
+        : getValues('valueType') || 'fixed';
     const policyFields =
       policyRequiredFieldsByType[voucherType]?.[currentValueType] || [];
     for (const field of policyFields) {
@@ -220,8 +209,8 @@ export default function NewVoucherPage() {
     const minimumPurchase = getValues('minimumPurchase');
     const maximumDiscount = getValues('maximumDiscount');
     if (minimumPurchase && maximumDiscount) {
-      const minPurchase = parseFloat(minimumPurchase);
-      const maxDiscount = parseFloat(maximumDiscount);
+      const minPurchase = parseFloat(String(minimumPurchase));
+      const maxDiscount = parseFloat(String(maximumDiscount));
       if (
         !isNaN(minPurchase) &&
         !isNaN(maxDiscount) &&
@@ -291,26 +280,22 @@ export default function NewVoucherPage() {
 
       setIsSubmitting(true);
 
-      let filteredData = removeEmptyValues(data);
-      const { voucherType: _vt, ...dataWithoutVoucherType } = filteredData;
-      filteredData = dataWithoutVoucherType;
-
-      if (filteredData.minimumPurchase && filteredData.minimumPurchase !== '') {
-        filteredData.minimumPurchase = parseFloat(filteredData.minimumPurchase);
-      }
-      if (filteredData.maximumDiscount && filteredData.maximumDiscount !== '') {
-        filteredData.maximumDiscount = parseFloat(filteredData.maximumDiscount);
-      }
-
-      await createVoucherMutation.mutateAsync(filteredData);
+      const payload = buildCreateVoucherPayload(data);
+      await createVoucherMutation.mutateAsync(payload);
       toast.success('Voucher created successfully!');
-    } catch (error) {
+      router.push('/account_receivables/vouchers');
+    } catch (error: any) {
       console.error('Error creating voucher:', error);
-      if (error instanceof Error) {
-        toast.error(`Failed to create voucher: ${error.message}`);
-      } else {
-        toast.error('Failed to create voucher. Please try again.');
-      }
+      const apiMessage =
+        error?.response?.data?.message ||
+        error?.data?.message ||
+        error?.message;
+      const text = Array.isArray(apiMessage)
+        ? apiMessage.join('. ')
+        : typeof apiMessage === 'string'
+          ? apiMessage
+          : 'Failed to create voucher. Please try again.';
+      toast.error(text);
     } finally {
       setIsSubmitting(false);
     }
