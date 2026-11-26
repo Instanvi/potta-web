@@ -21,7 +21,7 @@ const salesReceiptSchema = yup.object({
     .test('is-iso-date', 'Sale date must be a valid ISO date string', (value) => !value || !isNaN(Date.parse(value))),
   totalAmount: yup.number().required().min(0, 'Total amount cannot be negative'),
   paymentReference: yup.string(),
-  notes: yup.string(),
+  notes: yup.string().nullable().optional(),
   paymentMethod: yup
     .string()
     .trim()

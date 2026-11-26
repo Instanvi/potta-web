@@ -20,7 +20,7 @@ export const SaleReceiptDtoSchema = Yup.object({
 saleDate: Yup.string().required('Sale date is required'),
 totalAmount: Yup.number().positive('Total amount must be positive').required('Total amount is required'),
 paymentReference: Yup.string(),
-notes: Yup.string(),
+notes: Yup.string().nullable().optional(),
 paymentMethod: Yup.string()
   .max(64, 'Payment method code is too long')
   .required('Payment method is required'),
