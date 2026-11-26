@@ -1,6 +1,10 @@
 import { Font, Image, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { resolvePdfLogoUrl } from '@/lib/brand';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import {
+  documentTemplate,
+  type DocumentTemplateId,
+} from '@/components/documents/document-templates';
 
 try {
   Font.registerHyphenationCallback((word) => [word]);
@@ -216,54 +220,148 @@ export const pdfShellStyles = StyleSheet.create({
   },
 });
 
-/** Accent-coloured letterhead: seller identity left, document title/meta right. */
+function SellerIdentity({
+  seller,
+  light,
+}: {
+  seller: PdfSeller;
+  light: boolean;
+}) {
+  const s = pdfShellStyles;
+  const logoSrc = resolvePdfLogoUrl(seller.logoUrl);
+  const nameStyle = light
+    ? s.headerSellerName
+    : { fontSize: 12, fontFamily: 'Helvetica-Bold' as const, color: '#111111', marginBottom: 2 };
+  const lineStyle = light
+    ? s.headerSellerLine
+    : { fontSize: 8, color: '#4b5563', lineHeight: 1.4 };
+  return (
+    <View style={light ? s.headerSeller : { alignItems: 'flex-end', maxWidth: '48%' }}>
+      {logoSrc ? (
+        // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
+        <Image src={logoSrc} style={light ? s.headerLogo : { width: 36, height: 36, objectFit: 'contain', marginBottom: 4 }} />
+      ) : null}
+      <View>
+        <Text style={nameStyle}>{seller.name || 'Your organization'}</Text>
+        {(seller.addressLines ?? []).map((line, i) => (
+          <Text key={`${line}-${i}`} style={lineStyle}>
+            {line}
+          </Text>
+        ))}
+        {seller.email ? <Text style={lineStyle}>{seller.email}</Text> : null}
+        {seller.phone ? <Text style={lineStyle}>{seller.phone}</Text> : null}
+        {seller.registrationNumber ? (
+          <Text style={lineStyle}>Reg. {seller.registrationNumber}</Text>
+        ) : null}
+        {seller.taxId ? <Text style={lineStyle}>Tax ID {seller.taxId}</Text> : null}
+      </View>
+    </View>
+  );
+}
+
+/** Letterhead. Classic is the accent band; the other templates rearrange the same fields. */
 export function LetterheadHeader({
   seller,
   title,
   subtitle,
   meta = [],
   accent = PDF_ACCENT,
+  template = 'classic',
 }: {
   seller: PdfSeller;
   title: string;
   subtitle?: string;
   meta?: PdfMetaItem[];
   accent?: string;
+  template?: DocumentTemplateId;
 }) {
   const s = pdfShellStyles;
+  const spec = documentTemplate(template);
   const logoSrc = resolvePdfLogoUrl(seller.logoUrl);
-  return (
-    <View style={[s.header, { backgroundColor: accent }]}>
-      <View style={s.headerSeller}>
-        {logoSrc ? (
-          // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
-          <Image src={logoSrc} style={s.headerLogo} />
-        ) : null}
-        <View>
-          <Text style={s.headerSellerName}>{seller.name || 'Your organization'}</Text>
-          {(seller.addressLines ?? []).map((line, i) => (
-            <Text key={`${line}-${i}`} style={s.headerSellerLine}>
-              {line}
+
+  if (spec.header === 'band') {
+    return (
+      <View style={[s.header, { backgroundColor: accent }]}>
+        <SellerIdentity seller={seller} light />
+        <View style={s.headerRight}>
+          <Text style={s.headerTitle}>{title.toUpperCase()}</Text>
+          {subtitle ? <Text style={s.headerSub}>{subtitle}</Text> : null}
+          {meta.map((m) => (
+            <Text key={m.label} style={s.headerMeta}>
+              {m.label}: {m.value || '—'}
             </Text>
           ))}
-          {seller.email ? <Text style={s.headerSellerLine}>{seller.email}</Text> : null}
-          {seller.phone ? <Text style={s.headerSellerLine}>{seller.phone}</Text> : null}
-          {seller.registrationNumber ? (
-            <Text style={s.headerSellerLine}>Reg. {seller.registrationNumber}</Text>
-          ) : null}
-          {seller.taxId ? (
-            <Text style={s.headerSellerLine}>Tax ID {seller.taxId}</Text>
-          ) : null}
         </View>
       </View>
-      <View style={s.headerRight}>
-        <Text style={s.headerTitle}>{title.toUpperCase()}</Text>
-        {subtitle ? <Text style={s.headerSub}>{subtitle}</Text> : null}
-        {meta.map((m) => (
-          <Text key={m.label} style={s.headerMeta}>
-            {m.label}: {m.value || '—'}
+    );
+  }
+
+  if (spec.header === 'compact') {
+    return (
+      <View>
+        <View style={{ paddingHorizontal: 36, paddingTop: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <View>
+            {logoSrc ? (
+              // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
+              <Image src={logoSrc} style={{ width: 32, height: 32, objectFit: 'contain', marginBottom: 4 }} />
+            ) : null}
+            <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold' }}>{seller.name || 'Your organization'}</Text>
+          </View>
+          <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: accent }}>{title.toUpperCase()}</Text>
+        </View>
+        <View style={{ marginHorizontal: 36, marginTop: 10, backgroundColor: '#f3f4f6', paddingVertical: 6, paddingHorizontal: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
+          {subtitle ? <Text style={{ fontSize: 8, color: '#374151' }}>{subtitle}</Text> : <Text />}
+          {meta.map((m) => (
+            <Text key={m.label} style={{ fontSize: 8, color: '#374151' }}>
+              {m.label}: {m.value || '—'}
+            </Text>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  const open = spec.header === 'open';
+  return (
+    <View>
+      {spec.header === 'rail' ? (
+        <View
+          fixed
+          style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 8, backgroundColor: accent }}
+        />
+      ) : null}
+      <View
+        style={{
+          paddingHorizontal: 36,
+          paddingTop: 28,
+          paddingBottom: 14,
+          borderBottomWidth: open ? 2 : 0,
+          borderBottomColor: accent,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+        }}
+      >
+        <View style={{ maxWidth: '55%' }}>
+          <Text
+            style={{
+              fontSize: open ? 26 : 22,
+              fontFamily: 'Helvetica-Bold',
+              color: open ? '#111111' : accent,
+            }}
+          >
+            {open ? title : title.toUpperCase()}
           </Text>
-        ))}
+          {subtitle ? (
+            <Text style={{ marginTop: 4, fontSize: 10, color: '#6b7280' }}>{subtitle}</Text>
+          ) : null}
+          {meta.map((m) => (
+            <Text key={m.label} style={{ marginTop: 2, fontSize: 9, color: '#4b5563' }}>
+              {m.label}: {m.value || '—'}
+            </Text>
+          ))}
+        </View>
+        <SellerIdentity seller={seller} light={false} />
       </View>
     </View>
   );
@@ -299,26 +397,56 @@ export function PartyBlock({
   );
 }
 
+export function templateTableHeaderStyle(
+  template?: DocumentTemplateId,
+  accent: string = PDF_ACCENT,
+) {
+  const spec = documentTemplate(template);
+  if (spec.table === 'accent') {
+    return [pdfShellStyles.tableHeader, { backgroundColor: accent, borderBottomWidth: 0 }];
+  }
+  if (spec.table === 'open') {
+    return [pdfShellStyles.tableHeader, { backgroundColor: '#ffffff', borderBottomColor: accent }];
+  }
+  return pdfShellStyles.tableHeader;
+}
+
+export function templateTableHeaderColor(template?: DocumentTemplateId): string | undefined {
+  return documentTemplate(template).table === 'accent' ? '#ffffff' : undefined;
+}
+
 /** Line table shared by invoices, bills, receipts, and purchase orders. */
 export function LineItemsTable({
   columns,
   rows,
   emptyLabel = 'No line items yet',
+  template = 'classic',
+  accent = PDF_ACCENT,
 }: {
   columns: { header: string; width: string; align?: 'right' }[];
   rows: string[][];
   emptyLabel?: string;
+  template?: DocumentTemplateId;
+  accent?: string;
 }) {
   const s = pdfShellStyles;
+  const spec = documentTemplate(template);
   const align = (column?: { align?: 'right' }) =>
     column?.align === 'right' ? s.right : undefined;
+  const headerStyle =
+    spec.table === 'accent'
+      ? [s.tableHeader, { backgroundColor: accent, borderBottomWidth: 0 }]
+      : spec.table === 'open'
+        ? [s.tableHeader, { backgroundColor: '#ffffff', borderBottomColor: accent }]
+        : s.tableHeader;
+  const headerText = spec.table === 'accent' ? { color: '#ffffff' } : undefined;
   return (
-    <View style={{ marginBottom: 20 }}>
-      <View style={s.tableHeader}>
+    <View style={{ marginBottom: spec.totals === 'under' ? 4 : 20 }}>
+      <View style={headerStyle}>
         {columns.map((column) => (
           <Text
             key={column.header}
-            style={[s.th, align(column), { width: column.width }]}
+            style={[s.th, headerText, align(column), { width: column.width }]}
           >
             {column.header}
           </Text>
@@ -349,23 +477,33 @@ export function TotalsBlock({
   rows,
   total,
   accent = PDF_ACCENT,
+  template = 'classic',
 }: {
   rows: { label: string; amount: string }[];
   total: string;
   accent?: string;
+  template?: DocumentTemplateId;
 }) {
   const s = pdfShellStyles;
+  const spec = documentTemplate(template);
+  const grandColor = spec.totals === 'light' ? '#111111' : accent;
+  const wrap =
+    spec.totals === 'card'
+      ? [s.totalsWrap, { backgroundColor: '#f6f8f7', padding: 10, borderLeftWidth: 3, borderLeftColor: accent, width: 240 }]
+      : spec.totals === 'under'
+        ? [s.totalsWrap, { marginTop: 0 }]
+        : s.totalsWrap;
   return (
-    <View style={s.totalsWrap}>
+    <View style={wrap}>
       {rows.map((row) => (
         <View key={row.label} style={s.totalRow}>
           <Text style={s.totalLabel}>{row.label}</Text>
           <Text style={s.totalValue}>{row.amount}</Text>
         </View>
       ))}
-      <View style={[s.grandRow, { borderTopColor: accent }]}>
-        <Text style={[s.grandLabel, { color: accent }]}>Total</Text>
-        <Text style={[s.grandValue, { color: accent }]}>{total}</Text>
+      <View style={[s.grandRow, { borderTopColor: spec.totals === 'light' ? '#e5e7eb' : accent }]}>
+        <Text style={[s.grandLabel, { color: grandColor }]}>Total</Text>
+        <Text style={[s.grandValue, { color: grandColor }]}>{total}</Text>
       </View>
     </View>
   );

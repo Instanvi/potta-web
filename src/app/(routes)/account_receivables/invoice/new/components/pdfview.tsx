@@ -179,6 +179,7 @@ const PdfView = ({
       tax: totalTax,
       total,
       accent: invoiceColor,
+      template: letterhead.template,
       draft: true,
     };
   }, [
@@ -196,6 +197,7 @@ const PdfView = ({
     invoiceNumber,
     invoiceType,
     letterhead.logo,
+    letterhead.template,
     org,
     paymentMethodLabel,
     paymentReference,

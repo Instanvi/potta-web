@@ -1,5 +1,6 @@
 import { Document, Page, View } from '@react-pdf/renderer';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import { readStoredDocumentTemplate, type DocumentTemplateId } from './document-templates';
 import {
   DocumentFooter,
   LetterheadHeader,
@@ -48,6 +49,7 @@ export type InvoicePdfProps = {
   total: number;
   accent?: string;
   draft?: boolean;
+  template?: DocumentTemplateId;
 };
 
 const LINE_COLUMNS = [
@@ -77,6 +79,7 @@ export function InvoicePdfDocument({
   total,
   accent = PDF_ACCENT,
   draft = true,
+  template = readStoredDocumentTemplate(),
 }: InvoicePdfProps) {
   const money = (value: number) => formatPdfMoney(value, currency);
   const shipLines = (shippingAddress || '')
@@ -99,6 +102,7 @@ export function InvoicePdfDocument({
           title={title || 'Invoice'}
           subtitle={subtitle}
           accent={accent}
+          template={template}
           meta={[
             { label: 'Issue', value: issueDate },
             { label: 'Due', value: dueDate },
@@ -131,6 +135,8 @@ export function InvoicePdfDocument({
           </View>
 
           <LineItemsTable
+            template={template}
+            accent={accent}
             columns={LINE_COLUMNS}
             rows={lines.map((line) => [
               line.description,
@@ -142,6 +148,7 @@ export function InvoicePdfDocument({
           />
 
           <TotalsBlock
+            template={template}
             accent={accent}
             rows={[
               { label: 'Subtotal', amount: money(subtotal) },

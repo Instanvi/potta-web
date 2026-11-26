@@ -7,6 +7,7 @@ import {
 } from '@/components/documents/credit-note-pdf-document';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { PdfPreview } from '@/components/documents/pdf-preview';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { orgToSeller } from '@/lib/org-to-seller';
@@ -34,6 +35,7 @@ const PdfView = ({
   const context = useContext(ContextData);
   const contextData = context?.data || {};
   const { data: org } = useOrganizationProfile();
+  const { prefs: letterhead } = useDocumentLetterhead();
 
   const formattedIssueDate = contextData.issueDate
     ? new Date(contextData.issueDate).toLocaleDateString()
@@ -100,6 +102,8 @@ const PdfView = ({
             address: customerDetails.address?.address || undefined,
           }
         : null,
+      accent: letterhead.accent,
+      template: letterhead.template,
       draft: true,
     };
   }, [
@@ -109,6 +113,8 @@ const PdfView = ({
     customerDetails,
     formattedIssueDate,
     invoiceDetails,
+    letterhead.accent,
+    letterhead.template,
     lineRows,
     org,
     reason,

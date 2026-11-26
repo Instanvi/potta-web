@@ -13,6 +13,7 @@ import {
   type PartySnapshot,
 } from '@/components/books/selected-party';
 import type { BooksField } from '@/components/books/books-form-fields';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { PdfPreview } from '@/components/documents/pdf-preview';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
@@ -79,6 +80,7 @@ export function BooksDocumentPreview({
   onRegisterDownload?: (download: () => Promise<void>) => void;
 }) {
   const { data: org } = useOrganizationProfile();
+  const { prefs: letterhead } = useDocumentLetterhead();
   const customerId = values.customerId ?? '';
   const vendorId = values.vendorId ?? '';
   const customerQuery = useGetOneCustomer(customerId);
@@ -105,9 +107,11 @@ export function BooksDocumentPreview({
         fields={[...partyFields(customer), ...partyFields(vendor), ...detailFields(fields, values)]}
         lines={linesFromValue(linesValue)}
         currency={currency}
+        accent={letterhead.accent}
+        template={letterhead.template}
       />
     ),
-    [title, seller, customer, vendor, fields, values, linesValue, currency],
+    [title, seller, customer, vendor, fields, values, linesValue, currency, letterhead.accent, letterhead.template],
   );
 
   const download = useCallback(async () => {

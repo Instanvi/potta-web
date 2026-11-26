@@ -1,11 +1,14 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import { readStoredDocumentTemplate, type DocumentTemplateId } from './document-templates';
 import {
   DocumentFooter,
   LetterheadHeader,
   PDF_ACCENT,
   formatPdfMoney,
   pdfShellStyles as shell,
+  templateTableHeaderColor,
+  templateTableHeaderStyle,
 } from './pdf-shell';
 
 export type GenericDocumentPdfLine = {
@@ -23,6 +26,7 @@ export type GenericDocumentPdfProps = {
   lines?: GenericDocumentPdfLine[];
   currency?: string;
   accent?: string;
+  template?: DocumentTemplateId;
 };
 
 const styles = StyleSheet.create({
@@ -57,9 +61,12 @@ export function GenericDocumentPdf({
   lines = [],
   currency,
   accent = PDF_ACCENT,
+  template = readStoredDocumentTemplate(),
 }: GenericDocumentPdfProps) {
   const fmt = (v: number | null) =>
     v == null || !Number.isFinite(v) ? '' : currency ? formatPdfMoney(v, currency) : v.toLocaleString();
+  const headInk = templateTableHeaderColor(template);
+  const th = headInk ? [shell.th, { color: headInk }] : shell.th;
 
   return (
     <Document title={title} author={seller.name || 'Potta'} subject={subtitle || title}>
@@ -70,6 +77,7 @@ export function GenericDocumentPdf({
           subtitle={title}
           meta={[{ label: 'Date', value: new Date().toLocaleDateString() }]}
           accent={accent}
+          template={template}
         />
         <View style={shell.body}>
           {fields.map((f) => (
@@ -82,11 +90,11 @@ export function GenericDocumentPdf({
           {lines.length > 0 ? (
             <View style={{ marginTop: 20 }}>
               <Text style={shell.sectionTitle}>Lines</Text>
-              <View style={shell.tableHeader}>
-                <Text style={[shell.th, styles.colDesc]}>Item</Text>
-                <Text style={[shell.th, shell.right, styles.colQty]}>Qty</Text>
-                <Text style={[shell.th, shell.right, styles.colPrice]}>Price</Text>
-                <Text style={[shell.th, shell.right, styles.colTotal]}>Total</Text>
+              <View style={templateTableHeaderStyle(template, accent)}>
+                <Text style={[th, styles.colDesc]}>Item</Text>
+                <Text style={[th, shell.right, styles.colQty]}>Qty</Text>
+                <Text style={[th, shell.right, styles.colPrice]}>Price</Text>
+                <Text style={[th, shell.right, styles.colTotal]}>Total</Text>
               </View>
               {lines.map((line, i) => (
                 <View key={`${line.description ?? 'line'}-${i}`} style={shell.tableRow} wrap={false}>

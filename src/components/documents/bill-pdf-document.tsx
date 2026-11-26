@@ -1,5 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import { readStoredDocumentTemplate, type DocumentTemplateId } from './document-templates';
 import {
   DocumentFooter,
   LetterheadHeader,
@@ -47,6 +48,7 @@ export type BillPdfProps = {
   total: number;
   accent?: string;
   draft?: boolean;
+  template?: DocumentTemplateId;
 };
 
 const LINE_COLUMNS = [
@@ -101,6 +103,7 @@ export function BillPdfDocument({
   total,
   accent = PDF_ACCENT,
   draft = true,
+  template = readStoredDocumentTemplate(),
 }: BillPdfProps) {
   const money = (value: number) => formatPdfMoney(value, currency);
   const subtitle = [billNumber || title, draft ? 'Draft' : ''].filter(Boolean).join('  ·  ');
@@ -122,6 +125,7 @@ export function BillPdfDocument({
           title="Bill"
           subtitle={subtitle}
           accent={accent}
+          template={template}
           meta={[
             { label: 'Issue', value: issueDate },
             { label: 'Due', value: dueDate },
@@ -167,6 +171,8 @@ export function BillPdfDocument({
           </View>
 
           <LineItemsTable
+            template={template}
+            accent={accent}
             columns={LINE_COLUMNS}
             rows={lines.map((line) => [
               line.description,
@@ -177,7 +183,7 @@ export function BillPdfDocument({
             ])}
           />
 
-          <TotalsBlock accent={accent} rows={totalRows} total={money(total)} />
+          <TotalsBlock template={template} accent={accent} rows={totalRows} total={money(total)} />
 
           <NotesSection items={[{ label: 'Message on bill', value: notes }]} />
         </View>

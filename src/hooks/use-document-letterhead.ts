@@ -2,18 +2,25 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { DocumentLetterheadLogo } from '@/lib/brand';
+import {
+  LETTERHEAD_STORAGE_KEY,
+  isDocumentTemplateId,
+  type DocumentTemplateId,
+} from '@/components/documents/document-templates';
 
 export type DocumentLetterheadPrefs = {
   logo: DocumentLetterheadLogo;
   tagline: string;
   accent: string;
+  template: DocumentTemplateId;
 };
 
-const STORAGE_KEY = 'potta.documentLetterhead';
+const STORAGE_KEY = LETTERHEAD_STORAGE_KEY;
 const DEFAULT_PREFS: DocumentLetterheadPrefs = {
   logo: 'org',
   tagline: '',
   accent: '#0b5d1e',
+  template: 'classic',
 };
 
 function readPrefs(): DocumentLetterheadPrefs {
@@ -35,6 +42,7 @@ function readPrefs(): DocumentLetterheadPrefs {
         typeof parsed.accent === 'string' && parsed.accent.trim()
           ? parsed.accent
           : DEFAULT_PREFS.accent,
+      template: isDocumentTemplateId(parsed.template) ? parsed.template : DEFAULT_PREFS.template,
     };
   } catch {
     return DEFAULT_PREFS;

@@ -7,6 +7,7 @@ import {
   type BillPdfProps,
 } from '@/components/documents/bill-pdf-document';
 import { PdfPreview } from '@/components/documents/pdf-preview';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import {
   formatOrgAddress,
   orgDisplayName,
@@ -108,6 +109,7 @@ export default function BillDraftPreview({
 }) {
   const { control } = useFormContext<BillFormValues>();
   const { data: org } = useOrganizationProfile();
+  const { prefs: letterhead } = useDocumentLetterhead();
 
   const vendorId = useWatch({ control, name: 'vendorId' });
   const billNo = useWatch({ control, name: 'vendorInvoiceNumber' });
@@ -120,8 +122,8 @@ export default function BillDraftPreview({
   const lines = useWatch({ control, name: 'lineItems' }) ?? [];
 
   const pdfProps = useMemo(
-    () =>
-      buildPdfProps({
+    () => ({
+      ...buildPdfProps({
         vendors,
         vendorId,
         billNo,
@@ -140,6 +142,9 @@ export default function BillDraftPreview({
         sellerReg: org?.registrationNumber,
         sellerTax: org?.taxIdentificationNumber,
       }),
+      accent: letterhead.accent,
+      template: letterhead.template,
+    }),
     [
       vendors,
       vendorId,
@@ -152,6 +157,8 @@ export default function BillDraftPreview({
       notes,
       lines,
       org,
+      letterhead.accent,
+      letterhead.template,
     ],
   );
 
