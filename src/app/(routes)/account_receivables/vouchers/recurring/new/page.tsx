@@ -33,7 +33,7 @@ export default function NewRecurringVoucherPage() {
         onOpenChange={setShowPreview}
         downloadTitle="Recurring voucher"
         onDownloadPdf={onDownloadPdf}
-        editor={<Left />}
+        editor={<Left onOpenPreview={() => setShowPreview(true)} />}
         preview={<PdfView onRegisterDownload={registerDownload} />}
       />
     </DocumentWorkspace>

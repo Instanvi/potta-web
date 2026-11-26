@@ -1,30 +1,41 @@
-'use client'; // For Next.js 13+ App Directory
+'use client';
 import Input from '@potta/components/input';
-import SearchSelect from '@potta/components/search-select';
 import { useContext, useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import DynamicTable from './newtableInvoice';
-import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import useGetAllCustomers from '@potta/app/(routes)/customers/hooks/useGetAllCustomers';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import Select from '@potta/components/select';
+import SearchableSelect from '@potta/components/searchableSelect';
 import { Customer } from '@potta/app/(routes)/customers/utils/types';
-import { set } from 'react-hook-form';
 import TextArea from '@potta/components/textArea';
 import { DatePicker } from '@potta/components/ui/date-picker';
-
 import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
 import { GeneratedNumberField } from '@potta/components/generated-number-field';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
-import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
 import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 import { useCustomerAddressFill } from '@/hooks/use-customer-address';
+import {
+  DocumentBalanceDue,
+  DocumentFooterLink,
+  DocumentFormCard,
+  DocumentFormFooter,
+  DocumentFormShell,
+  DocumentSectionTitle,
+} from '@potta/components/document-form-layout';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
+import {
+  formatOrgAddress,
+  orgDisplayName,
+  useOrganizationProfile,
+} from '@/hooks/use-organization-profile';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
   label: string;
-  value: string | number;
+  value: string;
 }
 
 // Add these interfaces at the top of your file with the other interfaces
@@ -73,8 +84,9 @@ const frequencyOptions = [
   { label: 'Annually', value: 'Annually' },
 ];
 
-const Left = () => {
+const Left = ({ onOpenPreview }: { onOpenPreview?: () => void }) => {
   const context = useContext(ContextData);
+  const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>('');
   const { data, isLoading: customersLoading } = useGetAllCustomers({
@@ -382,277 +394,338 @@ const Left = () => {
     });
   };
 
-  // Helper function to render required field marker
-  const RequiredMark = () => <span className="text-red-500 ml-1">*</span>;
+  const RequiredMark = () => <span className="ml-1 text-red-500">*</span>;
+
+  const { data: org } = useOrganizationProfile();
+  const sellerName = orgDisplayName(org) || 'Your organization';
+  const sellerAddressLines = formatOrgAddress(org);
+
+  const tableRows: TableItem[] = context?.data?.table || [];
+  const lineSubtotal = tableRows.reduce(
+    (sum, row) => sum + Number(row.qty || 0) * Number(row.price || 0),
+    0,
+  );
+  const taxAmount = (lineSubtotal * (Number(taxRate) || 0)) / 100;
+  const balanceDue = lineSubtotal + taxAmount;
+  const money = (n: number) =>
+    `${currency} ${n.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl scroll flex-col gap-3 overflow-y-auto bg-white px-3 sm:px-5 md:px-8 lg:px-10">
-      <DocumentLetterheadControls flush />
-      <div className="w-full grid grid-cols-4 gap-4">
-        <div>
-          <Select
-            label="Currency"
-            options={[
-              { label: 'USD($)', value: 'USD' },
-              { label: 'EUR(€)', value: 'EUR' },
-              { label: 'XAF', value: 'XAF' },
-            ]}
-            selectedValue={currency}
-            onChange={(value: any) => handleInputChange('currency', value)}
-            bg={''}
-          />
-        </div>
-
-        <div className={`${errors.issueDate ? 'error-field' : ''}`}>
-          <DatePicker
-            label="Issued Date"
-            required
-            name="issueDate"
-            value={issueDate}
-            onChange={(value) => handleInputChange('issueDate', value)}
-            placeholder="Select issue date"
-            error={errors.issueDate}
-          />
-        </div>
-        <div className={`${errors.dueDate ? 'error-field' : ''}`}>
-          <DatePicker
-            label="Due Date"
-            required
-            name="dueDate"
-            value={dueDate}
-            min={issueDate || undefined}
-            onChange={(value) => handleInputChange('dueDate', value)}
-            placeholder="Select due date"
-            error={errors.dueDate}
-          />
-        </div>
-      </div>
-
-      {/* Recurring Invoice Settings */}
-      <div className="mt-6 border-t pt-4 border-gray-200">
-        <h3 className="text-lg font-medium mb-4">Recurring Settings</h3>
-        <div className="grid grid-cols-4 gap-4">
-          <div className={`${errors.frequency ? 'error-field' : ''}`}>
-            <Select
-              label={
-                <>
-                  Frequency
-                  <RequiredMark />
-                </>
-              }
-              options={frequencyOptions}
-              selectedValue={frequency}
-              onChange={(value: any) => handleInputChange('frequency', value)}
-              bg={''}
-            />
-            {errors.frequency && (
-              <p className="text-red-500 text-sm mt-1">{errors.frequency}</p>
-            )}
-          </div>
-          <div className={`${errors.startDate ? 'error-field' : ''}`}>
-            <DatePicker
-              label="Start Date"
-              required
-              name="startDate"
-              value={startDate}
-              onChange={(value) => handleInputChange('startDate', value)}
-              placeholder="Select start date"
-              error={errors.startDate}
-            />
-          </div>
-        </div>
-        <div className="col-span-2 mt-3">
-          <div className="flex items-center space-x-4 mb-2">
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                className="form-radio"
-                name="endOption"
-                checked={isEndDateOption}
-                onChange={() => setIsEndDateOption(true)}
-              />
-              <span className="ml-2">End Date</span>
-            </label>
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                className="form-radio"
-                name="endOption"
-                checked={!isEndDateOption}
-                onChange={() => setIsEndDateOption(false)}
-              />
-              <span className="ml-2">Number of Occurrences</span>
-            </label>
-          </div>
-
-          {isEndDateOption ? (
-            <div className={`${errors.endDate ? 'error-field' : ''}`}>
-              <DatePicker
-                label="End Date"
-                required
-                name="endDate"
-                value={endDate}
-                min={startDate || undefined}
-                onChange={(value) => handleInputChange('endDate', value)}
-                placeholder="Select end date"
-                error={errors.endDate}
-              />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <DocumentFormShell className="pb-6">
+          <DocumentFormCard flush>
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div className="grid min-w-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className={errors.customerName ? 'error-field' : ''}>
+                  <div className="flex items-end gap-2">
+                    <div className="min-w-0 flex-1">
+                      <SearchableSelect
+                        label="Customer"
+                        options={customerOptions}
+                        selectedValue={customerName}
+                        onChange={(value: string) => {
+                          handleInputChange('customerName', value);
+                          const selectedOption = customerOptions.find(
+                            (option) => option.value === value,
+                          );
+                          setSelectedCustomer(selectedOption ?? null);
+                        }}
+                        placeholder="Select a customer"
+                        isDisabled={customersLoading}
+                        required
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddCustomerDrawer(true)}
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+                      aria-label="Add customer"
+                    >
+                      <i className="ri-add-line text-xl" />
+                    </button>
+                  </div>
+                  {errors.customerName ? (
+                    <p className="mt-1 text-sm text-red-500">{errors.customerName}</p>
+                  ) : null}
+                </div>
+              </div>
+              <DocumentBalanceDue amount={money(balanceDue)} />
             </div>
-          ) : (
-            <div className={`${errors.occurrences ? 'error-field' : ''}`}>
+            {(sellerName || sellerAddressLines.length > 0) && (
+              <div className="mt-4 border-t border-black/[0.06] pt-4 text-sm text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-black/45">
+                  From (your organization)
+                </p>
+                <p className="mt-1 font-medium text-foreground">{sellerName}</p>
+                {sellerAddressLines.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+                {org?.businessPhone ? <p>{org.businessPhone}</p> : null}
+                {org?.businessEmail ? <p>{org.businessEmail}</p> : null}
+              </div>
+            )}
+          </DocumentFormCard>
+
+          <DocumentFormCard flush>
+            <DocumentSectionTitle>Voucher details</DocumentSectionTitle>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className={errors.issueDate ? 'error-field' : ''}>
+                <DatePicker
+                  label="Issued date"
+                  required
+                  name="issueDate"
+                  value={issueDate}
+                  onChange={(value) => handleInputChange('issueDate', value)}
+                  placeholder="Select date"
+                  error={errors.issueDate}
+                />
+              </div>
+              <div className={errors.dueDate ? 'error-field' : ''}>
+                <DatePicker
+                  label="Due date"
+                  required
+                  name="dueDate"
+                  value={dueDate}
+                  min={issueDate || undefined}
+                  onChange={(value) => handleInputChange('dueDate', value)}
+                  placeholder="Select date"
+                  error={errors.dueDate}
+                />
+              </div>
+              <GeneratedNumberField
+                label="Voucher no."
+                name="invoiceNumber"
+                acronym="VCH"
+                value={invoiceNumber}
+                onChange={(value) => handleInputChange('invoiceNumber', value)}
+              />
+              <Select
+                label="Currency"
+                options={[
+                  { label: 'XAF', value: 'XAF' },
+                  { label: 'USD ($)', value: 'USD' },
+                  { label: 'EUR (€)', value: 'EUR' },
+                ]}
+                selectedValue={currency}
+                onChange={(value: string) => handleInputChange('currency', value)}
+                bg="bg-white"
+              />
               <Input
                 type="number"
-                label={
-                  <>
-                    Number of Occurrences
-                    <RequiredMark />
-                  </>
-                }
-                name="occurrences"
-                value={occurrences}
-                min={1}
-                onchange={(e: any) =>
-                  handleInputChange('occurrences', e.target.value)
-                }
-                placeholder="e.g. 12"
-                errors={
-                  errors.occurrences
-                    ? { message: errors.occurrences }
-                    : undefined
-                }
+                label="Tax rate %"
+                name="taxRate"
+                value={taxRate}
+                onchange={(e) => handleInputChange('taxRate', e.target.value)}
               />
             </div>
-          )}
-        </div>
+          </DocumentFormCard>
+
+          <DocumentFormCard flush>
+            <DocumentSectionTitle>Recurring schedule</DocumentSectionTitle>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className={errors.frequency ? 'error-field' : ''}>
+                <Select
+                  label="Frequency"
+                  required
+                  options={frequencyOptions}
+                  selectedValue={frequency}
+                  onChange={(value: string) => handleInputChange('frequency', value)}
+                  bg="bg-white"
+                  error={errors.frequency}
+                />
+              </div>
+              <div className={errors.startDate ? 'error-field' : ''}>
+                <DatePicker
+                  label="Start date"
+                  required
+                  name="startDate"
+                  value={startDate}
+                  onChange={(value) => handleInputChange('startDate', value)}
+                  placeholder="Select date"
+                  error={errors.startDate}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <span className="mb-1 block text-sm font-normal text-foreground">Ends</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsEndDateOption(true)}
+                    className={`h-9 rounded-[2px] border px-3 text-sm ${
+                      isEndDateOption
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-black/15 bg-white text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    On a date
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEndDateOption(false)}
+                    className={`h-9 rounded-[2px] border px-3 text-sm ${
+                      !isEndDateOption
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-black/15 bg-white text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    After a number of times
+                  </button>
+                </div>
+              </div>
+              {isEndDateOption ? (
+                <div className={errors.endDate ? 'error-field' : ''}>
+                  <DatePicker
+                    label="End date"
+                    required
+                    name="endDate"
+                    value={endDate}
+                    min={startDate || undefined}
+                    onChange={(value) => handleInputChange('endDate', value)}
+                    placeholder="Select date"
+                    error={errors.endDate}
+                  />
+                </div>
+              ) : (
+                <div className={errors.occurrences ? 'error-field' : ''}>
+                  <Input
+                    type="number"
+                    label="Number of occurrences"
+                    name="occurrences"
+                    required
+                    value={occurrences}
+                    min={1}
+                    placeholder="e.g. 12"
+                    onchange={(e) => handleInputChange('occurrences', e.target.value)}
+                    errors={errors.occurrences ? { message: errors.occurrences } : undefined}
+                  />
+                </div>
+              )}
+            </div>
+          </DocumentFormCard>
+
+          <DocumentFormCard flush>
+            <DocumentSectionTitle>Addresses</DocumentSectionTitle>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <TextArea
+                label="Billing address"
+                name="billing"
+                value={billingAddress}
+                onchange={(e) => handleInputChange('billing', e.target.value)}
+              />
+              <TextArea
+                label="Shipping address"
+                name="shipping"
+                value={shippingAddress}
+                onchange={(e) => handleInputChange('shipping', e.target.value)}
+              />
+            </div>
+          </DocumentFormCard>
+
+          <DocumentFormCard flush>
+            <DocumentSectionTitle>
+              Product / service lines
+              <RequiredMark />
+            </DocumentSectionTitle>
+            <div className={errors.lineItems ? 'error-field' : ''}>
+              <DynamicTable showSummary={false} />
+              {errors.lineItems ? (
+                <p className="mt-2 text-sm text-red-500">{errors.lineItems}</p>
+              ) : null}
+            </div>
+          </DocumentFormCard>
+
+          <DocumentFormCard flush>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+              <div className="space-y-6 lg:col-span-7">
+                <TextArea
+                  label="Message on voucher"
+                  name="note"
+                  value={note}
+                  onchange={(e) => handleInputChange('note', e.target.value)}
+                />
+                <div className="space-y-4 rounded-[2px] border border-black/[0.08] bg-main-bg/40 p-4">
+                  <PaymentMethodSelect
+                    value={selectedPaymentMethod}
+                    onChange={handlePaymentMethodChange}
+                    error={errors.paymentMethod}
+                    required
+                  />
+                  <GeneratedNumberField
+                    label="Payment reference"
+                    name="paymentReference"
+                    value={paymentReference}
+                    onChange={(value) => handleInputChange('paymentReference', value)}
+                  />
+                  <TextArea
+                    label="Payment terms"
+                    name="paymentTerms"
+                    value={paymentTerms}
+                    onchange={(e) => handleInputChange('paymentTerms', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="lg:col-span-5">
+                <div className="ml-auto w-full max-w-sm space-y-2 text-sm">
+                  <div className="flex justify-between text-black/70">
+                    <span>Subtotal</span>
+                    <span className="tabular-nums text-foreground">{money(lineSubtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-black/70">
+                    <span>Tax</span>
+                    <span className="tabular-nums text-foreground">{money(taxAmount)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-black/[0.08] pt-3 text-base font-medium">
+                    <span>Total</span>
+                    <span className="tabular-nums">{money(balanceDue)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 text-base font-medium">
+                    <span>Balance due</span>
+                    <span className="tabular-nums text-primary">{money(balanceDue)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DocumentFormCard>
+        </DocumentFormShell>
       </div>
 
-      <div className="mt-3 w-full flex flex-col">
-        <div
-          className={`w-[50%] flex items-center space-x-3 ${
-            errors.customerName ? 'error-field' : ''
-          }`}
-        >
-          <div className="w-full">
-            <SearchSelect
-              label="Customer"
-              options={customerOptions}
-              value={selectedCustomer}
-              onChange={(option: Option | null) => {
-                console.log('SearchSelect onChange called with:', option);
-                setSelectedCustomer(option);
-                handleInputChange('customerName', option?.value || '');
-              }}
-              isLoading={customersLoading}
-              placeholder="Select a customer..."
-              isClearable={true}
-              isSearchable={true}
-            />
-            {errors.customerName && (
-              <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>
-            )}
-          </div>
-          <div className="h-full mt-8 flex items-center">
-            <button
-              type="button"
-              onClick={() => setIsAddCustomerDrawer(true)}
-              className="flex items-center justify-center text-white bg-green-700 rounded-full size-10"
-            >
-              <i className="ri-add-line text-3xl"></i>
-            </button>
-          </div>
-        </div>
-        <div className="flex space-x-4 mt-4">
-          <div className="w-full">
-            <Input
-              type="text"
-              label="Billing Address"
-              name="billing"
-              value={billingAddress}
-              onchange={(e: any) =>
-                handleInputChange('billing', e.target.value)
-              }
-            />
-          </div>
-          <div className="w-full">
-            <Input
-              type="text"
-              label="Shipping Address"
-              name="shipping"
-              value={shippingAddress}
-              onchange={(e: any) =>
-                handleInputChange('shipping', e.target.value)
-              }
-            />
-          </div>
-        </div>
-      </div>
+      <DocumentFormFooter
+        left={
+          <ShadcnButton
+            type="button"
+            variant="outline"
+            className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            onClick={() => router.push('/account_receivables/vouchers/recurring')}
+          >
+            Cancel
+          </ShadcnButton>
+        }
+        center={
+          onOpenPreview ? (
+            <DocumentFooterLink onClick={onOpenPreview}>Print or Preview</DocumentFooterLink>
+          ) : null
+        }
+        right={
+          <ShadcnButton
+            type="button"
+            className="bg-white text-foreground hover:bg-white/90"
+            onClick={handleSaveInvoice}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? 'Saving…' : 'Save'}
+          </ShadcnButton>
+        }
+      />
 
-      <div className="my-5 pt-10">
-        <h3 className="text-lg mb-2 text-gray-900 font-medium">
-          Line Items
-          <RequiredMark />
-        </h3>
-        <DynamicTable />
-        {errors.lineItems && (
-          <p className="text-red-500 text-sm mt-1">{errors.lineItems}</p>
-        )}
-      </div>
-
-      <hr className="my-5" />
-      <h3 className="text-lg font-medium my-2">
-        Payment method
-        <RequiredMark />
-      </h3>
-      <div className={`mt-2 space-y-4 ${errors.paymentMethod ? 'error-field' : ''}`}>
-        <PaymentMethodSelect
-          value={selectedPaymentMethod}
-          onChange={handlePaymentMethodChange}
-          error={errors.paymentMethod}
-        />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <GeneratedNumberField
-            label="Payment Reference"
-            name="paymentReference"
-            value={paymentReference}
-            onChange={(value) => handleInputChange('paymentReference', value)}
-          />
-          <Input
-            type="number"
-            label="Tax Rate"
-            name="taxRate"
-            value={taxRate}
-            onchange={(e: any) => handleInputChange('taxRate', e.target.value)}
-          />
-        </div>
-        <TextArea
-          label="Payment Terms"
-          name="paymentTerms"
-          value={paymentTerms}
-          onchange={(e: any) =>
-            handleInputChange('paymentTerms', e.target.value)
-          }
-        />
-      </div>
-
-      <hr className="my-5" />
-      <h3 className="text-xl font-normal my-2">Notes</h3>
-      <textarea
-        value={note}
-        onChange={(e) => handleInputChange('note', e.target.value)}
-        className="h-36 border p-2 w-full outline-none mt-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-   "
-      ></textarea>
-
-      <div className="mt-5 w-full flex justify-end">
-        <Button
-          text={mutation.isPending ? 'Saving…' : 'Save Recurring Invoice'}
-          isLoading={mutation.isPending}
-          disabled={mutation.isPending}
-          onClick={handleSaveInvoice}
-          type={'button'}
-        />
-      </div>
-      <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} showTrigger={false} />
+      <SliderCustomer
+        open={isAddCustomerDrawer}
+        setOpen={setIsAddCustomerDrawer}
+        showTrigger={false}
+      />
     </div>
   );
 };

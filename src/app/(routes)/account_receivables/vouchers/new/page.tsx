@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   FormProvider,
   useForm,
@@ -13,9 +14,14 @@ import Audience from './components/audience';
 import Scheduling from './components/scheduling';
 import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks';
-import { Loader2 } from 'lucide-react';
 import DocumentWorkspace from '@potta/components/document-workspace';
-import { cn } from '@potta/lib/utils';
+import {
+  DocumentFormCard,
+  DocumentFormFooter,
+  DocumentFormShell,
+  DocumentSectionTitle,
+} from '@potta/components/document-form-layout';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
 
 enum VoucherTypeEnum {
   COUPON = 'DISCOUNT',
@@ -103,28 +109,11 @@ const commonFields: Array<keyof FormData> = [
   'endDate',
 ];
 
-const TABS = [
-  { id: 'type', label: 'Type' },
-  { id: 'code', label: 'Code' },
-  { id: 'policy', label: 'Policy' },
-  { id: 'audience', label: 'Audience' },
-  { id: 'scheduling', label: 'Scheduling' },
-] as const;
-
-type VoucherTab = (typeof TABS)[number]['id'];
-
-function tabForError(key: string): VoucherTab {
-  if (key.startsWith('audience')) return 'audience';
-  if (key.startsWith('scheduling')) return 'scheduling';
-  if (key.startsWith('code') || key === 'programCardPrefix') return 'code';
-  if (key === 'type' || key === 'name') return 'type';
-  return 'policy';
-}
-
 export default function NewVoucherPage() {
+  const router = useRouter();
   const [voucherType, setVoucherType] = useState<VoucherType>('ROYALTY_POINTS');
-  const [tab, setTab] = useState<VoucherTab>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -272,19 +261,23 @@ export default function NewVoucherPage() {
 
     setValidationErrors(newErrors);
 
-    const firstError = Object.keys(newErrors)[0];
-    if (firstError) setTab(tabForError(firstError));
-
     if (Object.keys(newErrors).length > 0) {
+      setShowErrors(true);
       const count = Object.keys(newErrors).length;
       toast.error(
         count === 1
           ? 'There is 1 error in the form. Please fix it before publishing.'
           : `There are ${count} errors in the form. Please fix them before publishing.`
       );
+      requestAnimationFrame(() => {
+        document
+          .querySelector('.error-field')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
       return false;
     }
 
+    setShowErrors(false);
     return true;
   };
 
@@ -327,23 +320,7 @@ export default function NewVoucherPage() {
     <DocumentWorkspace
       title="New voucher"
       closeHref="/account_receivables/vouchers"
-      footer={
-        <button
-          type="submit"
-          form="new-voucher"
-          disabled={isSubmitting}
-          className="ml-auto inline-flex h-10 items-center justify-center rounded-[2px] bg-primary px-4 text-sm text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 size={16} className="mr-2 animate-spin" />
-              Publishing…
-            </>
-          ) : (
-            'Publish'
-          )}
-        </button>
-      }
+      bodyClassName="flex flex-col overflow-hidden"
     >
       <FormProvider {...methods}>
         <form
@@ -351,57 +328,67 @@ export default function NewVoucherPage() {
           onSubmit={methods.handleSubmit(onSubmit)}
           className="flex h-full min-h-0 flex-col bg-white"
         >
-          <div className="flex shrink-0 gap-6 overflow-x-auto border-b border-black/[0.08] px-6 text-sm">
-            {TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setTab(item.id)}
-                className={cn(
-                  'border-b-2 py-3',
-                  tab === item.id
-                    ? 'border-green-700 font-medium text-green-700'
-                    : 'border-transparent text-foreground',
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <DocumentFormShell className="pb-6">
+              <DocumentFormCard flush>
+                <DocumentSectionTitle>Voucher type</DocumentSectionTitle>
+                <VoucherTypeSelector
+                  selectedType={voucherType}
+                  onVoucherTypeChange={handleVoucherTypeChange}
+                />
+              </DocumentFormCard>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-            <div className={tab === 'type' ? undefined : 'hidden'}>
-              <VoucherTypeSelector
-                selectedType={voucherType}
-                onVoucherTypeChange={handleVoucherTypeChange}
-              />
-            </div>
-            <div className={tab === 'code' ? undefined : 'hidden'}>
-              <Code />
-            </div>
-            <div className={tab === 'policy' ? undefined : 'hidden'}>
-              <Policy voucherType={voucherType} />
-            </div>
-            <div className={tab === 'audience' ? undefined : 'hidden'}>
-              <Audience />
-            </div>
-            <div className={tab === 'scheduling' ? undefined : 'hidden'}>
-              <Scheduling />
-            </div>
+              <DocumentFormCard flush>
+                <DocumentSectionTitle>Code</DocumentSectionTitle>
+                <Code showErrors={showErrors} />
+              </DocumentFormCard>
 
-            {Object.keys(validationErrors).length > 0 && (
-              <div className="mt-6 border border-red-200 bg-red-50 p-3">
-                <h4 className="mb-2 font-medium text-red-600">
-                  Please fix the following errors:
-                </h4>
-                <ul className="list-disc pl-5 text-sm text-red-500">
-                  {Object.values(validationErrors).map((error, index) => (
-                    <li key={index}>{error}</li>
+              <DocumentFormCard flush>
+                <DocumentSectionTitle>Policy</DocumentSectionTitle>
+                <Policy voucherType={voucherType} showErrors={showErrors} />
+              </DocumentFormCard>
+
+              <DocumentFormCard flush>
+                <DocumentSectionTitle>Audience</DocumentSectionTitle>
+                <Audience showErrors={showErrors} />
+              </DocumentFormCard>
+
+              <DocumentFormCard flush>
+                <DocumentSectionTitle>Schedule</DocumentSectionTitle>
+                <Scheduling showErrors={showErrors} />
+              </DocumentFormCard>
+
+              {showErrors && Object.keys(validationErrors).length > 0 ? (
+                <div className="rounded-[2px] border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                  {Object.values(validationErrors).map((error) => (
+                    <p key={error}>{error}</p>
                   ))}
-                </ul>
-              </div>
-            )}
+                </div>
+              ) : null}
+            </DocumentFormShell>
           </div>
+
+          <DocumentFormFooter
+            left={
+              <ShadcnButton
+                type="button"
+                variant="outline"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                onClick={() => router.push('/account_receivables/vouchers')}
+              >
+                Cancel
+              </ShadcnButton>
+            }
+            right={
+              <ShadcnButton
+                type="submit"
+                className="bg-white text-foreground hover:bg-white/90"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Publishing…' : 'Publish'}
+              </ShadcnButton>
+            }
+          />
         </form>
       </FormProvider>
     </DocumentWorkspace>
