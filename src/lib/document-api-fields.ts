@@ -1,18 +1,16 @@
 /**
- * Backend document DTOs often mark optional strings with `@IsNotEmpty()` +
- * `@MinLength(10)`. Empty strings and short UI defaults (e.g. "Net 30") then
- * return 400. Use these helpers when building create/update payloads.
+ * Helpers for create/update payloads.
+ * Notes are optional and have no minimum length. Empty values are omitted.
+ * Payment terms on invoices and purchase orders still require 10 characters
+ * when sent, so short labels such as "Net 30" are expanded before send.
  */
 
-const DEFAULT_MIN = 10;
+const PAYMENT_TERMS_MIN = 10;
 
-/** Keep a string only when it meets the API minimum length. */
-export function apiOptionalText(
-  value: unknown,
-  minLength = DEFAULT_MIN,
-): string | undefined {
+/** Keep a trimmed string. Empty values are omitted. */
+export function apiOptionalText(value: unknown): string | undefined {
   const text = typeof value === 'string' ? value.trim() : '';
-  if (!text || text.length < minLength) return undefined;
+  if (!text) return undefined;
   return text;
 }
 
@@ -34,10 +32,12 @@ export function apiPaymentTerms(value: unknown): string | undefined {
     'Due on receipt': 'Due on receipt',
   };
 
-  return apiOptionalText(map[raw] ?? raw);
+  const mapped = map[raw] ?? raw;
+  if (mapped.length < PAYMENT_TERMS_MIN) return undefined;
+  return mapped;
 }
 
-/** Optional address / free-text fields that share the same MinLength rule. */
+/** Optional address / free-text. Empty values are omitted. */
 export function apiOptionalAddress(value: unknown): string | undefined {
   return apiOptionalText(value);
 }

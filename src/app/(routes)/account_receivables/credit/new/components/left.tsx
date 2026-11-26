@@ -158,8 +158,8 @@ const Left = ({ onOpenPreview }: LeftProps) => {
     const next: ValidationErrors = {};
     if (!customerId) next.customerName = 'Customer is required';
     if (!issueDate) next.issueDate = 'Issue date is required';
-    if (!note.trim() || note.trim().length < 10) {
-      next.reason = 'Notes / reason must be at least 10 characters';
+    if (!note.trim()) {
+      next.reason = 'Notes / reason is required';
     }
     if (serializeLineItems(tableRows).length === 0 || creditAmount <= 0) {
       next.lineItems = 'Add at least one line with a quantity and price';

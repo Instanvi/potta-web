@@ -38,7 +38,7 @@ export const invoiceSchema = yup.object().shape({
   invoiceType: yup
     .string()
     .required('invoice type is required'),
-  notes: yup.string().required('note is required'),
+  notes: yup.string().optional(),
   paymentTerms: yup.string().required('the payment term is required'),
   paymentMethod: yup
     .string()

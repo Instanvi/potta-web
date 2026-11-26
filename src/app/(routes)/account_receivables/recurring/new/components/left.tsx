@@ -19,6 +19,7 @@ import { GeneratedNumberField } from '@potta/components/generated-number-field';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
 import { withOptionalDocumentFields } from '@/lib/document-api-fields';
+import { useCustomerAddressFill } from '@/hooks/use-customer-address';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -108,6 +109,17 @@ const Left = () => {
 
   // Use a ref to track if initial selection has been made
   const initialSelectionMade = useRef(false);
+
+  useCustomerAddressFill(customerName, (address) => {
+    if (!address) return;
+    setBillingAddress(address);
+    setShippingAddress(address);
+    context?.setData((prevData: any) => ({
+      ...prevData,
+      billing: address,
+      shipping: address,
+    }));
+  });
 
   // Create customer options with proper typing
   const customerOptions: Option[] = customers.map((customer: Customer) => ({
