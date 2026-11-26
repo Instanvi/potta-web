@@ -9,31 +9,52 @@ import { useReconcile } from '../hooks';
 
 const n = (v: unknown) => Number(v ?? 0) || 0;
 
-type CompareRow = { label: string; pos: number; gl: number };
+type CompareRow = {
+  label: string;
+  hint: string;
+  pos: number;
+  gl: number;
+};
+
+function diffMessage(pos: number, gl: number): { ok: boolean; text: string } {
+  const diff = pos - gl;
+  if (Math.abs(diff) < 0.01) return { ok: true, text: 'Match' };
+  if (diff < 0) return { ok: false, text: `Books higher by ${formatAmount(-diff)}` };
+  return { ok: false, text: `Till higher by ${formatAmount(diff)}` };
+}
 
 const compareColumns: ColumnDef<CompareRow>[] = [
-  { accessorKey: 'label', header: 'Check', enableSorting: false },
+  {
+    accessorKey: 'label',
+    header: 'What we compare',
+    enableSorting: false,
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">{row.original.label}</p>
+        <p className="text-xs text-muted-foreground">{row.original.hint}</p>
+      </div>
+    ),
+  },
   {
     accessorKey: 'pos',
-    header: 'POS (synced)',
+    header: 'From the till',
     enableSorting: false,
     cell: ({ row }) => <span className="tabular-nums">{formatAmount(row.original.pos)}</span>,
   },
   {
     accessorKey: 'gl',
-    header: 'General ledger',
+    header: 'In the books',
     enableSorting: false,
     cell: ({ row }) => <span className="tabular-nums">{formatAmount(row.original.gl)}</span>,
   },
   {
     id: 'difference',
-    header: 'Difference',
+    header: 'Result',
     cell: ({ row }) => {
-      const diff = row.original.pos - row.original.gl;
-      const ok = Math.abs(diff) < 0.01;
+      const { ok, text } = diffMessage(row.original.pos, row.original.gl);
       return (
         <span className={`font-medium tabular-nums ${ok ? 'text-success' : 'text-destructive'}`}>
-          {ok ? 'Matched' : formatAmount(diff)}
+          {text}
         </span>
       );
     },
@@ -53,53 +74,126 @@ const ReconcilePanel = () => {
   const txn = data?.transactionsCollect ?? {};
   const gl = data?.generalLedger ?? {};
 
+  const salesPos = n(txn.pos_sales_total);
+  const salesGl = n(gl.revenue_credit_701);
+  const expensesPos = n(txn.pos_expenses_total);
+  const expensesGl = n(gl.expense_debit_629);
+  const sales = diffMessage(salesPos, salesGl);
+  const expenses = diffMessage(expensesPos, expensesGl);
+  const mappedSales = n(data?.mappings.sales);
+  const allMatch = sales.ok && expenses.ok;
+  const noTillData =
+    mappedSales === 0 && n(txn.pos_sales_count) === 0 && n(txn.pos_expenses_count) === 0;
+
   return (
     <div>
-      <div className="mb-4">
-        <DateRangePicker label="Period" className="w-72" value={range} onChange={setRange} />
+      <div className="mb-4 max-w-3xl space-y-2">
+        <p className="text-sm text-muted-foreground">
+          Pick dates, then we check: did money from the shop till match what is in the books?
+        </p>
+        <DateRangePicker label="Dates" className="w-72" value={range} onChange={setRange} />
       </div>
       {invalid ? (
         <p className="text-sm text-destructive">The start date must be before the end date.</p>
       ) : !from || !to ? (
-        <p className="text-sm text-muted-foreground">Pick a period to reconcile.</p>
+        <p className="text-sm text-muted-foreground">Pick dates to run the check.</p>
       ) : isLoading ? (
-        <LoadingState label="Reconciling..." />
+        <LoadingState label="Checking…" />
       ) : error ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : data ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-            <StatCard label="Mapped sales (all time)" value={data.mappings.sales} />
-            <StatCard label="Mapped expenses (all time)" value={data.mappings.expenses} />
-            <StatCard label="Mapped reversals (all time)" value={data.mappings.reversals} />
-            <StatCard label="POS sales in range" value={n(txn.pos_sales_count)} />
-            <StatCard label="POS expenses in range" value={n(txn.pos_expenses_count)} />
+          <div
+            className={`max-w-3xl rounded-[2px] border px-4 py-3 text-sm ${
+              allMatch
+                ? 'border-success/40 bg-success/5 text-success'
+                : 'border-destructive/40 bg-destructive/5 text-destructive'
+            }`}
+          >
+            {allMatch ? (
+              <p className="font-medium">Everything matches for these dates.</p>
+            ) : noTillData ? (
+              <div className="space-y-1">
+                <p className="font-medium">No till sales are linked yet.</p>
+                <p className="text-foreground/80">
+                  The books may still show sales, but nothing from the POS till has been synced for
+                  this check. Open the Mappings tab, or sync the desktop till first.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p className="font-medium">Till and books do not match.</p>
+                <p className="text-foreground/80">
+                  Sales: {sales.text}. Expenses: {expenses.text}.
+                </p>
+              </div>
+            )}
           </div>
-          <DataTable
-            className="max-w-3xl"
-            columns={compareColumns}
-            data={[
-              {
-                label: 'Sales vs revenue (701 credit)',
-                pos: n(txn.pos_sales_total),
-                gl: n(gl.revenue_credit_701),
-              },
-              {
-                label: 'Expenses vs expense (629 debit)',
-                pos: n(txn.pos_expenses_total),
-                gl: n(gl.expense_debit_629),
-              },
-            ]}
-            showPagination={false}
-            storageKey="pos-sync-reconcile-table"
-          />
-          <div className="grid max-w-3xl grid-cols-3 gap-3">
-            <StatCard label="Cash 571 debits" value={formatAmount(gl.cash_debit_571)} />
-            <StatCard label="Cash 571 credits" value={formatAmount(gl.cash_credit_571)} />
+
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             <StatCard
-              label="Cash 571 net movement"
-              value={formatAmount(n(gl.cash_debit_571) - n(gl.cash_credit_571))}
+              label="Till sales linked (ever)"
+              value={mappedSales}
+              hint="How many POS sales Potta knows about"
             />
+            <StatCard
+              label="Till expenses linked (ever)"
+              value={data.mappings.expenses}
+              hint="How many POS expenses Potta knows about"
+            />
+            <StatCard
+              label="Till refunds linked (ever)"
+              value={data.mappings.reversals}
+              hint="Refunds / reversals from the till"
+            />
+            <StatCard
+              label="Till sales in these dates"
+              value={n(txn.pos_sales_count)}
+              hint="Count of synced sales in the period"
+            />
+            <StatCard
+              label="Till expenses in these dates"
+              value={n(txn.pos_expenses_count)}
+              hint="Count of synced expenses in the period"
+            />
+          </div>
+
+          <div className="max-w-3xl space-y-2">
+            <h3 className="text-sm font-medium text-foreground">Money check</h3>
+            <DataTable
+              columns={compareColumns}
+              data={[
+                {
+                  label: 'Sales',
+                  hint: 'Till sales vs books revenue (account 701)',
+                  pos: salesPos,
+                  gl: salesGl,
+                },
+                {
+                  label: 'Expenses',
+                  hint: 'Till expenses vs books expense (account 629)',
+                  pos: expensesPos,
+                  gl: expensesGl,
+                },
+              ]}
+              showPagination={false}
+              storageKey="pos-sync-reconcile-table"
+            />
+          </div>
+
+          <div className="max-w-3xl space-y-2">
+            <h3 className="text-sm font-medium text-foreground">Cash in the books (account 571)</h3>
+            <p className="text-xs text-muted-foreground">
+              Money in and out of the cash account for these dates — from the books only.
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              <StatCard label="Cash in" value={formatAmount(gl.cash_debit_571)} />
+              <StatCard label="Cash out" value={formatAmount(gl.cash_credit_571)} />
+              <StatCard
+                label="Net cash change"
+                value={formatAmount(n(gl.cash_debit_571) - n(gl.cash_credit_571))}
+              />
+            </div>
           </div>
         </div>
       ) : null}

@@ -12,11 +12,11 @@ import RequestLookupPanel from './components/RequestLookupPanel';
 type Tab = 'reconcile' | 'health' | 'mappings' | 'feed' | 'requests';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'reconcile', label: 'Reconcile' },
-  { id: 'health', label: 'Entity health' },
-  { id: 'mappings', label: 'Mappings' },
-  { id: 'feed', label: 'Change feed' },
-  { id: 'requests', label: 'Request lookup' },
+  { id: 'reconcile', label: 'Match check' },
+  { id: 'health', label: 'Problems' },
+  { id: 'mappings', label: 'Links' },
+  { id: 'feed', label: 'Recent changes' },
+  { id: 'requests', label: 'Find a request' },
 ];
 
 const PosSyncPage = () => {
