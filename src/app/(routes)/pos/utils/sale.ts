@@ -145,7 +145,10 @@ export function buildSalePayload(input: {
     ...(input.customerId ? { customerId: input.customerId } : {}),
     ...(input.receiptNumber ? { receiptNumber: input.receiptNumber } : {}),
     ...(input.reference ? { paymentReference: input.reference } : {}),
-    ...(input.notes ? { notes: input.notes } : {}),
+    ...(typeof input.notes === 'string' &&
+    input.notes.trim().length >= 10
+      ? { notes: input.notes.trim() }
+      : {}),
     lineItems: input.items.map((i) => ({
       description: i.description,
       quantity: Number(i.quantity),

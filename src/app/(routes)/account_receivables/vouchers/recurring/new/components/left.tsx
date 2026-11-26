@@ -18,6 +18,7 @@ import useCreateInvoice from '../../_hooks/useCreateInvoice';
 import { GeneratedNumberField } from '@potta/components/generated-number-field';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { DocumentLetterheadControls } from '@/components/documents/document-letterhead-controls';
+import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -312,31 +313,34 @@ const Left = () => {
       return sum + itemTotal + itemTax;
     }, 0);
 
-    const InvoiceData = {
-      issuedDate: issueDate,
-      dueDate: dueDate,
-      shippingAddress: shippingAddress,
-      billingAddress: billingAddress,
-      invoiceType: invoiceType,
-      currency: currency,
-      taxRate: Number(taxRate),
-      totalAmount: totalAmount,
-      paymentTerms: paymentTerms,
-      paymentReference: paymentReference,
-      notes: note,
-      paymentMethod: selectedPaymentMethod,
-      invoiceNumber: invoiceNumber,
-      discountAmount: 0,
-      customerId: customerName,
-      salePersonId: 'c9c0c3a4-353f-4907-a342-ae64e629936f',
-      lineItems: lineItems,
-      // Recurring invoice specific data
-      isRecurring: true,
-      frequency: frequency,
-      startDate: startDate,
-      endDate: isEndDateOption ? endDate : null,
-      occurrences: !isEndDateOption ? parseInt(occurrences) : null,
-    };
+    const InvoiceData = withOptionalDocumentFields(
+      {
+        issuedDate: issueDate,
+        dueDate: dueDate,
+        invoiceType: invoiceType,
+        currency: currency,
+        taxRate: Number(taxRate),
+        totalAmount: totalAmount,
+        paymentReference: paymentReference || undefined,
+        paymentMethod: selectedPaymentMethod || undefined,
+        invoiceNumber: invoiceNumber,
+        discountAmount: 0,
+        customerId: customerName,
+        salePersonId: 'c9c0c3a4-353f-4907-a342-ae64e629936f',
+        lineItems: lineItems,
+        isRecurring: true,
+        frequency: frequency,
+        startDate: startDate,
+        endDate: isEndDateOption ? endDate : null,
+        occurrences: !isEndDateOption ? parseInt(occurrences) : null,
+      },
+      {
+        shippingAddress,
+        billingAddress,
+        paymentTerms,
+        notes: note,
+      },
+    );
 
     // Save to context
     context?.setData((prevData: any) => ({

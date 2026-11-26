@@ -21,6 +21,7 @@ import {
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { FIELD_TEXTAREA } from '@/lib/field-styles';
+import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 import { useRouter } from 'next/navigation';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
 import { GeneratedNumberField } from '@potta/components/generated-number-field';
@@ -273,18 +274,21 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
     }, 0);
 
     // Backend recomputes totals; totalAmount is sent for client-side display parity.
-    const saleReceiptData = {
-      saleDate: date,
-      totalAmount,
-      paymentReference: paymentReference,
-      notes: note,
-      paymentMethod: selectedPaymentMethod,
-      receiptNumber: invoiceNumber,
-      discountAmount: 0,
-      customerId: customerName,
-      salePerson: '532e5da0-204f-4417-95e0-f26a13c62e39',
-      lineItems: lineItems,
-    } as SalesReceiptPayload;
+    // Omit empty/short notes — API MinLength(10) rejects "".
+    const saleReceiptData = withOptionalDocumentFields(
+      {
+        saleDate: date,
+        totalAmount,
+        paymentReference: paymentReference || undefined,
+        paymentMethod: selectedPaymentMethod || undefined,
+        receiptNumber: invoiceNumber,
+        discountAmount: 0,
+        customerId: customerName,
+        salePerson: '532e5da0-204f-4417-95e0-f26a13c62e39',
+        lineItems: lineItems,
+      },
+      { notes: note },
+    ) as SalesReceiptPayload;
 
     // Save to context
     context?.setData((prevData: any) => ({

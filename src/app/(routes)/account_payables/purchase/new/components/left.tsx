@@ -25,6 +25,7 @@ import {
   formatErrorForTextArea,
   getFirstErrorField,
 } from '../validations/purchaseOrderValidation';
+import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 
 // Define Option interface to match the one in SearchSelect component
 interface Option {
@@ -286,19 +287,23 @@ const Left = () => {
       return total + itemTotal + itemTax;
     }, 0);
 
-    const purchaseOrderData = {
-      orderDate: orderDate,
-      requiredDate: requiredDate,
-      shipDate: shipDate || new Date().toISOString(),
-      orderTotal: orderTotal,
-      shippingAddress: shippingAddress,
-      paymentTerms: paymentTerms,
-      paymentMethod: selectedPaymentMethod,
-      status: status, // Already set to 'PENDING' which is valid
-      vendorId: vendorId,
-      notes: note,
-      lineItems: lineItems,
-    };
+    const purchaseOrderData = withOptionalDocumentFields(
+      {
+        orderDate: orderDate,
+        requiredDate: requiredDate,
+        shipDate: shipDate || new Date().toISOString(),
+        orderTotal: orderTotal,
+        paymentMethod: selectedPaymentMethod || undefined,
+        status: status,
+        vendorId: vendorId,
+        lineItems: lineItems,
+      },
+      {
+        shippingAddress,
+        paymentTerms,
+        notes: note,
+      },
+    );
 
     // Save to context
     context?.setData((prevData: any) => ({

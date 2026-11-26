@@ -42,6 +42,7 @@ import {
 } from '@/hooks/use-organization-profile';
 import { formatPartyAddress } from '@/lib/party-address';
 import { today, toDateInput } from '@potta/app/(routes)/_shared/format';
+import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 
 // Import Option interface from SearchableSelect to avoid conflicts
 import type { Option as SearchableSelectOption } from '@potta/components/searchableSelect';
@@ -162,7 +163,7 @@ const Left = ({
   const [billingAddress, setBillingAddress] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
   const [note, setNote] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('Net 30');
+  const [paymentTerms, setPaymentTerms] = useState('Net 30 days');
   const [paymentReference, setPaymentReference] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [sendLater, setSendLater] = useState(false);
@@ -471,25 +472,26 @@ const Left = ({
       return sum + itemTotal + itemTax;
     }, 0);
 
-    const InvoiceData = {
-      issuedDate: issueDate, // Convert string to Date object
-      dueDate: dueDate, // Convert string to Date object
-      shippingAddress: shippingAddress,
-      billingAddress: billingAddress,
-      invoiceType: mapInvoiceTypeToApiValue(invoiceType), // Map to API value
-      currency: currency,
-      taxRate: Number(taxRate),
-      // totalAmount: totalAmount,
-      paymentTerms: paymentTerms,
-      paymentReference: paymentReference, // or generate a unique reference
-      notes: note,
-      paymentMethod: selectedPaymentMethod,
-      invoiceNumber: withDocumentAcronym(invoiceNumber, 'INV'),
-      // discountAmount: 0, // Add default or actual value if available
-      customerId: customerName, // Using the customer UUID as customerId
-      // salePersonId: 'c9c0c3a4-353f-4907-a342-ae64e629936f', // property salePersonId should not exist
-      lineItems: lineItems,
-    };
+    const InvoiceData = withOptionalDocumentFields(
+      {
+        issuedDate: issueDate,
+        dueDate: dueDate,
+        invoiceType: mapInvoiceTypeToApiValue(invoiceType),
+        currency: currency,
+        taxRate: Number(taxRate),
+        paymentReference: paymentReference || undefined,
+        paymentMethod: selectedPaymentMethod || undefined,
+        invoiceNumber: withDocumentAcronym(invoiceNumber, 'INV'),
+        customerId: customerName,
+        lineItems: lineItems,
+      },
+      {
+        shippingAddress,
+        billingAddress,
+        paymentTerms,
+        notes: note,
+      },
+    );
 
     // Save to context
     context?.setData((prevData: any) => ({
@@ -786,9 +788,9 @@ const Left = ({
                 label="Terms"
                 options={[
                   { label: 'Due on receipt', value: 'Due on receipt' },
-                  { label: 'Net 15', value: 'Net 15' },
-                  { label: 'Net 30', value: 'Net 30' },
-                  { label: 'Net 60', value: 'Net 60' },
+                  { label: 'Net 15', value: 'Net 15 days' },
+                  { label: 'Net 30', value: 'Net 30 days' },
+                  { label: 'Net 60', value: 'Net 60 days' },
                 ]}
                 selectedValue={paymentTerms}
                 onChange={(value: any) => handleInputChange('paymentTerms', value)}
