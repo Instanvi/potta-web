@@ -1,10 +1,14 @@
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import { IFilter, RecordInvoicePaymentPayload } from './types';
 import { IInvoicePayload } from './valididation';
 
 export const invoiceApi = {
   create: async (data: IInvoicePayload) => {
-    const result = await axios.post(`/invoice/create`, data);
+    const result = await axios.post(
+      `/invoice/create`,
+      sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+    );
     return result?.data;
   },
   getAll: async ({
@@ -36,7 +40,11 @@ export const invoiceApi = {
   },
 
   update: async (invoice_id: string, data: unknown) => {
-    const result = await axios.put(`/invoice/${invoice_id}`, data);
+    const body =
+      data && typeof data === 'object' && !Array.isArray(data)
+        ? sanitizeDocumentPayload(data as Record<string, unknown>)
+        : data;
+    const result = await axios.put(`/invoice/${invoice_id}`, body);
     return result?.data;
   },
   delete: async (invoice_id: string) => {

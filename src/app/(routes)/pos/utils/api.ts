@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import { Filter, ProductResponse } from './types';
 import { SalesReceiptPayload } from './validation';
 
@@ -17,7 +18,10 @@ const toPaginateParams = ({ sortBy, sortOrder, search, productType, ...rest }: F
 
 export const posApi = {
   create: async (data: SalesReceiptPayload) => {
-    const result = await axios.post(`/sales-receipt/create`, data);
+    const result = await axios.post(
+      `/sales-receipt/create`,
+      sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+    );
     return result.data;
   },
   getAll: async (filter: Filter): Promise<ProductResponse> => {

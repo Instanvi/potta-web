@@ -1,5 +1,6 @@
 import { VendorPayload } from './validations';
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import {
   VendorFilter,
   Vendor,
@@ -12,7 +13,11 @@ import {
 
 export const vendorApi = {
   create: async (data: VendorPayload) => {
-    const result = await axios.post(`/vendor/create`, data, {});
+    const result = await axios.post(
+      `/vendor/create`,
+      sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+      {},
+    );
     return result?.data;
   },
   getAll: async (filter: VendorFilter = {}): Promise<VendorResponse> => {
@@ -52,7 +57,11 @@ export const vendorApi = {
     return result?.data;
   },
   update: async (vendor_id: string, data: unknown) => {
-    const result = await axios.put(`/vendor/${vendor_id}`, data);
+    const body =
+      data && typeof data === 'object' && !Array.isArray(data)
+        ? sanitizeDocumentPayload(data as Record<string, unknown>)
+        : data;
+    const result = await axios.put(`/vendor/${vendor_id}`, body);
     return result?.data;
   },
   delete: async (vendor_id: string) => {

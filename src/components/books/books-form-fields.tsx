@@ -28,6 +28,7 @@ import {
   loadBooksEntityOptions,
   loadPurchaseOrderForReceipt,
 } from '@/lib/books-entities';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 
 export type BooksField = {
   key: string;
@@ -85,7 +86,9 @@ export function buildPayload(
     const coerced = coerceFormValue(f.type, raw);
     if (coerced !== undefined) out[f.key] = coerced;
   }
-  return out;
+  // Estimates, proposals, sales orders, credits, receipts, and Books CRUD
+  // share this builder — strip empty/short notes & terms the API rejects.
+  return sanitizeDocumentPayload(out);
 }
 
 export function BooksFormFields({

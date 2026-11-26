@@ -10,6 +10,7 @@ import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ListToolbar } from '../../../../_shared/states';
 import { apiErrorMessage, formatDate } from '../../../../_shared/format';
+import { apiOptionalText } from '@/lib/document-api-fields';
 import type { Product } from '../../_utils/types';
 import {
   RETURN_REASON_OPTIONS,
@@ -71,7 +72,7 @@ const NewReturnSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boolean
         reason,
         restockItems: restock,
         ...(reference.trim() ? { referenceTransaction: reference.trim() } : {}),
-        ...(notes.trim() ? { notes: notes.trim() } : {}),
+        ...(apiOptionalText(notes) ? { notes: apiOptionalText(notes) } : {}),
       });
       if (processNow) await process.mutateAsync(created.uuid);
       toast.success(processNow ? 'Return recorded and processed' : 'Return recorded as pending');

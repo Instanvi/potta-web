@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import {
   PurchaseOrderFilter,
   CreatePurchaseOrderData,
@@ -32,7 +33,10 @@ export async function fetchPurchaseOrders(filter: PurchaseOrderFilter) {
 }
 
 export async function createPurchaseOrder(data: CreatePurchaseOrderData) {
-  const response = await axios.post('/purchase-order/create', data);
+  const response = await axios.post(
+    '/purchase-order/create',
+    sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+  );
   return response.data;
 }
 
@@ -40,7 +44,10 @@ export async function updatePurchaseOrder(
   purchaseOrderId: string,
   data: Partial<CreatePurchaseOrderData>
 ) {
-  const response = await axios.put(`/purchase-order/${purchaseOrderId}`, data);
+  const response = await axios.put(
+    `/purchase-order/${purchaseOrderId}`,
+    sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+  );
   return response.data;
 }
 

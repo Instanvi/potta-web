@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import { Bill, BillFilter, BillPage, CreateBillPayload, PayBillPayload } from './types';
 
 const clean = <T extends object>(obj: T) =>
@@ -16,7 +17,10 @@ export const billsApi = {
     return res.data;
   },
   create: async (data: CreateBillPayload): Promise<Bill> => {
-    const res = await axios.post('/bills', clean(data));
+    const res = await axios.post(
+      '/bills',
+      sanitizeDocumentPayload(clean(data) as Record<string, unknown>),
+    );
     return res.data;
   },
   approve: async (billId: string, expenseAccountCode?: string): Promise<Bill> => {
