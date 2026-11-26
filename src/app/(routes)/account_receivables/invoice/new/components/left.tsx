@@ -41,6 +41,7 @@ import {
   useOrganizationProfile,
 } from '@/hooks/use-organization-profile';
 import { formatPartyAddress } from '@/lib/party-address';
+import { useCustomerAddressFill } from '@/hooks/use-customer-address';
 import { today, toDateInput } from '@potta/app/(routes)/_shared/format';
 import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 
@@ -685,6 +686,18 @@ const Left = ({
   const selectedCustomerRecord = customers.find((c) => c.uuid === customerName);
   const resolvedEmail = customerEmail || selectedCustomerRecord?.email || '';
 
+  useCustomerAddressFill(customerName, (address, customer) => {
+    if (customer.email) setCustomerEmail(customer.email);
+    if (!address) return;
+    setBillingAddress(address);
+    setShippingAddress(address);
+    context?.setData((prevData: any) => ({
+      ...prevData,
+      billing: address,
+      shipping: address,
+    }));
+  });
+
   const saving = isEditMode ? updateMutation.isPending : createMutation.isPending;
   const saveLabel = isEditMode
     ? updateMutation.isPending
@@ -721,9 +734,7 @@ const Left = ({
                         const partyAddress = formatPartyAddress(cust?.address);
                         if (partyAddress) {
                           handleInputChange('billing', partyAddress);
-                          if (!shippingAddress.trim()) {
-                            handleInputChange('shipping', partyAddress);
-                          }
+                          handleInputChange('shipping', partyAddress);
                         }
                       }}
                       placeholder="Select a customer"
