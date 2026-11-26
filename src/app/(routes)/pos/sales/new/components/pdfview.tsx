@@ -6,6 +6,7 @@ import {
   type SalesReceiptPdfProps,
 } from '@/components/documents/sales-receipt-pdf-document';
 import { ContextData } from '@potta/components/providers/DataProvider';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import {
   formatOrgAddress,
   orgDisplayName,
@@ -36,6 +37,7 @@ const PdfView = ({
   const context = useContext(ContextData);
   const [currentCustomerId, setCurrentCustomerId] = useState('');
   const { data: org } = useOrganizationProfile();
+  const { prefs: letterhead } = useDocumentLetterhead();
   const contextData = context?.data || {};
   const tableData: TableItem[] = Array.isArray(contextData.table)
     ? contextData.table
@@ -112,6 +114,8 @@ const PdfView = ({
       subtotal,
       tax: totalTax,
       total,
+      accent: letterhead.accent,
+      template: letterhead.template,
       draft: true,
     };
   }, [
@@ -119,6 +123,8 @@ const PdfView = ({
     contextData.note,
     contextData.paymentReference,
     customerDetails,
+    letterhead.accent,
+    letterhead.template,
     methodLabel,
     org,
     receiptNumber,

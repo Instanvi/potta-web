@@ -108,6 +108,7 @@ const PdfView = ({
       tax: totalTax,
       total,
       accent: letterhead.accent || '#0b5d1e',
+      template: letterhead.template,
       draft: true,
     };
   }, [
@@ -121,6 +122,7 @@ const PdfView = ({
     formattedRequiredDate,
     letterhead.accent,
     letterhead.logo,
+    letterhead.template,
     org,
     subtotal,
     tableData,

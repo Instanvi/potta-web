@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import { readStoredDocumentTemplate } from '@/components/documents/document-templates';
 
 export type DocumentSendKind =
   | 'invoice'
@@ -35,6 +36,9 @@ export async function sendPartyDocument(
   id: string,
   data: DocumentSendPayload = {},
 ): Promise<DocumentSendResult> {
-  const res = await axios.post(`/documents/${kind}/${id}/send`, data);
+  const res = await axios.post(`/documents/${kind}/${id}/send`, {
+    ...data,
+    template: readStoredDocumentTemplate(),
+  });
   return res.data;
 }

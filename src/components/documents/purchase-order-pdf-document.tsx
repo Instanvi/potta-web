@@ -1,5 +1,6 @@
 import { Document, Page, View } from '@react-pdf/renderer';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import { readStoredDocumentTemplate, type DocumentTemplateId } from './document-templates';
 import {
   DocumentFooter,
   LetterheadHeader,
@@ -45,6 +46,7 @@ export type PurchaseOrderPdfProps = {
   total: number;
   accent?: string;
   draft?: boolean;
+  template?: DocumentTemplateId;
 };
 
 const LINE_COLUMNS = [
@@ -72,6 +74,7 @@ export function PurchaseOrderPdfDocument({
   total,
   accent = PDF_ACCENT,
   draft = true,
+  template = readStoredDocumentTemplate(),
 }: PurchaseOrderPdfProps) {
   const money = (value: number) => formatPdfMoney(value, currency);
   const shipLines = (shippingAddress || '')
@@ -87,6 +90,7 @@ export function PurchaseOrderPdfDocument({
           title="Purchase Order"
           subtitle={draft ? 'Draft' : undefined}
           accent={accent}
+          template={template}
           meta={[
             { label: 'Order', value: orderDate },
             { label: 'Required', value: requiredDate },
@@ -113,6 +117,8 @@ export function PurchaseOrderPdfDocument({
           </View>
 
           <LineItemsTable
+            template={template}
+            accent={accent}
             columns={LINE_COLUMNS}
             rows={lines.map((line) => [
               line.description,
@@ -124,6 +130,7 @@ export function PurchaseOrderPdfDocument({
           />
 
           <TotalsBlock
+            template={template}
             accent={accent}
             rows={[
               { label: 'Subtotal', amount: money(subtotal) },
