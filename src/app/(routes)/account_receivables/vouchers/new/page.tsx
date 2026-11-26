@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   FormProvider,
   useForm,
@@ -15,6 +16,11 @@ import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks';
 import { Loader2 } from 'lucide-react';
 import DocumentWorkspace from '@potta/components/document-workspace';
+import {
+  DocumentFormFooter,
+  DocumentFormShell,
+} from '@potta/components/document-form-layout';
+import { Button as ShadcnButton } from '@/components/shadcn/button';
 import { cn } from '@potta/lib/utils';
 
 enum VoucherTypeEnum {
@@ -122,9 +128,12 @@ function tabForError(key: string): VoucherTab {
 }
 
 export default function NewVoucherPage() {
+  const router = useRouter();
   const [voucherType, setVoucherType] = useState<VoucherType>('ROYALTY_POINTS');
   const [tab, setTab] = useState<VoucherTab>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  /** Only show field errors after the user tries to Publish. */
+  const [attemptedPublish, setAttemptedPublish] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -140,6 +149,23 @@ export default function NewVoucherPage() {
   });
 
   const { unregister, setValue, getValues } = methods;
+
+  const tabIndex = useMemo(
+    () => TABS.findIndex((item) => item.id === tab),
+    [tab],
+  );
+  const isFirstStep = tabIndex <= 0;
+  const isLastStep = tabIndex === TABS.length - 1;
+
+  const goNext = () => {
+    if (isLastStep) return;
+    setTab(TABS[tabIndex + 1].id);
+  };
+
+  const goBack = () => {
+    if (isFirstStep) return;
+    setTab(TABS[tabIndex - 1].id);
+  };
 
   const unregisterIrrelevantFields = (newType: VoucherType) => {
     const allTypeSpecificFields = Object.values(
@@ -209,7 +235,7 @@ export default function NewVoucherPage() {
     return obj === '' ? undefined : obj;
   };
 
-  /** Validate the whole form before Publish (not step-by-step). */
+  /** Validate the whole form only when Publish is clicked (last step). */
   const validateAll = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -290,6 +316,7 @@ export default function NewVoucherPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      setAttemptedPublish(true);
       setValidationErrors({});
 
       if (!validateAll()) {
@@ -311,6 +338,7 @@ export default function NewVoucherPage() {
 
       await createVoucherMutation.mutateAsync(filteredData);
       toast.success('Voucher created successfully!');
+      router.push('/account_receivables/vouchers');
     } catch (error) {
       console.error('Error creating voucher:', error);
       if (error instanceof Error) {
@@ -327,32 +355,25 @@ export default function NewVoucherPage() {
     <DocumentWorkspace
       title="New voucher"
       closeHref="/account_receivables/vouchers"
-      footer={
-        <button
-          type="submit"
-          form="new-voucher"
-          disabled={isSubmitting}
-          className="ml-auto inline-flex h-10 items-center justify-center rounded-[2px] bg-primary px-4 text-sm text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 size={16} className="mr-2 animate-spin" />
-              Publishing…
-            </>
-          ) : (
-            'Publish'
-          )}
-        </button>
-      }
+      bodyClassName="flex flex-col overflow-hidden bg-white"
     >
       <FormProvider {...methods}>
         <form
           id="new-voucher"
           onSubmit={methods.handleSubmit(onSubmit)}
           className="flex h-full min-h-0 flex-col bg-white"
+          onKeyDown={(e) => {
+            // Enter on intermediate steps should not publish.
+            if (e.key === 'Enter' && !isLastStep) {
+              const tag = (e.target as HTMLElement)?.tagName;
+              if (tag !== 'TEXTAREA') {
+                e.preventDefault();
+              }
+            }
+          }}
         >
           <div className="flex shrink-0 gap-6 overflow-x-auto border-b border-black/[0.08] px-6 text-sm">
-            {TABS.map((item) => (
+            {TABS.map((item, index) => (
               <button
                 key={item.id}
                 type="button"
@@ -360,48 +381,111 @@ export default function NewVoucherPage() {
                 className={cn(
                   'border-b-2 py-3',
                   tab === item.id
-                    ? 'border-green-700 font-medium text-green-700'
+                    ? 'border-primary font-medium text-primary'
                     : 'border-transparent text-foreground',
                 )}
               >
+                <span className="mr-1.5 text-muted-foreground">{index + 1}.</span>
                 {item.label}
               </button>
             ))}
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
-            <div className={tab === 'type' ? undefined : 'hidden'}>
-              <VoucherTypeSelector
-                selectedType={voucherType}
-                onVoucherTypeChange={handleVoucherTypeChange}
-              />
-            </div>
-            <div className={tab === 'code' ? undefined : 'hidden'}>
-              <Code />
-            </div>
-            <div className={tab === 'policy' ? undefined : 'hidden'}>
-              <Policy voucherType={voucherType} />
-            </div>
-            <div className={tab === 'audience' ? undefined : 'hidden'}>
-              <Audience />
-            </div>
-            <div className={tab === 'scheduling' ? undefined : 'hidden'}>
-              <Scheduling />
-            </div>
-
-            {Object.keys(validationErrors).length > 0 && (
-              <div className="mt-6 border border-red-200 bg-red-50 p-3">
-                <h4 className="mb-2 font-medium text-red-600">
-                  Please fix the following errors:
-                </h4>
-                <ul className="list-disc pl-5 text-sm text-red-500">
-                  {Object.values(validationErrors).map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <DocumentFormShell className="bg-white">
+              <div className={tab === 'type' ? undefined : 'hidden'}>
+                <VoucherTypeSelector
+                  selectedType={voucherType}
+                  onVoucherTypeChange={handleVoucherTypeChange}
+                />
               </div>
-            )}
+              <div className={tab === 'code' ? undefined : 'hidden'}>
+                <Code showErrors={attemptedPublish} />
+              </div>
+              <div className={tab === 'policy' ? undefined : 'hidden'}>
+                <Policy voucherType={voucherType} showErrors={attemptedPublish} />
+              </div>
+              <div className={tab === 'audience' ? undefined : 'hidden'}>
+                <Audience showErrors={attemptedPublish} />
+              </div>
+              <div className={tab === 'scheduling' ? undefined : 'hidden'}>
+                <Scheduling showErrors={attemptedPublish} />
+              </div>
+
+              {attemptedPublish && Object.keys(validationErrors).length > 0 ? (
+                <div className="mt-6 border border-red-200 bg-red-50 p-3">
+                  <h4 className="mb-2 font-medium text-red-600">
+                    Please fix the following errors:
+                  </h4>
+                  <ul className="list-disc pl-5 text-sm text-red-500">
+                    {Object.values(validationErrors).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </DocumentFormShell>
           </div>
+
+          <DocumentFormFooter
+            left={
+              <ShadcnButton
+                type="button"
+                variant="outline"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                onClick={() => router.push('/account_receivables/vouchers')}
+              >
+                Cancel
+              </ShadcnButton>
+            }
+            center={
+              <p className="text-sm text-white/80">
+                Step {tabIndex + 1} of {TABS.length}
+                {!isLastStep ? ' — Publish is on the last step' : ''}
+              </p>
+            }
+            right={
+              <div className="flex flex-wrap items-center gap-2">
+                {!isFirstStep ? (
+                  <ShadcnButton
+                    type="button"
+                    variant="outline"
+                    className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                    onClick={goBack}
+                  >
+                    Back
+                  </ShadcnButton>
+                ) : null}
+                {!isLastStep ? (
+                  <ShadcnButton
+                    type="button"
+                    variant="outline"
+                    className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                    onClick={goNext}
+                  >
+                    Next
+                  </ShadcnButton>
+                ) : (
+                  <ShadcnButton
+                    type="submit"
+                    form="new-voucher"
+                    variant="outline"
+                    className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={16} className="mr-2 animate-spin" />
+                        Publishing…
+                      </>
+                    ) : (
+                      'Publish'
+                    )}
+                  </ShadcnButton>
+                )}
+              </div>
+            }
+          />
         </form>
       </FormProvider>
     </DocumentWorkspace>

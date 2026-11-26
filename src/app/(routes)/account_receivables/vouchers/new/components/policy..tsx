@@ -11,9 +11,15 @@ type ValueType = 'fixed' | 'proportional';
 interface PolicyProps {
   voucherType: VoucherType;
   onValueTypeChange?: (type: ValueType) => void;
+  /** Show validation messages only after Publish on the last step. */
+  showErrors?: boolean;
 }
 
-const Policy: React.FC<PolicyProps> = ({ voucherType, onValueTypeChange }) => {
+const Policy: React.FC<PolicyProps> = ({
+  voucherType,
+  onValueTypeChange,
+  showErrors = false,
+}) => {
   const {
     register,
     watch,
@@ -174,8 +180,8 @@ const Policy: React.FC<PolicyProps> = ({ voucherType, onValueTypeChange }) => {
       <div className="p-6">
         <h3 className="text-lg font-medium mb-8">Policy Settings</h3>
 
-        {/* Validation Error Messages */}
-        {validationErrors.length > 0 && (
+        {/* Validation Error Messages — only after Publish */}
+        {showErrors && validationErrors.length > 0 && (
           <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md">
             <div className="flex items-center mb-2">
               <AlertCircle className="h-5 w-5 text-red-500 mr-2" />

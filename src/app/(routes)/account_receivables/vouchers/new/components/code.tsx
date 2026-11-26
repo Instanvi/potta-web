@@ -5,10 +5,11 @@ import { useFormContext } from 'react-hook-form';
 import { AlertCircle } from 'lucide-react';
 
 interface CodeProps {
-  // Add any props if needed
+  /** Show validation messages only after Publish on the last step. */
+  showErrors?: boolean;
 }
 
-const Code: React.FC<CodeProps> = () => {
+const Code: React.FC<CodeProps> = ({ showErrors = false }) => {
   const { register, watch, setValue, getValues, formState: { errors }, trigger } = useFormContext();
   const [hasAdvancedSettings, setHasAdvancedSettings] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -114,8 +115,8 @@ const Code: React.FC<CodeProps> = () => {
     <div className="bg-white p-6">
       <h3 className="text-xl font-medium mb-8">Code Settings</h3>
       
-      {/* Validation Error Messages - Only show on submit or when fields are touched */}
-      {validationErrors.length > 0 && (
+      {/* Validation Error Messages — only after Publish */}
+      {showErrors && validationErrors.length > 0 && (
         <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md">
           <div className="flex items-center mb-2">
             <AlertCircle className="h-5 w-5 text-red-500 mr-2" />

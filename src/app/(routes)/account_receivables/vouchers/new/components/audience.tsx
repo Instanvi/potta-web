@@ -5,10 +5,11 @@ import { useFormContext } from 'react-hook-form';
 import { Check, ChevronDown, AlertCircle } from 'lucide-react';
 
 interface AudienceProps {
-  // Add any props if needed
+  /** Show validation messages only after Publish on the last step. */
+  showErrors?: boolean;
 }
 
-const Audience: React.FC<AudienceProps> = () => {
+const Audience: React.FC<AudienceProps> = ({ showErrors = false }) => {
   const { register, watch, setValue, formState: { errors } } = useFormContext();
   const autoAddUsers = watch('autoAddUsers') || false;
   const canJoinOnce = watch('canJoinOnce') || false;
@@ -52,8 +53,8 @@ const Audience: React.FC<AudienceProps> = () => {
     <div className="bg-white p-6">
       <h3 className="text-xl font-medium mb-8">Audience Settings</h3>
 
-      {/* Validation Error Messages */}
-      {validationErrors.length > 0 && (
+      {/* Validation Error Messages — only after Publish */}
+      {showErrors && validationErrors.length > 0 && (
         <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md">
           <div className="flex items-center mb-2">
             <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
@@ -76,7 +77,9 @@ const Audience: React.FC<AudienceProps> = () => {
           <div className="relative flex-1 w-1/2">
             <select
               {...register('audience.segment')}
-              className={`w-full appearance-none border ${!audienceSegment ? 'border-red-300' : 'border-gray-300'} bg-white px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
+              className={`w-full appearance-none border ${
+                showErrors && !audienceSegment ? 'border-red-300' : 'border-gray-300'
+              } bg-white px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
             >
               <option value="">Select Audience segment</option>
               <option value="all">All Customers</option>
@@ -88,7 +91,7 @@ const Audience: React.FC<AudienceProps> = () => {
               <ChevronDown className="h-5 w-5 text-gray-400" />
             </div>
           </div>
-          {!audienceSegment && (
+          {showErrors && !audienceSegment && (
             <p className="mt-1 text-sm text-red-500">
               Please select an audience segment
             </p>

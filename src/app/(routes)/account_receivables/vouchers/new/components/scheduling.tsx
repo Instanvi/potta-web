@@ -8,7 +8,8 @@ import { DatePicker, parseDateValue } from '@potta/components/ui/date-picker';
 import { cn } from '@potta/lib/utils';
 
 interface SchedulingProps {
-  // Add any props if needed
+  /** Show validation messages only after Publish on the last step. */
+  showErrors?: boolean;
 }
 
 type DaySchedule = {
@@ -42,7 +43,7 @@ const daysOfWeek = [
 // Time format validation regex - matches formats like "09:00 AM", "9:00 PM", "12:30 AM"
 const timeFormatRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM|am|pm)$/;
 
-const Scheduling: React.FC<SchedulingProps> = () => {
+const Scheduling: React.FC<SchedulingProps> = ({ showErrors = false }) => {
   // Properly type the form context
   const { 
     register, 
@@ -80,10 +81,14 @@ const Scheduling: React.FC<SchedulingProps> = () => {
     setValue('scheduling.validDays', selectedDays);
   }, [selectedDays, setValue]);
 
-  // Validate dates when they change
+  // Validate dates only after Publish — don't nag while filling earlier steps.
   useEffect(() => {
+    if (!showErrors) {
+      clearErrors(['scheduling.programStartDate', 'scheduling.programEndDate']);
+      return;
+    }
     validateDates();
-  }, [startDate, endDate, programNeverEnds]);
+  }, [startDate, endDate, programNeverEnds, showErrors]);
 
   const validateDates = () => {
     // Clear previous errors
@@ -298,8 +303,9 @@ const Scheduling: React.FC<SchedulingProps> = () => {
     }
   };
 
-  // Helper function to safely check for nested errors
+  // Helper function to safely check for nested errors (only after Publish)
   const hasError = (path: string): boolean => {
+    if (!showErrors) return false;
     const parts = path.split('.');
     let current: any = errors;
     
