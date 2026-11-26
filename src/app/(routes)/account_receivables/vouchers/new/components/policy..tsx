@@ -18,40 +18,38 @@ const Policy = ({ voucherType, showErrors = false, onValueTypeChange }: PolicyPr
   const valueType = (watch('valueType') as ValueType) || 'fixed';
   const discountAmount = watch('discountAmount');
   const discountPercent = watch('discountPercent');
-  const cashbackAmount = watch('cashbackAmount');
   const cashbackPercent = watch('cashbackPercent');
+  const cashbackMaximum = watch('cashbackMaximum');
   const balance = watch('balance');
   const loyaltyPoints = watch('loyaltyPoints');
   const loyaltyAmount = watch('loyaltyAmount');
-  const loyaltyPointsValue = watch('loyaltyPointsValue');
   const minimumPurchase = watch('minimumPurchase');
   const maximumDiscount = watch('maximumDiscount');
 
   useEffect(() => {
     if (!getValues('valueType')) setValue('valueType', 'fixed');
     setValue('type', voucherType);
-    if (voucherType === 'GIFT_CARD') setValue('valueType', 'fixed');
+    if (voucherType === 'GIFT_CARD' || voucherType === 'CASHBACK') {
+      setValue('valueType', 'fixed');
+    }
   }, [voucherType, setValue, getValues]);
 
   const handleValueTypeChange = (type: ValueType) => {
     setValue('valueType', type);
     onValueTypeChange?.(type);
     if (type === 'fixed') {
-      unregister('cashbackPercent');
       unregister('discountPercent');
-      unregister('loyaltyPointsValue');
       unregister('loyaltyAmount');
     } else {
       unregister('discountAmount');
-      unregister('loyaltyPoints');
     }
   };
 
-  const missing = (value: unknown) => (showErrors && !value ? 'Required' : undefined);
+  const missing = (value: unknown) => (showErrors && !value && value !== 0 ? 'Required' : undefined);
 
   return (
     <div className="space-y-6">
-      {voucherType !== 'GIFT_CARD' ? (
+      {voucherType === 'DISCOUNT' || voucherType === 'ROYALTY_POINTS' ? (
         <div>
           <span className="mb-1 block text-sm font-normal text-foreground">Value type</span>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -78,7 +76,7 @@ const Policy = ({ voucherType, showErrors = false, onValueTypeChange }: PolicyPr
           <div className={missing(discountAmount) ? 'error-field' : ''}>
             <Input
               type="number"
-              label="Fixed discount amount (XAF)"
+              label="Fixed discount amount"
               name="discountAmount"
               required
               register={register}
@@ -104,122 +102,10 @@ const Policy = ({ voucherType, showErrors = false, onValueTypeChange }: PolicyPr
           </div>
         ) : null}
 
-        {voucherType === 'CASHBACK' && valueType === 'fixed' ? (
-          <div className={missing(cashbackAmount) ? 'error-field' : ''}>
-            <Input
-              type="number"
-              label="Fixed cashback percentage"
-              name="cashbackAmount"
-              required
-              register={register}
-              placeholder="Enter amount"
-              errors={missing(cashbackAmount)}
-            />
-          </div>
-        ) : null}
-
-        {voucherType === 'CASHBACK' && valueType === 'proportional' ? (
-          <>
-            <div className={missing(cashbackAmount) ? 'error-field' : ''}>
-              <Input
-                type="number"
-                label="For every (XAF)"
-                name="cashbackAmount"
-                required
-                register={register}
-                placeholder="1000"
-                errors={missing(cashbackAmount)}
-              />
-            </div>
-            <div className={missing(cashbackPercent) ? 'error-field' : ''}>
-              <Input
-                type="number"
-                label="Cashback percentage"
-                name="cashbackPercent"
-                required
-                min={0}
-                max={100}
-                register={register}
-                placeholder="100"
-                errors={missing(cashbackPercent)}
-              />
-            </div>
-          </>
-        ) : null}
-
-        {voucherType === 'GIFT_CARD' ? (
-          <div className={missing(balance) ? 'error-field' : ''}>
-            <Input
-              type="number"
-              label="Gift card value (XAF)"
-              name="balance"
-              required
-              register={register}
-              placeholder="Enter amount"
-              errors={missing(balance)}
-            />
-          </div>
-        ) : null}
-
-        {voucherType === 'ROYALTY_POINTS' && valueType === 'fixed' ? (
-          <div className={missing(loyaltyPoints) ? 'error-field' : ''}>
-            <Input
-              type="number"
-              label="Points"
-              name="loyaltyPoints"
-              required
-              register={register}
-              placeholder="10"
-              errors={missing(loyaltyPoints)}
-            />
-          </div>
-        ) : null}
-
-        {voucherType === 'ROYALTY_POINTS' && valueType === 'proportional' ? (
-          <>
-            <div className={missing(loyaltyAmount) ? 'error-field' : ''}>
-              <Input
-                type="number"
-                label="For every (XAF)"
-                name="loyaltyAmount"
-                required
-                register={register}
-                placeholder="1000"
-                errors={missing(loyaltyAmount)}
-              />
-            </div>
-            <div className={missing(loyaltyPointsValue) ? 'error-field' : ''}>
-              <Input
-                type="number"
-                label="Points"
-                name="loyaltyPointsValue"
-                required
-                register={register}
-                placeholder="1"
-                errors={missing(loyaltyPointsValue)}
-              />
-            </div>
-          </>
-        ) : null}
-
-        <Input
-          type="text"
-          label="Minimum purchase amount (XAF)"
-          name="minimumPurchase"
-          value={minimumPurchase ?? ''}
-          onchange={(e) => setValue('minimumPurchase', e.target.value)}
-          placeholder="0"
-        />
-        <div
-          className={
-            showErrors && validationErrorsMessage(minimumPurchase, maximumDiscount)
-              ? 'error-field'
-              : ''
-          }
-        >
+        {voucherType === 'DISCOUNT' ? (
           <Input
-            type="text"
-            label="Maximum discount amount (XAF)"
+            type="number"
+            label="Maximum discount amount"
             name="maximumDiscount"
             value={maximumDiscount ?? ''}
             onchange={(e) => setValue('maximumDiscount', e.target.value)}
@@ -230,7 +116,96 @@ const Policy = ({ voucherType, showErrors = false, onValueTypeChange }: PolicyPr
                 : undefined
             }
           />
-        </div>
+        ) : null}
+
+        {voucherType === 'CASHBACK' ? (
+          <>
+            <div className={missing(cashbackPercent) ? 'error-field' : ''}>
+              <Input
+                type="number"
+                label="Cashback percentage"
+                name="cashbackPercent"
+                required
+                min={0}
+                max={100}
+                register={register}
+                placeholder="10"
+                errors={missing(cashbackPercent)}
+              />
+            </div>
+            <div className={missing(cashbackMaximum) ? 'error-field' : ''}>
+              <Input
+                type="number"
+                label="Maximum cashback"
+                name="cashbackMaximum"
+                required
+                register={register}
+                placeholder="5000"
+                errors={missing(cashbackMaximum)}
+              />
+            </div>
+          </>
+        ) : null}
+
+        {voucherType === 'GIFT_CARD' ? (
+          <div className={missing(balance) ? 'error-field' : ''}>
+            <Input
+              type="number"
+              label="Gift card value"
+              name="balance"
+              required
+              register={register}
+              placeholder="Enter amount"
+              errors={missing(balance)}
+            />
+          </div>
+        ) : null}
+
+        {voucherType === 'ROYALTY_POINTS' ? (
+          <>
+            <div className={missing(loyaltyPoints) ? 'error-field' : ''}>
+              <Input
+                type="number"
+                label="Points awarded"
+                name="loyaltyPoints"
+                required
+                register={register}
+                placeholder="10"
+                errors={missing(loyaltyPoints)}
+              />
+            </div>
+            {valueType === 'proportional' ? (
+              <div className={missing(loyaltyAmount) ? 'error-field' : ''}>
+                <Input
+                  type="number"
+                  label="For every (spend amount)"
+                  name="loyaltyAmount"
+                  required
+                  register={register}
+                  placeholder="1000"
+                  errors={missing(loyaltyAmount)}
+                />
+              </div>
+            ) : (
+              <Input
+                type="number"
+                label="Spend amount (optional)"
+                name="loyaltyAmount"
+                register={register}
+                placeholder="1000"
+              />
+            )}
+          </>
+        ) : null}
+
+        <Input
+          type="number"
+          label="Minimum purchase amount"
+          name="minimumPurchase"
+          value={minimumPurchase ?? ''}
+          onchange={(e) => setValue('minimumPurchase', e.target.value)}
+          placeholder="0"
+        />
       </div>
     </div>
   );
@@ -238,8 +213,8 @@ const Policy = ({ voucherType, showErrors = false, onValueTypeChange }: PolicyPr
 
 function validationErrorsMessage(minimumPurchase?: string, maximumDiscount?: string) {
   if (!minimumPurchase || !maximumDiscount) return undefined;
-  const minPurchase = parseFloat(minimumPurchase);
-  const maxDiscount = parseFloat(maximumDiscount);
+  const minPurchase = parseFloat(String(minimumPurchase));
+  const maxDiscount = parseFloat(String(maximumDiscount));
   if (!isNaN(minPurchase) && !isNaN(maxDiscount) && maxDiscount > minPurchase) {
     return 'Maximum discount cannot be greater than minimum purchase amount';
   }

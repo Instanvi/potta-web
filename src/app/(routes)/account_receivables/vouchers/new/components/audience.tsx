@@ -35,13 +35,19 @@ const Audience = ({ showErrors = false }: { showErrors?: boolean }) => {
           id="auto-add-users"
           label="Automatically add new users to this program"
           checked={autoAddUsers}
-          onChange={(checked) => setValue('autoAddUsers', checked)}
+          onChange={(checked) => {
+            setValue('autoAddUsers', checked);
+            setValue('audience.autoAddUsers', checked);
+          }}
         />
         <Checkbox
           id="join-once"
           label="Can only join campaigns once"
           checked={canJoinOnce}
-          onChange={(checked) => setValue('canJoinOnce', checked)}
+          onChange={(checked) => {
+            setValue('canJoinOnce', checked);
+            setValue('audience.canJoinOnce', checked);
+          }}
         />
       </div>
     </div>
