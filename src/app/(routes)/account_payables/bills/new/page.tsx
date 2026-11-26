@@ -37,7 +37,6 @@ export default function NewBillPage() {
         }
       >
         <BillForm
-          showPreview={showPreview}
           onOpenPreview={() => setShowPreview(true)}
           onTogglePreview={togglePreview}
           renderSplit={(form, preview, actions) => (

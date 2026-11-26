@@ -36,7 +36,6 @@ import {
   DocumentFooterLink,
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
-import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
 import { usePreviewDownload } from '@potta/components/document-editor-split';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
 
@@ -59,13 +58,14 @@ interface BillFormProps {
   variant?: 'page' | 'sheet';
   /** Called after save (with the new bill id) or cancel; defaults to navigating back to the bills list. */
   onDone?: (billId?: string) => void;
-  showPreview?: boolean;
   onOpenPreview?: () => void;
-  onClosePreview?: () => void;
   /** @deprecated Prefer onOpenPreview — kept for older callers that toggle. */
   onTogglePreview?: () => void;
-  /** When set, wraps form + preview under FormProvider for the split layout. */
-  renderSplit?: (
+  /**
+   * Side-by-side editor + live preview. Callers that show a bill preview must pass this
+   * (full page and New bill sheet) so the modal dialog path cannot regress.
+   */
+  renderSplit: (
     form: ReactNode,
     preview: ReactNode,
     actions?: { onDownloadPdf?: () => void | Promise<void> },
@@ -75,9 +75,7 @@ interface BillFormProps {
 const BillForm = ({
   variant = 'page',
   onDone,
-  showPreview = false,
   onOpenPreview,
-  onClosePreview,
   onTogglePreview,
   renderSplit,
 }: BillFormProps) => {
@@ -488,34 +486,13 @@ const BillForm = ({
     />
   );
 
-  if (renderSplit) {
-    return (
-      <FormProvider {...methods}>
-        {renderSplit(
-          formColumn,
-          <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />,
-          { onDownloadPdf },
-        )}
-        {vendorCreateSheet}
-      </FormProvider>
-    );
-  }
-
   return (
     <FormProvider {...methods}>
-      {formColumn}
-      <DocumentPreviewDialog
-        open={showPreview}
-        onOpenChange={(open) => {
-          if (open) onOpenPreview?.();
-          else onClosePreview?.();
-        }}
-        downloadTitle="Bill"
-        dialogTitle="Bill preview"
-        onDownloadPdf={onDownloadPdf}
-      >
-        <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />
-      </DocumentPreviewDialog>
+      {renderSplit(
+        formColumn,
+        <BillDraftPreview vendors={vendors} onRegisterDownload={registerDownload} />,
+        { onDownloadPdf },
+      )}
       {vendorCreateSheet}
     </FormProvider>
   );
