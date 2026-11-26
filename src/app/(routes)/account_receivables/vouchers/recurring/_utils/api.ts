@@ -1,10 +1,14 @@
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import { IFilter } from './types';
 import { IInvoicePayload } from './valididation';
 
 export const invoiceApi = {
   create: async (data: IInvoicePayload) => {
-    const result = await axios.post(`/invoice/create`, data);
+    const result = await axios.post(
+      `/invoice/create`,
+      sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+    );
     return result?.data;
   },
   getAll: async ({

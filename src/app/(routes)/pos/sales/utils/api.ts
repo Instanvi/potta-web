@@ -1,11 +1,15 @@
 // import axios from 'config/axios.config';
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import { Filters, SalesReceiptListResponse } from './types';
 import { SalesReceiptPayload } from './validation';
 
 export const salesApi = {
   create: async (data: SalesReceiptPayload) => {
-    const result = await axios.post(`/sales-receipt/create`, data);
+    const result = await axios.post(
+      `/sales-receipt/create`,
+      sanitizeDocumentPayload(data as unknown as Record<string, unknown>),
+    );
     return result?.data;
   },
   getAll: async ({ sortBy, sortOrder, ...filter }: Filters) => {

@@ -10,6 +10,7 @@ import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ListToolbar } from '../../../../_shared/states';
 import { apiErrorMessage, formatAmount, formatDate } from '../../../../_shared/format';
+import { apiOptionalText } from '@/lib/document-api-fields';
 import type { Product } from '../../_utils/types';
 import {
   ADJUSTMENT_TYPE_OPTIONS,
@@ -104,7 +105,7 @@ const NewAdjustmentSheet = ({ open, setOpen }: { open: boolean; setOpen: (o: boo
         ...(isCost ? { costAdjustment: costN } : {}),
         reason: reason.trim(),
         ...(reference.trim() ? { referenceDocument: reference.trim() } : {}),
-        ...(notes.trim() ? { notes: notes.trim() } : {}),
+        ...(apiOptionalText(notes) ? { notes: apiOptionalText(notes) } : {}),
       });
       if (applyNow) await apply.mutateAsync(created.uuid);
       toast.success(applyNow ? 'Adjustment applied' : 'Adjustment saved as pending');

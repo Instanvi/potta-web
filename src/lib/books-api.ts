@@ -1,5 +1,11 @@
 import axios from 'config/axios.config';
 import type { ListMeta } from '@/hooks/use-server-pagination';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
+
+function sanitizedBody(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return data;
+  return sanitizeDocumentPayload(data as Record<string, unknown>);
+}
 
 /** Pluggable CRUD client used by BooksResourcePage (default: potta-backend). */
 export type BooksResourceClient = {
@@ -20,9 +26,10 @@ export const booksApi: BooksResourceClient = {
   list: (path: string, filter: Record<string, unknown> = {}, params: Record<string, unknown> = {}) =>
     axios.post(`/${path}/filter`, filter, { params }).then((r) => r.data),
   get: (path: string, id: string) => axios.get(`/${path}/details/${id}`).then((r) => r.data),
-  create: (path: string, data: unknown) => axios.post(`/${path}/create`, data).then((r) => r.data),
+  create: (path: string, data: unknown) =>
+    axios.post(`/${path}/create`, sanitizedBody(data)).then((r) => r.data),
   update: (path: string, id: string, data: unknown) =>
-    axios.put(`/${path}/${id}`, data).then((r) => r.data),
+    axios.put(`/${path}/${id}`, sanitizedBody(data)).then((r) => r.data),
   remove: (path: string, id: string) => axios.delete(`/${path}/${id}`).then((r) => r.data),
   action: (path: string, id: string, action: string, data?: unknown) =>
     axios.post(`/${path}/${id}/${action}`, data).then((r) => r.data),

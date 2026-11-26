@@ -42,6 +42,40 @@ export function apiOptionalAddress(value: unknown): string | undefined {
   return apiOptionalText(value);
 }
 
+const OPTIONAL_TEXT_KEYS = new Set([
+  'notes',
+  'note',
+  'message',
+  'billingAddress',
+  'shippingAddress',
+]);
+
+const TERMS_KEYS = new Set(['paymentTerms']);
+
+/**
+ * Final pass for create/update bodies: drop empty/short optional text and
+ * normalize payment terms. Safe to run on any plain object payload.
+ */
+export function sanitizeDocumentPayload<T extends Record<string, unknown>>(
+  payload: T,
+): T {
+  const next: Record<string, unknown> = { ...payload };
+  for (const key of Object.keys(next)) {
+    if (TERMS_KEYS.has(key)) {
+      const terms = apiPaymentTerms(next[key]);
+      if (terms) next[key] = terms;
+      else delete next[key];
+      continue;
+    }
+    if (OPTIONAL_TEXT_KEYS.has(key)) {
+      const text = apiOptionalText(next[key]);
+      if (text) next[key] = text;
+      else delete next[key];
+    }
+  }
+  return next as T;
+}
+
 /** Drop empty or short optional keys from a payload object. */
 export function withOptionalDocumentFields<T extends Record<string, unknown>>(
   payload: T,
@@ -81,5 +115,5 @@ export function withOptionalDocumentFields<T extends Record<string, unknown>>(
     else delete next.shippingAddress;
   }
 
-  return next as T;
+  return sanitizeDocumentPayload(next as T);
 }

@@ -1,4 +1,5 @@
 import axios from 'config/axios.config';
+import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
 import {
   CreateCreditNotePayload,
   CreditNote,
@@ -24,10 +25,13 @@ export const creditNoteApi = {
   },
   create: async (data: CreateCreditNotePayload): Promise<CreditNote> => {
     // Drop undefined/empty optional ids so the API never sees blank uuids.
-    const body = Object.fromEntries(
-      Object.entries(data).filter(
-        ([, v]) => v !== undefined && v !== null && v !== ''
-      )
+    // Keep `reason` (required); sanitize only optional notes-style fields.
+    const body = sanitizeDocumentPayload(
+      Object.fromEntries(
+        Object.entries(data).filter(
+          ([, v]) => v !== undefined && v !== null && v !== '',
+        ),
+      ),
     );
     const result = await axios.post('/credit-note/create', body);
     return result.data;

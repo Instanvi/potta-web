@@ -1,5 +1,7 @@
 /** Templates and CSV payloads for customer and vendor import. */
 
+import { apiOptionalText, apiPaymentTerms } from '@/lib/document-api-fields';
+
 export type ContactImportKind = 'customer' | 'vendor';
 
 const CUSTOMER_HEADERS = [
@@ -255,12 +257,14 @@ export function prepareContactImport(kind: ContactImportKind, rows: Record<strin
     if (row.currency && CURRENCIES.has(row.currency)) payload.currency = row.currency;
     if (row.classification && CLASSIFICATIONS.has(row.classification)) payload.classification = row.classification;
     if (row.industry) payload.industry = row.industry;
-    if (row.paymentTerms) payload.paymentTerms = row.paymentTerms;
+    const paymentTerms = apiPaymentTerms(row.paymentTerms);
+    if (paymentTerms) payload.paymentTerms = paymentTerms;
     if (row.website) payload.website = row.website;
     if (row.taxId) payload.taxId = row.taxId;
     if (row.creditLimit) payload.creditLimit = row.creditLimit;
     if (row.openingBalance) payload.openingBalance = row.openingBalance;
-    if (notes) payload.notes = notes;
+    const notesValue = apiOptionalText(notes);
+    if (notesValue) payload.notes = notesValue;
     prepared.push(payload);
   });
 

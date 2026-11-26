@@ -1,5 +1,6 @@
 import { payrollClient } from 'config/axios.config';
 import { extractBooksRows } from '@/lib/books-api';
+import { apiOptionalText } from '@/lib/document-api-fields';
 
 export type ExpenseProject = Record<string, unknown> & {
   id?: string;
@@ -62,7 +63,7 @@ function toExpenseBody(body: Record<string, unknown>) {
     budget_amount: body.budget ?? body.budget_amount,
     start_date: body.startDate ?? body.start_date,
     end_date: body.endDate ?? body.end_date,
-    notes: body.notes,
+    notes: apiOptionalText(body.notes) ?? null,
   };
 }
 
