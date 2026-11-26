@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { PhoneInput } from '@potta/components/phoneInput';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { orgDefaultCallingCode } from '@/lib/org-phone-country';
+import { apiOptionalText, apiPaymentTerms } from '@/lib/document-api-fields';
 
 interface VendorCreateProps {
   open?: boolean;
@@ -145,13 +146,17 @@ const SliderVendor: React.FC<VendorCreateProps> = ({
   }, [isSliderOpen, reset, defaultCalling]);
 
   const onSubmit = async (data: VendorPayload) => {
-    // The API names the field taxId and rejects empty optional strings.
-    const { taxID, industry, creditLimit, ...rest } = data;
+    // The API names the field taxId and rejects empty/short optional strings.
+    const { taxID, industry, creditLimit, paymentTerms, notes, ...rest } = data;
     const payload = {
       ...Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== '' && v !== undefined && v !== null)),
       ...(taxID ? { taxId: taxID } : {}),
       ...(industry ? { industry } : {}),
       ...(creditLimit ? { creditLimit: Number(creditLimit) } : {}),
+      ...(apiPaymentTerms(paymentTerms)
+        ? { paymentTerms: apiPaymentTerms(paymentTerms) }
+        : {}),
+      ...(apiOptionalText(notes) ? { notes: apiOptionalText(notes) } : {}),
     } as VendorPayload;
     try {
       const created = await mutation.mutateAsync(payload);

@@ -75,6 +75,7 @@ import { toast } from 'sonner';
 import { PhoneInput } from '@potta/components/phoneInput';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { orgDefaultCallingCode } from '@/lib/org-phone-country';
+import { apiOptionalText, apiPaymentTerms } from '@/lib/document-api-fields';
 
 interface EditVendorProps {
   vendor: VendorFormData | null; // Existing vendor data
@@ -186,7 +187,7 @@ const EditVendor: React.FC<EditVendorProps> = ({
       type: data.type,
       name: data.name,
       vendorId: data.vendorId,
-      paymentTerms: data.paymentTerms || null,
+      paymentTerms: apiPaymentTerms(data.paymentTerms) ?? null,
       accountDetails: data.accountDetails || null,
       openingBalance: data.openingBalance || undefined,
       currency: data.currency,
@@ -196,7 +197,7 @@ const EditVendor: React.FC<EditVendorProps> = ({
       taxId: data.taxId || null,
       website: data.website || null,
       classification: data.classification,
-      notes: data.notes || null,
+      notes: apiOptionalText(data.notes) ?? null,
       address: {
         address: data.address.address,
         city: data.address.city,

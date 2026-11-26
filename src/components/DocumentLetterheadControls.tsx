@@ -129,33 +129,35 @@ export function DocumentLetterheadControls({
               className="h-10"
             />
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Accent color</Label>
-            <div className="flex flex-wrap items-center gap-2">
-              {ACCENTS.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  title={c.name}
-                  onClick={() => setPrefs({ accent: c.value })}
-                  className={cn(
-                    'size-8 rounded-full border-2 transition-transform',
-                    prefs.accent === c.value
-                      ? 'scale-110 border-foreground'
-                      : 'border-transparent',
-                  )}
-                  style={{ backgroundColor: c.value }}
+          {!flush ? (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Accent color</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                {ACCENTS.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    title={c.name}
+                    onClick={() => setPrefs({ accent: c.value })}
+                    className={cn(
+                      'size-8 rounded-full border-2 transition-transform',
+                      prefs.accent === c.value
+                        ? 'scale-110 border-foreground'
+                        : 'border-transparent',
+                    )}
+                    style={{ backgroundColor: c.value }}
+                  />
+                ))}
+                <input
+                  type="color"
+                  value={prefs.accent}
+                  onChange={(e) => setPrefs({ accent: e.target.value })}
+                  className="size-8 cursor-pointer rounded-full border border-black/10 bg-transparent p-0"
+                  title="Custom color"
                 />
-              ))}
-              <input
-                type="color"
-                value={prefs.accent}
-                onChange={(e) => setPrefs({ accent: e.target.value })}
-                className="size-8 cursor-pointer rounded-full border border-black/10 bg-transparent p-0"
-                title="Custom color"
-              />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </DocumentFormCard>

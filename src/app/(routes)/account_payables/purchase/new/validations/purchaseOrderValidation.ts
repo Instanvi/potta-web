@@ -19,19 +19,17 @@ export const purchaseOrderValidationSchema = yup.object().shape({
 
   shippingAddress: yup
     .string()
-    .required('Shipping address is required')
-    .min(5, 'Shipping address must be at least 5 characters')
+    .optional()
     .max(500, 'Shipping address must not exceed 500 characters'),
 
-  paymentMethod: yup.string().trim().required('Payment method is required'),
+  paymentMethod: yup.string().trim().optional(),
 
   paymentTerms: yup
     .string()
-    .required('Payment terms are required')
-    .min(10, 'Payment terms must be at least 10 characters')
+    .optional()
     .max(1000, 'Payment terms must not exceed 1000 characters'),
 
-  note: yup.string().max(1000, 'Notes must not exceed 1000 characters'),
+  note: yup.string().optional().max(1000, 'Notes must not exceed 1000 characters'),
 
   lineItems: yup
     .array()
@@ -75,19 +73,17 @@ export const fieldSchemas = {
 
   shippingAddress: yup
     .string()
-    .required('Shipping address is required')
-    .min(5, 'Shipping address must be at least 5 characters')
+    .optional()
     .max(500, 'Shipping address must not exceed 500 characters'),
 
-  paymentMethod: yup.string().trim().required('Payment method is required'),
+  paymentMethod: yup.string().trim().optional(),
 
   paymentTerms: yup
     .string()
-    .required('Payment terms are required')
-    .min(10, 'Payment terms must be at least 10 characters')
+    .optional()
     .max(1000, 'Payment terms must not exceed 1000 characters'),
 
-  note: yup.string().max(1000, 'Notes must not exceed 1000 characters'),
+  note: yup.string().optional().max(1000, 'Notes must not exceed 1000 characters'),
 };
 
 // Validation functions

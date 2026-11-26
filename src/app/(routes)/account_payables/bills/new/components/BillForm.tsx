@@ -39,6 +39,7 @@ import {
 import { DocumentPreviewDialog } from '@potta/components/document-preview-dialog';
 import { usePreviewDownload } from '@potta/components/document-editor-split';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
+import { apiOptionalText } from '@/lib/document-api-fields';
 
 const CURRENCIES: { value: BillCurrency; label: string }[] = [
   { value: 'XAF', label: 'XAF (FCFA)' },
@@ -182,7 +183,7 @@ const BillForm = ({
         currency: values.currency,
         paymentMethod: values.paymentMethod,
         expenseAccountCode: values.expenseAccountCode.trim(),
-        notes: values.notes?.trim() || undefined,
+        notes: apiOptionalText(values.notes),
         lineItems: values.lineItems.map((l) => ({
           description: l.description.trim(),
           quantity: Number(l.quantity),
