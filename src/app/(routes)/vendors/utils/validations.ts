@@ -126,7 +126,7 @@ export const vendorSchema = yup.object().shape({
     .typeError('Must be a number')
     .min(0, 'Credit limit must be positive'),
   
-  notes: yup.string(),
+  notes: yup.string().nullable().optional(),
 });
 
 export const updateVendorSchema = yup.object().shape({

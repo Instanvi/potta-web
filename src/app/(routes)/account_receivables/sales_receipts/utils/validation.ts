@@ -47,7 +47,7 @@ const salesReceiptSchema = yup.object({
       (value) => !value || !isNaN(Date.parse(value))
     ),
   paymentReference: yup.string(),
-  notes: yup.string(),
+  notes: yup.string().nullable().optional(),
   paymentMethod: yup
     .string()
     .required('Payment method is required')
