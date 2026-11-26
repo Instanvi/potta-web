@@ -177,6 +177,33 @@ export const pdfShellStyles = StyleSheet.create({
     color: '#4b5563',
     lineHeight: 1.5,
   },
+  emptyLine: {
+    paddingVertical: 16,
+    textAlign: 'center',
+    color: '#9ca3af',
+    fontSize: 10,
+  },
+  totalsWrap: {
+    marginLeft: 'auto',
+    width: 220,
+    marginTop: 8,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  totalLabel: { fontSize: 10, color: '#4b5563' },
+  totalValue: { fontSize: 10, fontFamily: 'Helvetica-Bold' },
+  grandRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    paddingTop: 10,
+    marginTop: 4,
+  },
+  grandLabel: { fontSize: 12, fontFamily: 'Helvetica-Bold' },
+  grandValue: { fontSize: 12, fontFamily: 'Helvetica-Bold' },
   footer: {
     position: 'absolute',
     bottom: 24,
@@ -267,6 +294,99 @@ export function PartyBlock({
         <Text key={`${line}-${i}`} style={s.partyLine}>
           {line}
         </Text>
+      ))}
+    </View>
+  );
+}
+
+/** Line table shared by invoices, bills, receipts, and purchase orders. */
+export function LineItemsTable({
+  columns,
+  rows,
+  emptyLabel = 'No line items yet',
+}: {
+  columns: { header: string; width: string; align?: 'right' }[];
+  rows: string[][];
+  emptyLabel?: string;
+}) {
+  const s = pdfShellStyles;
+  const align = (column?: { align?: 'right' }) =>
+    column?.align === 'right' ? s.right : undefined;
+  return (
+    <View style={{ marginBottom: 20 }}>
+      <View style={s.tableHeader}>
+        {columns.map((column) => (
+          <Text
+            key={column.header}
+            style={[s.th, align(column), { width: column.width }]}
+          >
+            {column.header}
+          </Text>
+        ))}
+      </View>
+      {rows.length === 0 ? (
+        <Text style={s.emptyLine}>{emptyLabel}</Text>
+      ) : (
+        rows.map((cells, index) => (
+          <View key={`line-${index}`} style={s.tableRow} wrap={false}>
+            {cells.map((cell, cellIndex) => (
+              <Text
+                key={`${columns[cellIndex]?.header ?? 'cell'}-${cellIndex}`}
+                style={[s.td, align(columns[cellIndex]), { width: columns[cellIndex]?.width }]}
+              >
+                {cell}
+              </Text>
+            ))}
+          </View>
+        ))
+      )}
+    </View>
+  );
+}
+
+/** Right-aligned subtotal rows plus an accent total. */
+export function TotalsBlock({
+  rows,
+  total,
+  accent = PDF_ACCENT,
+}: {
+  rows: { label: string; amount: string }[];
+  total: string;
+  accent?: string;
+}) {
+  const s = pdfShellStyles;
+  return (
+    <View style={s.totalsWrap}>
+      {rows.map((row) => (
+        <View key={row.label} style={s.totalRow}>
+          <Text style={s.totalLabel}>{row.label}</Text>
+          <Text style={s.totalValue}>{row.amount}</Text>
+        </View>
+      ))}
+      <View style={[s.grandRow, { borderTopColor: accent }]}>
+        <Text style={[s.grandLabel, { color: accent }]}>Total</Text>
+        <Text style={[s.grandValue, { color: accent }]}>{total}</Text>
+      </View>
+    </View>
+  );
+}
+
+/** Labelled note blocks. Empty values are omitted. */
+export function NotesSection({
+  items,
+}: {
+  items: Array<{ label: string; value?: string | null }>;
+}) {
+  const visible = items.filter((item) => item.value?.trim());
+  if (visible.length === 0) return null;
+  const s = pdfShellStyles;
+  return (
+    <View style={s.notes}>
+      {visible.map((item, index) => (
+        <View key={item.label} style={index > 0 ? { marginTop: 10 } : undefined}>
+          <Text style={s.notesLabel}>{item.label}</Text>
+          <Text style={s.notesBody}>{item.value}</Text>
+        </View>
       ))}
     </View>
   );
