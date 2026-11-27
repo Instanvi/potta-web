@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import RootLayout from '@/app/(routes)/layout';
-import { ErrorState, ListToolbar, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
+import { ErrorState, ListToolbar, PageContainer } from '@/app/(routes)/_shared/states';
 import { useCreateEmployee, useGetEmployees } from '@/app/(routes)/accounting/employees/hooks';
 import {
   createEmployeeSchema,
@@ -12,7 +12,7 @@ import {
 } from '@/app/(routes)/accounting/employees/utils/validations';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { Button } from '@/components/shadcn/button';
 import Input from '@/components/input';
 import {
@@ -82,8 +82,7 @@ export function PayrollEmployeesPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Employees"
+        <ListToolbar
           actions={
             <>
               <Button
@@ -98,13 +97,13 @@ export function PayrollEmployeesPage() {
               >
                 <i className={`ri-refresh-line text-base ${isFetching ? 'animate-spin' : ''}`} />
               </Button>
+              <ListActionsMenu table={table} />
               <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
                 New
               </Button>
             </>
           }
-        />
-        <ListToolbar actions={table ? <DataTableViewOptions table={table} /> : null}>
+        >
           <input
             type="search"
             value={searchInput}
