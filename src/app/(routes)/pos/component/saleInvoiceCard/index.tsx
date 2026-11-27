@@ -282,8 +282,8 @@ const SaleInvoiceCard = () => {
                 onClick={() => handleActive(category.id)}
                 className={`mx-[3px] min-w-fit whitespace-nowrap rounded-[15px] px-[15px] py-[5px] text-xs transition-colors ${
                   isActive
-                    ? 'bg-[#1E5B13] text-white ring-2 ring-[#A0E86F] ring-offset-1'
-                    : 'bg-[#1E5B13] text-white hover:bg-green-200 hover:text-black'
+                    ? 'bg-[#98FB98] text-[#1E5B13]'
+                    : 'bg-[#1E5B13] text-white hover:bg-[#98FB98] hover:text-[#1E5B13]'
                 }`}
               >
                 {category.name}
