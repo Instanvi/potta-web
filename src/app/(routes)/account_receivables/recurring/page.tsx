@@ -26,6 +26,8 @@ export default function Page() {
         { key: 'name', label: 'Name' },
         { key: 'documentType', label: 'Document type' },
         { key: 'frequency', label: 'Frequency' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
+        { key: 'paymentMethod', label: 'Payment method', type: 'paymentMethod' },
         { key: 'isActive', label: 'Active' },
         { key: 'nextRunDate', label: 'Next run' },
       ]}
@@ -47,6 +49,7 @@ export default function Page() {
         { key: 'nextRunDate', label: 'Next run date', type: 'date' },
         { key: 'endDate', label: 'End date', type: 'date' },
         { key: 'customerId', label: 'Customer', type: 'customer' },
+        { key: 'paymentMethod', label: 'Payment method', type: 'paymentMethod' },
         { key: 'lines', label: 'Line items', type: 'lines' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
       ]}

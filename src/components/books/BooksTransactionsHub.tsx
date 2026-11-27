@@ -16,6 +16,7 @@ import { FIELD_INPUT } from '@/lib/field-styles';
 import { booksApi, extractBooksRows, rowId } from '@/lib/books-api';
 import axios, { payrollClient } from 'config/axios.config';
 import { cn } from '@/lib/utils';
+import { useBooksLabelMaps } from '@/hooks/use-books-label-maps';
 
 export type HubTab = {
   id: string;
@@ -23,7 +24,7 @@ export type HubTab = {
   /** Books filter path, GET path, or payroll path */
   path: string;
   listMode?: 'filter' | 'get' | 'payroll';
-  columns: { key: string; label: string }[];
+  columns: { key: string; label: string; type?: string }[];
 };
 
 export function BooksTransactionsHub({
@@ -91,6 +92,7 @@ export function BooksTransactionsHub({
     () => [{ key: '_type', label: 'Type' }, ...columns],
     [columns],
   );
+  const { formatCell } = useBooksLabelMaps(hubColumns);
   const hubRows = useMemo<Record<string, unknown>[]>(
     () =>
       rows.map((row) => ({
@@ -150,6 +152,7 @@ export function BooksTransactionsHub({
               isLoading={loading}
               emptyMessage="No transactions"
               onTableChange={onTableChange}
+              formatCell={formatCell}
             />
           )}
         </div>

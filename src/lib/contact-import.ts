@@ -5,6 +5,7 @@ import { apiOptionalText, apiPaymentTerms } from '@/lib/document-api-fields';
 export type ContactImportKind = 'customer' | 'vendor';
 
 const CUSTOMER_HEADERS = [
+  'customerId',
   'firstName',
   'lastName',
   'type',
@@ -14,6 +15,7 @@ const CUSTOMER_HEADERS = [
   'contactPerson',
   'creditLimit',
   'taxId',
+  'paymentTerms',
   'date_of_birth',
   'address',
   'city',
@@ -45,6 +47,7 @@ const VENDOR_HEADERS = [
 ];
 
 const CUSTOMER_SAMPLE = [
+  '',
   'Jane',
   'Doe',
   'INDIVIDUAL',
@@ -54,6 +57,7 @@ const CUSTOMER_SAMPLE = [
   'Jane Doe',
   '0',
   '',
+  'Net 30 days',
   '1990-01-01',
   '12 Main St',
   'Douala',
@@ -226,6 +230,8 @@ export function prepareContactImport(kind: ContactImportKind, rows: Record<strin
       if (row.contactPerson) payload.contactPerson = row.contactPerson;
       if (row.creditLimit) payload.creditLimit = row.creditLimit;
       if (row.taxId) payload.taxId = row.taxId;
+      const paymentTerms = apiPaymentTerms(row.paymentTerms);
+      if (paymentTerms) payload.paymentTerms = paymentTerms;
       if (/^\d{4}-\d{2}-\d{2}/.test(row.date_of_birth || '')) payload.date_of_birth = row.date_of_birth.slice(0, 10);
       const address = addressJson(row);
       if (address) payload.address = address;

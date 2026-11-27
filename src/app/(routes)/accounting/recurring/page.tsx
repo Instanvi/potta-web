@@ -26,6 +26,9 @@ export default function Page() {
         { key: 'name', label: 'Name' },
         { key: 'documentType', label: 'Document type' },
         { key: 'frequency', label: 'Frequency' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
+        { key: 'vendorId', label: 'Vendor', type: 'vendor' },
+        { key: 'paymentMethod', label: 'Payment method', type: 'paymentMethod' },
         { key: 'isActive', label: 'Active' },
         { key: 'nextRunDate', label: 'Next run' },
       ]}

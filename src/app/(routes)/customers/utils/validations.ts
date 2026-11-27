@@ -13,7 +13,7 @@ const addressSchema = yup.object().shape({
 })
 const CustomerStatusEnum = [ 'pending', 'schedule', 'complete', 'enabled', 'disabled', 'available', 'expired', 'taken' ] as const
 const CustomerTypeEnum = ["INDIVIDUAL", "COMPANY",] as const;
-const CustomerGenderEnum = ["male", "female","others"]
+const CustomerGenderEnum = ["male", "female", "other"]
 const phoneNumberRegex = /^\+\d{1,4}\s?\d{6,14}$/
 
 export const customerSchema = yup.object().shape({

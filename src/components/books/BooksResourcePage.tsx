@@ -17,7 +17,6 @@ import {
 import { FIELD_INPUT } from '@/lib/field-styles';
 import {
   booksApi,
-  cellValue,
   extractBooksMeta,
   extractBooksRows,
   type BooksResourceClient,
@@ -52,9 +51,10 @@ import {
   type BooksAction,
   type BooksField,
 } from '@/components/books/books-form-fields';
+import { useBooksLabelMaps } from '@/hooks/use-books-label-maps';
 
 export type { BooksAction, BooksField };
-export type BooksColumn = { key: string; label: string };
+export type BooksColumn = { key: string; label: string; type?: string };
 
 export type BooksResourcePageProps = {
   resourcePath: string;
@@ -118,6 +118,7 @@ export function BooksResourcePage({
     resetOn: [searchApplied, resourcePath, JSON.stringify(listParams ?? {})],
   });
   const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
+  const { formatCell } = useBooksLabelMaps(columns, fields);
 
   // page/limit come from server pagination state; listParams may still set sortBy etc.
   const baseParams = useMemo(
@@ -149,11 +150,11 @@ export function BooksResourcePage({
         key: c.key,
         header: c.label,
         value: (row: Record<string, unknown>) => {
-          const v = cellValue(row, c.key);
+          const v = formatCell(row, c.key, c.type);
           return v === '—' ? '' : v;
         },
       })),
-    [columns]
+    [columns, formatCell]
   );
 
   const fetchAllRows = () =>
@@ -319,6 +320,7 @@ export function BooksResourcePage({
               serverPagination={tableProps(meta, rows.length)}
               showViewOptions={false}
               onTableChange={onTableChange}
+              formatCell={formatCell}
             />
           )}
         </div>
@@ -392,10 +394,16 @@ export function BooksResourcePage({
                         subtitle: title,
                         fields: fields
                           .filter((f) => f.type !== 'lines' && f.type !== 'json')
-                          .map((f) => ({
-                            label: f.label,
-                            value: editForm[f.key] ?? '',
-                          })),
+                          .map((f) => {
+                            const row = {
+                              ...(selected ?? {}),
+                              [f.key]: editForm[f.key] ?? '',
+                            } as Record<string, unknown>;
+                            return {
+                              label: f.label,
+                              value: formatCell(row, f.key, f.type),
+                            };
+                          }),
                         lines,
                         seller: orgToSeller(org),
                         currency: editForm.currency || undefined,

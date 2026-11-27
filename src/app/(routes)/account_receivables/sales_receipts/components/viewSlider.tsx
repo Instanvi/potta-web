@@ -4,6 +4,7 @@ import Slider from '@potta/components/slideover';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import { useGetOneReceipt } from '../hooks/useGetOneReceipt';
 import Button from '@potta/components/button';
+import { paymentMethodDisplayLabel } from '@/lib/payment-method-labels';
 
 // Define the response type based on the provided data
 interface LineItem {
@@ -292,7 +293,8 @@ const ViewReceiptSlider: React.FC<ReceiptDetailsProps> = ({
                   <div className="pl-4">
                     <p>
                       <strong>Payment Method:</strong>{' '}
-                      {data.paymentMethod || 'Not specified'}
+                      {paymentMethodDisplayLabel(data.paymentMethod) ||
+                        'Not specified'}
                     </p>
                     {data.notes && (
                       <div className="mt-4">

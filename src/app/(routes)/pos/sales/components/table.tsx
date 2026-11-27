@@ -26,6 +26,8 @@ import ConfirmModal from '../../../_shared/ConfirmModal';
 import { exportRows } from '@/lib/export-file';
 import { sendPartyDocument } from '@/lib/document-send';
 import type { DocumentChannel } from '@/components/document-channel-menu';
+import { usePaymentMethods } from '@potta/app/(routes)/accounting/payment-methods/hooks';
+import { paymentMethodDisplayLabel } from '@/lib/payment-method-labels';
 
 
 /** saleDate range for a date preset, as a nestjs-paginate $btw filter (local days). */
@@ -132,6 +134,13 @@ const SaleTable = () => {
   };
 
   const { data, isLoading, error, refetch } = useGetAllSalesReceipts(filter);
+  const { data: paymentMethodsData } = usePaymentMethods({ page: 1, limit: 100 });
+  const orgPaymentMethods = (paymentMethodsData?.data ?? []).map((m) => ({
+    code: m.code,
+    name: m.name,
+  }));
+  const methodLabel = (code?: string | null) =>
+    paymentMethodDisplayLabel(code, orgPaymentMethods);
 
   const handleRowClick = (row: ResponseSalesReceipt) => {
     setOpenViewModal(row.uuid);
@@ -208,7 +217,7 @@ const SaleTable = () => {
       accessorKey: 'paymentMethod',
       header: 'Method',
       cell: ({ row: { original } }) => (
-        <div className="">{original.paymentMethod || '—'}</div>
+        <div className="">{methodLabel(original.paymentMethod)}</div>
       ),
     },
     {
