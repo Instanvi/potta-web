@@ -24,6 +24,8 @@ interface CustomerCreateProps {
   setOpen?: (open: boolean) => void; // Optional setter from parent
   /** When false, hide the default list-page trigger (use with external + button). */
   showTrigger?: boolean;
+  /** Called with the new customer uuid when create succeeds. */
+  onCreated?: (id?: string) => void;
 }
 
 // Define the PhoneMetadata interface to match what our PhoneInput component provides
@@ -37,6 +39,7 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
   open: controlledOpen, // Renamed to avoid naming conflict
   setOpen: setControlledOpen,
   showTrigger = true,
+  onCreated,
 }) => {
   const [tabs, setTabs] = useState<string>('Address');
   // Local state as fallback if no controlled state is provided
@@ -108,8 +111,14 @@ const SliderCustomer: React.FC<CustomerCreateProps> = ({
   const onSubmit = (data: CustomerPayload) => {
     console.log('Submitted Data:', data);
     mutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (response: any) => {
         toast.success('Customer created successfully!');
+        const id =
+          response?.data?.uuid ??
+          response?.uuid ??
+          response?.data?.id ??
+          response?.id;
+        onCreated?.(typeof id === 'string' ? id : undefined);
         reset();
         setIsOpen(false);
       },

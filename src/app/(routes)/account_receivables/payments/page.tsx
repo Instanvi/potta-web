@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="ar-payments"
       title="AR payment"
+      createLabel="New AR Payment"
       columns={[
         { key: 'paymentDate', label: 'Date' },
         { key: 'amount', label: 'Amount' },

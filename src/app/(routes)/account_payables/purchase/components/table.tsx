@@ -437,7 +437,7 @@ const InvoiceTable = () => {
             />
             </ListActionsMenu>
             <Button
-              text={'Create Purchase Order'}
+              text={'New Purchase Order'}
               icon={<i className="ri-file-add-line"></i>}
               theme="default"
               type={'button'}

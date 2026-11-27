@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="item-receipt"
       title="Item receipt"
+      createLabel="New Item Receipt"
       createHref="/inventory/receipts/new"
       documentKind="item_receipt"
       columns={[
@@ -20,8 +21,9 @@ export default function Page() {
         { key: 'vendorId', label: 'Vendor', type: 'vendor' },
         { key: 'receivedDate', label: 'Received date', type: 'date' },
         { key: 'postInventory', label: 'Post inventory', type: 'checkbox' },
-        { key: 'notes', label: 'Notes', type: 'textarea' },
         { key: 'lines', label: 'Received items', type: 'lines' },
+        { key: 'notes', label: 'Additional notes', type: 'textarea' },
+        { key: 'attachments', label: 'Attachments', type: 'attachments' },
       ]}
       actions={[
         { label: 'Post inventory', action: 'post-inventory', confirm: true },

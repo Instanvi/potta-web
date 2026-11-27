@@ -7,6 +7,7 @@ export default function Page() {
     <BooksDocumentCreatePage
       resourcePath="supplier-credit"
       title="Supplier credit"
+      createLabel="Create Supplier Credit"
       closeHref="/account_payables/credits"
       fields={[
         { key: 'vendorId', label: 'Vendor', type: 'vendor' },
@@ -14,8 +15,9 @@ export default function Page() {
         { key: 'creditAmount', label: 'Credit amount', type: 'number' },
         { key: 'issueDate', label: 'Issue date', type: 'date' },
         { key: 'reason', label: 'Reason' },
-        { key: 'notes', label: 'Notes', type: 'textarea' },
         { key: 'lines', label: 'Line items', type: 'lines' },
+        { key: 'notes', label: 'Additional notes', type: 'textarea' },
+        { key: 'attachments', label: 'Attachments', type: 'attachments' },
       ]}
     />
   );

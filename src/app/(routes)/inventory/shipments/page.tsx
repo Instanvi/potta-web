@@ -7,6 +7,8 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="shipment"
       title="Shipment"
+      createLabel="New Shipment"
+      createHref="/inventory/shipments/new"
       documentKind="shipment"
       columns={[
         { key: 'shipDate', label: 'Ship date' },
@@ -22,8 +24,9 @@ export default function Page() {
         { key: 'shipDate', label: 'Ship date', type: 'date' },
         { key: 'trackingNumber', label: 'Tracking number' },
         { key: 'carrier', label: 'Carrier' },
-        { key: 'notes', label: 'Notes', type: 'textarea' },
         { key: 'lines', label: 'Line items', type: 'lines' },
+        { key: 'notes', label: 'Additional notes', type: 'textarea' },
+        { key: 'attachments', label: 'Attachments', type: 'attachments' },
       ]}
     />
   );
