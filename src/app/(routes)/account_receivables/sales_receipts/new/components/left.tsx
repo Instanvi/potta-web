@@ -47,7 +47,7 @@ interface LineItemsDto {
   description: string;
   quantity: number;
   discountCap: number;
-  discountType: 'FlatRate' | 'Percentage' | 'PercentageWithCap'; // Use literal types here
+  discountType: 'FLAT_RATE' | 'PERCENTAGE' | 'PERCENTAGE_WITH_CAP';
   unitPrice: number;
   taxRate: number;
   discountRate: number;
@@ -259,7 +259,7 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void } = {}) => {
       description: item.name,
       quantity: item.qty,
       discountCap: 0,
-      discountType: 'FlatRate', // Use the literal string without 'as const'
+      discountType: 'FLAT_RATE',
       unitPrice: Number(item.price),
       taxRate: item.tax,
       discountRate: 0,
