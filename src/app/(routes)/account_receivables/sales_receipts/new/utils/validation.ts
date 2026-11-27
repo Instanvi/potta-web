@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 
 // Define the discount type options
-const discountTypeOptions = ['FlatRate', 'Percentage', 'PercentageWithCap'];
+const discountTypeOptions = ['FLAT_RATE', 'PERCENTAGE', 'PERCENTAGE_WITH_CAP'];
 
 // Define the LineItemsDto schema
 export const LineItemsDtoSchema = Yup.object({

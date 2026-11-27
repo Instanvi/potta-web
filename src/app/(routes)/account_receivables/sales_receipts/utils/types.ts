@@ -41,7 +41,7 @@ export const paymentMethodLabel = (value?: string | null) =>
 export const SALES_RECEIPT_PAYMENT_METHOD_VALUES =
   SALES_RECEIPT_PAYMENT_METHODS.map((m) => m.value);
 
-export const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
+export const DiscountTypes = ['FLAT_RATE', 'PERCENTAGE', 'PERCENTAGE_WITH_CAP'] as const;
 export type DiscountType = typeof DiscountTypes[number];
 
 // Line Item Type
