@@ -88,7 +88,7 @@ const Code = ({ showErrors = false }: { showErrors?: boolean }) => {
             required
             value={code}
             onChange={(value) => setValue('code', value, { shouldDirty: true })}
-            placeholder="VCH-261127-4821"
+            placeholder="Generate or enter a code"
             errors={
               showErrors && !code
                 ? 'Enter a code, or turn on advanced settings'
@@ -108,7 +108,7 @@ const Code = ({ showErrors = false }: { showErrors?: boolean }) => {
           onChange={(value) =>
             setValue('programCardPrefix', value, { shouldDirty: true })
           }
-          placeholder="PROG-261127-4821"
+          placeholder="Generate or enter a prefix"
           errors={
             showErrors && !programCardPrefix
               ? 'Program card prefix is required'
@@ -303,20 +303,14 @@ const Code = ({ showErrors = false }: { showErrors?: boolean }) => {
           </div>
 
           <div className="sm:col-span-2 rounded-[2px] border border-dashed border-black/10 bg-white p-3 text-sm text-muted-foreground">
-            <p className="font-medium text-foreground">Sample code</p>
+            <p className="font-medium text-foreground">Pattern preview</p>
             <p className="mt-1 font-mono text-foreground">
               {(codeSettingsPrefix || 'ABC') +
-                (codeSettingsPattern || patternForLength(DEFAULT_CODE_LENGTH)).replace(
-                  /#/g,
-                  () => {
-                    const set = codeSettingsCharacterSet || DEFAULT_CHARACTER_SET;
-                    return set[Math.floor(Math.random() * set.length)] || '0';
-                  },
-                ) +
+                (codeSettingsPattern || patternForLength(DEFAULT_CODE_LENGTH)) +
                 (codeSettingsPostfix || 'XYZ')}
             </p>
             <p className="mt-1 text-xs">
-              Preview only. The server builds the real code from these settings when you publish.
+              `#` characters are replaced when the server generates the code on publish.
             </p>
           </div>
         </div>

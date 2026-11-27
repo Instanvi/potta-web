@@ -1,6 +1,6 @@
 'use client';
 import Input from '@potta/components/input';
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DynamicTable from './newtableInvoice';
 import { ContextData } from '@potta/components/providers/DataProvider';
@@ -13,7 +13,10 @@ import TextArea from '@potta/components/textArea';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { toast } from 'sonner';
 import useCreateInvoice from '../../_hooks/useCreateInvoice';
-import { GeneratedNumberField } from '@potta/components/generated-number-field';
+import {
+  GeneratedNumberField,
+  generateDocumentNumber,
+} from '@potta/components/generated-number-field';
 import PaymentMethodSelect from '@potta/components/payment-method-select';
 import { withOptionalDocumentFields } from '@/lib/document-api-fields';
 import { useCustomerAddressFill } from '@/hooks/use-customer-address';
@@ -99,7 +102,9 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void }) => {
   const [invoice, setInvoice] = useState('Invoice');
   const [customerName, setCustomerName] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Option | null>(null);
-  const [invoiceNumber, setInvoiceNumber] = useState('0025');
+  const [invoiceNumber, setInvoiceNumber] = useState(() =>
+    generateDocumentNumber('VCH'),
+  );
   const [currency, setCurrency] = useState('USD');
   const [invoiceType, setInvioceType] = useState('Invoice');
   const [billingAddress, setBillingAddress] = useState('');
@@ -118,9 +123,6 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void }) => {
   const [endDate, setEndDate] = useState('');
   const [occurrences, setOccurrences] = useState('');
   const [isEndDateOption, setIsEndDateOption] = useState(true);
-
-  // Use a ref to track if initial selection has been made
-  const initialSelectionMade = useRef(false);
 
   useCustomerAddressFill(customerName, (address) => {
     if (!address) return;
@@ -141,48 +143,6 @@ const Left = ({ onOpenPreview }: { onOpenPreview?: () => void }) => {
       `Customer ${customer.customerId || customer.uuid.slice(0, 8)}`,
     value: customer.uuid,
   }));
-
-  // Set default customer only once when data first loads
-  useEffect(() => {
-    if (
-      customers.length > 0 &&
-      !customerName &&
-      !initialSelectionMade.current &&
-      !selectedCustomer
-    ) {
-      const firstCustomer = customers[0];
-      const firstOption = {
-        label:
-          firstCustomer.firstName ||
-          firstCustomer.lastName ||
-          `Customer ${
-            firstCustomer.customerId || firstCustomer.uuid.slice(0, 8)
-          }`,
-        value: firstCustomer.uuid,
-      };
-
-      initialSelectionMade.current = true;
-      setCustomerName(firstCustomer.uuid);
-      setSelectedCustomer(firstOption);
-      // Update context data
-      context?.setData((prevData: any) => ({
-        ...prevData,
-        customerName: firstCustomer.uuid,
-      }));
-    }
-  }, [customers, customerName, context, selectedCustomer]);
-
-  // Set start date to today by default
-  useEffect(() => {
-    if (!startDate) {
-      const today = new Date().toISOString().split('T')[0];
-      setStartDate(today);
-      context?.setData((prevData: any) => ({
-        ...prevData,
-        startDate: today,
-      }));
-    }
-  }, [context, startDate]);
 
   const handleInputChange = (key: string, value: any) => {
     console.log(`Changing ${key} to:`, value);
