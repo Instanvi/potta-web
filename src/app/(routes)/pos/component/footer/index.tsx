@@ -1,45 +1,61 @@
 'use client';
 
 import React, { useContext, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
-import {
-  buildHeldOrder,
-  readHeldOrders,
-  subscribeHeldOrders,
-  writeHeldOrders,
-  type HeldOrder,
-} from '../../utils/heldOrders';
-import type { SaleLineItem } from '../../utils/sale';
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  category?: string;
+}
+
+interface HoldOrder {
+  id: string;
+  items: CartItem[];
+  timestamp: string;
+  total: number;
+}
 
 const HeldOrders: React.FC = () => {
   const context = useContext(ContextData);
-  const [heldOrders, setHeldOrders] = useState<HeldOrder[]>([]);
+  const [heldOrders, setHeldOrders] = useState<HoldOrder[]>([]);
+  const [replaceConfirm, setReplaceConfirm] = useState<HoldOrder | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
-    const refresh = () => setHeldOrders(readHeldOrders());
-    refresh();
-    return subscribeHeldOrders(refresh);
+    const loadHeldOrders = () => {
+      const orders = JSON.parse(localStorage.getItem('heldOrders') || '[]');
+      setHeldOrders(orders);
+    };
+
+    loadHeldOrders();
+    window.addEventListener('storage', loadHeldOrders);
+
+    return () => {
+      window.removeEventListener('storage', loadHeldOrders);
+    };
   }, []);
 
-  /** Desktop SwapWithWaitingTransaction: restore held order; park current cart if busy. */
-  const handleSelectOrder = (order: HeldOrder) => {
-    const currentItems: SaleLineItem[] = Array.isArray(context?.data) ? context.data : [];
-    let next = heldOrders.filter((o) => o.id !== order.id);
-
-    if (currentItems.length > 0) {
-      next = [...next, buildHeldOrder(currentItems)];
-    }
-
-    writeHeldOrders(next);
+  const applyOrder = (order: HoldOrder) => {
     context?.setData(order.items);
-    toast.success(currentItems.length > 0 ? 'Orders swapped' : 'Held order restored');
+    setReplaceConfirm(null);
+  };
+
+  const handleSelectOrder = (order: HoldOrder) => {
+    if (context?.data && context.data.length > 0) {
+      setReplaceConfirm(order);
+      return;
+    }
+    applyOrder(order);
   };
 
   const handleDeleteOrder = (orderId: string) => {
-    writeHeldOrders(heldOrders.filter((o) => o.id !== orderId));
+    const updatedOrders = heldOrders.filter((o) => o.id !== orderId);
+    localStorage.setItem('heldOrders', JSON.stringify(updatedOrders));
+    setHeldOrders(updatedOrders);
     setDeleteConfirmId(null);
   };
 
@@ -53,33 +69,44 @@ const HeldOrders: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-full items-center overflow-x-auto px-2">
-        <div className="flex items-center">
+      <div className="flex h-full items-center px-3 py-2">
+        <div className="flex gap-3 overflow-x-auto">
           {heldOrders.map((order) => (
             <div
               key={order.id}
               onClick={() => handleSelectOrder(order)}
-              className="relative mr-[5px] flex h-[57px] w-[193px] shrink-0 cursor-pointer items-center bg-[#98FB98] pl-3 pr-12 text-black hover:brightness-95"
+              className="flex min-w-fit cursor-pointer items-center gap-6 bg-[#A0E86F] px-4 py-3 text-black transition-colors hover:bg-[#8ae74d]"
             >
-              <div className="min-w-0">
-                <p className="truncate text-[11px] font-medium">ID: {order.id}</p>
-              </div>
+              <span className="text-sm font-medium">ID:{order.id}</span>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setDeleteConfirmId(order.id);
                 }}
-                className="absolute right-0 top-0 flex h-full w-10 items-center justify-center text-[15px] font-bold hover:bg-red-500 hover:text-white"
+                className="hover:text-white"
                 aria-label="Delete held order"
               >
-                ✕
+                <i className="ri-close-line text-2xl" />
               </button>
             </div>
           ))}
         </div>
       </div>
 
+      <ConfirmDialog
+        open={Boolean(replaceConfirm)}
+        onOpenChange={(open) => {
+          if (!open) setReplaceConfirm(null);
+        }}
+        title="Replace current cart?"
+        description="Selecting this held order will replace the items currently in the cart."
+        confirmText="Replace cart"
+        destructive={false}
+        onConfirm={() => {
+          if (replaceConfirm) applyOrder(replaceConfirm);
+        }}
+      />
       <ConfirmDialog
         open={Boolean(deleteConfirmId)}
         onOpenChange={(open) => {
