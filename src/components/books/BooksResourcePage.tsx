@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { downloadBooksPdf } from '@/lib/books-entities';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { ExportButton } from '@/components/export-button';
 import { fetchAllPages } from '@/lib/fetch-all-pages';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -269,25 +269,21 @@ export function BooksResourcePage({
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
+              <ListActionsMenu table={table}>
               <ExportButton
+                asItem
                 filename={resourcePath.replace(/\//g, '-')}
                 rows={rows}
                 columns={exportColumns}
                 fetchAllRows={fetchAllRows}
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="size-9"
-                onClick={() => void load()}
+              <ListActionItem
+                label="Refresh"
+                icon={<i className={`ri-refresh-line mr-2 ${loading ? 'animate-spin' : ''}`} />}
                 disabled={loading}
-                aria-label="Refresh"
-                title="Refresh"
-              >
-                <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
-              </Button>
+                onSelect={() => void load()}
+              />
+              </ListActionsMenu>
               <Button type="button" size="sm" onClick={openCreate}>
                 New {title}
               </Button>

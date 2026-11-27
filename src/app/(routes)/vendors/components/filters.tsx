@@ -1,12 +1,11 @@
 'use client';
-import Button from '@potta/components/button';
-import { Can } from '@/components/auth/can';
 import React, { useState } from 'react';
+import { Can } from '@/components/auth/can';
 import SliderVendor from './vendorSlider';
 import BulkSlider from '@potta/app/(routes)/customers/components/bulkSlider';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import type { Table } from '@tanstack/react-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { ListToolbar } from '../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useContactToolbarStart } from '@/components/shared/contact-toolbar';
@@ -72,8 +71,9 @@ const Filter: React.FC<FilterProps> = ({
     <ListToolbar
       actions={
         <>
-          {table ? <DataTableViewOptions table={table} /> : null}
+          <ListActionsMenu table={table}>
           <ExportButton
+            asItem
             filename="vendors"
             rows={rows}
             columns={[
@@ -98,12 +98,10 @@ const Filter: React.FC<FilterProps> = ({
             ]}
           />
           <Can resource="Vendor" action="create">
-            <Button
-              text="Import"
-              type="button"
-              theme="gray"
-              onClick={() => setIsUploadOpen(true)}
-            />
+            <ListActionItem label="Import" onSelect={() => setIsUploadOpen(true)} />
+          </Can>
+          </ListActionsMenu>
+          <Can resource="Vendor" action="create">
             <SliderVendor />
           </Can>
         </>

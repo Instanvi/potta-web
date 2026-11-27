@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import Button from '@potta/components/button';
 import Select from '@potta/components/select';
 import {
@@ -236,8 +236,9 @@ const CreditNotesView = () => {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+                        <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="credit-notes"
               rows={rows}
               columns={[
@@ -272,6 +273,7 @@ const CreditNotesView = () => {
                 { key: 'status', header: 'Status' },
               ]}
             />
+            </ListActionsMenu>
             <Can resource="CreditNote" action="create">
               <Link href="/account_receivables/credit/new">
                 <Button

@@ -7,7 +7,7 @@ import RootLayout from '@/app/(routes)/layout';
 import { ErrorState, ListToolbar, PageContainer, StatusBadge } from '@/app/(routes)/_shared/states';
 import { formatMoney } from '@/app/(routes)/account_payables/utils/format';
 import { DataTable, useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { ExportButton } from '@/components/export-button';
 import { Button } from '@/components/shadcn/button';
 import {
@@ -379,33 +379,29 @@ export function PayrollExpensesPage() {
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
-              <ExportButton
-                filename="expenses"
-                rows={rows}
-                columns={exportColumns}
-                disabled={loading}
-                fetchAllRows={() =>
-                  fetchAllPages(async (page, limit) => {
-                    const result = await fetchPage(page, limit, Boolean(status)).catch(() =>
-                      fetchPage(page, limit, false),
-                    );
-                    return { data: result.rows, meta: result.meta };
-                  })
-                }
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="size-9"
-                onClick={() => void load()}
-                disabled={loading}
-                aria-label="Refresh"
-                title="Refresh"
-              >
-                <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
-              </Button>
+              <ListActionsMenu table={table}>
+                <ExportButton
+                  asItem
+                  filename="expenses"
+                  rows={rows}
+                  columns={exportColumns}
+                  disabled={loading}
+                  fetchAllRows={() =>
+                    fetchAllPages(async (page, limit) => {
+                      const result = await fetchPage(page, limit, Boolean(status)).catch(() =>
+                        fetchPage(page, limit, false),
+                      );
+                      return { data: result.rows, meta: result.meta };
+                    })
+                  }
+                />
+                <ListActionItem
+                  label="Refresh"
+                  icon={<i className={`ri-refresh-line mr-2 ${loading ? 'animate-spin' : ''}`} />}
+                  disabled={loading}
+                  onSelect={() => void load()}
+                />
+              </ListActionsMenu>
               <Button type="button" size="sm" onClick={openCreate}>
                 <i className="ri-add-line" />
                 New expense

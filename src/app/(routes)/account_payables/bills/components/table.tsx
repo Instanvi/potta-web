@@ -14,7 +14,7 @@ import {
   DocumentListRow,
 } from '@potta/components/document-master-detail';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { Skeleton } from '@potta/components/ui/loaders';
 import { formatDate } from '../../../_shared/format';
 import { ErrorState, ListToolbar } from '../../../_shared/states';
@@ -114,8 +114,9 @@ export function BillsTable() {
     />
   );
 
-  const exportButton = (
+  const renderExport = (asItem = false) => (
     <ExportButton
+      asItem={asItem}
       filename="bills"
       rows={rows}
       columns={[
@@ -233,7 +234,7 @@ export function BillsTable() {
             </Can>
           </div>
           {filterControls('stack')}
-          <div className="flex justify-end">{exportButton}</div>
+          <div className="flex justify-end">{renderExport()}</div>
         </>
       }
       footer={
@@ -336,8 +337,7 @@ export function BillsTable() {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
-            {exportButton}
+            <ListActionsMenu table={table}>{renderExport(true)}</ListActionsMenu>
             <Can resource="Bill" action="create">
               <Link href="/account_payables/bills/new">
                 <Button

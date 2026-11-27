@@ -7,6 +7,7 @@ import useGetAllProducts from '../../_hooks/useGetAllProducts';
 import type { Product } from '../../_utils/types';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { FieldHint } from '../fields/ItemFormFields';
+import { RowActionMenu } from '@/components/row-action-menu';
 
 export const inputClass = `mt-2 ${FIELD_INPUT}`;
 
@@ -164,22 +165,13 @@ export const RowActions = ({
   onReject: () => void;
 }) =>
   pending ? (
-    <div className="flex justify-end gap-2">
-      <button
-        type="button"
-        onClick={onPrimary}
-        className="h-8 rounded-[2px] bg-primary px-3 text-xs font-medium text-white hover:opacity-90"
-      >
-        {primaryLabel}
-      </button>
-      <button
-        type="button"
-        onClick={onReject}
-        className="h-8 rounded-[2px] border border-input px-3 text-xs font-medium text-destructive hover:bg-destructive/10"
-      >
-        Reject
-      </button>
-    </div>
+    <RowActionMenu
+      label="Movement actions"
+      items={[
+        { label: primaryLabel, onSelect: onPrimary },
+        { label: 'Reject', destructive: true, onSelect: onReject },
+      ]}
+    />
   ) : (
     <span className="block text-right text-xs text-muted-foreground">—</span>
   );

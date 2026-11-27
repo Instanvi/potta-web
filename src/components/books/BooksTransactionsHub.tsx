@@ -10,8 +10,7 @@ import {
 } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
-import { Button } from '@/components/shadcn/button';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { booksApi, extractBooksRows, rowId } from '@/lib/books-api';
 import axios from 'config/axios.config';
@@ -108,19 +107,14 @@ export function BooksTransactionsHub({
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-9"
-              onClick={() => void load()}
-              disabled={loading}
-              aria-label="Refresh"
-              title="Refresh"
-            >
-              <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
-            </Button>
+              <ListActionsMenu table={table}>
+                <ListActionItem
+                  label="Refresh"
+                  icon={<i className={`ri-refresh-line mr-2 ${loading ? 'animate-spin' : ''}`} />}
+                  disabled={loading}
+                  onSelect={() => void load()}
+                />
+              </ListActionsMenu>
             </>
           }
         >

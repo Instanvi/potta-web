@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import Search from '@potta/components/search';
 import { DatePicker } from '@potta/components/ui/date-picker';
 import { formatAmount, today } from '../../../_shared/format';
@@ -76,9 +76,9 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
     <div className="flex flex-col gap-4">
       <ListToolbar
         actions={
-          <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+          <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename={`${type === 'AR' ? 'ar' : 'ap'}-aging`}
               rows={rows}
               columns={[
@@ -99,7 +99,7 @@ const AgingTab = ({ type }: { type: SubLedgerKind }) => {
                 },
               ]}
             />
-          </>
+          </ListActionsMenu>
         }
       >
         <DatePicker

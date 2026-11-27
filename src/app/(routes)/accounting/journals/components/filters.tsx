@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Search from '@potta/components/search';
 import { Can } from '@/components/auth/can';
 import type { Table } from '@tanstack/react-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { ListToolbar } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { formatAmount, formatDate } from '../../../_shared/format';
@@ -28,8 +28,9 @@ const Filter = ({ search, onSearchChange, rows = [], table }: FilterProps) => {
       className="mb-4"
       actions={
         <>
-          {table ? <DataTableViewOptions table={table} /> : null}
+                    <ListActionsMenu table={table}>
           <ExportButton
+            asItem
             filename="journals"
             rows={rows}
             columns={[
@@ -62,6 +63,7 @@ const Filter = ({ search, onSearchChange, rows = [], table }: FilterProps) => {
               },
             ]}
           />
+          </ListActionsMenu>
           <Can resource="JournalEntries" action="create">
             <JournalSlider open={isCreateOpen} setOpen={setIsCreateOpen} />
           </Can>

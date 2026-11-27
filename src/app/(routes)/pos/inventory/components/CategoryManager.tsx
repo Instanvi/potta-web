@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import type { ProductCategory } from '../_utils/types';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { Button } from '@potta/components/shadcn/button';
 import {
   Sheet,
@@ -132,8 +132,9 @@ const CategoryManager = () => {
         className="mb-4"
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+                        <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="categories"
               rows={filteredRows}
               columns={[
@@ -155,6 +156,7 @@ const CategoryManager = () => {
                 )
               }
             />
+            </ListActionsMenu>
             <Button type="button" size="sm" onClick={handleOpenModal}>
               Add Category
             </Button>

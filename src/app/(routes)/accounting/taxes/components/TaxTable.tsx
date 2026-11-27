@@ -3,7 +3,8 @@ import { useMemo, useRef, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
+import { RowActionMenu } from '@/components/row-action-menu';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import Select from '@potta/components/select';
@@ -94,31 +95,29 @@ const TaxTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
-          {canAccess('Tax', 'update') && (
-            <button
-              type="button"
-              title="Edit"
-              className="rounded-full p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-              onClick={() => {
-                setEditing(row.original);
-                setSheetOpen(true);
-              }}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          )}
-          {canAccess('Tax', 'remove') && (
-            <button
-              type="button"
-              title="Delete"
-              className="rounded-full p-2 text-destructive hover:bg-destructive/10"
-              onClick={() => setToDelete(row.original)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+        <RowActionMenu
+          label="Tax actions"
+          items={[
+            ...(canAccess('Tax', 'update')
+              ? [{
+                  label: 'Edit',
+                  icon: <Pencil className="mr-2 h-4 w-4" />,
+                  onSelect: () => {
+                    setEditing(row.original);
+                    setSheetOpen(true);
+                  },
+                }]
+              : []),
+            ...(canAccess('Tax', 'remove')
+              ? [{
+                  label: 'Delete',
+                  icon: <Trash2 className="mr-2 h-4 w-4" />,
+                  destructive: true,
+                  onSelect: () => setToDelete(row.original),
+                }]
+              : []),
+          ]}
+        />
       ),
     },
   ];
@@ -128,8 +127,9 @@ const TaxTable = () => {
       <ListToolbar
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            {table ? <DataTableViewOptions table={table} /> : null}
+            <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="taxes"
               rows={rows}
               fetchAllRows={async () => {
@@ -177,6 +177,15 @@ const TaxTable = () => {
               ]}
             />
             <Can resource="Tax" action="create">
+              <ListActionItem
+                label={importMutation.isPending ? 'Importing…' : 'Import CSV'}
+                icon={<Upload className="mr-2 h-4 w-4" />}
+                disabled={importMutation.isPending}
+                onSelect={() => fileInput.current?.click()}
+              />
+            </Can>
+            </ListActionsMenu>
+            <Can resource="Tax" action="create">
               <input
                 ref={fileInput}
                 type="file"
@@ -187,14 +196,6 @@ const TaxTable = () => {
                   if (file) importMutation.mutate(file);
                   e.target.value = '';
                 }}
-              />
-              <Button
-                text="Import CSV"
-                type="button"
-                theme="outline"
-                icon={<Upload className="h-4 w-4" />}
-                isLoading={importMutation.isPending}
-                onClick={() => fileInput.current?.click()}
               />
               <Button
                 text="New tax"

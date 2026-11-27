@@ -5,7 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import DynamicFilter from '@potta/components/dynamic-filter';
 import Button from '@potta/components/button';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -194,8 +194,9 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+                        <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="recurring-invoices"
               rows={rows}
               columns={[
@@ -222,6 +223,7 @@ const InvoiceTable = () => {
                 { key: 'invoiceTotal', header: 'Amount' },
               ]}
             />
+            </ListActionsMenu>
             <Link href={'/account_receivables/recurring/new'}>
               <Button
                 text={'Create Invoice'}

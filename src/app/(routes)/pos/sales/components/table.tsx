@@ -18,7 +18,7 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
@@ -358,14 +358,12 @@ const SaleTable = () => {
         className="items-center"
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
-            <Button
-              text={'Export'}
-              icon={<img src="/images/export.svg" alt="" />}
-              theme="lightBlue"
-              type={'button'}
-              color={true}
-              onClick={() =>
+            <ListActionsMenu table={table}>
+            <ListActionItem
+              label="Export"
+              icon={<i className="ri-upload-2-line mr-2" />}
+              disabled={receiptsData.length === 0}
+              onSelect={() =>
                 void exportRows({
                   filename: 'sales',
                   rows: receiptsData,
@@ -393,6 +391,7 @@ const SaleTable = () => {
                 })
               }
             />
+            </ListActionsMenu>
             <Link href={'/pos/sales/new'}>
               <Button
                 text={'Create Sale'}

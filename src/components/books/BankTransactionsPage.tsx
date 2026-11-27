@@ -6,7 +6,7 @@ import RootLayout from '@/app/(routes)/layout';
 import { ErrorState, ListToolbar, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
@@ -199,10 +199,13 @@ export function BankTransactionsPage() {
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
-              <Button type="button" variant="outline" size="sm" onClick={() => void applyRules()} disabled={saving}>
-                Apply rules
-              </Button>
+              <ListActionsMenu table={table}>
+                <ListActionItem
+                  label="Apply rules"
+                  disabled={saving}
+                  onSelect={() => void applyRules()}
+                />
+              </ListActionsMenu>
             </>
           }
         >
