@@ -173,7 +173,7 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
       }
       buttonText="account"
     >
-      <div className="my-14 min-w-[600px] relative">
+      <div className="w-full">
         {(error || accountsLoadFailed) && (
           <div className="mb-4 rounded-[2px] border border-destructive/30 bg-destructive/5 p-3">
             <p className="text-destructive text-sm">{error ?? 'Failed to load accounts. Please try again.'}</p>
@@ -265,7 +265,7 @@ const SliderAccount: React.FC<SliderAccountProps> = ({
           </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 p-2 bg-white border-t border-black/10 flex justify-end space-x-3">
+        <div className="mt-2 flex justify-end border-t border-black/10 pt-4">
           <Button
             type="submit"
             text={isLoading ? 'Creating Account...' : 'Create Account'}
