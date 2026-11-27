@@ -82,7 +82,7 @@ export interface Hierarchy {
   assignmentType: string;
   jobTitle: string | null;
   isActive: boolean;
-  location?: { id: string; name: string } | null;
+  location?: { id: string; name: string; location_name?: string | null } | null;
   location_id?: string;
   organizationalStructure?: {
     id: string;
@@ -109,7 +109,7 @@ export interface OrganizationAssignment {
   id: string;
   assignmentType: string;
   isActive: boolean;
-  location: { id: string; name: string } | null;
+  location: { id: string; name: string; location_name?: string | null } | null;
 }
 
 export interface App {

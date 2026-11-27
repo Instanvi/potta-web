@@ -13,7 +13,10 @@ import {
   DropdownMenuTrigger,
 } from '@potta/components/shadcn/dropdown';
 import { useAuthContextStore } from '@/store/use-auth-context-store';
-import { useOrganizationLocations } from '@/hooks/use-organization-locations';
+import {
+  locationLabel,
+  useOrganizationLocations,
+} from '@/hooks/use-organization-locations';
 import { Skeleton } from '@/components/ui/loaders';
 import { cn } from '@/lib/utils';
 
@@ -22,9 +25,19 @@ interface LocationOption {
   name: string;
 }
 
+type LocNameSource = {
+  id: string;
+  name?: string | null;
+  location_name?: string | null;
+};
+
 function isPlaceholderName(name: string | null | undefined) {
-  const n = (name ?? '').trim();
-  return !n || n.toLowerCase() === 'location';
+  const n = (name ?? '').trim().toLowerCase();
+  return !n || n === 'location' || n === 'unnamed location';
+}
+
+function optionFromSource(loc: LocNameSource): LocationOption {
+  return { id: loc.id, name: locationLabel(loc) };
 }
 
 /** Picks the location sent as `x-location-id`; potta-backend scopes every query and posting to it. */
@@ -40,17 +53,11 @@ export function LocationSwitcher({ className }: { className?: string }) {
   const assignmentLocations = useMemo<LocationOption[]>(() => {
     const byId = new Map<string, LocationOption>();
     if (hierarchy?.location?.id) {
-      byId.set(hierarchy.location.id, {
-        id: hierarchy.location.id,
-        name: hierarchy.location.name?.trim() || 'Unnamed location',
-      });
+      byId.set(hierarchy.location.id, optionFromSource(hierarchy.location));
     }
     for (const a of assignments) {
       if (a.isActive !== false && a.location?.id && !byId.has(a.location.id)) {
-        byId.set(a.location.id, {
-          id: a.location.id,
-          name: a.location.name?.trim() || 'Unnamed location',
-        });
+        byId.set(a.location.id, optionFromSource(a.location));
       }
     }
     return [...byId.values()];
@@ -68,11 +75,11 @@ export function LocationSwitcher({ className }: { className?: string }) {
   const locations = useMemo<LocationOption[]>(() => {
     if (authLocations && authLocations.length > 0) {
       return authLocations.map((l) => {
-        const fromAuth = l.name?.trim() ?? '';
+        const fromAuth = locationLabel(l);
         const fromSession = assignmentNameById.get(l.id);
         const name = !isPlaceholderName(fromAuth)
           ? fromAuth
-          : fromSession || fromAuth || 'Unnamed location';
+          : fromSession || fromAuth;
         return { id: l.id, name };
       });
     }
@@ -86,7 +93,7 @@ export function LocationSwitcher({ className }: { className?: string }) {
     const fromSession = assignmentNameById.get(locationId);
     if (fromSession) return { id: locationId, name: fromSession };
     if (match) return match;
-    return { id: locationId, name: 'Unnamed location' };
+    return { id: locationId, name: locationLabel({ id: locationId }) };
   }, [locationId, locations, assignmentNameById]);
 
   const select = (loc: LocationOption) => {

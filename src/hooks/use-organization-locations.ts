@@ -9,6 +9,7 @@ import { useCan } from '@/components/auth/can';
 export type AuthLocation = {
   id: string;
   name: string;
+  location_name?: string | null;
   address?: string | null;
   phone?: string | null;
   email?: string | null;
@@ -19,13 +20,29 @@ export const locationKeys = {
   org: (orgId: string) => ['auth-locations', orgId] as const,
 };
 
-function locationDisplayName(row: Record<string, unknown>): string {
+/** Same label rule as instanvi-pay-frontend: Auth returns `location_name`, not `name`. */
+export function locationLabel(loc: {
+  id: string;
+  location_name?: string | null;
+  name?: string | null;
+}): string {
+  return (
+    (loc.location_name || loc.name || '').trim() ||
+    `Location ${loc.id.slice(0, 6)}`
+  );
+}
+
+function locationDisplayName(row: Record<string, unknown>, id: string): string {
+  const nested = row.location as Record<string, unknown> | null | undefined;
   const candidates = [
-    row.name,
+    row.location_name,
     row.locationName,
+    row.name,
     row.displayName,
     row.title,
-    (row.location as Record<string, unknown> | null | undefined)?.name,
+    nested?.location_name,
+    nested?.locationName,
+    nested?.name,
   ];
   for (const c of candidates) {
     if (typeof c === 'string' && c.trim() && c.trim().toLowerCase() !== 'location') {
@@ -35,20 +52,26 @@ function locationDisplayName(row: Record<string, unknown>): string {
   for (const c of candidates) {
     if (typeof c === 'string' && c.trim()) return c.trim();
   }
-  return 'Unnamed location';
+  return id ? `Location ${id.slice(0, 6)}` : 'Unnamed location';
 }
 
 async function fetchOrganizationLocations(orgId: string): Promise<AuthLocation[]> {
   const { data } = await authClient.get(`/organizations/${orgId}/locations`);
   const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
   return rows
-    .map((row: Record<string, unknown>) => ({
-      id: String(row.id ?? row.uuid ?? ''),
-      name: locationDisplayName(row),
-      address: (row.address as string | null | undefined) ?? null,
-      phone: (row.phone as string | null | undefined) ?? null,
-      email: (row.email as string | null | undefined) ?? null,
-    }))
+    .map((row: Record<string, unknown>) => {
+      const id = String(row.id ?? row.uuid ?? '');
+      const location_name =
+        typeof row.location_name === 'string' ? row.location_name : null;
+      return {
+        id,
+        location_name,
+        name: locationDisplayName(row, id),
+        address: (row.address as string | null | undefined) ?? null,
+        phone: (row.phone as string | null | undefined) ?? null,
+        email: (row.email as string | null | undefined) ?? null,
+      };
+    })
     .filter((l: AuthLocation) => Boolean(l.id));
 }
 
