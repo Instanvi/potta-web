@@ -28,10 +28,9 @@ export function writeHeldOrders(orders: HeldOrder[]) {
 }
 
 export function nextHeldOrderId(existing: HeldOrder[] = readHeldOrders()): string {
-  // Use RegExp ctor (not a /[-:TZ.]/ literal) so Tailwind content scan won't treat it as a class.
   const stamp = new Date()
     .toISOString()
-    .replace(new RegExp('[-:TZ.]', 'g'), '')
+    .replace(/[-:TZ.]/g, '')
     .slice(0, 14);
   if (!existing.some((o) => o.id === stamp)) return stamp;
   return `${stamp}${Math.floor(Math.random() * 90 + 10)}`;
