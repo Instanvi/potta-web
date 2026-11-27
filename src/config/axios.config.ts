@@ -39,6 +39,12 @@ export const PAYROLL_API_URL = withApiPrefix(
   process.env.NEXT_PUBLIC_PAYROLL_API_URL || 'https://api.spend.instanvi.com/api/'
 );
 
+/**
+ * Same-origin path rewritten by next.config.js → PAYROLL_API_URL.
+ * Avoids CORS when Potta (e.g. localhost:3006 / potta.instanvi.com) calls spend API.
+ */
+export const PAYROLL_BROWSER_PROXY = '/payroll-proxy/';
+
 export const payrollClient = Axios.create({
   baseURL: PAYROLL_API_URL,
   timeout: 30000,
@@ -100,7 +106,13 @@ authClient.interceptors.request.use(async (config) => {
   return config;
 });
 
-payrollClient.interceptors.request.use(attachOrgAuthHeaders);
+payrollClient.interceptors.request.use(async (config) => {
+  // Browser: hit Next rewrite so we never depend on spend API CORS allowlists.
+  if (typeof window !== 'undefined') {
+    config.baseURL = PAYROLL_BROWSER_PROXY;
+  }
+  return attachOrgAuthHeaders(config);
+});
 
 function handleResponseError(error: AxiosError) {
   if (typeof window === 'undefined') return Promise.reject(error);

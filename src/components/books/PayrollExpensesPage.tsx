@@ -77,7 +77,7 @@ export function PayrollExpensesPage() {
   const displayError =
     error && isNetworkError(error)
       ? new Error(
-          `Could not reach the payroll expense API. Set NEXT_PUBLIC_PAYROLL_API_URL in your environment (see .env.example) and ensure the service is running.`
+          `Could not reach the payroll expense API. Restart potta-web after setting NEXT_PUBLIC_PAYROLL_API_URL (see .env.example), or confirm the spend/payroll service is up.`,
         )
       : error;
 
