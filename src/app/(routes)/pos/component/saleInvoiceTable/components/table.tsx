@@ -2,11 +2,17 @@
 import React, { useEffect, useContext } from 'react';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from './orderSummary';
+import CustomerSearchBar from './CustomerSearchBar';
 import { computeLine, computeTotals, type SaleLineItem } from '@potta/app/(routes)/pos/utils/sale';
 
 type LineItem = SaleLineItem & { stock?: number | null; modifiersText?: string };
 
-const TableOPS = () => {
+type Props = {
+  customerId: string;
+  onCustomerChange: (customerId: string) => void;
+};
+
+const TableOPS = ({ customerId, onCustomerChange }: Props) => {
   const context = useContext(ContextData);
   const items: LineItem[] = Array.isArray(context?.data) ? context.data : [];
 
@@ -45,6 +51,8 @@ const TableOPS = () => {
   return (
     <div className="flex h-full flex-col justify-between bg-white">
       <div className="min-h-0 flex-1 overflow-auto p-2.5">
+        <CustomerSearchBar value={customerId} onChange={onCustomerChange} />
+
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="h-[45px] bg-[var(--pos-green)] text-left text-white">
@@ -98,9 +106,11 @@ const TableOPS = () => {
                         </button>
                       </div>
                     </td>
-                    <td className="px-2 align-middle">{isNaN(price) ? '0' : Math.round(price).toLocaleString()}</td>
+                    <td className="px-2 align-middle">
+                      {isNaN(price) ? '0.00' : price.toFixed(2)}
+                    </td>
                     <td className="px-2 align-middle font-semibold">
-                      {Math.round(line.total).toLocaleString()}
+                      {line.total.toFixed(2)} XAF
                     </td>
                     <td className="px-1 align-middle">
                       <button

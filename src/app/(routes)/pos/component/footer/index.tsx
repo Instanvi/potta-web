@@ -61,18 +61,9 @@ const HeldOrders: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-full items-center bg-[var(--pos-green)] px-2">
-        <button
-          type="button"
-          className="mr-2 flex h-12 w-12 shrink-0 items-center justify-center text-white"
-          aria-label="Menu"
-          tabIndex={-1}
-        >
-          <i className="ri-menu-line text-2xl" />
-        </button>
-
+      <div className="flex h-full items-center bg-[var(--pos-green)] px-3">
         {heldOrders.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center text-sm text-white/80">
+          <div className="flex flex-1 items-center justify-center text-sm text-white/90">
             No held orders
           </div>
         ) : (

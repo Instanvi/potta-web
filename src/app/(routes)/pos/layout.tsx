@@ -14,8 +14,8 @@ interface Props {
 
 const POSLayout: FC<Props> = ({ children }) => {
   return (
-    <div className={`${outfit.variable} pos-till h-screen w-full overflow-hidden`}>
-      <div className="relative h-full w-full overflow-hidden p-0">{children}</div>
+    <div className={`${outfit.variable} pos-till h-full min-h-0 w-full overflow-hidden`}>
+      <div className="relative h-full min-h-0 w-full overflow-hidden p-0">{children}</div>
     </div>
   );
 };

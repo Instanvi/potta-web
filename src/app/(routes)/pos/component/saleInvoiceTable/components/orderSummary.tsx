@@ -22,7 +22,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const totalDiscount = discount + itemDiscounts;
 
-  const fmt = (n: number) => n.toFixed(2);
+  const fmt = (n: number) => `${n.toFixed(2)} XAF`;
 
   return (
     <div className="space-y-4">
@@ -40,30 +40,32 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         onApplyCoupon={(amount) => setDiscount(amount)}
       />
 
-      <div className="relative flex items-end justify-between gap-4">
+      <div className="flex items-end justify-between gap-4">
         <HoldOrderButton />
-        <div className="ml-auto w-[280px] max-w-full space-y-0">
-          <div className="mb-3 flex justify-between text-sm">
-            <span>Sub-Total</span>
-            <span className="font-semibold">{fmt(subtotal)}</span>
+        <div className="ml-auto w-[280px] max-w-full space-y-0 text-sm">
+          <div className="mb-2 flex items-center justify-between py-1">
+            <span className="text-gray-600">Sub-Total</span>
+            <span className="font-semibold text-gray-800">{fmt(subtotal)}</span>
           </div>
-          <div className="mb-3 border-b border-[var(--pos-border)]" />
+          <div className="mb-2 border-b border-[var(--pos-border)]" />
 
-          <div className="mb-3 flex justify-between text-sm">
-            <span>Discounts</span>
-            <span className="font-semibold text-[var(--pos-discount)]">{fmt(totalDiscount)}</span>
+          <div className="mb-2 flex items-center justify-between py-1">
+            <span className="text-gray-600">Discounts</span>
+            <span className="font-semibold text-[var(--pos-discount)]">
+              {totalDiscount > 0 ? `-${fmt(totalDiscount)}` : fmt(0)}
+            </span>
           </div>
-          <div className="mb-3 border-b border-[var(--pos-border)]" />
+          <div className="mb-2 border-b border-[var(--pos-border)]" />
 
-          <div className="mb-3 flex justify-between text-sm">
-            <span>Tax</span>
-            <span className="font-semibold">{fmt(tax)}</span>
+          <div className="mb-2 flex items-center justify-between py-1">
+            <span className="text-gray-600">Tax</span>
+            <span className="font-semibold text-gray-800">{fmt(tax)}</span>
           </div>
-          <div className="mb-3 border-b border-[var(--pos-border)]" />
+          <div className="mb-2 border-b border-[var(--pos-border)]" />
 
-          <div className="flex justify-between text-base">
-            <span className="font-medium">Total</span>
-            <span className="font-bold">{fmt(total)}</span>
+          <div className="flex items-center justify-between bg-[#e8f5e8] px-2 py-2.5">
+            <span className="font-medium text-gray-900">Total</span>
+            <span className="text-base font-bold text-[var(--pos-green)]">{fmt(total)}</span>
           </div>
         </div>
       </div>
