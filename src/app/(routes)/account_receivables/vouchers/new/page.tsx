@@ -23,6 +23,7 @@ import {
   DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
+import { cn } from '@potta/lib/utils';
 
 enum VoucherTypeEnum {
   COUPON = 'DISCOUNT',
@@ -73,6 +74,16 @@ type FormData = {
   [key: string]: any;
 };
 
+const STEPS = [
+  { id: 'type', label: 'Type' },
+  { id: 'code', label: 'Code' },
+  { id: 'policy', label: 'Policy' },
+  { id: 'audience', label: 'Audience' },
+  { id: 'scheduling', label: 'Scheduling' },
+] as const;
+
+type StepId = (typeof STEPS)[number]['id'];
+
 const voucherTypeSpecificFields: Record<VoucherType, Array<keyof FormData>> = {
   DISCOUNT: ['discountPercent', 'discountAmount', 'maximumDiscount'],
   GIFT_CARD: ['balance'],
@@ -111,6 +122,7 @@ const commonFields: Array<keyof FormData> = [
 export default function NewVoucherPage() {
   const router = useRouter();
   const [voucherType, setVoucherType] = useState<VoucherType>('ROYALTY_POINTS');
+  const [step, setStep] = useState<StepId>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
@@ -118,6 +130,8 @@ export default function NewVoucherPage() {
   >({});
 
   const createVoucherMutation = useCreateVoucher();
+  const stepIndex = STEPS.findIndex((item) => item.id === step);
+  const isLastStep = stepIndex === STEPS.length - 1;
 
   const methods = useForm<FormData>({
     defaultValues: {
@@ -183,103 +197,128 @@ export default function NewVoucherPage() {
     setValue('valueType', 'fixed');
     unregisterIrrelevantFields(type);
     setValidationErrors({});
+    setShowErrors(false);
   };
 
-  const validateAll = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const validateStep = (current: StepId): Record<string, string> => {
+    const next: Record<string, string> = {};
 
-    const currentValueType =
-      voucherType === 'CASHBACK' || voucherType === 'GIFT_CARD'
-        ? 'fixed'
-        : getValues('valueType') || 'fixed';
-    const policyFields =
-      policyRequiredFieldsByType[voucherType]?.[currentValueType] || [];
-    for (const field of policyFields) {
-      const value = getValues(field as any);
-      if (!value && value !== 0) {
-        const fieldName = field.split('.').pop() || field;
-        const readable = fieldName
-          .replace(/([A-Z])/g, ' $1')
-          .toLowerCase()
-          .replace(/^\w/, (c) => c.toUpperCase());
-        newErrors[field] = `${readable} is required`;
+    if (current === 'type') {
+      if (!getValues('type')) next.type = 'Voucher type is required';
+    }
+
+    if (current === 'code') {
+      const code = getValues('code');
+      const useAdvancedSettings = getValues('advancedCodeSettings');
+      if (!code && !useAdvancedSettings) {
+        next.code = 'Enter a code, or turn on advanced settings';
+      }
+      if (useAdvancedSettings) {
+        const codeSettings = getValues('codeSettings') || {};
+        if (!codeSettings.prefix) next['codeSettings.prefix'] = 'Code prefix is required';
+        if (!codeSettings.postfix) next['codeSettings.postfix'] = 'Code postfix is required';
+        if (!codeSettings.length) next['codeSettings.length'] = 'Code length is required';
+        if (!codeSettings.pattern) next['codeSettings.pattern'] = 'Pattern is required';
+        if (!codeSettings.characterSet) {
+          next['codeSettings.characterSet'] = 'Character set is required';
+        }
+      }
+      if (!getValues('programCardPrefix')) {
+        next.programCardPrefix = 'Program card prefix is required';
       }
     }
 
-    const minimumPurchase = getValues('minimumPurchase');
-    const maximumDiscount = getValues('maximumDiscount');
-    if (minimumPurchase && maximumDiscount) {
-      const minPurchase = parseFloat(String(minimumPurchase));
-      const maxDiscount = parseFloat(String(maximumDiscount));
-      if (
-        !isNaN(minPurchase) &&
-        !isNaN(maxDiscount) &&
-        maxDiscount > minPurchase
-      ) {
-        newErrors['maximumDiscount'] =
-          'Maximum discount cannot be greater than minimum purchase amount';
+    if (current === 'policy') {
+      const currentValueType =
+        voucherType === 'CASHBACK' || voucherType === 'GIFT_CARD'
+          ? 'fixed'
+          : getValues('valueType') || 'fixed';
+      const policyFields =
+        policyRequiredFieldsByType[voucherType]?.[currentValueType] || [];
+      for (const field of policyFields) {
+        const value = getValues(field as any);
+        if (!value && value !== 0) {
+          const fieldName = field.split('.').pop() || field;
+          const readable = fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .toLowerCase()
+            .replace(/^\w/, (c) => c.toUpperCase());
+          next[field] = `${readable} is required`;
+        }
+      }
+
+      const minimumPurchase = getValues('minimumPurchase');
+      const maximumDiscount = getValues('maximumDiscount');
+      if (minimumPurchase && maximumDiscount) {
+        const minPurchase = parseFloat(String(minimumPurchase));
+        const maxDiscount = parseFloat(String(maximumDiscount));
+        if (
+          !isNaN(minPurchase) &&
+          !isNaN(maxDiscount) &&
+          maxDiscount > minPurchase
+        ) {
+          next.maximumDiscount =
+            'Maximum discount cannot be greater than minimum purchase amount';
+        }
       }
     }
 
-    const code = getValues('code');
-    const useAdvancedSettings = getValues('advancedCodeSettings');
-    if (!code && !useAdvancedSettings) {
-      newErrors['code'] = 'Either a code or code settings must be provided';
-    }
-    if (useAdvancedSettings) {
-      const codeSettings = getValues('codeSettings');
-      if (!codeSettings || !codeSettings.length) {
-        newErrors['codeSettings.length'] =
-          'Code length is required when using advanced settings';
+    if (current === 'audience') {
+      if (!getValues('audience.segment')) {
+        next['audience.segment'] = 'Audience is required';
       }
     }
-    const programCardPrefix = getValues('programCardPrefix');
-    if (!programCardPrefix) {
-      newErrors['programCardPrefix'] = 'Program card prefix is required';
+
+    if (current === 'scheduling') {
+      if (!getValues('scheduling.programStartDate')) {
+        next['scheduling.programStartDate'] = 'Program start date is required';
+      }
+      const neverEnds = getValues('scheduling.neverEnds');
+      if (!neverEnds && !getValues('scheduling.programEndDate')) {
+        next['scheduling.programEndDate'] = 'Program end date is required';
+      }
     }
 
-    const segment = getValues('audience.segment');
-    if (!segment) {
-      newErrors['audience.segment'] = 'Audience segment is required';
-    }
+    return next;
+  };
 
-    const programStartDate = getValues('scheduling.programStartDate');
-    if (!programStartDate) {
-      newErrors['scheduling.programStartDate'] = 'Program start date is required';
-    }
-
-    setValidationErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
+  const goNext = () => {
+    const errors = validateStep(step);
+    setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) {
       setShowErrors(true);
-      const count = Object.keys(newErrors).length;
-      toast.error(
-        count === 1
-          ? 'There is 1 error in the form. Please fix it before publishing.'
-          : `There are ${count} errors in the form. Please fix them before publishing.`
-      );
+      toast.error('Please fix the required fields before continuing.');
       requestAnimationFrame(() => {
         document
           .querySelector('.error-field')
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
-      return false;
+      return;
     }
-
     setShowErrors(false);
-    return true;
+    setValidationErrors({});
+    const next = STEPS[stepIndex + 1];
+    if (next) setStep(next.id);
+  };
+
+  const goBack = () => {
+    setShowErrors(false);
+    setValidationErrors({});
+    const prev = STEPS[stepIndex - 1];
+    if (prev) setStep(prev.id);
   };
 
   const onSubmit = async (data: FormData) => {
     try {
-      setValidationErrors({});
-
-      if (!validateAll()) {
+      const errors = validateStep('scheduling');
+      setValidationErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        setShowErrors(true);
+        toast.error('Please fix the required fields before publishing.');
         return;
       }
 
       setIsSubmitting(true);
-
       const payload = buildCreateVoucherPayload(data);
       await createVoucherMutation.mutateAsync(payload);
       toast.success('Voucher created successfully!');
@@ -313,43 +352,72 @@ export default function NewVoucherPage() {
           onSubmit={methods.handleSubmit(onSubmit)}
           className="flex h-full min-h-0 flex-col bg-white"
         >
+          <div className="flex shrink-0 gap-6 overflow-x-auto border-b border-black/[0.08] px-6 text-sm">
+            {STEPS.map((item, index) => {
+              const reached = index <= stepIndex;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    if (index < stepIndex) {
+                      setShowErrors(false);
+                      setValidationErrors({});
+                      setStep(item.id);
+                    }
+                  }}
+                  className={cn(
+                    'border-b-2 py-3',
+                    step === item.id
+                      ? 'border-primary font-medium text-primary'
+                      : reached
+                        ? 'border-transparent text-foreground'
+                        : 'border-transparent text-muted-foreground',
+                  )}
+                >
+                  {index + 1}. {item.label}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="min-h-0 flex-1 overflow-y-auto">
             <DocumentFormShell className="pb-6">
               <DocumentFormCard flush>
-                <DocumentSectionTitle>Voucher type</DocumentSectionTitle>
-                <VoucherTypeSelector
-                  selectedType={voucherType}
-                  onVoucherTypeChange={handleVoucherTypeChange}
-                />
-              </DocumentFormCard>
+                <DocumentSectionTitle>
+                  {STEPS[stepIndex]?.label}
+                </DocumentSectionTitle>
 
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Code</DocumentSectionTitle>
-                <Code showErrors={showErrors} />
-              </DocumentFormCard>
-
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Policy</DocumentSectionTitle>
-                <Policy voucherType={voucherType} showErrors={showErrors} />
-              </DocumentFormCard>
-
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Audience</DocumentSectionTitle>
-                <Audience showErrors={showErrors} />
-              </DocumentFormCard>
-
-              <DocumentFormCard flush>
-                <DocumentSectionTitle>Schedule</DocumentSectionTitle>
-                <Scheduling showErrors={showErrors} />
-              </DocumentFormCard>
-
-              {showErrors && Object.keys(validationErrors).length > 0 ? (
-                <div className="rounded-[2px] border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-                  {Object.values(validationErrors).map((error) => (
-                    <p key={error}>{error}</p>
-                  ))}
+                <div className={step === 'type' ? undefined : 'hidden'}>
+                  <VoucherTypeSelector
+                    selectedType={voucherType}
+                    onVoucherTypeChange={handleVoucherTypeChange}
+                  />
                 </div>
-              ) : null}
+                <div className={step === 'code' ? undefined : 'hidden'}>
+                  <Code showErrors={showErrors && step === 'code'} />
+                </div>
+                <div className={step === 'policy' ? undefined : 'hidden'}>
+                  <Policy
+                    voucherType={voucherType}
+                    showErrors={showErrors && step === 'policy'}
+                  />
+                </div>
+                <div className={step === 'audience' ? undefined : 'hidden'}>
+                  <Audience showErrors={showErrors && step === 'audience'} />
+                </div>
+                <div className={step === 'scheduling' ? undefined : 'hidden'}>
+                  <Scheduling showErrors={showErrors && step === 'scheduling'} />
+                </div>
+
+                {showErrors && Object.keys(validationErrors).length > 0 ? (
+                  <div className="mt-6 rounded-[2px] border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                    {Object.values(validationErrors).map((error) => (
+                      <p key={error}>{error}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </DocumentFormCard>
             </DocumentFormShell>
           </div>
 
@@ -365,13 +433,35 @@ export default function NewVoucherPage() {
               </ShadcnButton>
             }
             right={
-              <ShadcnButton
-                type="submit"
-                className="bg-white text-foreground hover:bg-white/90"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Publishing…' : 'Publish'}
-              </ShadcnButton>
+              <>
+                {stepIndex > 0 ? (
+                  <ShadcnButton
+                    type="button"
+                    variant="outline"
+                    className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                    onClick={goBack}
+                  >
+                    Back
+                  </ShadcnButton>
+                ) : null}
+                {isLastStep ? (
+                  <ShadcnButton
+                    type="submit"
+                    className="bg-white text-foreground hover:bg-white/90"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Publishing…' : 'Publish'}
+                  </ShadcnButton>
+                ) : (
+                  <ShadcnButton
+                    type="button"
+                    className="bg-white text-foreground hover:bg-white/90"
+                    onClick={goNext}
+                  >
+                    Next
+                  </ShadcnButton>
+                )}
+              </>
             }
           />
         </form>
