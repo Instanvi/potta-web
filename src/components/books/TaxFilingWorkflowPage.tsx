@@ -6,7 +6,7 @@ import RootLayout from '@/app/(routes)/layout';
 import { ErrorState, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { Button } from '@/components/shadcn/button';
 import {
   Sheet,
@@ -91,18 +91,13 @@ export function TaxFilingWorkflowPage({ mode }: { mode: 'prepare' | 'submit' }) 
           title={mode === 'prepare' ? 'Prepare tax filing' : 'Submit tax filing'}
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="size-9"
-                onClick={() => void load()}
-                aria-label="Refresh"
-                title="Refresh"
-              >
-                <i className="ri-refresh-line text-base" />
-              </Button>
+              <ListActionsMenu table={table}>
+                <ListActionItem
+                  label="Refresh"
+                  icon={<i className="ri-refresh-line mr-2" />}
+                  onSelect={() => void load()}
+                />
+              </ListActionsMenu>
               <Button
                 type="button"
                 size="sm"

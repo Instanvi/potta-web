@@ -36,7 +36,7 @@ import {
   InvoiceDetailPreview,
 } from './InvoiceDetailPanel';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { ExportButton } from '@/components/export-button';
 import type { ExportColumn } from '@/lib/export-file';
 import { fetchAllPages } from '@/lib/fetch-all-pages';
@@ -566,13 +566,15 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+                        <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="invoices"
               rows={filteredData}
               fetchAllRows={fetchAllInvoices}
               columns={INVOICE_EXPORT_COLUMNS}
             />
+            </ListActionsMenu>
             <Link href="/account_receivables/invoice/new">
               <Button
                 text="New invoice"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import {
   Select,
@@ -20,6 +21,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { cn } from '@/lib/utils';
 import SearchableSelect from '@/components/searchableSelect';
 import { BooksLinesEditor } from '@/components/books/BooksLinesEditor';
+import { BooksAttachmentsField } from '@/components/books/BooksAttachmentsField';
 import SliderCustomer from '@potta/app/(routes)/customers/components/customerSlider';
 import SliderVendor from '@potta/app/(routes)/vendors/components/vendorSlider';
 import {
@@ -29,6 +31,7 @@ import {
   loadPurchaseOrderForReceipt,
 } from '@/lib/books-entities';
 import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 
 export type BooksField = {
   key: string;
@@ -36,10 +39,19 @@ export type BooksField = {
   /**
    * text | number | textarea | checkbox | date | lines | select | json |
    * customer | vendor | estimate | purchaseOrder | salesOrder |
-   * invoice | bill | opportunity | lead | proposal | account
+   * invoice | bill | opportunity | lead | proposal | account |
+   * paymentMethod | attachments
    */
   type?: string;
   options?: { value: string; label: string }[];
+};
+
+const CREATE_HREF: Partial<Record<BooksEntityKind, string>> = {
+  purchaseOrder: '/account_payables/purchase/new',
+  salesOrder: '/account_receivables/sales-orders/new',
+  estimate: '/account_receivables/estimates/new',
+  invoice: '/account_receivables/invoice/new',
+  bill: '/account_payables/bills/new',
 };
 
 export type BooksAction = { label: string; action: string; confirm?: boolean };
@@ -82,6 +94,8 @@ export function buildPayload(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of fields) {
+    // Attachments stay client-side until a document upload API exists.
+    if (f.type === 'attachments') continue;
     const raw = values[f.key] ?? '';
     const coerced = coerceFormValue(f.type, raw);
     if (coerced !== undefined) out[f.key] = coerced;
@@ -195,6 +209,15 @@ export function FieldInput({
       />
     );
   }
+  if (type === 'attachments') {
+    return (
+      <BooksAttachmentsField
+        label={field.label}
+        value={value}
+        onChange={onChange}
+      />
+    );
+  }
   if (ENTITY_FIELD_TYPES.has(type)) {
     return (
       <EntitySelectField
@@ -202,6 +225,16 @@ export function FieldInput({
         label={field.label}
         value={value}
         onChange={onChange}
+      />
+    );
+  }
+  if (type === 'paymentMethod') {
+    return (
+      <PaymentMethodSelect
+        label={field.label}
+        value={value || ''}
+        onChange={onChange}
+        allowCreate
       />
     );
   }
@@ -290,7 +323,8 @@ function EntitySelectField({
   const [options, setOptions] = useState<{ value: string; label: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
-  const canCreate = entity === 'customer' || entity === 'vendor';
+  const slideCreate = entity === 'customer' || entity === 'vendor';
+  const createHref = CREATE_HREF[entity];
 
   const reload = async () => {
     setLoading(true);
@@ -337,16 +371,28 @@ function EntitySelectField({
             outlined
           />
         </div>
-        {canCreate ? (
+        {slideCreate ? (
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+            className="mb-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
             aria-label={`Add ${label.toLowerCase()}`}
             title={`Add ${label.toLowerCase()}`}
           >
             <i className="ri-add-line text-xl" />
           </button>
+        ) : null}
+        {!slideCreate && createHref ? (
+          <Link
+            href={createHref}
+            target="_blank"
+            rel="noreferrer"
+            className="mb-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+            aria-label={`New ${label.toLowerCase()}`}
+            title={`New ${label.toLowerCase()}`}
+          >
+            <i className="ri-add-line text-xl" />
+          </Link>
         ) : null}
       </div>
       {entity === 'customer' ? (
@@ -354,6 +400,11 @@ function EntitySelectField({
           open={createOpen}
           setOpen={setCreateOpen}
           showTrigger={false}
+          onCreated={(id?: string) => {
+            void reload().then(() => {
+              if (id) onChange(id);
+            });
+          }}
         />
       ) : null}
       {entity === 'vendor' ? (

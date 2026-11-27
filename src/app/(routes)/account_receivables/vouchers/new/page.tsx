@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   FormProvider,
@@ -14,11 +14,13 @@ import Audience from './components/audience';
 import Scheduling from './components/scheduling';
 import Code from './components/code';
 import { useCreateVoucher } from '../_hooks/hooks';
-import { Loader2 } from 'lucide-react';
+import { buildCreateVoucherPayload } from '../_utils/build-create-payload';
 import DocumentWorkspace from '@potta/components/document-workspace';
 import {
+  DocumentFormCard,
   DocumentFormFooter,
   DocumentFormShell,
+  DocumentSectionTitle,
 } from '@potta/components/document-form-layout';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
 import { cn } from '@potta/lib/utils';
@@ -36,15 +38,14 @@ type FormData = {
   scheduling: {
     programStartDate: string;
     programEndDate?: string;
+    neverEnds?: boolean;
     specificDaysOnly: boolean;
-    specificDays?: [
-      {
-        day: string;
-        startTime?: string;
-        endTime?: string;
-        allDay: boolean;
-      }
-    ];
+    validDays?: Array<{
+      day: string;
+      startTime?: string;
+      endTime?: string;
+      allDay: boolean;
+    }>;
   };
   audience: {
     segment: string;
@@ -56,8 +57,8 @@ type FormData = {
   balance?: number;
   loyaltyPoints?: number;
   loyaltyAmount?: number;
-  loyaltyPointsValue?: number;
   cashbackPercent?: number;
+  cashbackMaximum?: number;
   cashbackAmount?: number;
   code?: string;
   programCardPrefix: string;
@@ -73,11 +74,21 @@ type FormData = {
   [key: string]: any;
 };
 
+const STEPS = [
+  { id: 'type', label: 'Type' },
+  { id: 'code', label: 'Code' },
+  { id: 'policy', label: 'Policy' },
+  { id: 'audience', label: 'Audience' },
+  { id: 'scheduling', label: 'Scheduling' },
+] as const;
+
+type StepId = (typeof STEPS)[number]['id'];
+
 const voucherTypeSpecificFields: Record<VoucherType, Array<keyof FormData>> = {
-  DISCOUNT: ['discountPercent', 'discountAmount'],
+  DISCOUNT: ['discountPercent', 'discountAmount', 'maximumDiscount'],
   GIFT_CARD: ['balance'],
-  ROYALTY_POINTS: ['loyaltyPoints', 'loyaltyAmount', 'loyaltyPointsValue'],
-  CASHBACK: ['cashbackPercent', 'cashbackAmount'],
+  ROYALTY_POINTS: ['loyaltyPoints', 'loyaltyAmount'],
+  CASHBACK: ['cashbackPercent', 'cashbackMaximum', 'cashbackAmount'],
 };
 
 const policyRequiredFieldsByType: Record<
@@ -93,11 +104,10 @@ const policyRequiredFieldsByType: Record<
   },
   ROYALTY_POINTS: {
     fixed: ['loyaltyPoints'],
-    proportional: ['loyaltyAmount', 'loyaltyPointsValue'],
+    proportional: ['loyaltyPoints', 'loyaltyAmount'],
   },
   CASHBACK: {
-    fixed: ['cashbackAmount'],
-    proportional: ['cashbackAmount', 'cashbackPercent'],
+    fixed: ['cashbackPercent', 'cashbackMaximum'],
   },
 };
 
@@ -109,63 +119,42 @@ const commonFields: Array<keyof FormData> = [
   'endDate',
 ];
 
-const TABS = [
-  { id: 'type', label: 'Type' },
-  { id: 'code', label: 'Code' },
-  { id: 'policy', label: 'Policy' },
-  { id: 'audience', label: 'Audience' },
-  { id: 'scheduling', label: 'Scheduling' },
-] as const;
-
-type VoucherTab = (typeof TABS)[number]['id'];
-
-function tabForError(key: string): VoucherTab {
-  if (key.startsWith('audience')) return 'audience';
-  if (key.startsWith('scheduling')) return 'scheduling';
-  if (key.startsWith('code') || key === 'programCardPrefix') return 'code';
-  if (key === 'type' || key === 'name') return 'type';
-  return 'policy';
-}
-
 export default function NewVoucherPage() {
   const router = useRouter();
   const [voucherType, setVoucherType] = useState<VoucherType>('ROYALTY_POINTS');
-  const [tab, setTab] = useState<VoucherTab>('type');
+  const [step, setStep] = useState<StepId>('type');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  /** Only show field errors after the user tries to Publish. */
-  const [attemptedPublish, setAttemptedPublish] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
 
   const createVoucherMutation = useCreateVoucher();
+  const stepIndex = STEPS.findIndex((item) => item.id === step);
+  const isLastStep = stepIndex === STEPS.length - 1;
 
   const methods = useForm<FormData>({
     defaultValues: {
       type: VoucherTypeEnum.ROYALTY_POINTS,
+      valueType: 'fixed',
+      advancedCodeSettings: false,
+      autoAddUsers: false,
+      canJoinOnce: false,
+      scheduling: {
+        specificDaysOnly: false,
+        neverEnds: false,
+      },
+      audience: {
+        segment: '',
+        autoAddUsers: false,
+        canJoinOnce: false,
+      },
     },
     mode: 'onBlur',
     shouldUnregister: false,
   });
 
   const { unregister, setValue, getValues } = methods;
-
-  const tabIndex = useMemo(
-    () => TABS.findIndex((item) => item.id === tab),
-    [tab],
-  );
-  const isFirstStep = tabIndex <= 0;
-  const isLastStep = tabIndex === TABS.length - 1;
-
-  const goNext = () => {
-    if (isLastStep) return;
-    setTab(TABS[tabIndex + 1].id);
-  };
-
-  const goBack = () => {
-    if (isFirstStep) return;
-    setTab(TABS[tabIndex - 1].id);
-  };
 
   const unregisterIrrelevantFields = (newType: VoucherType) => {
     const allTypeSpecificFields = Object.values(
@@ -205,147 +194,147 @@ export default function NewVoucherPage() {
     }
 
     setValue('type', voucherTypeEnum);
+    setValue('valueType', 'fixed');
     unregisterIrrelevantFields(type);
     setValidationErrors({});
+    setShowErrors(false);
   };
 
-  const removeEmptyValues = (obj: any): any => {
-    if (obj === null || obj === undefined) return undefined;
+  const validateStep = (current: StepId): Record<string, string> => {
+    const next: Record<string, string> = {};
 
-    if (Array.isArray(obj)) {
-      const filteredArray = obj
-        .map((item) =>
-          typeof item === 'object' ? removeEmptyValues(item) : item
-        )
-        .filter((item) => item !== null && item !== undefined && item !== '');
-      return filteredArray.length > 0 ? filteredArray : undefined;
+    if (current === 'type') {
+      if (!getValues('type')) next.type = 'Voucher type is required';
     }
 
-    if (typeof obj === 'object') {
-      const filteredObj = Object.entries(obj).reduce((acc, [key, value]) => {
-        const filteredValue = removeEmptyValues(value);
-        if (filteredValue !== undefined) {
-          acc[key] = filteredValue;
+    if (current === 'code') {
+      const code = getValues('code');
+      const useAdvancedSettings = getValues('advancedCodeSettings');
+      if (!code && !useAdvancedSettings) {
+        next.code = 'Enter a code, or turn on advanced settings';
+      }
+      if (useAdvancedSettings) {
+        const codeSettings = getValues('codeSettings') || {};
+        if (!codeSettings.prefix) next['codeSettings.prefix'] = 'Code prefix is required';
+        if (!codeSettings.postfix) next['codeSettings.postfix'] = 'Code postfix is required';
+        if (!codeSettings.length) next['codeSettings.length'] = 'Code length is required';
+        if (!codeSettings.pattern) next['codeSettings.pattern'] = 'Pattern is required';
+        if (!codeSettings.characterSet) {
+          next['codeSettings.characterSet'] = 'Character set is required';
         }
-        return acc;
-      }, {} as Record<string, any>);
-      return Object.keys(filteredObj).length > 0 ? filteredObj : undefined;
+      }
+      if (!getValues('programCardPrefix')) {
+        next.programCardPrefix = 'Program card prefix is required';
+      }
     }
 
-    return obj === '' ? undefined : obj;
+    if (current === 'policy') {
+      const currentValueType =
+        voucherType === 'CASHBACK' || voucherType === 'GIFT_CARD'
+          ? 'fixed'
+          : getValues('valueType') || 'fixed';
+      const policyFields =
+        policyRequiredFieldsByType[voucherType]?.[currentValueType] || [];
+      for (const field of policyFields) {
+        const value = getValues(field as any);
+        if (!value && value !== 0) {
+          const fieldName = field.split('.').pop() || field;
+          const readable = fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .toLowerCase()
+            .replace(/^\w/, (c) => c.toUpperCase());
+          next[field] = `${readable} is required`;
+        }
+      }
+
+      const minimumPurchase = getValues('minimumPurchase');
+      const maximumDiscount = getValues('maximumDiscount');
+      if (minimumPurchase && maximumDiscount) {
+        const minPurchase = parseFloat(String(minimumPurchase));
+        const maxDiscount = parseFloat(String(maximumDiscount));
+        if (
+          !isNaN(minPurchase) &&
+          !isNaN(maxDiscount) &&
+          maxDiscount > minPurchase
+        ) {
+          next.maximumDiscount =
+            'Maximum discount cannot be greater than minimum purchase amount';
+        }
+      }
+    }
+
+    if (current === 'audience') {
+      if (!getValues('audience.segment')) {
+        next['audience.segment'] = 'Audience is required';
+      }
+    }
+
+    if (current === 'scheduling') {
+      if (!getValues('scheduling.programStartDate')) {
+        next['scheduling.programStartDate'] = 'Program start date is required';
+      }
+      const neverEnds = getValues('scheduling.neverEnds');
+      if (!neverEnds && !getValues('scheduling.programEndDate')) {
+        next['scheduling.programEndDate'] = 'Program end date is required';
+      }
+    }
+
+    return next;
   };
 
-  /** Validate the whole form only when Publish is clicked (last step). */
-  const validateAll = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    const currentValueType = getValues('valueType') || 'fixed';
-    const policyFields =
-      policyRequiredFieldsByType[voucherType]?.[currentValueType] || [];
-    for (const field of policyFields) {
-      const value = getValues(field as any);
-      if (!value && value !== 0) {
-        const fieldName = field.split('.').pop() || field;
-        const readable = fieldName
-          .replace(/([A-Z])/g, ' $1')
-          .toLowerCase()
-          .replace(/^\w/, (c) => c.toUpperCase());
-        newErrors[field] = `${readable} is required`;
-      }
+  const goNext = () => {
+    const errors = validateStep(step);
+    setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setShowErrors(true);
+      toast.error('Please fix the required fields before continuing.');
+      requestAnimationFrame(() => {
+        document
+          .querySelector('.error-field')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      return;
     }
+    setShowErrors(false);
+    setValidationErrors({});
+    const next = STEPS[stepIndex + 1];
+    if (next) setStep(next.id);
+  };
 
-    const minimumPurchase = getValues('minimumPurchase');
-    const maximumDiscount = getValues('maximumDiscount');
-    if (minimumPurchase && maximumDiscount) {
-      const minPurchase = parseFloat(minimumPurchase);
-      const maxDiscount = parseFloat(maximumDiscount);
-      if (
-        !isNaN(minPurchase) &&
-        !isNaN(maxDiscount) &&
-        maxDiscount > minPurchase
-      ) {
-        newErrors['maximumDiscount'] =
-          'Maximum discount cannot be greater than minimum purchase amount';
-      }
-    }
-
-    const code = getValues('code');
-    const useAdvancedSettings = getValues('advancedCodeSettings');
-    if (!code && !useAdvancedSettings) {
-      newErrors['code'] = 'Either a code or code settings must be provided';
-    }
-    if (useAdvancedSettings) {
-      const codeSettings = getValues('codeSettings');
-      if (!codeSettings || !codeSettings.length) {
-        newErrors['codeSettings.length'] =
-          'Code length is required when using advanced settings';
-      }
-    }
-    const programCardPrefix = getValues('programCardPrefix');
-    if (!programCardPrefix) {
-      newErrors['programCardPrefix'] = 'Program card prefix is required';
-    }
-
-    const segment = getValues('audience.segment');
-    if (!segment) {
-      newErrors['audience.segment'] = 'Audience segment is required';
-    }
-
-    const programStartDate = getValues('scheduling.programStartDate');
-    if (!programStartDate) {
-      newErrors['scheduling.programStartDate'] = 'Program start date is required';
-    }
-
-    setValidationErrors(newErrors);
-
-    const firstError = Object.keys(newErrors)[0];
-    if (firstError) setTab(tabForError(firstError));
-
-    if (Object.keys(newErrors).length > 0) {
-      const count = Object.keys(newErrors).length;
-      toast.error(
-        count === 1
-          ? 'There is 1 error in the form. Please fix it before publishing.'
-          : `There are ${count} errors in the form. Please fix them before publishing.`
-      );
-      return false;
-    }
-
-    return true;
+  const goBack = () => {
+    setShowErrors(false);
+    setValidationErrors({});
+    const prev = STEPS[stepIndex - 1];
+    if (prev) setStep(prev.id);
   };
 
   const onSubmit = async (data: FormData) => {
     try {
-      setAttemptedPublish(true);
-      setValidationErrors({});
-
-      if (!validateAll()) {
+      const errors = validateStep('scheduling');
+      setValidationErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        setShowErrors(true);
+        toast.error('Please fix the required fields before publishing.');
         return;
       }
 
       setIsSubmitting(true);
-
-      let filteredData = removeEmptyValues(data);
-      const { voucherType: _vt, ...dataWithoutVoucherType } = filteredData;
-      filteredData = dataWithoutVoucherType;
-
-      if (filteredData.minimumPurchase && filteredData.minimumPurchase !== '') {
-        filteredData.minimumPurchase = parseFloat(filteredData.minimumPurchase);
-      }
-      if (filteredData.maximumDiscount && filteredData.maximumDiscount !== '') {
-        filteredData.maximumDiscount = parseFloat(filteredData.maximumDiscount);
-      }
-
-      await createVoucherMutation.mutateAsync(filteredData);
+      const payload = buildCreateVoucherPayload(data);
+      await createVoucherMutation.mutateAsync(payload);
       toast.success('Voucher created successfully!');
       router.push('/account_receivables/vouchers');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating voucher:', error);
-      if (error instanceof Error) {
-        toast.error(`Failed to create voucher: ${error.message}`);
-      } else {
-        toast.error('Failed to create voucher. Please try again.');
-      }
+      const apiMessage =
+        error?.response?.data?.message ||
+        error?.data?.message ||
+        error?.message;
+      const text = Array.isArray(apiMessage)
+        ? apiMessage.join('. ')
+        : typeof apiMessage === 'string'
+          ? apiMessage
+          : 'Failed to create voucher. Please try again.';
+      toast.error(text);
     } finally {
       setIsSubmitting(false);
     }
@@ -355,75 +344,80 @@ export default function NewVoucherPage() {
     <DocumentWorkspace
       title="New voucher"
       closeHref="/account_receivables/vouchers"
-      bodyClassName="flex flex-col overflow-hidden bg-white"
+      bodyClassName="flex flex-col overflow-hidden"
     >
       <FormProvider {...methods}>
         <form
           id="new-voucher"
           onSubmit={methods.handleSubmit(onSubmit)}
           className="flex h-full min-h-0 flex-col bg-white"
-          onKeyDown={(e) => {
-            // Enter on intermediate steps should not publish.
-            if (e.key === 'Enter' && !isLastStep) {
-              const tag = (e.target as HTMLElement)?.tagName;
-              if (tag !== 'TEXTAREA') {
-                e.preventDefault();
-              }
-            }
-          }}
         >
           <div className="flex shrink-0 gap-6 overflow-x-auto border-b border-black/[0.08] px-6 text-sm">
-            {TABS.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setTab(item.id)}
-                className={cn(
-                  'border-b-2 py-3',
-                  tab === item.id
-                    ? 'border-primary font-medium text-primary'
-                    : 'border-transparent text-foreground',
-                )}
-              >
-                <span className="mr-1.5 text-muted-foreground">{index + 1}.</span>
-                {item.label}
-              </button>
-            ))}
+            {STEPS.map((item, index) => {
+              const reached = index <= stepIndex;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    if (index < stepIndex) {
+                      setShowErrors(false);
+                      setValidationErrors({});
+                      setStep(item.id);
+                    }
+                  }}
+                  className={cn(
+                    'border-b-2 py-3',
+                    step === item.id
+                      ? 'border-primary font-medium text-primary'
+                      : reached
+                        ? 'border-transparent text-foreground'
+                        : 'border-transparent text-muted-foreground',
+                  )}
+                >
+                  {index + 1}. {item.label}
+                </button>
+              );
+            })}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <DocumentFormShell className="bg-white">
-              <div className={tab === 'type' ? undefined : 'hidden'}>
-                <VoucherTypeSelector
-                  selectedType={voucherType}
-                  onVoucherTypeChange={handleVoucherTypeChange}
-                />
-              </div>
-              <div className={tab === 'code' ? undefined : 'hidden'}>
-                <Code showErrors={attemptedPublish} />
-              </div>
-              <div className={tab === 'policy' ? undefined : 'hidden'}>
-                <Policy voucherType={voucherType} showErrors={attemptedPublish} />
-              </div>
-              <div className={tab === 'audience' ? undefined : 'hidden'}>
-                <Audience showErrors={attemptedPublish} />
-              </div>
-              <div className={tab === 'scheduling' ? undefined : 'hidden'}>
-                <Scheduling showErrors={attemptedPublish} />
-              </div>
+            <DocumentFormShell className="pb-6">
+              <DocumentFormCard flush>
+                <DocumentSectionTitle>
+                  {STEPS[stepIndex]?.label}
+                </DocumentSectionTitle>
 
-              {attemptedPublish && Object.keys(validationErrors).length > 0 ? (
-                <div className="mt-6 border border-red-200 bg-red-50 p-3">
-                  <h4 className="mb-2 font-medium text-red-600">
-                    Please fix the following errors:
-                  </h4>
-                  <ul className="list-disc pl-5 text-sm text-red-500">
-                    {Object.values(validationErrors).map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
+                <div className={step === 'type' ? undefined : 'hidden'}>
+                  <VoucherTypeSelector
+                    selectedType={voucherType}
+                    onVoucherTypeChange={handleVoucherTypeChange}
+                  />
                 </div>
-              ) : null}
+                <div className={step === 'code' ? undefined : 'hidden'}>
+                  <Code showErrors={showErrors && step === 'code'} />
+                </div>
+                <div className={step === 'policy' ? undefined : 'hidden'}>
+                  <Policy
+                    voucherType={voucherType}
+                    showErrors={showErrors && step === 'policy'}
+                  />
+                </div>
+                <div className={step === 'audience' ? undefined : 'hidden'}>
+                  <Audience showErrors={showErrors && step === 'audience'} />
+                </div>
+                <div className={step === 'scheduling' ? undefined : 'hidden'}>
+                  <Scheduling showErrors={showErrors && step === 'scheduling'} />
+                </div>
+
+                {showErrors && Object.keys(validationErrors).length > 0 ? (
+                  <div className="mt-6 rounded-[2px] border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                    {Object.values(validationErrors).map((error) => (
+                      <p key={error}>{error}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </DocumentFormCard>
             </DocumentFormShell>
           </div>
 
@@ -438,52 +432,36 @@ export default function NewVoucherPage() {
                 Cancel
               </ShadcnButton>
             }
-            center={
-              <p className="text-sm text-white/80">
-                Step {tabIndex + 1} of {TABS.length}
-                {!isLastStep ? ' — Publish is on the last step' : ''}
-              </p>
-            }
             right={
-              <div className="flex flex-wrap items-center gap-2">
-                {!isFirstStep ? (
+              <>
+                {stepIndex > 0 ? (
                   <ShadcnButton
                     type="button"
                     variant="outline"
-                    className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                    className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
                     onClick={goBack}
                   >
                     Back
                   </ShadcnButton>
                 ) : null}
-                {!isLastStep ? (
+                {isLastStep ? (
+                  <ShadcnButton
+                    type="submit"
+                    className="bg-white text-foreground hover:bg-white/90"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Publishing…' : 'Publish'}
+                  </ShadcnButton>
+                ) : (
                   <ShadcnButton
                     type="button"
-                    variant="outline"
-                    className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                    className="bg-white text-foreground hover:bg-white/90"
                     onClick={goNext}
                   >
                     Next
                   </ShadcnButton>
-                ) : (
-                  <ShadcnButton
-                    type="submit"
-                    form="new-voucher"
-                    variant="outline"
-                    className="border-white/40 bg-white text-foreground hover:bg-white/90"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={16} className="mr-2 animate-spin" />
-                        Publishing…
-                      </>
-                    ) : (
-                      'Publish'
-                    )}
-                  </ShadcnButton>
                 )}
-              </div>
+              </>
             }
           />
         </form>

@@ -25,7 +25,8 @@ import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate } from '../../../_shared/format';
 import { ErrorState, LoadingState } from '../../../_shared/states';
 import { useCreditNote } from '../_hooks';
-import { partyName } from '../_utils/types';
+import { partyName, REFUND_METHODS } from '../_utils/types';
+import { paymentMethodDisplayLabel } from '@/lib/payment-method-labels';
 import CreditNoteStatusBadge from './CreditNoteStatusBadge';
 
 interface Props {
@@ -172,7 +173,15 @@ const CreditNoteDetailsSheet = ({ creditNoteId, onClose }: Props) => {
                 <>
                   <Row label="Refunded" value={formatDate(data.refundedAt)} />
                   <Row label="Refund amount" value={formatAmount(data.refundAmount, currency)} />
-                  <Row label="Refund method" value={data.refundMethod ?? '—'} />
+                  <Row
+                    label="Refund method"
+                    value={
+                      REFUND_METHODS.find((m) => m.value === data.refundMethod)
+                        ?.label ??
+                      paymentMethodDisplayLabel(data.refundMethod) ??
+                      '—'
+                    }
+                  />
                   {data.refundDescription && (
                     <Row label="Refund note" value={data.refundDescription} />
                   )}

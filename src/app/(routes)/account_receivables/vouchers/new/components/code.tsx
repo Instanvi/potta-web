@@ -1,307 +1,320 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { AlertCircle } from 'lucide-react';
+import Input from '@potta/components/input';
+import { Switch } from '@potta/components/shadcn/switch';
+import { GeneratedNumberField } from '@potta/components/generated-number-field';
 
-interface CodeProps {
-  /** Show validation messages only after Publish on the last step. */
-  showErrors?: boolean;
+const DEFAULT_CHARACTER_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const DEFAULT_CODE_LENGTH = 8;
+
+function randomLetters(count: number) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let out = '';
+  for (let i = 0; i < count; i += 1) {
+    out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return out;
 }
 
-const Code: React.FC<CodeProps> = ({ showErrors = false }) => {
-  const { register, watch, setValue, getValues, formState: { errors }, trigger } = useFormContext();
-  const [hasAdvancedSettings, setHasAdvancedSettings] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  
-  // Watch for code and advanced settings fields
-  const code = watch('code');
-  const programCardPrefix = watch('programCardPrefix');
-  const codeSettingsLength = watch('codeSettings.length');
-  const codeSettingsPrefix = watch('codeSettings.prefix');
-  const codeSettingsPostfix = watch('codeSettings.postfix');
-  const codeSettingsPattern = watch('codeSettings.pattern');
-  const codeSettingsCharacterSet = watch('codeSettings.characterSet');
-  
-  // Check if we have either a code or valid advanced settings
-  const hasCode = !!code;
-  const hasProgramCardPrefix = !!programCardPrefix;
-  const hasValidAdvancedSettings = hasAdvancedSettings && 
-    !!codeSettingsLength && 
-    !!codeSettingsPrefix && 
-    !!codeSettingsPostfix && 
-    !!codeSettingsPattern && 
-    !!codeSettingsCharacterSet;
-  
-  // Reactive validation
-  useEffect(() => {
-    const errors: string[] = [];
-    
-    // Program card prefix is always required
-    if (!programCardPrefix) {
-      errors.push("Program card prefix is required");
-    }
-    
-    if (hasAdvancedSettings) {
-      if (!codeSettingsLength) errors.push("Code length is required");
-      if (!codeSettingsPrefix) errors.push("Code prefix is required");
-      if (!codeSettingsPostfix) errors.push("Code postfix is required");
-      if (!codeSettingsPattern) errors.push("Pattern is required");
-      if (!codeSettingsCharacterSet) errors.push("Character set is required");
-    } else if (!hasCode) {
-      errors.push("Code is required if not using advanced settings");
-    }
-    
-    setValidationErrors(errors);
-  }, [
-    hasAdvancedSettings, 
-    code, 
-    programCardPrefix,
-    codeSettingsLength, 
-    codeSettingsPrefix, 
-    codeSettingsPostfix, 
-    codeSettingsPattern, 
-    codeSettingsCharacterSet
-  ]);
-  
-  // Validate the code tab
-  const validateCodeTab = () => {
-    // Program card prefix is always required
-    if (!programCardPrefix) {
-      return false;
-    }
-    
-    // Either need a code or valid advanced settings
-    if (hasAdvancedSettings) {
-      return hasValidAdvancedSettings;
-    } else {
-      return hasCode;
-    }
-  };
-  
-  // Add a hidden validation button that can be triggered from the parent
-  useEffect(() => {
-    // Create a hidden button for validation
-    const validateButton = document.createElement('button');
-    validateButton.id = 'validate-code';
-    validateButton.style.display = 'none';
-    validateButton.onclick = () => validateCodeTab();
-    
-    document.body.appendChild(validateButton);
-    
-    return () => {
-      document.body.removeChild(validateButton);
-    };
-  }, [hasCode, hasValidAdvancedSettings, programCardPrefix]);
+function patternForLength(length: number) {
+  const n = Math.max(4, Math.min(16, Math.floor(Number(length) || DEFAULT_CODE_LENGTH)));
+  const left = Math.ceil(n / 2);
+  const right = n - left;
+  return `${'#'.repeat(left)}-${'#'.repeat(right)}`;
+}
 
-  // Toggle between simple code and advanced settings
-  const toggleAdvancedSettings = () => {
-    if (hasAdvancedSettings) {
-      // Switching from advanced to simple
-      setValue('codeSettings.length', '');
-      setValue('codeSettings.prefix', '');
-      setValue('codeSettings.postfix', '');
-      setValue('codeSettings.pattern', '');
-      setValue('codeSettings.characterSet', '');
-      setHasAdvancedSettings(false);
-    } else {
-      // Switching from simple to advanced
+function GenerateFieldButton({
+  onGenerate,
+  label = 'Generate',
+}: {
+  onGenerate: () => void;
+  label?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onGenerate}
+      className="mt-1 text-sm font-medium text-primary hover:underline"
+    >
+      {label}
+    </button>
+  );
+}
+
+const Code = ({ showErrors = false }: { showErrors?: boolean }) => {
+  const { watch, setValue } = useFormContext();
+  const hasAdvancedSettings = Boolean(watch('advancedCodeSettings'));
+  const code = watch('code') || '';
+  const programCardPrefix = watch('programCardPrefix') || '';
+  const usageLimit = watch('usageLimit') ?? '';
+  const codeSettingsLength = watch('codeSettings.length');
+  const codeSettingsPrefix = watch('codeSettings.prefix') || '';
+  const codeSettingsPostfix = watch('codeSettings.postfix') || '';
+  const codeSettingsPattern = watch('codeSettings.pattern') || '';
+  const codeSettingsCharacterSet = watch('codeSettings.characterSet') || '';
+
+  const toggleAdvancedSettings = (next: boolean) => {
+    setValue('advancedCodeSettings', next);
+    if (next) {
       setValue('code', '');
-      setHasAdvancedSettings(true);
+      fillAdvancedDefaults();
+      return;
     }
+    setValue('codeSettings.length', '');
+    setValue('codeSettings.prefix', '');
+    setValue('codeSettings.postfix', '');
+    setValue('codeSettings.pattern', '');
+    setValue('codeSettings.characterSet', '');
+  };
+
+  const fillAdvancedDefaults = () => {
+    const length = DEFAULT_CODE_LENGTH;
+    setValue('codeSettings.prefix', randomLetters(3), { shouldDirty: true });
+    setValue('codeSettings.postfix', randomLetters(3), { shouldDirty: true });
+    setValue('codeSettings.length', length, { shouldDirty: true });
+    setValue('codeSettings.pattern', patternForLength(length), { shouldDirty: true });
+    setValue('codeSettings.characterSet', DEFAULT_CHARACTER_SET, { shouldDirty: true });
   };
 
   return (
-    <div className="bg-white p-6">
-      <h3 className="text-xl font-medium mb-8">Code Settings</h3>
-      
-      {/* Validation Error Messages — only after Publish */}
-      {showErrors && validationErrors.length > 0 && (
-        <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex items-center mb-2">
-            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-            <h4 className="text-red-600 font-medium">Please fix the following errors:</h4>
-          </div>
-          <ul className="list-disc pl-5 text-red-500 text-sm">
-            {validationErrors.map((error, index) => (
-              <li key={index} className="code-error">{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      
-      {/* Simple Code Input */}
-      {!hasAdvancedSettings && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Code <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            {...register('code')}
-            className={`w-1/2 border ${!hasCode ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-            placeholder="SAVE20"
+    <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+      {!hasAdvancedSettings ? (
+        <div className={showErrors && !code ? 'error-field' : ''}>
+          <GeneratedNumberField
+            label="Code"
+            name="code"
+            acronym="VCH"
+            required
+            value={code}
+            onChange={(value) => setValue('code', value, { shouldDirty: true })}
+            placeholder="Generate or enter a code"
+            errors={
+              showErrors && !code
+                ? 'Enter a code, or turn on advanced settings'
+                : undefined
+            }
           />
-          {!hasCode && (
-            <p className="mt-1 text-sm text-red-500">
-              Enter a code or use advanced settings
-            </p>
-          )}
         </div>
-      )}
-      
-      <div className="space-y-6 w-3/5">
-        {/* Program Card Prefix - Now marked as required */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Program Card Prefix <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            {...register('programCardPrefix', { required: true })}
-            className={`w-1/2 border ${!hasProgramCardPrefix ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-            placeholder="Program-02152"
-          />
-          {!hasProgramCardPrefix && (
-            <p className="mt-1 text-sm text-red-500">
-              Program card prefix is required
-            </p>
-          )}
-        </div>
+      ) : null}
 
-        {/* Maximum Entries */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Maximum Entries
-          </label>
-          <input
-            type="number"
-            {...register('usageLimit')}
-            className="w-1/2 border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            placeholder="55"
-          />
-        </div>
+      <div className={showErrors && !programCardPrefix ? 'error-field' : ''}>
+        <GeneratedNumberField
+          label="Program card prefix"
+          name="programCardPrefix"
+          acronym="PROG"
+          required
+          value={programCardPrefix}
+          onChange={(value) =>
+            setValue('programCardPrefix', value, { shouldDirty: true })
+          }
+          placeholder="Generate or enter a prefix"
+          errors={
+            showErrors && !programCardPrefix
+              ? 'Program card prefix is required'
+              : undefined
+          }
+        />
+      </div>
 
-        {/* Advanced Code Settings Toggle */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">
-              Advanced code settings
-            </label>
-            <div
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                hasAdvancedSettings ? 'bg-green-500' : 'bg-gray-200'
-              }`}
-              onClick={toggleAdvancedSettings}
+      <div>
+        <Input
+          type="number"
+          label="Maximum entries"
+          name="usageLimit"
+          value={usageLimit}
+          onchange={(e) => setValue('usageLimit', e.target.value, { shouldDirty: true })}
+          placeholder="100"
+          min={1}
+        />
+        <GenerateFieldButton
+          label="Use 100"
+          onGenerate={() => setValue('usageLimit', 100, { shouldDirty: true })}
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 sm:col-span-2">
+        <div>
+          <p className="text-sm text-foreground">Advanced code settings</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {hasAdvancedSettings
+              ? 'Codes are built from the settings below. Use Generate on any field, or fill all at once.'
+              : 'Turn this on to generate codes from prefix, pattern, and character set.'}
+          </p>
+        </div>
+        <Switch checked={hasAdvancedSettings} onCheckedChange={toggleAdvancedSettings} />
+      </div>
+
+      {hasAdvancedSettings ? (
+        <div className="grid grid-cols-1 gap-x-6 gap-y-5 rounded-[2px] border border-black/[0.08] bg-main-bg/40 p-4 sm:col-span-2 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <button
+              type="button"
+              onClick={fillAdvancedDefaults}
+              className="inline-flex h-9 items-center rounded-[2px] border border-primary/30 bg-white px-3 text-sm font-medium text-primary hover:bg-brand-subtle"
             >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  hasAdvancedSettings ? 'translate-x-6' : 'translate-x-1'
-                }`}
+              Generate all advanced settings
+            </button>
+          </div>
+
+          <div className={showErrors && !codeSettingsPrefix ? 'error-field' : ''}>
+            <Input
+              type="text"
+              label="Code prefix"
+              name="codeSettings.prefix"
+              required
+              value={codeSettingsPrefix}
+              onchange={(e) =>
+                setValue('codeSettings.prefix', e.target.value, { shouldDirty: true })
+              }
+              placeholder="ABC"
+              errors={showErrors && !codeSettingsPrefix ? 'Required' : undefined}
+            />
+            <GenerateFieldButton
+              onGenerate={() =>
+                setValue('codeSettings.prefix', randomLetters(3), { shouldDirty: true })
+              }
+            />
+          </div>
+
+          <div className={showErrors && !codeSettingsPostfix ? 'error-field' : ''}>
+            <Input
+              type="text"
+              label="Code postfix"
+              name="codeSettings.postfix"
+              required
+              value={codeSettingsPostfix}
+              onchange={(e) =>
+                setValue('codeSettings.postfix', e.target.value, { shouldDirty: true })
+              }
+              placeholder="XYZ"
+              errors={showErrors && !codeSettingsPostfix ? 'Required' : undefined}
+            />
+            <GenerateFieldButton
+              onGenerate={() =>
+                setValue('codeSettings.postfix', randomLetters(3), { shouldDirty: true })
+              }
+            />
+          </div>
+
+          <div className={showErrors && !codeSettingsLength ? 'error-field' : ''}>
+            <Input
+              type="number"
+              label="Code length"
+              name="codeSettings.length"
+              required
+              min={4}
+              max={32}
+              value={codeSettingsLength ?? ''}
+              onchange={(e) => {
+                const next = e.target.value;
+                setValue('codeSettings.length', next, { shouldDirty: true });
+                if (next && !codeSettingsPattern) {
+                  setValue('codeSettings.pattern', patternForLength(Number(next)), {
+                    shouldDirty: true,
+                  });
+                }
+              }}
+              placeholder="8"
+              errors={showErrors && !codeSettingsLength ? 'Required' : undefined}
+            />
+            <GenerateFieldButton
+              label={`Use ${DEFAULT_CODE_LENGTH}`}
+              onGenerate={() => {
+                setValue('codeSettings.length', DEFAULT_CODE_LENGTH, { shouldDirty: true });
+                setValue(
+                  'codeSettings.pattern',
+                  patternForLength(DEFAULT_CODE_LENGTH),
+                  { shouldDirty: true },
+                );
+              }}
+            />
+          </div>
+
+          <div className={showErrors && !codeSettingsPattern ? 'error-field' : ''}>
+            <Input
+              type="text"
+              label="Pattern"
+              name="codeSettings.pattern"
+              required
+              value={codeSettingsPattern}
+              onchange={(e) =>
+                setValue('codeSettings.pattern', e.target.value, { shouldDirty: true })
+              }
+              placeholder="####-####"
+              errors={showErrors && !codeSettingsPattern ? 'Required' : undefined}
+            />
+            <GenerateFieldButton
+              onGenerate={() =>
+                setValue(
+                  'codeSettings.pattern',
+                  patternForLength(Number(codeSettingsLength) || DEFAULT_CODE_LENGTH),
+                  { shouldDirty: true },
+                )
+              }
+            />
+          </div>
+
+          <div
+            className={`sm:col-span-2 ${
+              showErrors && !codeSettingsCharacterSet ? 'error-field' : ''
+            }`}
+          >
+            <Input
+              type="text"
+              label="Character set"
+              name="codeSettings.characterSet"
+              required
+              value={codeSettingsCharacterSet}
+              onchange={(e) =>
+                setValue('codeSettings.characterSet', e.target.value, {
+                  shouldDirty: true,
+                })
+              }
+              placeholder={DEFAULT_CHARACTER_SET}
+              errors={showErrors && !codeSettingsCharacterSet ? 'Required' : undefined}
+            />
+            <div className="mt-1 flex flex-wrap gap-3">
+              <GenerateFieldButton
+                label="Letters + numbers"
+                onGenerate={() =>
+                  setValue('codeSettings.characterSet', DEFAULT_CHARACTER_SET, {
+                    shouldDirty: true,
+                  })
+                }
+              />
+              <GenerateFieldButton
+                label="Numbers only"
+                onGenerate={() =>
+                  setValue('codeSettings.characterSet', '0123456789', {
+                    shouldDirty: true,
+                  })
+                }
+              />
+              <GenerateFieldButton
+                label="Letters only"
+                onGenerate={() =>
+                  setValue('codeSettings.characterSet', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', {
+                    shouldDirty: true,
+                  })
+                }
               />
             </div>
           </div>
-          <p className="mt-1 text-sm text-gray-500">
-            {hasAdvancedSettings 
-              ? "Configure advanced code settings (code will be generated automatically)" 
-              : "Switch to advanced settings to generate codes automatically"}
-          </p>
-        </div>
 
-        {/* Advanced Code Settings Fields */}
-        {hasAdvancedSettings && (
-          <div className="border-dotted border border-gray-200 p-6 space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Code Prefix <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  {...register('codeSettings.prefix', { 
-                    required: hasAdvancedSettings 
-                  })}
-                  className={`w-full border ${!codeSettingsPrefix && hasAdvancedSettings ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-                  placeholder="ABC"
-                />
-                {!codeSettingsPrefix && hasAdvancedSettings && (
-                  <p className="mt-1 text-sm text-red-500">Required</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Code Postfix <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  {...register('codeSettings.postfix', { 
-                    required: hasAdvancedSettings 
-                  })}
-                  className={`w-full border ${!codeSettingsPostfix && hasAdvancedSettings ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-                  placeholder="XYZ"
-                />
-                {!codeSettingsPostfix && hasAdvancedSettings && (
-                  <p className="mt-1 text-sm text-red-500">Required</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Code length <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  {...register('codeSettings.length', { 
-                    required: hasAdvancedSettings 
-                  })}
-                  className={`w-full border ${!codeSettingsLength && hasAdvancedSettings ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-                  placeholder="11"
-                />
-                {!codeSettingsLength && hasAdvancedSettings && (
-                  <p className="mt-1 text-sm text-red-500">Required</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pattern <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  {...register('codeSettings.pattern', { 
-                    required: hasAdvancedSettings 
-                  })}
-                  className={`w-full border ${!codeSettingsPattern && hasAdvancedSettings ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-                  placeholder="#125###120"
-                />
-                {!codeSettingsPattern && hasAdvancedSettings && (
-                  <p className="mt-1 text-sm text-red-500">Required</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Character Set <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  {...register('codeSettings.characterSet', { 
-                    required: hasAdvancedSettings 
-                  })}
-                  className={`w-full border ${!codeSettingsCharacterSet && hasAdvancedSettings ? 'border-red-300' : 'border-gray-300'} px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500`}
-                  placeholder="01223456789abcdefghijklmnopirstuvwxyz"
-                />
-                {!codeSettingsCharacterSet && hasAdvancedSettings && (
-                  <p className="mt-1 text-sm text-red-500">Required</p>
-                )}
-              </div>
-            </div>
+          <div className="sm:col-span-2 rounded-[2px] border border-dashed border-black/10 bg-white p-3 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">Pattern preview</p>
+            <p className="mt-1 font-mono text-foreground">
+              {(codeSettingsPrefix || 'ABC') +
+                (codeSettingsPattern || patternForLength(DEFAULT_CODE_LENGTH)) +
+                (codeSettingsPostfix || 'XYZ')}
+            </p>
+            <p className="mt-1 text-xs">
+              `#` characters are replaced when the server generates the code on publish.
+            </p>
           </div>
-        )}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 };

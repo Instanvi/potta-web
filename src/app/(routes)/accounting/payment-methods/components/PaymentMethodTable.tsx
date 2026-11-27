@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
+import { RowActionMenu } from '@/components/row-action-menu';
 import Button from '@potta/components/button';
 import Search from '@potta/components/search';
 import { Can, useCan } from '@/components/auth/can';
@@ -78,31 +79,29 @@ const PaymentMethodTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
-          {canAccess('PaymentMethod', 'update') && (
-            <button
-              type="button"
-              title="Edit"
-              className="rounded-[2px] p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-              onClick={() => {
-                setEditing(row.original);
-                setSheetOpen(true);
-              }}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          )}
-          {canAccess('PaymentMethod', 'remove') && !row.original.isSystem && (
-            <button
-              type="button"
-              title="Delete"
-              className="rounded-[2px] p-2 text-destructive hover:bg-destructive/10"
-              onClick={() => setToDelete(row.original)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+        <RowActionMenu
+          label="Payment method actions"
+          items={[
+            ...(canAccess('PaymentMethod', 'update')
+              ? [{
+                  label: 'Edit',
+                  icon: <Pencil className="mr-2 h-4 w-4" />,
+                  onSelect: () => {
+                    setEditing(row.original);
+                    setSheetOpen(true);
+                  },
+                }]
+              : []),
+            ...(canAccess('PaymentMethod', 'remove') && !row.original.isSystem
+              ? [{
+                  label: 'Delete',
+                  icon: <Trash2 className="mr-2 h-4 w-4" />,
+                  destructive: true,
+                  onSelect: () => setToDelete(row.original),
+                }]
+              : []),
+          ]}
+        />
       ),
     },
   ];
@@ -112,8 +111,9 @@ const PaymentMethodTable = () => {
       <ListToolbar
         actions={
           <div className="flex flex-wrap items-center gap-3">
-            {table ? <DataTableViewOptions table={table} /> : null}
+            <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="payment-methods"
               rows={rows}
               fetchAllRows={() =>
@@ -134,13 +134,14 @@ const PaymentMethodTable = () => {
               ]}
             />
             <Can resource="PaymentMethod" action="create">
-              <Button
-                text={seedMutation.isPending ? 'Seeding…' : 'Seed defaults'}
-                type="button"
-                theme="outline"
-                isLoading={seedMutation.isPending}
-                onClick={() => seedMutation.mutate()}
+              <ListActionItem
+                label={seedMutation.isPending ? 'Seeding…' : 'Seed defaults'}
+                disabled={seedMutation.isPending}
+                onSelect={() => seedMutation.mutate()}
               />
+            </Can>
+            </ListActionsMenu>
+            <Can resource="PaymentMethod" action="create">
               <Button
                 text="Add method"
                 type="button"

@@ -17,7 +17,7 @@ import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import { Skeleton } from '@potta/components/ui/loaders';
 
 const NewInvoiceInner = () => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const searchParams = useSearchParams();
   const initialInvoiceType = searchParams.get('type');

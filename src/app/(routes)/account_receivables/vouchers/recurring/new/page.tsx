@@ -7,11 +7,13 @@ import DocumentWorkspace from '@potta/components/document-workspace';
 import {
   DocumentEditorSplit,
   DocumentPreviewToggle,
+  usePreviewDownload,
 } from '@potta/components/document-editor-split';
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 
 export default function NewRecurringVoucherPage() {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
+  const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 
   return (
@@ -30,8 +32,9 @@ export default function NewRecurringVoucherPage() {
         open={showPreview}
         onOpenChange={setShowPreview}
         downloadTitle="Recurring voucher"
-        editor={<Left />}
-        preview={<PdfView />}
+        onDownloadPdf={onDownloadPdf}
+        editor={<Left onOpenPreview={() => setShowPreview(true)} />}
+        preview={<PdfView onRegisterDownload={registerDownload} />}
       />
     </DocumentWorkspace>
   );

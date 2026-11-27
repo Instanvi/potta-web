@@ -10,20 +10,20 @@ import {
 } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
-import { Button } from '@/components/shadcn/button';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { booksApi, extractBooksRows, rowId } from '@/lib/books-api';
-import axios, { payrollClient } from 'config/axios.config';
+import axios from 'config/axios.config';
 import { cn } from '@/lib/utils';
+import { useBooksLabelMaps } from '@/hooks/use-books-label-maps';
 
 export type HubTab = {
   id: string;
   label: string;
-  /** Books filter path, GET path, or payroll path */
+  /** Books filter path or GET path on potta-backend */
   path: string;
-  listMode?: 'filter' | 'get' | 'payroll';
-  columns: { key: string; label: string }[];
+  listMode?: 'filter' | 'get';
+  columns: { key: string; label: string; type?: string }[];
 };
 
 export function BooksTransactionsHub({
@@ -48,12 +48,7 @@ export function BooksTransactionsHub({
     setError(null);
     try {
       let data: unknown;
-      if (active.listMode === 'payroll') {
-        const res = await payrollClient.get(`/${active.path.replace(/^\//, '')}`, {
-          params: { page: 1, limit: 50, search: search.trim() || undefined },
-        });
-        data = res.data?.data ?? res.data;
-      } else if (active.listMode === 'get') {
+      if (active.listMode === 'get') {
         const res = await axios.get(`/${active.path}`, {
           params: { page: 1, limit: 50, search: search.trim() || undefined },
         });
@@ -91,6 +86,7 @@ export function BooksTransactionsHub({
     () => [{ key: '_type', label: 'Type' }, ...columns],
     [columns],
   );
+  const { formatCell } = useBooksLabelMaps(hubColumns);
   const hubRows = useMemo<Record<string, unknown>[]>(
     () =>
       rows.map((row) => ({
@@ -111,19 +107,14 @@ export function BooksTransactionsHub({
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-9"
-              onClick={() => void load()}
-              disabled={loading}
-              aria-label="Refresh"
-              title="Refresh"
-            >
-              <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
-            </Button>
+              <ListActionsMenu table={table}>
+                <ListActionItem
+                  label="Refresh"
+                  icon={<i className={`ri-refresh-line mr-2 ${loading ? 'animate-spin' : ''}`} />}
+                  disabled={loading}
+                  onSelect={() => void load()}
+                />
+              </ListActionsMenu>
             </>
           }
         >
@@ -150,6 +141,7 @@ export function BooksTransactionsHub({
               isLoading={loading}
               emptyMessage="No transactions"
               onTableChange={onTableChange}
+              formatCell={formatCell}
             />
           )}
         </div>

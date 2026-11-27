@@ -6,7 +6,8 @@ import { Check, X } from 'lucide-react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
+import { RowActionMenu } from '@/components/row-action-menu';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import Button from '@potta/components/button';
 import Input from '@potta/components/input';
@@ -16,7 +17,6 @@ import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDateTime } from '../../../_shared/format';
 import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
-import { cn } from '@/lib/utils';
 import {
   useAcceptIntegrationTransaction,
   useExcludeIntegrationTransaction,
@@ -148,28 +148,26 @@ const IntegrationTransactionsTable = () => {
         const actionable = txn.status === 'new' || txn.status === 'reviewed';
         if (!actionable) return null;
         return (
-          <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
-            {canAccess('JournalEntries', 'create') && (
-              <>
-                <button
-                  type="button"
-                  title="Accept"
-                  className="rounded-[2px] p-2 text-success hover:bg-success/10"
-                  onClick={() => openAccept(txn)}
-                >
-                  <Check className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  title="Exclude"
-                  className="rounded-[2px] p-2 text-destructive hover:bg-destructive/10"
-                  onClick={() => setToExclude(txn)}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </>
-            )}
-          </div>
+          <RowActionMenu
+            label="Transaction actions"
+            items={
+              canAccess('JournalEntries', 'create')
+                ? [
+                    {
+                      label: 'Accept',
+                      icon: <Check className="mr-2 h-4 w-4" />,
+                      onSelect: () => openAccept(txn),
+                    },
+                    {
+                      label: 'Exclude',
+                      icon: <X className="mr-2 h-4 w-4" />,
+                      destructive: true,
+                      onSelect: () => setToExclude(txn),
+                    },
+                  ]
+                : []
+            }
+          />
         );
       },
     },
@@ -180,8 +178,9 @@ const IntegrationTransactionsTable = () => {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+            <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="integration-transactions"
               rows={rows}
               columns={[
@@ -222,18 +221,13 @@ const IntegrationTransactionsTable = () => {
                 },
               ]}
             />
-            <button
-              type="button"
-              aria-label="Refresh"
+            <ListActionItem
+              label="Refresh"
               disabled={isFetching}
-              onClick={() => void refetch()}
-              className="inline-flex size-10 items-center justify-center rounded-[2px] border border-input bg-background text-foreground hover:bg-accent disabled:opacity-50"
-            >
-              <ArrowsClockwise
-                className={cn('size-4', isFetching && 'animate-spin')}
-                weight="bold"
-              />
-            </button>
+              icon={<ArrowsClockwise className={`mr-2 size-4 ${isFetching ? 'animate-spin' : ''}`} weight="bold" />}
+              onSelect={() => void refetch()}
+            />
+            </ListActionsMenu>
           </>
         }
       >

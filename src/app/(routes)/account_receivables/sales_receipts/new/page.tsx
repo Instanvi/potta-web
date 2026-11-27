@@ -12,7 +12,7 @@ import {
 } from '@potta/components/document-editor-split';
 
 const NewSalesReciept = () => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
 
   const togglePreview = () => setShowPreview((v) => !v);

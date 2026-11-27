@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="supplier-credit"
       title="Supplier credit"
+      createLabel="New Supplier Credit"
       createHref="/account_payables/credits/new"
       documentKind="supplier_credit"
       columns={[

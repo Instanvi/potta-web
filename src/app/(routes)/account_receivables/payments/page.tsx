@@ -7,18 +7,19 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="ar-payments"
       title="AR payment"
+      createLabel="New AR Payment"
       columns={[
         { key: 'paymentDate', label: 'Date' },
         { key: 'amount', label: 'Amount' },
-        { key: 'method', label: 'Method' },
-        { key: 'customerId', label: 'Customer' },
-        { key: 'invoiceId', label: 'Invoice' },
+        { key: 'method', label: 'Method', type: 'paymentMethod' },
+        { key: 'customerId', label: 'Customer', type: 'customer' },
+        { key: 'invoiceId', label: 'Invoice', type: 'invoice' },
         { key: 'reference', label: 'Reference' },
       ]}
       fields={[
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'paymentDate', label: 'Payment date', type: 'date' },
-        { key: 'method', label: 'Method' },
+        { key: 'method', label: 'Method', type: 'paymentMethod' },
         { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'invoiceId', label: 'Invoice', type: 'invoice' },
         { key: 'reference', label: 'Reference' },

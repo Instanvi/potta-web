@@ -1,9 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import type { ColumnDef, Table } from '@tanstack/react-table';
-import { Eye, Trash2 } from 'lucide-react';
+import { RowActionMenu } from '@/components/row-action-menu';
 import { DataTable } from '@potta/components/ui/data-table';
-import { Can } from '@/components/auth/can';
+import { useCan } from '@/components/auth/can';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { formatAmount, formatDate } from '../../../_shared/format';
 import { ErrorState } from '../../../_shared/states';
@@ -36,6 +36,7 @@ const JournalEntriesTable = ({
   const term = useDebounced(search.trim());
   const { page, limit, tableProps } = useServerPagination({ pageSize: 20, resetOn: [term] });
   const { data, isLoading, error, refetch } = useGetJournalEntries({ page, limit, search: term });
+  const { canAccess } = useCan();
   const [viewId, setViewId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -84,26 +85,24 @@ const JournalEntriesTable = ({
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            title="View"
-            className="p-2 hover:bg-accent"
-            onClick={() => setViewId(row.original.uuid)}
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-          <Can resource="JournalEntries" action="delete">
-            <button
-              type="button"
-              title="Delete"
-              className="p-2 text-destructive hover:bg-destructive/10"
-              onClick={() => setDeleteId(row.original.uuid)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </Can>
-        </div>
+        <RowActionMenu
+          label="Journal actions"
+          items={[
+            {
+              label: 'View',
+              icon: <i className="ri-eye-line mr-2" />,
+              onSelect: () => setViewId(row.original.uuid),
+            },
+            ...(canAccess('JournalEntries', 'delete')
+              ? [{
+                  label: 'Delete',
+                  icon: <i className="ri-delete-bin-line mr-2" />,
+                  destructive: true,
+                  onSelect: () => setDeleteId(row.original.uuid),
+                }]
+              : []),
+          ]}
+        />
       ),
     },
   ];

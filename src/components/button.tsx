@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
+import React, { forwardRef, ReactNode } from 'react';
 
-type Props = {
+type Props = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'> & {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   text: any;
   icon?: ReactNode;
@@ -28,22 +28,28 @@ const themes = {
   outline: 'border border-input !text-foreground bg-background hover:bg-accent',
 };
 
-const Button = ({
-  onClick,
-  text,
-  icon,
-  theme,
-  color,
-  type,
-  isLoading,
-  disabled,
-  width,
-  height,
-  rounded,
-  className,
-}: Props) => {
+const Button = forwardRef<HTMLButtonElement, Props>(function Button(
+  {
+    onClick,
+    text,
+    icon,
+    theme,
+    color,
+    type,
+    isLoading,
+    disabled,
+    width,
+    height,
+    rounded,
+    className,
+    ...rest
+  },
+  ref,
+) {
   return (
     <button
+      {...rest}
+      ref={ref}
       type={type}
       disabled={disabled || isLoading}
       aria-busy={isLoading || undefined}
@@ -55,7 +61,7 @@ const Button = ({
         rounded ? '!rounded-full' : ''
       } ${height ? 'h-9 px-3 text-sm' : 'h-10 px-4'} ${
         isLoading || disabled ? 'opacity-50' : 'opacity-100'
-      } ${className}`}
+      } ${className ?? ''}`}
       onClick={onClick}
     >
       {isLoading ? (
@@ -69,6 +75,6 @@ const Button = ({
       {text}
     </button>
   );
-};
+});
 
 export default Button;

@@ -283,8 +283,8 @@ const Sidebars = () => {
           className="flex min-w-0 flex-col border-l border-black/[0.06]"
           style={{ width: SIDEBAR_PANEL_WIDTH }}
         >
-          <div className="shrink-0 border-b border-black/[0.06] px-3 py-3.5">
-            <p className="truncate text-base font-medium tracking-tight text-foreground">
+          <div className="shrink-0 border-b border-black/[0.06] px-3 py-4">
+            <p className="truncate text-xl font-semibold tracking-tight text-foreground">
               {active.title}
             </p>
           </div>

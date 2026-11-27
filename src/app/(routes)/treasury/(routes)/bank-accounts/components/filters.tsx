@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import AddBankAccountSlideover from './AddBankAccountSlideover';
 import { ListToolbar } from '../../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 
 interface FilterProps {
   search: string;
@@ -28,7 +29,9 @@ const Filter: React.FC<FilterProps> = ({ search, onSearchChange, rows = [] }) =>
       <ListToolbar
         actions={
           <>
+            <ListActionsMenu>
             <ExportButton
+              asItem
               filename="bank-accounts"
               rows={rows}
               columns={[
@@ -47,6 +50,7 @@ const Filter: React.FC<FilterProps> = ({ search, onSearchChange, rows = [] }) =>
                 { key: 'current_balance', header: 'Balance' },
               ]}
             />
+            </ListActionsMenu>
             <Button
               type={'button'}
               text="Add Bank Account"

@@ -95,7 +95,7 @@ export function ReportExportMenu({
           icon={<i className="ri-download-2-line" />}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 bg-white">
+      <DropdownMenuContent align="end" className="z-[200] w-48 bg-white">
         {REPORT_DOWNLOAD_FORMATS.map(({ format, label }) => (
           <DropdownMenuItem
             key={format}

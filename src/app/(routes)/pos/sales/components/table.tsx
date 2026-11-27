@@ -18,7 +18,7 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ErrorState, ListToolbar, StatusBadge } from '../../../_shared/states';
@@ -26,6 +26,8 @@ import ConfirmModal from '../../../_shared/ConfirmModal';
 import { exportRows } from '@/lib/export-file';
 import { sendPartyDocument } from '@/lib/document-send';
 import type { DocumentChannel } from '@/components/document-channel-menu';
+import { usePaymentMethods } from '@potta/app/(routes)/accounting/payment-methods/hooks';
+import { paymentMethodDisplayLabel } from '@/lib/payment-method-labels';
 
 
 /** saleDate range for a date preset, as a nestjs-paginate $btw filter (local days). */
@@ -132,6 +134,13 @@ const SaleTable = () => {
   };
 
   const { data, isLoading, error, refetch } = useGetAllSalesReceipts(filter);
+  const { data: paymentMethodsData } = usePaymentMethods({ page: 1, limit: 100 });
+  const orgPaymentMethods = (paymentMethodsData?.data ?? []).map((m) => ({
+    code: m.code,
+    name: m.name,
+  }));
+  const methodLabel = (code?: string | null) =>
+    paymentMethodDisplayLabel(code, orgPaymentMethods);
 
   const handleRowClick = (row: ResponseSalesReceipt) => {
     setOpenViewModal(row.uuid);
@@ -208,7 +217,7 @@ const SaleTable = () => {
       accessorKey: 'paymentMethod',
       header: 'Method',
       cell: ({ row: { original } }) => (
-        <div className="">{original.paymentMethod || '—'}</div>
+        <div className="">{methodLabel(original.paymentMethod)}</div>
       ),
     },
     {
@@ -349,14 +358,12 @@ const SaleTable = () => {
         className="items-center"
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
-            <Button
-              text={'Export'}
-              icon={<img src="/images/export.svg" alt="" />}
-              theme="lightBlue"
-              type={'button'}
-              color={true}
-              onClick={() =>
+            <ListActionsMenu table={table}>
+            <ListActionItem
+              label="Export"
+              icon={<i className="ri-upload-2-line mr-2" />}
+              disabled={receiptsData.length === 0}
+              onSelect={() =>
                 void exportRows({
                   filename: 'sales',
                   rows: receiptsData,
@@ -384,6 +391,7 @@ const SaleTable = () => {
                 })
               }
             />
+            </ListActionsMenu>
             <Link href={'/pos/sales/new'}>
               <Button
                 text={'Create Sale'}

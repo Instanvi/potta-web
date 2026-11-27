@@ -36,6 +36,11 @@ const PARTY_TYPES = new Set([
   'purchaseOrder',
   'estimate',
   'opportunity',
+  'salesOrder',
+  'invoice',
+  'lead',
+  'proposal',
+  'account',
 ]);
 
 export type BooksDocumentCreatePageProps = {
@@ -45,6 +50,8 @@ export type BooksDocumentCreatePageProps = {
   fields: BooksField[];
   /** Shown after create when an id is available (e.g. post-inventory). */
   postActions?: BooksAction[];
+  /** Primary save button label. Defaults to `Create ${title}`. */
+  createLabel?: string;
 };
 
 export function BooksDocumentCreatePage({
@@ -53,7 +60,9 @@ export function BooksDocumentCreatePage({
   closeHref,
   fields,
   postActions = [],
+  createLabel,
 }: BooksDocumentCreatePageProps) {
+  const saveLabel = createLabel ?? `Create ${title}`;
   const router = useRouter();
   const [form, setForm] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -64,30 +73,34 @@ export function BooksDocumentCreatePage({
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [acting, setActing] = useState(false);
 
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
 
-  const { partyFields, dateFields, lineFields, noteFields, detailFields } = useMemo(() => {
-    const party: BooksField[] = [];
-    const dates: BooksField[] = [];
-    const lines: BooksField[] = [];
-    const notes: BooksField[] = [];
-    const details: BooksField[] = [];
-    for (const f of fields) {
-      if (f.type === 'lines') lines.push(f);
-      else if (f.type && PARTY_TYPES.has(f.type)) party.push(f);
-      else if (f.type === 'date') dates.push(f);
-      else if (f.type === 'textarea' || f.type === 'json') notes.push(f);
-      else details.push(f);
-    }
-    return {
-      partyFields: party,
-      dateFields: dates,
-      lineFields: lines,
-      noteFields: notes,
-      detailFields: details,
-    };
-  }, [fields]);
+  const { partyFields, dateFields, lineFields, noteFields, attachmentFields, detailFields } =
+    useMemo(() => {
+      const party: BooksField[] = [];
+      const dates: BooksField[] = [];
+      const lines: BooksField[] = [];
+      const notes: BooksField[] = [];
+      const attachments: BooksField[] = [];
+      const details: BooksField[] = [];
+      for (const f of fields) {
+        if (f.type === 'lines') lines.push(f);
+        else if (f.type === 'attachments') attachments.push(f);
+        else if (f.type && PARTY_TYPES.has(f.type)) party.push(f);
+        else if (f.type === 'date') dates.push(f);
+        else if (f.type === 'textarea' || f.type === 'json') notes.push(f);
+        else details.push(f);
+      }
+      return {
+        partyFields: party,
+        dateFields: dates,
+        lineFields: lines,
+        noteFields: notes,
+        attachmentFields: attachments,
+        detailFields: details,
+      };
+    }, [fields]);
 
   const onChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -223,9 +236,22 @@ export function BooksDocumentCreatePage({
                 </DocumentFormCard>
               ) : null}
 
+              {lineFields.length > 0 ? (
+                <DocumentFormCard flush>
+                  <DocumentSectionTitle>Line items</DocumentSectionTitle>
+                  <BooksFormFields
+                    fields={lineFields}
+                    values={form}
+                    resourcePath={resourcePath}
+                    onChange={onChange}
+                    onPatch={onPatch}
+                  />
+                </DocumentFormCard>
+              ) : null}
+
               {noteFields.length > 0 ? (
                 <DocumentFormCard flush>
-                  <DocumentSectionTitle>Notes</DocumentSectionTitle>
+                  <DocumentSectionTitle>Additional notes</DocumentSectionTitle>
                   <BooksFormFields
                     fields={noteFields}
                     values={form}
@@ -236,11 +262,11 @@ export function BooksDocumentCreatePage({
                 </DocumentFormCard>
               ) : null}
 
-              {lineFields.length > 0 ? (
+              {attachmentFields.length > 0 ? (
                 <DocumentFormCard flush>
-                  <DocumentSectionTitle>Line items</DocumentSectionTitle>
+                  <DocumentSectionTitle>Attachments</DocumentSectionTitle>
                   <BooksFormFields
-                    fields={lineFields}
+                    fields={attachmentFields}
                     values={form}
                     resourcePath={resourcePath}
                     onChange={onChange}
@@ -290,18 +316,29 @@ export function BooksDocumentCreatePage({
                       disabled={saving}
                       onClick={() => void handleSave()}
                     >
-                      {saving ? 'Saving…' : 'Save'}
+                      {saving ? 'Saving…' : saveLabel}
                     </Button>
                   ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="border-white/40 bg-white text-foreground hover:bg-white/90"
-                      disabled={acting}
-                      onClick={() => router.push(closeHref)}
-                    >
-                      Done
-                    </Button>
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                        disabled={acting}
+                        onClick={() => void onDownloadPdf()}
+                      >
+                        Download PDF
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-white/40 bg-white text-foreground hover:bg-white/90"
+                        disabled={acting}
+                        onClick={() => router.push(closeHref)}
+                      >
+                        Done
+                      </Button>
+                    </>
                   )}
                 </>
               }

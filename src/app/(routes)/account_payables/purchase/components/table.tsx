@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 
 import {
   DropdownMenu,
@@ -399,14 +399,12 @@ const InvoiceTable = () => {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
-            <Button
-              text={'Export'}
-              icon={<i className="ri-upload-2-line"></i>}
-              theme="lightBlue"
-              type={'button'}
-              color={true}
-              onClick={() =>
+            <ListActionsMenu table={table}>
+            <ListActionItem
+              label="Export"
+              icon={<i className="ri-upload-2-line mr-2" />}
+              disabled={(data?.data ?? []).length === 0}
+              onSelect={() =>
                 void exportRows({
                   filename: 'purchase-orders',
                   rows: (data?.data ?? []) as PurchaseOrder[],
@@ -437,8 +435,9 @@ const InvoiceTable = () => {
                 })
               }
             />
+            </ListActionsMenu>
             <Button
-              text={'Create Purchase Order'}
+              text={'New Purchase Order'}
               icon={<i className="ri-file-add-line"></i>}
               theme="default"
               type={'button'}

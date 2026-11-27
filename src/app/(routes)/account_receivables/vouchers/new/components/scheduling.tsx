@@ -2,13 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Check, X, ChevronDown, AlertCircle } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 import { isAfter, parse, isValid } from 'date-fns';
 import { DatePicker, parseDateValue } from '@potta/components/ui/date-picker';
 import { cn } from '@potta/lib/utils';
+import { FIELD_INPUT } from '@/lib/field-styles';
+import Select from '@potta/components/select';
+import Checkbox from '@potta/components/checkbox';
+import { Switch } from '@potta/components/shadcn/switch';
 
 interface SchedulingProps {
-  /** Show validation messages only after Publish on the last step. */
   showErrors?: boolean;
 }
 
@@ -45,11 +48,10 @@ const timeFormatRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM|am|pm)$/;
 
 const Scheduling: React.FC<SchedulingProps> = ({ showErrors = false }) => {
   // Properly type the form context
-  const { 
-    register, 
-    watch, 
-    setValue, 
-    getValues, 
+  const {
+    watch,
+    setValue,
+    getValues,
     unregister, 
     formState: { errors }, 
     setError, 
@@ -81,7 +83,6 @@ const Scheduling: React.FC<SchedulingProps> = ({ showErrors = false }) => {
     setValue('scheduling.validDays', selectedDays);
   }, [selectedDays, setValue]);
 
-  // Validate dates only after Publish — don't nag while filling earlier steps.
   useEffect(() => {
     if (!showErrors) {
       clearErrors(['scheduling.programStartDate', 'scheduling.programEndDate']);
@@ -303,9 +304,8 @@ const Scheduling: React.FC<SchedulingProps> = ({ showErrors = false }) => {
     }
   };
 
-  // Helper function to safely check for nested errors (only after Publish)
+  // Helper function to safely check for nested errors
   const hasError = (path: string): boolean => {
-    if (!showErrors) return false;
     const parts = path.split('.');
     let current: any = errors;
     
@@ -330,271 +330,175 @@ const Scheduling: React.FC<SchedulingProps> = ({ showErrors = false }) => {
     return current.message || '';
   };
 
+  const dayOptions = [
+    { label: 'Select a day', value: '' },
+    ...daysOfWeek
+      .filter((day) => !selectedDays.some((schedule) => schedule.day === day))
+      .map((day) => ({ label: day, value: day })),
+  ];
+
   return (
-    <div className="bg-white p-6">
-      <h3 className="text-xl font-medium mb-8">Scheduling Settings</h3>
-
-      <div className="space-y-8 w-3/5">
-        {/* Program Start and End Date */}
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <DatePicker
-              valueType="date"
-              label="Program Starts Datetime"
-              required
-              placeholder="Select start date"
-              value={parseDateValue(startDate) ?? null}
-              onChange={(date) =>
-                setValue(
-                  'scheduling.programStartDate',
-                  date ? date.toISOString() : ''
-                )
-              }
-              error={
-                hasError('scheduling.programStartDate')
-                  ? getErrorMessage('scheduling.programStartDate')
-                  : undefined
-              }
-            />
-          </div>
-          <div className="flex items-start space-x-4">
-            <div className="flex-1">
-              <DatePicker
-                valueType="date"
-                label="Program Ends Datetime"
-                required={!programNeverEnds}
-                disabled={programNeverEnds}
-                placeholder={programNeverEnds ? 'Never' : 'Select end date'}
-                min={parseDateValue(startDate) ?? null}
-                value={programNeverEnds ? null : parseDateValue(endDate) ?? null}
-                onChange={(date) =>
-                  setValue(
-                    'scheduling.programEndDate',
-                    date ? date.toISOString() : ''
-                  )
-                }
-                error={
-                  hasError('scheduling.programEndDate')
-                    ? getErrorMessage('scheduling.programEndDate')
-                    : undefined
-                }
-              />
-            </div>
-          </div>
-            <div className="flex items-center ">
-              <label className="mr-2 text-sm text-gray-700">
-                Program Never ends
-              </label>
-              <div
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  programNeverEnds ? 'bg-green-500' : 'bg-gray-200'
-                }`}
-                onClick={handleProgramNeverEndsToggle}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    programNeverEnds ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </div>
-              <input
-                type="checkbox"
-                {...register('scheduling.neverEnds')}
-                className="hidden"
-              />
-            </div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+        <div className={showErrors && hasError('scheduling.programStartDate') ? 'error-field' : ''}>
+          <DatePicker
+            valueType="date"
+            label="Program starts"
+            required
+            placeholder="Select start date"
+            value={parseDateValue(startDate) ?? null}
+            onChange={(date) =>
+              setValue('scheduling.programStartDate', date ? date.toISOString() : '')
+            }
+            error={
+              showErrors && hasError('scheduling.programStartDate')
+                ? getErrorMessage('scheduling.programStartDate')
+                : undefined
+            }
+          />
         </div>
-
-        {/* Valid during specific days */}
-        <div className="mb-6">
-          <div className="flex items-center mb-4">
-            <div
-              className={`w-5 h-5 border rounded flex items-center justify-center cursor-pointer ${
-                validDuringSpecificDays
-                  ? 'bg-green-500 border-green-500'
-                  : 'border-gray-300'
-              }`}
-              onClick={handleValidDuringSpecificDaysToggle}
-            >
-              {validDuringSpecificDays && (
-                <Check className="h-4 w-4 text-white" />
-              )}
-            </div>
-            <input
-              type="checkbox"
-              {...register('scheduling.specificDaysOnly')}
-              className="hidden"
-            />
-            <label
-              className="ml-2 text-sm text-gray-700 cursor-pointer"
-              onClick={handleValidDuringSpecificDaysToggle}
-            >
-              Valid during specific days
-            </label>
-          </div>
-
-          {validDuringSpecificDays && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 w-1/2">
-                {/* Custom select with centered icon */}
-                <div className="relative flex-1 w-1/2">
-                  <select
-                    value={selectedDay}
-                    onChange={(e) => setSelectedDay(e.target.value)}
-                    className={cn(
-                      "w-full appearance-none border bg-white border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500",
-                      hasError('scheduling.validDays') && selectedDays.length === 0 && "border-red-500"
-                    )}
-                  >
-                    <option value="">select day</option>
-                    {daysOfWeek
-                      .filter(
-                        (day) =>
-                          !selectedDays.some((schedule) => schedule.day === day)
-                      )
-                      .map((day) => (
-                        <option key={day} value={day}>
-                          {day}
-                        </option>
-                      ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={addDaySchedule}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  disabled={!selectedDay}
-                >
-                  Add
-                </button>
-              </div>
-              
-              {hasError('scheduling.validDays') && selectedDays.length === 0 && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  {getErrorMessage('scheduling.validDays')}
-                </p>
-              )}
-
-              {selectedDays.length > 0 && (
-                <div className="mt-4">
-                  <div className="grid grid-cols-4 gap-4 py-2 border-b border-gray-200 font-medium">
-                    <div>Day</div>
-                    <div>Start Time</div>
-                    <div>Ends</div>
-                    <div>All Day</div>
-                  </div>
-
-                  {selectedDays.map((schedule, index) => (
-                    <div
-                      key={schedule.day}
-                      className="grid grid-cols-4 gap-4 py-4 border-b border-gray-100 items-center"
-                    >
-                      <div>{schedule.day}</div>
-                      <div>
-                        {schedule.allDay ? (
-                          <span className="text-gray-500">--</span>
-                        ) : (
-                          <div>
-                            <input
-                              type="text"
-                              value={schedule.startTime || ''}
-                              onChange={(e) =>
-                                updateDaySchedule(
-                                  index,
-                                  'startTime',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="e.g. 09:00 AM"
-                              className={cn(
-                                "w-full border border-gray-300 px-3 py-1 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500",
-                                timeErrors[`${schedule.day}-start`] && "border-red-500"
-                              )}
-                            />
-                            {timeErrors[`${schedule.day}-start`] && (
-                              <p className="mt-1 text-xs text-red-500">
-                                {timeErrors[`${schedule.day}-start`]}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        {schedule.allDay ? (
-                          <span className="text-gray-500">--</span>
-                        ) : (
-                          <div>
-                            <input
-                              type="text"
-                              value={schedule.endTime || ''}
-                              onChange={(e) =>
-                                updateDaySchedule(
-                                  index,
-                                  'endTime',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="e.g. 05:00 PM"
-                              className={cn(
-                                "w-full border border-gray-300 px-3 py-1 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500",
-                                timeErrors[`${schedule.day}-end`] && "border-red-500"
-                              )}
-                            />
-                            {timeErrors[`${schedule.day}-end`] && (
-                              <p className="mt-1 text-xs text-red-500">
-                                {timeErrors[`${schedule.day}-end`]}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <span className="mr-2 text-sm">All Day</span>
-                          <div
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                              schedule.allDay ? 'bg-green-500' : 'bg-gray-200'
-                            }`}
-                            onClick={() => toggleAllDay(index)}
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                schedule.allDay
-                                  ? 'translate-x-6'
-                                  : 'translate-x-1'
-                              }`}
-                            />
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeDaySchedule(schedule.day)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {Object.keys(timeErrors).some(key => key.endsWith('-range')) && (
-                    <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded-md">
-                      <p className="text-sm text-red-500 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
-                        End time must be after start time
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+        <div className={showErrors && hasError('scheduling.programEndDate') ? 'error-field' : ''}>
+          <DatePicker
+            valueType="date"
+            label="Program ends"
+            required={!programNeverEnds}
+            disabled={programNeverEnds}
+            placeholder={programNeverEnds ? 'Never' : 'Select end date'}
+            min={parseDateValue(startDate) ?? null}
+            value={programNeverEnds ? null : parseDateValue(endDate) ?? null}
+            onChange={(date) =>
+              setValue('scheduling.programEndDate', date ? date.toISOString() : '')
+            }
+            error={
+              showErrors && hasError('scheduling.programEndDate')
+                ? getErrorMessage('scheduling.programEndDate')
+                : undefined
+            }
+          />
         </div>
       </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-foreground">Program never ends</p>
+        <Switch checked={programNeverEnds} onCheckedChange={handleProgramNeverEndsToggle} />
+      </div>
+
+      <Checkbox
+        id="specific-days"
+        label="Valid during specific days"
+        checked={validDuringSpecificDays}
+        onChange={handleValidDuringSpecificDaysToggle}
+      />
+
+      {validDuringSpecificDays ? (
+        <div className="space-y-4">
+          <div className="flex items-end gap-2 sm:max-w-md">
+            <div className="min-w-0 flex-1">
+              <Select
+                label="Day"
+                options={dayOptions}
+                selectedValue={selectedDay}
+                onChange={setSelectedDay}
+                placeholder="Select a day"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={addDaySchedule}
+              disabled={!selectedDay}
+              className="inline-flex h-10 items-center rounded-[2px] bg-primary px-4 text-sm text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Add
+            </button>
+          </div>
+
+          {selectedDays.length > 0 ? (
+            <div className="overflow-x-auto">
+              <div className="grid min-w-[36rem] grid-cols-[1.2fr_1fr_1fr_auto] gap-4 border-b border-black/[0.08] py-2 text-sm font-medium">
+                <div>Day</div>
+                <div>Start</div>
+                <div>End</div>
+                <div>All day</div>
+              </div>
+              {selectedDays.map((schedule, index) => (
+                <div
+                  key={schedule.day}
+                  className="grid min-w-[36rem] grid-cols-[1.2fr_1fr_1fr_auto] items-center gap-4 border-b border-black/[0.06] py-3 text-sm"
+                >
+                  <div>{schedule.day}</div>
+                  <div>
+                    {schedule.allDay ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      <div>
+                        <input
+                          type="text"
+                          value={schedule.startTime || ''}
+                          onChange={(e) => updateDaySchedule(index, 'startTime', e.target.value)}
+                          placeholder="09:00 AM"
+                          className={cn(
+                            FIELD_INPUT,
+                            timeErrors[`${schedule.day}-start`] && 'border-destructive',
+                          )}
+                        />
+                        {timeErrors[`${schedule.day}-start`] ? (
+                          <p className="mt-1 text-xs text-red-500">
+                            {timeErrors[`${schedule.day}-start`]}
+                          </p>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    {schedule.allDay ? (
+                      <span className="text-muted-foreground">—</span>
+                    ) : (
+                      <div>
+                        <input
+                          type="text"
+                          value={schedule.endTime || ''}
+                          onChange={(e) => updateDaySchedule(index, 'endTime', e.target.value)}
+                          placeholder="05:00 PM"
+                          className={cn(
+                            FIELD_INPUT,
+                            timeErrors[`${schedule.day}-end`] && 'border-destructive',
+                          )}
+                        />
+                        {timeErrors[`${schedule.day}-end`] ? (
+                          <p className="mt-1 text-xs text-red-500">
+                            {timeErrors[`${schedule.day}-end`]}
+                          </p>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={schedule.allDay}
+                      onCheckedChange={() => toggleAllDay(index)}
+                      aria-label={`All day on ${schedule.day}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeDaySchedule(schedule.day)}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={`Remove ${schedule.day}`}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {Object.keys(timeErrors).some((key) => key.endsWith('-range')) ? (
+                <p className="mt-2 flex items-center text-sm text-red-500">
+                  <AlertCircle className="mr-1 size-4" />
+                  End time must be after start time
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 };

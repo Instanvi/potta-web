@@ -206,11 +206,12 @@ export async function downloadBooksPdf(opts: {
   seller?: PdfSeller;
   currency?: string;
 }) {
-  const [{ createElement }, { downloadReactPdf }, { GenericDocumentPdf }] =
+  const [{ createElement }, { downloadReactPdf }, { GenericDocumentPdf }, { readStoredDocumentTemplate }] =
     await Promise.all([
       import('react'),
       import('@/lib/download-react-pdf'),
       import('@/components/documents/generic-document-pdf'),
+      import('@/components/documents/document-templates'),
     ]);
 
   const element = createElement(GenericDocumentPdf, {
@@ -220,6 +221,7 @@ export async function downloadBooksPdf(opts: {
     lines: opts.lines,
     currency: opts.currency,
     seller: opts.seller ?? { name: 'Your organization' },
+    template: readStoredDocumentTemplate(),
   });
   await downloadReactPdf(element, opts.title || 'document');
 }

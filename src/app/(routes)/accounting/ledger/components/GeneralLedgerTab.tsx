@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import Search from '@potta/components/search';
 import Select from '@potta/components/select';
 import { DateRangePicker, DateRangeValue } from '@potta/components/ui/date-picker';
@@ -110,9 +110,9 @@ const GeneralLedgerTab = () => {
     <div className="flex flex-col gap-4">
       <ListToolbar
         actions={
-          <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+          <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="general-ledger"
               rows={rows}
               columns={[
@@ -140,7 +140,7 @@ const GeneralLedgerTab = () => {
                 { key: 'sourceModule', header: 'Source' },
               ]}
             />
-          </>
+          </ListActionsMenu>
         }
       >
         <DateRangePicker

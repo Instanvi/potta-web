@@ -26,7 +26,9 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
+import { usePaymentMethods } from '@potta/app/(routes)/accounting/payment-methods/hooks';
+import { paymentMethodDisplayLabel } from '@/lib/payment-method-labels';
 
 // Updated type to match the actual response structure
 type ResponseSalesReceipt = {
@@ -139,6 +141,13 @@ const SaleTable = () => {
 
   // Fetch receipts data using the hook
   const { data, isLoading, error, refetch } = useGetAllSalesReceipts(filter);
+  const { data: paymentMethodsData } = usePaymentMethods({ page: 1, limit: 100 });
+  const orgPaymentMethods = (paymentMethodsData?.data ?? []).map((m) => ({
+    code: m.code,
+    name: m.name,
+  }));
+  const methodLabel = (code?: string | null) =>
+    paymentMethodDisplayLabel(code, orgPaymentMethods);
 
   const handleRowClick = (row: ResponseSalesReceipt) => {
     setOpenViewModal(row.uuid);
@@ -221,7 +230,7 @@ const SaleTable = () => {
       accessorKey: 'paymentMethod',
       header: 'Method',
       cell: ({ row: { original } }) => (
-        <div className="">{original.paymentMethod}</div>
+        <div className="">{methodLabel(original.paymentMethod)}</div>
       ),
     },
     {
@@ -361,13 +370,12 @@ const SaleTable = () => {
       <ListToolbar
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            {table ? <DataTableViewOptions table={table} /> : null}
-            <Button
-              text={'Export'}
-              icon={<img src="/images/export.svg" alt="" />}
-              theme="lightBlue"
-              type={'button'}
-              onClick={() =>
+            <ListActionsMenu table={table}>
+            <ListActionItem
+              label="Export"
+              icon={<i className="ri-upload-2-line mr-2" />}
+              disabled={receiptsData.length === 0}
+              onSelect={() =>
                 void exportRows({
                   filename: 'sales-receipts',
                   rows: receiptsData,
@@ -395,6 +403,7 @@ const SaleTable = () => {
                 })
               }
             />
+            </ListActionsMenu>
             <Link href={'/account_receivables/sales_receipts/new'}>
               <Button
                 text={'Create Sale'}

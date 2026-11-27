@@ -13,7 +13,7 @@ import {
 import { DataProvider } from '@potta/components/providers/DataProvider';
 
 const NewSalesReciept = () => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 

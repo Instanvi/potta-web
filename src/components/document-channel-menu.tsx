@@ -58,7 +58,7 @@ export function DocumentChannelMenu({
           className={className}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[12rem] rounded-[4px] bg-white p-1">
+      <DropdownMenuContent align="end" className="z-[200] min-w-[12rem] rounded-[4px] bg-white p-1">
         {items.map((item) => (
           <DropdownMenuItem
             key={item.channel}

@@ -1,5 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import { readStoredDocumentTemplate, type DocumentTemplateId } from './document-templates';
 import {
   DocumentFooter,
   LetterheadHeader,
@@ -24,6 +25,7 @@ export type ReportPdfProps = {
   totals?: Record<string, number>;
   currency?: string;
   accent?: string;
+  template?: DocumentTemplateId;
 };
 
 export type StatementPdfSection = {
@@ -42,6 +44,7 @@ export type StatementPdfProps = {
   /** Highlighted closing rows, e.g. Net profit, Total liabilities + equity. */
   summary?: { label: string; amount: number }[];
   accent?: string;
+  template?: DocumentTemplateId;
 };
 
 const formatNumber = (value: unknown, money: boolean) => {
@@ -138,6 +141,7 @@ export function ReportPdfDocument({
   rows,
   totals,
   accent = PDF_ACCENT,
+  template = readStoredDocumentTemplate(),
 }: ReportPdfProps) {
   const landscape = columns.length > 6;
   const totalEntries = Object.entries(totals ?? {});
@@ -151,6 +155,7 @@ export function ReportPdfDocument({
           subtitle={title}
           meta={[{ label: 'Generated', value: new Date().toLocaleDateString() }]}
           accent={accent}
+          template={template}
         />
         <View style={shell.body}>
           <TitleBlock title={title} description={description} period={period} />
@@ -214,6 +219,7 @@ export function StatementPdfDocument({
   sections,
   summary = [],
   accent = PDF_ACCENT,
+  template = readStoredDocumentTemplate(),
 }: StatementPdfProps) {
   const fmt = (n: number) =>
     `${formatNumber(n, true)}${currency ? ` ${currency}` : ''}`;
@@ -227,6 +233,7 @@ export function StatementPdfDocument({
           subtitle={title}
           meta={[{ label: 'Generated', value: new Date().toLocaleDateString() }]}
           accent={accent}
+          template={template}
         />
         <View style={shell.body}>
           <TitleBlock title={title} period={period} />

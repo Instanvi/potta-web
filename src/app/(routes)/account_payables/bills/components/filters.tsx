@@ -6,6 +6,7 @@ import DynamicFilter from '@potta/components/dynamic-filter';
 import { Can } from '@/components/auth/can';
 import { ListToolbar } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { useVendorOptions } from '../../hooks';
 import { Bill } from '../utils/types';
 import { formatDate } from '../../../_shared/format';
@@ -47,7 +48,9 @@ const Filter: React.FC<FilterProps> = ({
     <ListToolbar
       actions={
         <>
+          <ListActionsMenu>
           <ExportButton
+            asItem
             filename="bills"
             rows={rows}
             columns={[
@@ -80,6 +83,7 @@ const Filter: React.FC<FilterProps> = ({
               { key: 'status', header: 'Status' },
             ]}
           />
+          </ListActionsMenu>
           <Can resource="Bill" action="create">
             <Button
               text="New bill"

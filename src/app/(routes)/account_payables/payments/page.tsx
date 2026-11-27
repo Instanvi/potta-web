@@ -7,18 +7,19 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="ap-payments"
       title="AP payment"
+      createLabel="New AP Payment"
       columns={[
         { key: 'paymentDate', label: 'Date' },
         { key: 'amount', label: 'Amount' },
-        { key: 'method', label: 'Method' },
-        { key: 'vendorId', label: 'Vendor' },
-        { key: 'billId', label: 'Bill' },
+        { key: 'method', label: 'Method', type: 'paymentMethod' },
+        { key: 'vendorId', label: 'Vendor', type: 'vendor' },
+        { key: 'billId', label: 'Bill', type: 'bill' },
         { key: 'reference', label: 'Reference' },
       ]}
       fields={[
         { key: 'amount', label: 'Amount', type: 'number' },
         { key: 'paymentDate', label: 'Payment date', type: 'date' },
-        { key: 'method', label: 'Method' },
+        { key: 'method', label: 'Method', type: 'paymentMethod' },
         { key: 'vendorId', label: 'Vendor', type: 'vendor' },
         { key: 'billId', label: 'Bill', type: 'bill' },
         { key: 'reference', label: 'Reference' },

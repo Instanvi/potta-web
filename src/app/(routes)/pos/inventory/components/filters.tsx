@@ -14,7 +14,7 @@ import useImportFromPay from '../_hooks/useImportFromPay';
 import { PayImportResult } from '../_utils/payImportApi';
 import { Can } from '@/components/auth/can';
 import type { Table } from '@tanstack/react-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { ListToolbar } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import type { Product } from '../_utils/types';
@@ -146,8 +146,9 @@ const Filter = ({ rows = [], table }: { rows?: Product[]; table?: Table<Product>
         className="mb-4"
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+            <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="inventory"
               rows={rows}
               columns={[
@@ -190,24 +191,21 @@ const Filter = ({ rows = [], table }: { rows?: Product[]; table?: Table<Product>
               ]}
             />
             <Can resource="Item" action="restock">
-              <Button
-                type="button"
-                text="Restock"
-                icon={<SquareStack className="h-4 w-4" />}
-                theme="outline"
-                onClick={() => setIsRestockOpen(true)}
+              <ListActionItem
+                label="Restock"
+                icon={<SquareStack className="mr-2 h-4 w-4" />}
+                onSelect={() => setIsRestockOpen(true)}
               />
             </Can>
             <Can resource="Item" action="create">
-              <Button
-                type="button"
-                text={importFromPay.isPending ? 'Syncing…' : 'Sync from Pay'}
-                icon={<ArrowsClockwise size={16} className={importFromPay.isPending ? 'animate-spin' : ''} />}
-                theme="outline"
-                onClick={handleSyncFromPay}
+              <ListActionItem
+                label={importFromPay.isPending ? 'Syncing…' : 'Sync from Pay'}
+                icon={<ArrowsClockwise size={16} className={`mr-2 ${importFromPay.isPending ? 'animate-spin' : ''}`} />}
                 disabled={importFromPay.isPending}
+                onSelect={() => void handleSyncFromPay()}
               />
             </Can>
+            </ListActionsMenu>
             <Can resource="Item" action="create">
               <div className="relative">
                 <Button

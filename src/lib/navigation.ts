@@ -91,7 +91,7 @@ export const NAV_MODULES: NavModule[] = [
       { title: 'Register', href: '/pos', icon: House, appIcon: APP_ICONS.shoppingCart, exact: true },
       { title: 'Sales', href: '/pos/sales', icon: ShoppingCart, appIcon: APP_ICONS.transactions },
       { title: 'Contacts', href: '/pos/contacts', icon: Users, appIcon: APP_ICONS.people },
-      { title: 'Desktop sync', href: '/pos/sync', icon: ArrowsClockwise },
+      { title: 'Sync activity', href: '/pos/sync', icon: ArrowsClockwise },
     ],
   },
   {

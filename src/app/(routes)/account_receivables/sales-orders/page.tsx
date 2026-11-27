@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="sales-order"
       title="Sales order"
+      createLabel="New Sales Order"
       createHref="/account_receivables/sales-orders/new"
       documentKind="sales_order"
       columns={[

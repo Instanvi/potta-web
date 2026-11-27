@@ -3,7 +3,7 @@ import * as yup from 'yup';
 // UUID Regex Pattern
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const DiscountTypes = ['FlatRate', 'Percentage', 'PercentageWithCap'] as const;
+const DiscountTypes = ['FLAT_RATE', 'PERCENTAGE', 'PERCENTAGE_WITH_CAP'] as const;
 
 // Line Item Schema
 const lineItemSchema = yup.object({

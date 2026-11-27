@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import TableActionPopover, {
   PopoverAction,
 } from '@potta/components/tableActionsPopover';
@@ -161,8 +161,9 @@ const VoucherTable = () => {
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+                        <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="vouchers"
               rows={rows as any[]}
               columns={[
@@ -190,6 +191,7 @@ const VoucherTable = () => {
                 },
               ]}
             />
+            </ListActionsMenu>
             <Link href={'/account_receivables/vouchers/new'}>
               <Button
                 text={'Create Voucher'}

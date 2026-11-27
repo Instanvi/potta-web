@@ -13,6 +13,8 @@ import ConfirmModal from '../../../_shared/ConfirmModal';
 import { formatAmount, formatDate, startOfMonth, today } from '../../../_shared/format';
 import { ErrorState, StatCard, StatusBadge } from '../../../_shared/states';
 import { ExportButton } from '@/components/export-button';
+import { ListActionsMenu } from '@/components/list-actions-menu';
+import { RowActionMenu } from '@/components/row-action-menu';
 import { useCashAccounts, useCashbookEntries, useDeleteCashbookEntry } from '../hooks';
 import { CashbookDirection, CashbookEntry, CashbookFilter } from '../utils/types';
 import CashbookEntrySheet from './CashbookEntrySheet';
@@ -119,31 +121,29 @@ const CashbookTable = () => {
       enableHiding: false,
       header: '',
       cell: ({ row }) => (
-        <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
-          {canAccess('Cashbook', 'update') && (
-            <button
-              type="button"
-              title="Edit"
-              className="rounded-[2px] p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
-              onClick={() => {
-                setEditing(row.original);
-                setSheetOpen(true);
-              }}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          )}
-          {canAccess('Cashbook', 'remove') && (
-            <button
-              type="button"
-              title="Delete"
-              className="rounded-[2px] p-2 text-destructive hover:bg-destructive/10"
-              onClick={() => setToDelete(row.original)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+        <RowActionMenu
+          label="Cashbook actions"
+          items={[
+            ...(canAccess('Cashbook', 'update')
+              ? [{
+                  label: 'Edit',
+                  icon: <Pencil className="mr-2 h-4 w-4" />,
+                  onSelect: () => {
+                    setEditing(row.original);
+                    setSheetOpen(true);
+                  },
+                }]
+              : []),
+            ...(canAccess('Cashbook', 'remove')
+              ? [{
+                  label: 'Delete',
+                  icon: <Trash2 className="mr-2 h-4 w-4" />,
+                  destructive: true,
+                  onSelect: () => setToDelete(row.original),
+                }]
+              : []),
+          ]}
+        />
       ),
     },
   ];
@@ -200,7 +200,9 @@ const CashbookTable = () => {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <ListActionsMenu>
           <ExportButton
+            asItem
             filename="cashbook"
             rows={rows}
             columns={[
@@ -246,6 +248,7 @@ const CashbookTable = () => {
               },
             ]}
           />
+          </ListActionsMenu>
           <Can resource="Cashbook" action="create">
             <Button
               text="New entry"

@@ -17,7 +17,6 @@ import {
 import { FIELD_INPUT } from '@/lib/field-styles';
 import {
   booksApi,
-  cellValue,
   extractBooksMeta,
   extractBooksRows,
   type BooksResourceClient,
@@ -26,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { downloadBooksPdf } from '@/lib/books-entities';
 import { useDataTableHandle } from '@/components/ui/data-table';
-import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
 import { ExportButton } from '@/components/export-button';
 import { fetchAllPages } from '@/lib/fetch-all-pages';
 import { useServerPagination } from '@/hooks/use-server-pagination';
@@ -52,9 +51,10 @@ import {
   type BooksAction,
   type BooksField,
 } from '@/components/books/books-form-fields';
+import { useBooksLabelMaps } from '@/hooks/use-books-label-maps';
 
 export type { BooksAction, BooksField };
-export type BooksColumn = { key: string; label: string };
+export type BooksColumn = { key: string; label: string; type?: string };
 
 export type BooksResourcePageProps = {
   resourcePath: string;
@@ -62,6 +62,8 @@ export type BooksResourcePageProps = {
   columns: BooksColumn[];
   fields: BooksField[];
   actions?: BooksAction[];
+  /** List/create button label. Defaults to `New ${title}`. */
+  createLabel?: string;
   /** When set, New navigates here instead of opening the create sheet. */
   createHref?: string;
   /** When set, shows Email/SMS send (versioned download links). */
@@ -78,7 +80,7 @@ export type BooksResourcePageProps = {
     | 'credit_note';
   /** Extra query params for list (page, limit, sortBy). */
   listParams?: Record<string, unknown>;
-  /** Override CRUD client (e.g. expense projects via payrollClient). */
+  /** Override CRUD client (e.g. projects mapped onto `/project`). */
   api?: BooksResourceClient;
 };
 
@@ -88,11 +90,13 @@ export function BooksResourcePage({
   columns,
   fields,
   actions = [],
+  createLabel,
   createHref,
   documentKind,
   listParams,
   api = booksApi,
 }: BooksResourcePageProps) {
+  const newLabel = createLabel ?? `New ${title}`;
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [searchApplied, setSearchApplied] = useState('');
@@ -118,6 +122,7 @@ export function BooksResourcePage({
     resetOn: [searchApplied, resourcePath, JSON.stringify(listParams ?? {})],
   });
   const { table, onTableChange } = useDataTableHandle<Record<string, unknown>>();
+  const { formatCell } = useBooksLabelMaps(columns, fields);
 
   // page/limit come from server pagination state; listParams may still set sortBy etc.
   const baseParams = useMemo(
@@ -149,11 +154,11 @@ export function BooksResourcePage({
         key: c.key,
         header: c.label,
         value: (row: Record<string, unknown>) => {
-          const v = cellValue(row, c.key);
+          const v = formatCell(row, c.key, c.type);
           return v === '—' ? '' : v;
         },
       })),
-    [columns]
+    [columns, formatCell]
   );
 
   const fetchAllRows = () =>
@@ -268,27 +273,23 @@ export function BooksResourcePage({
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
+              <ListActionsMenu table={table}>
               <ExportButton
+                asItem
                 filename={resourcePath.replace(/\//g, '-')}
                 rows={rows}
                 columns={exportColumns}
                 fetchAllRows={fetchAllRows}
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="size-9"
-                onClick={() => void load()}
+              <ListActionItem
+                label="Refresh"
+                icon={<i className={`ri-refresh-line mr-2 ${loading ? 'animate-spin' : ''}`} />}
                 disabled={loading}
-                aria-label="Refresh"
-                title="Refresh"
-              >
-                <i className={`ri-refresh-line text-base ${loading ? 'animate-spin' : ''}`} />
-              </Button>
+                onSelect={() => void load()}
+              />
+              </ListActionsMenu>
               <Button type="button" size="sm" onClick={openCreate}>
-                New {title}
+                {newLabel}
               </Button>
             </>
           }
@@ -319,6 +320,7 @@ export function BooksResourcePage({
               serverPagination={tableProps(meta, rows.length)}
               showViewOptions={false}
               onTableChange={onTableChange}
+              formatCell={formatCell}
             />
           )}
         </div>
@@ -327,7 +329,7 @@ export function BooksResourcePage({
           <Sheet open={createOpen} onOpenChange={setCreateOpen}>
             <SheetContent side="right" className="bg-white">
               <SheetHeader>
-                <SheetTitle>New {title}</SheetTitle>
+                <SheetTitle>{newLabel}</SheetTitle>
               </SheetHeader>
               <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
                 <BooksFormFields
@@ -343,7 +345,7 @@ export function BooksResourcePage({
                   Cancel
                 </Button>
                 <Button type="button" onClick={() => void handleCreate()} disabled={saving}>
-                  {saving ? 'Saving…' : 'Create'}
+                  {saving ? 'Saving…' : newLabel}
                 </Button>
               </SheetFooter>
             </SheetContent>
@@ -392,10 +394,16 @@ export function BooksResourcePage({
                         subtitle: title,
                         fields: fields
                           .filter((f) => f.type !== 'lines' && f.type !== 'json')
-                          .map((f) => ({
-                            label: f.label,
-                            value: editForm[f.key] ?? '',
-                          })),
+                          .map((f) => {
+                            const row = {
+                              ...(selected ?? {}),
+                              [f.key]: editForm[f.key] ?? '',
+                            } as Record<string, unknown>;
+                            return {
+                              label: f.label,
+                              value: formatCell(row, f.key, f.type),
+                            };
+                          }),
                         lines,
                         seller: orgToSeller(org),
                         currency: editForm.currency || undefined,

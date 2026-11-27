@@ -1,7 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import useGetOneVendor from '@potta/app/(routes)/vendors/hooks/useGetOneVendor';
 import {
@@ -14,21 +13,11 @@ import {
   type PartySnapshot,
 } from '@/components/books/selected-party';
 import type { BooksField } from '@/components/books/books-form-fields';
+import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
+import { PdfPreview } from '@/components/documents/pdf-preview';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { orgToSeller } from '@/lib/org-to-seller';
-
-const PDFViewer = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => mod.PDFViewer),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center bg-main-bg text-sm text-muted-foreground">
-        Loading PDF preview…
-      </div>
-    ),
-  },
-);
 
 function linesFromValue(raw: string | undefined): GenericDocumentPdfLine[] {
   if (!raw?.trim()) return [];
@@ -67,7 +56,19 @@ function detailFields(
 ): { label: string; value: string }[] {
   const rows: { label: string; value: string }[] = [];
   for (const field of fields) {
-    if (field.type === 'lines' || field.type === 'customer' || field.type === 'vendor') continue;
+    if (
+      field.type === 'lines' ||
+      field.type === 'attachments' ||
+      field.type === 'customer' ||
+      field.type === 'vendor' ||
+      field.type === 'purchaseOrder' ||
+      field.type === 'salesOrder' ||
+      field.type === 'invoice' ||
+      field.type === 'bill' ||
+      field.type === 'estimate'
+    ) {
+      continue;
+    }
     const raw = (values[field.key] ?? '').trim();
     if (!raw || raw === 'false') continue;
     if (field.type === 'checkbox' || field.type === 'boolean') {
@@ -91,6 +92,7 @@ export function BooksDocumentPreview({
   onRegisterDownload?: (download: () => Promise<void>) => void;
 }) {
   const { data: org } = useOrganizationProfile();
+  const { prefs: letterhead } = useDocumentLetterhead();
   const customerId = values.customerId ?? '';
   const vendorId = values.vendorId ?? '';
   const customerQuery = useGetOneCustomer(customerId);
@@ -108,39 +110,40 @@ export function BooksDocumentPreview({
   const currency = values.currency?.trim() || 'XAF';
   const linesValue = values.lines ?? '';
 
+  const previewProps = useMemo(
+    () => ({
+      title,
+      subtitle: title,
+      seller,
+      fields: [...partyFields(customer), ...partyFields(vendor), ...detailFields(fields, values)],
+      lines: linesFromValue(linesValue),
+      currency,
+      accent: letterhead.accent,
+      template: letterhead.template,
+    }),
+    [title, seller, customer, vendor, fields, values, linesValue, currency, letterhead.accent, letterhead.template],
+  );
+
+  /** Hold last stable props so typing does not rebuild the PDF every keystroke. */
+  const [stableProps, setStableProps] = useState(previewProps);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setStableProps(previewProps), 500);
+    return () => window.clearTimeout(handle);
+  }, [previewProps]);
+
   const documentNode = useMemo(
-    () => (
-      <GenericDocumentPdf
-        title={title}
-        subtitle={title}
-        seller={seller}
-        fields={[...partyFields(customer), ...partyFields(vendor), ...detailFields(fields, values)]}
-        lines={linesFromValue(linesValue)}
-        currency={currency}
-      />
-    ),
-    [title, seller, customer, vendor, fields, values, linesValue, currency],
+    () => <GenericDocumentPdf {...stableProps} />,
+    [stableProps],
   );
 
   const download = useCallback(async () => {
     const filename = title.trim().toLowerCase().replace(/\s+/g, '-') || 'document';
-    await downloadReactPdf(documentNode, `${filename}-draft`);
-  }, [documentNode, title]);
+    await downloadReactPdf(<GenericDocumentPdf {...previewProps} />, `${filename}-draft`);
+  }, [previewProps, title]);
 
   useEffect(() => {
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
 
-  return (
-    <div className="h-full min-h-0 bg-main-bg">
-      <PDFViewer
-        width="100%"
-        height="100%"
-        showToolbar={false}
-        className="h-full w-full border-0"
-      >
-        {documentNode}
-      </PDFViewer>
-    </div>
-  );
+  return <PdfPreview document={documentNode} />;
 }

@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
 } from '@potta/components/shadcn/dropdown';
 import type { Table } from '@tanstack/react-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu } from '@/components/list-actions-menu';
 import { ListToolbar } from '../../_shared/states';
 import { ExportButton } from '@/components/export-button';
 import { useContactToolbarStart } from '@/components/shared/contact-toolbar';
@@ -34,8 +34,9 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [],
       <ListToolbar
         actions={
           <>
-            {table ? <DataTableViewOptions table={table} /> : null}
+                        <ListActionsMenu table={table}>
             <ExportButton
+              asItem
               filename="customers"
               rows={rows}
               columns={[
@@ -51,6 +52,7 @@ const Filter: React.FC<FilterProps> = ({ searchValue, onSearchChange, rows = [],
                 { key: 'status', header: 'Status' },
               ]}
             />
+            </ListActionsMenu>
             <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <button

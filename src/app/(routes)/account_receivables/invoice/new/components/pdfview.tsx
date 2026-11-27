@@ -14,10 +14,10 @@ import {
 import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import { resolveLetterheadLogoUrl, absoluteBrandUrl } from '@/lib/brand';
 import { formatPartyAddress } from '@/lib/party-address';
-import { DocumentSellerHeader } from '@/components/documents/document-seller-header';
+import { PdfPreview } from '@/components/documents/pdf-preview';
 import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface TableItem {
   name: string;
@@ -41,21 +41,6 @@ function formatPaymentMethod(raw: unknown): string {
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (c: string) => c.toUpperCase()) || ''
   );
-}
-
-function getCurrencySymbol(currencyCode: string): string {
-  switch (currencyCode) {
-    case 'USD':
-      return '$';
-    case 'EUR':
-      return '€';
-    case 'GBP':
-      return '£';
-    case 'XAF':
-      return 'XAF ';
-    default:
-      return currencyCode ? `${currencyCode} ` : '';
-  }
 }
 
 const EMPTY_TABLE: TableItem[] = [];
@@ -96,12 +81,8 @@ const PdfView = ({
   const shippingAddress = contextData.shipping || '';
   const paymentTerms = contextData.paymentTerms || '';
   const paymentReference = contextData.paymentReference || '';
-  const taxRate = contextData.taxRate || 0;
-  const currencySymbol = getCurrencySymbol(contextData.currency || 'USD');
 
-  const { data: customerData, isLoading: customerLoading } = useGetOneCustomer(
-    customerId || ''
-  );
+  const { data: customerData } = useGetOneCustomer(customerId || '');
   const customerDetails: Customer | null = customerData || null;
 
   // Calculate totals
@@ -131,8 +112,23 @@ const PdfView = ({
     const customerName = customerDetails
       ? `${customerDetails.firstName ?? ''} ${customerDetails.lastName ?? ''}`.trim()
       : '';
+    const scheduleNote = [
+      contextData.frequency ? `Schedule: ${contextData.frequency}` : '',
+      contextData.startDate
+        ? `Starts ${new Date(contextData.startDate).toLocaleDateString()}`
+        : '',
+      contextData.endDate
+        ? `Ends ${new Date(contextData.endDate).toLocaleDateString()}`
+        : '',
+      contextData.occurrences ? `${contextData.occurrences} occurrences` : '',
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    const notes = [contextData.note, scheduleNote].filter(Boolean).join('\n') || undefined;
     return {
-      title: invoiceType || 'Invoice',
+      title: contextData.frequency
+        ? `Recurring ${invoiceType || 'Invoice'}`
+        : invoiceType || 'Invoice',
       invoiceNumber: invoiceNumber ? String(invoiceNumber) : undefined,
       issueDate: formattedIssueDate,
       dueDate: formattedDueDate,
@@ -140,7 +136,7 @@ const PdfView = ({
       paymentMethod: paymentMethodLabel || undefined,
       paymentReference: paymentReference || undefined,
       paymentTerms: paymentTerms || undefined,
-      notes: contextData.note || undefined,
+      notes,
       shippingAddress: shippingAddress || undefined,
       seller: {
         name: orgDisplayName(org) || 'Your organization',
@@ -183,12 +179,17 @@ const PdfView = ({
       tax: totalTax,
       total,
       accent: invoiceColor,
+      template: letterhead.template,
       draft: true,
     };
   }, [
     billingAddress,
     previewCurrency,
+    contextData.endDate,
+    contextData.frequency,
     contextData.note,
+    contextData.occurrences,
+    contextData.startDate,
     customerDetails,
     formattedDueDate,
     formattedIssueDate,
@@ -196,6 +197,7 @@ const PdfView = ({
     invoiceNumber,
     invoiceType,
     letterhead.logo,
+    letterhead.template,
     org,
     paymentMethodLabel,
     paymentReference,
@@ -207,198 +209,28 @@ const PdfView = ({
     totalTax,
   ]);
 
+  /** Hold last stable props so typing does not rebuild the PDF every keystroke. */
+  const [stableProps, setStableProps] = useState(pdfProps);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setStableProps(pdfProps), 500);
+    return () => window.clearTimeout(handle);
+  }, [pdfProps]);
+
   const documentNode = useMemo(
-    () => <InvoicePdfDocument {...pdfProps} />,
-    [pdfProps],
+    () => <InvoicePdfDocument {...stableProps} />,
+    [stableProps],
   );
 
   const download = useCallback(async () => {
     const filename = pdfProps.invoiceNumber || 'INV-draft';
-    await downloadReactPdf(documentNode, filename);
-  }, [documentNode, pdfProps.invoiceNumber]);
+    await downloadReactPdf(<InvoicePdfDocument {...pdfProps} />, filename);
+  }, [pdfProps]);
 
   useEffect(() => {
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
 
-  return (
-    <div className="flex min-h-full flex-col items-start justify-center overflow-y-auto w-full scroll bg-main-bg">
-      <div className="flex min-w-[45rem] justify-between w-full p-8 pb-2">
-        <h3 className="text-xl font-medium">PDF Preview</h3>
-      </div>
-
-      <div className="mb-10 w-full min-w-[45rem] max-w-[48rem] space-y-8 bg-white">
-        <div
-          className="h-36 w-full flex items-center justify-between px-8"
-          style={{ backgroundColor: invoiceColor }}
-        >
-          <div>
-            <p className="text-3xl font-medium text-white">{invoiceType}</p>
-            <p className="text-white mt-2">#{invoiceNumber}</p>
-          </div>
-          <div className="space-y-1 text-right text-white">
-            {formattedIssueDate ? (
-              <p>
-                <strong>Issue Date:</strong> {formattedIssueDate}
-              </p>
-            ) : null}
-            {formattedDueDate ? (
-              <p>
-                <strong>Due Date:</strong> {formattedDueDate}
-              </p>
-            ) : null}
-            {previewCurrency ? (
-              <p>
-                <strong>Currency:</strong> {previewCurrency}
-              </p>
-            ) : null}
-          </div>
-        </div>
-        <div className="p-5 space-y-16 bg-white">
-          <div className="mt-5 w-full flex space-x-5">
-            <DocumentSellerHeader className="w-[40%]" />
-            <div className="flex space-x-2">
-              <h3 className="font-medium">To: </h3>
-              <div className="space-y-2 text-sm text-gray-600 flex-col">
-                {customerLoading ? (
-                  <p>Loading customer details...</p>
-                ) : customerDetails ? (
-                  <>
-                    <p>
-                      {customerDetails.firstName} {customerDetails.lastName}
-                    </p>
-                    <p>{customerDetails.email || 'No email'}</p>
-                    <p>
-                      {billingAddress ||
-                        customerDetails.address?.address ||
-                        'No address'}
-                    </p>
-                    <p>{customerDetails.phone || 'No phone'}</p>
-                  </>
-                ) : (
-                  <p>No customer selected</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {shippingAddress && (
-            <div className="mt-4">
-              <h3 className="font-medium">Shipping Address:</h3>
-              <p className="text-sm text-gray-600">{shippingAddress}</p>
-            </div>
-          )}
-
-          <table className="min-w-full h-40 table-auto mt-10">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Item
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Qty
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tax
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((item: TableItem, index: number) => {
-                const price = Number(item.price);
-                const qty = Number(item.qty);
-                const tax = Number(item.tax);
-                const itemTotal = price * qty;
-                const itemTax = (itemTotal * tax) / 100;
-                const totalWithTax = itemTotal + itemTax;
-
-                return (
-                  <tr key={item.id || index}>
-                    <td className="border-b px-4 py-2">{index + 1}</td>
-                    <td className="border-b px-4 py-2">{item.name}</td>
-                    <td className="border-b px-4 py-2">{qty}</td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {price.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {itemTax.toFixed(2)}
-                    </td>
-                    <td className="border-b px-4 py-2">
-                      {currencySymbol}
-                      {totalWithTax.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          <div className="w-full mt-10 pb-4 flex">
-            <div className="w-[50%]">
-              <div className="pl-4">
-                <p>
-                  <strong>Payment Method:</strong>{' '}
-                  {paymentMethodLabel || 'Not selected'}
-                </p>
-                {paymentReference && (
-                  <p className="mt-2">
-                    <strong>Payment Reference:</strong> {paymentReference}
-                  </p>
-                )}
-                {paymentTerms && (
-                  <div className="mt-2">
-                    <strong>Payment Terms:</strong>
-                    <p className="text-gray-600 mt-1">{paymentTerms}</p>
-                  </div>
-                )}
-                {contextData.note && (
-                  <div className="mt-4">
-                    <strong>Notes:</strong>
-                    <p className="text-gray-600 mt-1">{contextData.note}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="w-[50%]">
-              <div className="mt-4 flex justify-between">
-                <div className="w-1/2">Sub Total:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {currencySymbol}
-                  {subtotal.toFixed(2)}
-                </div>
-              </div>
-              <div className="mt-2 flex justify-between">
-                <div className="w-1/2">Tax ({taxRate || 0}%):</div>
-                <div className="w-1/2 text-right pr-20">
-                  {currencySymbol}
-                  {totalTax.toFixed(2)}
-                </div>
-              </div>
-              <hr className="my-4 border-t-2 border-gray-300" />
-              <div className="flex justify-between font-medium">
-                <div className="w-1/2">Total:</div>
-                <div className="w-1/2 text-right pr-20">
-                  {currencySymbol}
-                  {total.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <PdfPreview document={documentNode} />;
 };
 
 export default PdfView;

@@ -1,5 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { PdfSeller } from '@/lib/org-to-seller';
+import { readStoredDocumentTemplate, type DocumentTemplateId } from './document-templates';
 import {
   DocumentFooter,
   LetterheadHeader,
@@ -7,6 +8,8 @@ import {
   PartyBlock,
   formatPdfMoney,
   pdfShellStyles as shell,
+  templateTableHeaderColor,
+  templateTableHeaderStyle,
 } from './pdf-shell';
 
 export type CreditNotePdfSeller = PdfSeller;
@@ -43,11 +46,13 @@ export type CreditNotePdfProps = {
   status?: string;
   accent?: string;
   draft?: boolean;
+  template?: DocumentTemplateId;
 };
 
 const styles = StyleSheet.create({
   detailsBox: {
-    backgroundColor: '#f9fafb',
+    borderWidth: 0.5,
+    borderColor: '#d1d5db',
     padding: 16,
     marginBottom: 20,
   },
@@ -112,6 +117,7 @@ export function CreditNotePdfDocument({
   status,
   accent = PDF_ACCENT,
   draft = true,
+  template = readStoredDocumentTemplate(),
 }: CreditNotePdfProps) {
   const lines = lineItems.filter(
     (l) => Number(l.quantity) > 0 || Number(l.unitPrice) > 0 || Number(l.total) > 0,
@@ -120,6 +126,8 @@ export function CreditNotePdfDocument({
   const subtitle = [reference ? `#${reference}` : title, draft ? 'Draft' : status]
     .filter(Boolean)
     .join('  ·  ');
+  const headInk = templateTableHeaderColor(template);
+  const th = headInk ? [shell.th, { color: headInk }] : shell.th;
 
   return (
     <Document
@@ -137,6 +145,7 @@ export function CreditNotePdfDocument({
             { label: 'Currency', value: currency },
           ]}
           accent={accent}
+          template={template}
         />
 
         <View style={shell.body}>
@@ -179,34 +188,43 @@ export function CreditNotePdfDocument({
           {lines.length > 0 ? (
             <View style={{ marginBottom: 8 }}>
               <Text style={shell.sectionTitle}>Lines</Text>
-              <View style={shell.tableHeader}>
-                <Text style={[shell.th, styles.colDesc]}>Description</Text>
-                <Text style={[shell.th, shell.right, styles.colQty]}>Qty</Text>
-                <Text style={[shell.th, shell.right, styles.colPrice]}>Price</Text>
-                {showTax ? (
-                  <Text style={[shell.th, shell.right, styles.colTax]}>Tax</Text>
-                ) : null}
-                <Text style={[shell.th, shell.right, styles.colTotal]}>Total</Text>
-              </View>
-              {lines.map((line, i) => (
-                <View key={`${line.description ?? 'line'}-${i}`} style={shell.tableRow} wrap={false}>
-                  <Text style={[shell.td, styles.colDesc]}>{line.description || '—'}</Text>
-                  <Text style={[shell.td, shell.right, styles.colQty]}>
-                    {Number(line.quantity) || 0}
-                  </Text>
-                  <Text style={[shell.td, shell.right, styles.colPrice]}>
-                    {formatPdfMoney(Number(line.unitPrice) || 0, currency)}
-                  </Text>
-                  {showTax ? (
-                    <Text style={[shell.td, shell.right, styles.colTax]}>
-                      {Number(line.taxRate) ? `${Number(line.taxRate)}%` : '—'}
-                    </Text>
-                  ) : null}
-                  <Text style={[shell.td, shell.right, styles.colTotal]}>
-                    {formatPdfMoney(Number(line.total) || 0, currency)}
+              <View style={shell.table}>
+                <View style={templateTableHeaderStyle(template, accent)}>
+                  <Text style={[th, styles.colDesc]}>Description</Text>
+                  <Text style={[th, shell.right, styles.colQty]}>Qty</Text>
+                  <Text style={[th, shell.right, styles.colPrice]}>Price</Text>
+                  {showTax ? <Text style={[th, shell.right, styles.colTax]}>Tax</Text> : null}
+                  <Text style={[th, shell.right, styles.colTotal, { borderRightWidth: 0 }]}>
+                    Total
                   </Text>
                 </View>
-              ))}
+                {lines.map((line, i) => (
+                  <View
+                    key={`${line.description ?? 'line'}-${i}`}
+                    style={[
+                      shell.tableRow,
+                      i === lines.length - 1 ? { borderBottomWidth: 0 } : null,
+                    ]}
+                    wrap={false}
+                  >
+                    <Text style={[shell.td, styles.colDesc]}>{line.description || '—'}</Text>
+                    <Text style={[shell.td, shell.right, styles.colQty]}>
+                      {Number(line.quantity) || 0}
+                    </Text>
+                    <Text style={[shell.td, shell.right, styles.colPrice]}>
+                      {formatPdfMoney(Number(line.unitPrice) || 0, currency)}
+                    </Text>
+                    {showTax ? (
+                      <Text style={[shell.td, shell.right, styles.colTax]}>
+                        {Number(line.taxRate) ? `${Number(line.taxRate)}%` : '—'}
+                      </Text>
+                    ) : null}
+                    <Text style={[shell.td, shell.right, styles.colTotal, { borderRightWidth: 0 }]}>
+                      {formatPdfMoney(Number(line.total) || 0, currency)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </View>
           ) : null}
 

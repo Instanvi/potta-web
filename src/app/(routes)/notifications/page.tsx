@@ -6,10 +6,10 @@ import { ArrowRight, Checks, Envelope, EnvelopeOpen, Trash } from '@phosphor-ico
 import { ColumnDef } from '@tanstack/react-table';
 import { formatDistanceToNow } from 'date-fns';
 import RootLayout from '../layout';
-import Button from '@potta/components/button';
 import ConfirmDialog from '@potta/components/shared/ConfirmDialog';
 import { DataTable, useDataTableHandle } from '@potta/components/ui/data-table';
-import { DataTableViewOptions } from '@potta/components/ui/data-table-view-options';
+import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
+import { RowActionMenu } from '@/components/row-action-menu';
 import { useServerPagination } from '@/hooks/use-server-pagination';
 import {
   useClearAllNotifications,
@@ -108,27 +108,23 @@ export default function NotificationsPage() {
       cell: ({ row: { original: n } }) => {
         const isUnread = !n.isRead;
         return (
-          <div className="flex items-center justify-end gap-3">
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-primary disabled:opacity-40"
-              disabled={toggleRead.isPending}
-              onClick={() => toggleRead.mutate(n.id)}
-              aria-label={isUnread ? 'Mark as read' : 'Mark as unread'}
-              title={isUnread ? 'Mark as read' : 'Mark as unread'}
-            >
-              {isUnread ? <EnvelopeOpen size={15} /> : <Envelope size={15} />}
-            </button>
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-destructive"
-              onClick={() => setToDelete(n)}
-              aria-label="Delete notification"
-              title="Delete"
-            >
-              <Trash size={15} />
-            </button>
-          </div>
+          <RowActionMenu
+            label="Notification actions"
+            items={[
+              {
+                label: isUnread ? 'Mark as read' : 'Mark as unread',
+                icon: isUnread ? <EnvelopeOpen size={15} className="mr-2" /> : <Envelope size={15} className="mr-2" />,
+                disabled: toggleRead.isPending,
+                onSelect: () => toggleRead.mutate(n.id),
+              },
+              {
+                label: 'Delete',
+                icon: <Trash size={15} className="mr-2" />,
+                destructive: true,
+                onSelect: () => setToDelete(n),
+              },
+            ]}
+          />
         );
       },
     },
@@ -141,23 +137,21 @@ export default function NotificationsPage() {
         <ListToolbar
           actions={
             <>
-              {table ? <DataTableViewOptions table={table} /> : null}
-              <Button
-                type="button"
-                theme="default"
-                text="Mark all read"
-                icon={<Checks size={16} />}
+              <ListActionsMenu table={table}>
+              <ListActionItem
+                label="Mark all read"
+                icon={<Checks size={16} className="mr-2" />}
                 disabled={unread === 0 || markAll.isPending}
-                onClick={() => markAll.mutate()}
+                onSelect={() => markAll.mutate()}
               />
-              <Button
-                type="button"
-                theme="outline"
-                text="Clear all"
-                icon={<Trash size={16} />}
+              <ListActionItem
+                label="Clear all"
+                icon={<Trash size={16} className="mr-2" />}
+                destructive
                 disabled={items.length === 0 || clearAll.isPending}
-                onClick={() => setConfirmClear(true)}
+                onSelect={() => setConfirmClear(true)}
               />
+              </ListActionsMenu>
             </>
           }
         >
