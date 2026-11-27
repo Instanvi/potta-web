@@ -113,17 +113,94 @@ export interface FeedParams {
   to?: string;
 }
 
+export type SyncRequestStatus = 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED';
+
+export interface SyncRequestTallies {
+  created: number;
+  updated: number;
+  duplicate: number;
+  failed: number;
+}
+
 export interface SyncRequest {
   id: string;
   orgId: string;
   locationContextId: string | null;
   endpoint: string;
   idempotencyKey: string;
-  status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+  status: SyncRequestStatus;
   response: Record<string, unknown> | null;
   error: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SyncRequestSummary {
+  id: string;
+  orgId: string;
+  locationContextId: string | null;
+  endpoint: string;
+  idempotencyKey: string;
+  status: SyncRequestStatus;
+  createdAt: string;
+  updatedAt: string;
+  tallies: SyncRequestTallies;
+  recordCount: number;
+  errorMessage: string | null;
+}
+
+export interface SyncRequestListResponse {
+  items: SyncRequestSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  counts: Record<SyncRequestStatus, number>;
+}
+
+export interface SyncRequestListParams {
+  status?: SyncRequestStatus | SyncRequestStatus[];
+  endpoint?: string;
+  page?: number;
+  limit?: number;
+}
+
+/** Friendly labels for sync batch endpoints shown on the activity board. */
+export const ENDPOINT_LABELS: Record<string, string> = {
+  'pos-sync:transactions': 'Sales',
+  'pos-sync:expenses': 'Expenses',
+  'pos-sync:customers': 'Customers',
+  'pos-sync:customer-payments': 'Customer payments',
+  'pos-sync:products': 'Products',
+  'pos-sync:product-variations': 'Product variations',
+  'pos-sync:vendors': 'Vendors',
+  'pos-sync:categories': 'Categories',
+  'pos-sync:modifiers': 'Modifiers',
+  'pos-sync:product-attributes': 'Product attributes',
+  'pos-sync:product-attribute-values': 'Attribute values',
+  'pos-sync:variation-attribute-values': 'Variation attributes',
+  'pos-sync:product-unit-pricing': 'Unit pricing',
+  'pos-sync:product-cost-history': 'Cost history',
+  'pos-sync:bundle-items': 'Bundles',
+  'pos-sync:bundle-components': 'Bundle components',
+  'pos-sync:waiting-transactions': 'Waiting transactions',
+  'pos-sync:market-requests': 'Market requests',
+  'pos-sync:market-request-items': 'Market request items',
+  'pos-sync:purchase-orders': 'Purchase orders',
+  'pos-sync:purchase-order-line-items': 'PO line items',
+  'pos-sync:inventory-operations': 'Inventory operations',
+};
+
+export const STATUS_LABELS: Record<SyncRequestStatus, string> = {
+  PENDING: 'Pending',
+  PROCESSING: 'Ongoing',
+  SUCCEEDED: 'Success',
+  FAILED: 'Failed',
+};
+
+export function endpointLabel(endpoint: string): string {
+  if (ENDPOINT_LABELS[endpoint]) return ENDPOINT_LABELS[endpoint];
+  const trimmed = endpoint.replace(/^pos-sync:/, '').replace(/-/g, ' ');
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
 export const posSyncApi = {
@@ -155,6 +232,17 @@ export const posSyncApi = {
     });
     return res.data;
   },
+  listRequests: async (params: SyncRequestListParams = {}): Promise<SyncRequestListResponse> => {
+    const query: Record<string, string | number> = {};
+    if (params.page) query.page = params.page;
+    if (params.limit) query.limit = params.limit;
+    if (params.endpoint) query.endpoint = params.endpoint;
+    if (params.status) {
+      query.status = Array.isArray(params.status) ? params.status.join(',') : params.status;
+    }
+    const res = await axios.get('/pos-sync/requests', { params: query });
+    return res.data;
+  },
   request: async (id: string): Promise<SyncRequest> => {
     const res = await axios.get(`/pos-sync/requests/${encodeURIComponent(id)}`);
     return res.data;
@@ -167,5 +255,6 @@ export const posSyncKeys = {
   entityHealth: () => ['pos-sync', 'reconcile', 'entities'] as const,
   mappings: (params: MappingsParams) => ['pos-sync', 'mappings', params] as const,
   feed: (params: FeedParams) => ['pos-sync', 'feed', params] as const,
+  requests: (params: SyncRequestListParams) => ['pos-sync', 'requests', params] as const,
   request: (id: string) => ['pos-sync', 'requests', id] as const,
 };
