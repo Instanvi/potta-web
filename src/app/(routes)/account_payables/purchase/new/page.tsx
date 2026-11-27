@@ -11,7 +11,7 @@ import Left from './components/left';
 import PdfView from './components/pdfview';
 
 const NewPurchaseOrderPage = () => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 

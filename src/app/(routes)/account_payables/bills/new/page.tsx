@@ -11,7 +11,7 @@ import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 import BillForm from './components/BillForm';
 
 export default function NewBillPage() {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const togglePreview = () => setShowPreview((v) => !v);
 
   return (

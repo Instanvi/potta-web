@@ -12,7 +12,7 @@ import {
 import { LocationSwitcher } from '@potta/components/shell/location-switcher';
 
 export default function NewRecurringVoucherPage() {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const togglePreview = () => setShowPreview((v) => !v);
 

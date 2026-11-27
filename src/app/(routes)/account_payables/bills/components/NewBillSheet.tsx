@@ -12,7 +12,7 @@ import BillForm from '../new/components/BillForm';
 /** "New bill" slide-over with the same side-by-side resizable preview as the full-page editor. */
 const NewBillSheet = ({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) => {
   const router = useRouter();
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const togglePreview = () => setShowPreview((v) => !v);
 
   return (
