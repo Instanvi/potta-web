@@ -78,7 +78,7 @@ export type BooksResourcePageProps = {
     | 'credit_note';
   /** Extra query params for list (page, limit, sortBy). */
   listParams?: Record<string, unknown>;
-  /** Override CRUD client (e.g. expense projects via payrollClient). */
+  /** Override CRUD client (e.g. projects mapped onto `/project`). */
   api?: BooksResourceClient;
 };
 

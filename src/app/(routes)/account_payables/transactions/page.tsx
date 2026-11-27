@@ -23,7 +23,7 @@ export default function Page() {
           id: 'expenses',
           label: 'Expenses',
           path: 'expense/transactions',
-          listMode: 'payroll',
+          listMode: 'get',
           columns: [
             { key: 'date', label: 'Date' },
             { key: 'merchant', label: 'Merchant' },

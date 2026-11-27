@@ -1,6 +1,4 @@
-import { payrollClient } from 'config/axios.config';
-import { extractBooksRows } from '@/lib/books-api';
-import { apiOptionalText } from '@/lib/document-api-fields';
+import { booksApi, extractBooksRows } from '@/lib/books-api';
 
 export type ExpenseProject = Record<string, unknown> & {
   id?: string;
@@ -53,22 +51,8 @@ export function normalizeProject(row: Record<string, unknown>): ExpenseProject {
   };
 }
 
-function toExpenseBody(body: Record<string, unknown>) {
-  return {
-    name: body.name,
-    description: body.description,
-    customer_id: body.customerId ?? body.customer_id,
-    status: body.status,
-    budget_id: body.budgetId ?? body.budget_id,
-    budget_amount: body.budget ?? body.budget_amount,
-    start_date: body.startDate ?? body.start_date,
-    end_date: body.endDate ?? body.end_date,
-    notes: apiOptionalText(body.notes) ?? null,
-  };
-}
-
 /**
- * BooksResourceClient adapter — Projects SoT is expense-be `/expense/projects`.
+ * BooksResourceClient adapter — projects are stored in potta-backend (`/project`).
  * `resourcePath` is ignored; kept for BooksResourcePage compatibility.
  */
 export const expenseProjectsApi = {
@@ -77,48 +61,31 @@ export const expenseProjectsApi = {
     filter: Record<string, unknown> = {},
     params: Record<string, unknown> = {},
   ) => {
-    const res = await payrollClient.get('/expense/projects', {
-      params: {
-        page: params.page ?? 1,
-        limit: params.limit ?? 50,
-        search: typeof filter.search === 'string' ? filter.search : undefined,
-      },
-    });
-    const payload = res.data?.data ?? res.data;
-    const rows = extractBooksRows(payload).length
-      ? extractBooksRows(payload)
-      : extractBooksRows(res.data);
-    return { data: rows.map(normalizeProject) };
+    const payload = await booksApi.list('project', filter, params);
+    return { data: extractBooksRows(payload).map(normalizeProject) };
   },
 
   get: async (_path: string, id: string) => {
-    const res = await payrollClient.get(`/expense/projects/${id}`);
-    const row = (res.data?.data ?? res.data) as Record<string, unknown>;
+    const row = (await booksApi.get('project', id)) as Record<string, unknown>;
     return normalizeProject(row && typeof row === 'object' ? row : { id });
   },
 
   create: async (_path: string, data: unknown) => {
-    const res = await payrollClient.post(
-      '/expense/projects',
-      toExpenseBody((data ?? {}) as Record<string, unknown>),
-    );
-    return normalizeProject((res.data?.data ?? res.data) as Record<string, unknown>);
+    const row = (await booksApi.create('project', data)) as Record<string, unknown>;
+    return normalizeProject(row);
   },
 
   update: async (_path: string, id: string, data: unknown) => {
-    const res = await payrollClient.patch(
-      `/expense/projects/${id}`,
-      toExpenseBody((data ?? {}) as Record<string, unknown>),
-    );
-    return normalizeProject((res.data?.data ?? res.data) as Record<string, unknown>);
+    const row = (await booksApi.update('project', id, data)) as Record<string, unknown>;
+    return normalizeProject(row);
   },
 
   remove: async (_path: string, id: string) => {
-    await payrollClient.delete(`/expense/projects/${id}`);
+    await booksApi.remove('project', id);
     return { id };
   },
 
   action: async () => {
-    throw new Error('Project workflow actions are not supported on the expense API');
+    throw new Error('Project workflow actions are not supported');
   },
 };

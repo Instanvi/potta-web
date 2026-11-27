@@ -14,16 +14,16 @@ import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { booksApi, extractBooksRows, rowId } from '@/lib/books-api';
-import axios, { payrollClient } from 'config/axios.config';
+import axios from 'config/axios.config';
 import { cn } from '@/lib/utils';
 import { useBooksLabelMaps } from '@/hooks/use-books-label-maps';
 
 export type HubTab = {
   id: string;
   label: string;
-  /** Books filter path, GET path, or payroll path */
+  /** Books filter path or GET path on potta-backend */
   path: string;
-  listMode?: 'filter' | 'get' | 'payroll';
+  listMode?: 'filter' | 'get';
   columns: { key: string; label: string; type?: string }[];
 };
 
@@ -49,12 +49,7 @@ export function BooksTransactionsHub({
     setError(null);
     try {
       let data: unknown;
-      if (active.listMode === 'payroll') {
-        const res = await payrollClient.get(`/${active.path.replace(/^\//, '')}`, {
-          params: { page: 1, limit: 50, search: search.trim() || undefined },
-        });
-        data = res.data?.data ?? res.data;
-      } else if (active.listMode === 'get') {
+      if (active.listMode === 'get') {
         const res = await axios.get(`/${active.path}`, {
           params: { page: 1, limit: 50, search: search.trim() || undefined },
         });

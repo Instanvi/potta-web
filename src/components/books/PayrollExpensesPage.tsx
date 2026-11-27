@@ -9,7 +9,7 @@ import { DataTableViewOptions } from '@/components/ui/data-table-view-options';
 import { Button } from '@/components/shadcn/button';
 import { FIELD_INPUT } from '@/lib/field-styles';
 import { extractBooksRows } from '@/lib/books-api';
-import { payrollClient } from 'config/axios.config';
+import axios from 'config/axios.config';
 import { cn } from '@/lib/utils';
 
 const COLUMNS = [
@@ -29,21 +29,6 @@ function normalizeTx(row: Record<string, unknown>): Record<string, unknown> {
   };
 }
 
-function isNetworkError(error: unknown): boolean {
-  const err = error as {
-    code?: string;
-    message?: string;
-    response?: unknown;
-  } | null;
-  if (!err) return false;
-  if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED') return true;
-  if (!err.response && typeof err.message === 'string') {
-    const m = err.message.toLowerCase();
-    return m.includes('network') || m.includes('failed to fetch');
-  }
-  return false;
-}
-
 export function PayrollExpensesPage() {
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +40,7 @@ export function PayrollExpensesPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await payrollClient.get('/expense/transactions', {
+      const res = await axios.get('/expense/transactions', {
         params: { page: 1, limit: 50, search: search.trim() || undefined },
       });
       const list = extractBooksRows(res.data?.data ?? res.data).length
@@ -73,13 +58,6 @@ export function PayrollExpensesPage() {
   useEffect(() => {
     void load();
   }, [load]);
-
-  const displayError =
-    error && isNetworkError(error)
-      ? new Error(
-          `Could not reach the payroll expense API. Restart potta-web after setting NEXT_PUBLIC_PAYROLL_API_URL (see .env.example), or confirm the spend/payroll service is up.`,
-        )
-      : error;
 
   return (
     <RootLayout>
@@ -113,8 +91,8 @@ export function PayrollExpensesPage() {
         </ListToolbar>
 
         <div className="mt-4">
-          {displayError ? (
-            <ErrorState error={displayError} onRetry={() => void load()} />
+          {error ? (
+            <ErrorState error={error} onRetry={() => void load()} />
           ) : (
             <BooksListTable
               columns={COLUMNS}

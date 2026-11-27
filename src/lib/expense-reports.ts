@@ -1,7 +1,7 @@
-import { payrollClient } from 'config/axios.config';
+import axios from 'config/axios.config';
 import type { ReportColumn, ReportResult, ReportRunParams } from '@/app/(routes)/reports/utils/api';
 
-/** Report ids owned by expense-be (`GET /expense/reports/:key`). Books catalog ids stay on potta-backend. */
+/** Report ids served by potta-backend (`GET /expense/reports/:key`). */
 export const EXPENSE_REPORT_KEYS = [
   'spend_summary',
   'expenses_by_vendor',
@@ -47,7 +47,7 @@ export async function runExpenseReport(
   const key = backendKey(reportId);
   const from = params.startDate;
   const to = params.endDate || params.asOfDate;
-  const { data } = await payrollClient.get(`/expense/reports/${key}`, {
+  const { data } = await axios.get(`/expense/reports/${key}`, {
     params: {
       from,
       to,

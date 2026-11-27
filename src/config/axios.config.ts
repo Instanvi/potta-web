@@ -34,7 +34,7 @@ export const authClient = Axios.create({
   headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 });
 
-/** instanvi-payroll-expense-be (employees + expense transactions). */
+/** instanvi-payroll-expense-be (employees only). Expenses live on potta-backend. */
 export const PAYROLL_API_URL = withApiPrefix(
   process.env.NEXT_PUBLIC_PAYROLL_API_URL || 'https://api.spend.instanvi.com/api/'
 );
