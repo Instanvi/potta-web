@@ -48,15 +48,14 @@ export const pdfShellStyles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   headerSeller: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     maxWidth: '55%',
+    alignItems: 'center',
   },
   headerLogo: {
     width: 44,
     height: 44,
     objectFit: 'contain',
-    marginRight: 12,
+    marginBottom: 16,
     backgroundColor: '#ffffff',
   },
   headerSellerName: {
@@ -226,40 +225,28 @@ export const pdfShellStyles = StyleSheet.create({
   },
 });
 
-function SellerIdentity({
-  seller,
-  light,
-}: {
-  seller: PdfSeller;
-  light: boolean;
-}) {
+function SellerIdentity({ seller }: { seller: PdfSeller }) {
   const s = pdfShellStyles;
   const logoSrc = resolvePdfLogoUrl(seller.logoUrl);
-  const nameStyle = light
-    ? s.headerSellerName
-    : { fontSize: 12, fontFamily: 'Helvetica-Bold' as const, color: '#111111', marginBottom: 2 };
-  const lineStyle = light
-    ? s.headerSellerLine
-    : { fontSize: 8, color: '#4b5563', lineHeight: 1.4 };
   return (
-    <View style={light ? s.headerSeller : { alignItems: 'flex-end', maxWidth: '48%' }}>
+    <View style={s.headerSeller}>
       {logoSrc ? (
         // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
-        <Image src={logoSrc} style={light ? s.headerLogo : { width: 36, height: 36, objectFit: 'contain', marginBottom: 4 }} />
+        <Image src={logoSrc} style={s.headerLogo} />
       ) : null}
       <View>
-        <Text style={nameStyle}>{seller.name || 'Your organization'}</Text>
+        <Text style={s.headerSellerName}>{seller.name || 'Your organization'}</Text>
         {(seller.addressLines ?? []).map((line, i) => (
-          <Text key={`${line}-${i}`} style={lineStyle}>
+          <Text key={`${line}-${i}`} style={s.headerSellerLine}>
             {line}
           </Text>
         ))}
-        {seller.email ? <Text style={lineStyle}>{seller.email}</Text> : null}
-        {seller.phone ? <Text style={lineStyle}>{seller.phone}</Text> : null}
+        {seller.email ? <Text style={s.headerSellerLine}>{seller.email}</Text> : null}
+        {seller.phone ? <Text style={s.headerSellerLine}>{seller.phone}</Text> : null}
         {seller.registrationNumber ? (
-          <Text style={lineStyle}>Reg. {seller.registrationNumber}</Text>
+          <Text style={s.headerSellerLine}>Reg. {seller.registrationNumber}</Text>
         ) : null}
-        {seller.taxId ? <Text style={lineStyle}>Tax ID {seller.taxId}</Text> : null}
+        {seller.taxId ? <Text style={s.headerSellerLine}>Tax ID {seller.taxId}</Text> : null}
       </View>
     </View>
   );
@@ -288,7 +275,7 @@ export function LetterheadHeader({
   if (spec.header === 'band') {
     return (
       <View style={[s.header, { borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }]}>
-        <SellerIdentity seller={seller} light={false} />
+        <SellerIdentity seller={seller} />
         <View style={s.headerRight}>
           <Text style={[s.headerTitle, { color: accent }]}>{title.toUpperCase()}</Text>
           {subtitle ? <Text style={s.headerSub}>{subtitle}</Text> : null}
@@ -306,10 +293,10 @@ export function LetterheadHeader({
     return (
       <View>
         <View style={{ paddingHorizontal: 36, paddingTop: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <View>
+          <View style={{ alignItems: 'center', maxWidth: '55%' }}>
             {logoSrc ? (
               // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image
-              <Image src={logoSrc} style={{ width: 32, height: 32, objectFit: 'contain', marginBottom: 4 }} />
+              <Image src={logoSrc} style={{ width: 36, height: 36, objectFit: 'contain', marginBottom: 12 }} />
             ) : null}
             <Text style={{ fontSize: 12, fontFamily: 'Helvetica-Bold' }}>{seller.name || 'Your organization'}</Text>
           </View>
@@ -367,7 +354,7 @@ export function LetterheadHeader({
             </Text>
           ))}
         </View>
-        <SellerIdentity seller={seller} light={false} />
+        <SellerIdentity seller={seller} />
       </View>
     </View>
   );
