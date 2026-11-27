@@ -282,8 +282,8 @@ const SaleInvoiceCard = () => {
                 onClick={() => handleActive(category.id)}
                 className={`mx-[3px] min-w-fit whitespace-nowrap rounded-[15px] px-[15px] py-[5px] text-xs transition-colors ${
                   isActive
-                    ? 'bg-[#0E4B03] text-white'
-                    : 'bg-[#1E5B13] text-white hover:bg-[#98FB98] hover:text-black'
+                    ? 'bg-[#1E5B13] text-white ring-2 ring-[#A0E86F] ring-offset-1'
+                    : 'bg-[#1E5B13] text-white hover:bg-green-200 hover:text-black'
                 }`}
               >
                 {category.name}
@@ -337,6 +337,15 @@ const SaleInvoiceCard = () => {
                 <p className="mt-1 line-clamp-2 px-2 text-center text-[13px] text-gray-800">
                   {menuItem.name}
                 </p>
+                {menuItem.stock !== null && (
+                  <p
+                    className={`px-2 text-center text-[11px] ${
+                      menuItem.stock <= 5 ? 'text-[#FF4444]' : 'text-gray-500'
+                    }`}
+                  >
+                    Stock: {menuItem.stock}
+                  </p>
+                )}
                 <div className="mt-auto px-2 pb-3 text-center text-sm font-bold text-gray-900">
                   {menuItem.price.toLocaleString(undefined, {
                     minimumFractionDigits: 0,
