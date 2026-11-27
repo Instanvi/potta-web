@@ -1,8 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { Table } from '@tanstack/react-table';
-import Button from '@potta/components/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,7 +27,7 @@ function columnLabel(column: {
     .trim();
 }
 
-/** One Actions menu for list toolbars: export and other commands, plus column visibility. */
+/** One More menu for list toolbars: export and other commands, plus column visibility. */
 export function ListActionsMenu<T>({
   table,
   children,
@@ -36,20 +35,34 @@ export function ListActionsMenu<T>({
   table?: Table<T> | null;
   children?: ReactNode;
 }) {
+  const [mounted, setMounted] = useState(false);
   const hideable = table?.getAllColumns().filter((column) => column.getCanHide()) ?? [];
   const hasColumns = hideable.length > 0;
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const trigger = (
+    <button
+      type="button"
+      className="inline-flex h-9 items-center gap-1 rounded-[2px] border-0 bg-transparent px-2 text-sm font-normal text-foreground shadow-none hover:bg-accent"
+    >
+      More
+      <i className="ri-arrow-down-s-line text-base" aria-hidden />
+    </button>
+  );
+
+  // Radix ids differ between the server and the browser. Rendering the menu
+  // before mount leaves the trigger attributes unpatched, so the click never opens it.
+  if (!mounted) return trigger;
+
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          text="Actions"
-          theme="outline"
-          icon={<i className="ri-more-2-line" />}
-        />
+        {trigger}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-white">
+      <DropdownMenuContent align="end" className="z-[200] w-56 bg-white">
         {children}
         {children && hasColumns ? <DropdownMenuSeparator /> : null}
         {hasColumns ? (

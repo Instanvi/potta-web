@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import RootLayout from '@/app/(routes)/layout';
-import { ErrorState, ListToolbar, PageContainer, PageHeader } from '@/app/(routes)/_shared/states';
+import { ErrorState, ListToolbar, PageContainer } from '@/app/(routes)/_shared/states';
 import { BooksListTable } from '@/components/books/books-list-table';
 import { useDataTableHandle } from '@/components/ui/data-table';
 import { ListActionsMenu, ListActionItem } from '@/components/list-actions-menu';
@@ -168,8 +168,7 @@ export function BankTransactionsPage() {
   return (
     <RootLayout>
       <PageContainer>
-        <PageHeader
-          title="Bank transactions"
+        <ListToolbar
           actions={
             <>
               <Button
@@ -183,6 +182,13 @@ export function BankTransactionsPage() {
               >
                 <i className="ri-refresh-line text-base" />
               </Button>
+              <ListActionsMenu table={table}>
+                <ListActionItem
+                  label="Apply rules"
+                  disabled={saving}
+                  onSelect={() => void applyRules()}
+                />
+              </ListActionsMenu>
               <Button
                 type="button"
                 size="sm"
@@ -193,19 +199,6 @@ export function BankTransactionsPage() {
               >
                 New
               </Button>
-            </>
-          }
-        />
-        <ListToolbar
-          actions={
-            <>
-              <ListActionsMenu table={table}>
-                <ListActionItem
-                  label="Apply rules"
-                  disabled={saving}
-                  onSelect={() => void applyRules()}
-                />
-              </ListActionsMenu>
             </>
           }
         >
