@@ -156,22 +156,28 @@ const PdfView = ({
     totalTax,
   ]);
 
+  /** Hold last stable props so typing does not rebuild the PDF every keystroke. */
+  const [stableProps, setStableProps] = useState(pdfProps);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setStableProps(pdfProps), 500);
+    return () => window.clearTimeout(handle);
+  }, [pdfProps]);
+
   const documentNode = useMemo(
-    () => <SalesReceiptPdfDocument {...pdfProps} />,
-    [pdfProps],
+    () => <SalesReceiptPdfDocument {...stableProps} />,
+    [stableProps],
   );
 
   const download = useCallback(async () => {
     const filename = pdfProps.receiptNumber
       ? `sales-receipt-${pdfProps.receiptNumber}`
       : 'draft-sales-receipt';
-    await downloadReactPdf(documentNode, filename);
-  }, [documentNode, pdfProps.receiptNumber]);
+    await downloadReactPdf(<SalesReceiptPdfDocument {...pdfProps} />, filename);
+  }, [pdfProps]);
 
   useEffect(() => {
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
-
 
   return <PdfPreview document={documentNode} />;
 };

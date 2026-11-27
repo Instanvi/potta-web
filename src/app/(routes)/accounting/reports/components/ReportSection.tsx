@@ -14,7 +14,7 @@ const ReportSection = ({ title, lines, total, totalLabel, hideZero }: Props) => 
   );
   return (
     <section className="overflow-hidden border-b border-black/[0.06] last:border-b-0">
-      <h3 className="bg-brand-subtle px-4 py-2.5 text-sm font-normal text-foreground">{title}</h3>
+      <h3 className="bg-brand-subtle px-4 py-3 text-base font-semibold text-foreground">{title}</h3>
       {entries.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">No balances</p>
       ) : (

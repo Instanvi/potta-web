@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useGetOneCustomer from '@potta/app/(routes)/customers/hooks/useGetOneCustomer';
 import useGetOneVendor from '@potta/app/(routes)/vendors/hooks/useGetOneVendor';
 import {
@@ -98,26 +98,36 @@ export function BooksDocumentPreview({
   const currency = values.currency?.trim() || 'XAF';
   const linesValue = values.lines ?? '';
 
-  const documentNode = useMemo(
-    () => (
-      <GenericDocumentPdf
-        title={title}
-        subtitle={title}
-        seller={seller}
-        fields={[...partyFields(customer), ...partyFields(vendor), ...detailFields(fields, values)]}
-        lines={linesFromValue(linesValue)}
-        currency={currency}
-        accent={letterhead.accent}
-        template={letterhead.template}
-      />
-    ),
+  const previewProps = useMemo(
+    () => ({
+      title,
+      subtitle: title,
+      seller,
+      fields: [...partyFields(customer), ...partyFields(vendor), ...detailFields(fields, values)],
+      lines: linesFromValue(linesValue),
+      currency,
+      accent: letterhead.accent,
+      template: letterhead.template,
+    }),
     [title, seller, customer, vendor, fields, values, linesValue, currency, letterhead.accent, letterhead.template],
+  );
+
+  /** Hold last stable props so typing does not rebuild the PDF every keystroke. */
+  const [stableProps, setStableProps] = useState(previewProps);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setStableProps(previewProps), 500);
+    return () => window.clearTimeout(handle);
+  }, [previewProps]);
+
+  const documentNode = useMemo(
+    () => <GenericDocumentPdf {...stableProps} />,
+    [stableProps],
   );
 
   const download = useCallback(async () => {
     const filename = title.trim().toLowerCase().replace(/\s+/g, '-') || 'document';
-    await downloadReactPdf(documentNode, `${filename}-draft`);
-  }, [documentNode, title]);
+    await downloadReactPdf(<GenericDocumentPdf {...previewProps} />, `${filename}-draft`);
+  }, [previewProps, title]);
 
   useEffect(() => {
     onRegisterDownload?.(download);

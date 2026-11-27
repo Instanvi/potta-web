@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState, type ReactElement } from 'rea
 import type { DocumentProps } from '@react-pdf/renderer';
 import { cn } from '@potta/lib/utils';
 
-const UPDATE_DELAY_MS = 650;
+const UPDATE_DELAY_MS = 700;
 /** Let the PDF plugin paint the covered frame before we bring it forward. */
-const REVEAL_DELAY_MS = 200;
+const REVEAL_DELAY_MS = 280;
 
 type SlotUrl = string | null;
 
@@ -49,12 +49,15 @@ export function PdfPreview({ document }: { document: ReactElement<DocumentProps>
   const [slots, setSlots] = useState<[SlotUrl, SlotUrl]>([null, null]);
   const [visible, setVisible] = useState<0 | 1>(0);
   const [painted, setPainted] = useState(false);
+  const [pending, setPending] = useState(false);
 
   const slotsRef = useRef<[SlotUrl, SlotUrl]>([null, null]);
   const visibleRef = useRef<0 | 1>(0);
   const paintedRef = useRef(false);
   const lastSignature = useRef('');
   const revealTimers = useRef<number[]>([]);
+  const documentRef = useRef(document);
+  documentRef.current = document;
 
   const placeUrl = useCallback((url: string) => {
     const current = slotsRef.current;
@@ -74,6 +77,7 @@ export function PdfPreview({ document }: { document: ReactElement<DocumentProps>
     paintedRef.current = true;
     setVisible(index);
     setPainted(true);
+    setPending(false);
   }, []);
 
   useEffect(() => {
@@ -81,15 +85,20 @@ export function PdfPreview({ document }: { document: ReactElement<DocumentProps>
     if (signature && signature === lastSignature.current) return;
 
     let cancelled = false;
+    if (paintedRef.current) setPending(true);
+
     const handle = window.setTimeout(async () => {
       try {
         const { pdf } = await import('@react-pdf/renderer');
-        const blob = await pdf(document).toBlob();
+        const blob = await pdf(documentRef.current).toBlob();
         if (cancelled) return;
         if (signature) lastSignature.current = signature;
         placeUrl(URL.createObjectURL(blob));
       } catch (error) {
-        if (!cancelled) console.error('PDF preview failed', error);
+        if (!cancelled) {
+          console.error('PDF preview failed', error);
+          setPending(false);
+        }
       }
     }, paintedRef.current ? UPDATE_DELAY_MS : 0);
 
@@ -109,14 +118,16 @@ export function PdfPreview({ document }: { document: ReactElement<DocumentProps>
   }, []);
 
   return (
-    <div className="relative h-full min-h-0 bg-main-bg">
+    <div className="relative h-full min-h-0 bg-white">
+      {/* Opaque underlay so a loading iframe never flashes through. */}
+      <div className="absolute inset-0 z-0 bg-white" aria-hidden />
       {([0, 1] as const).map((index) => {
         const url = slots[index];
         if (!url) return null;
         const showing = painted && visible === index;
         return (
           <iframe
-            key={index}
+            key={`${index}-${url}`}
             title={showing ? 'Document preview' : ''}
             src={withViewerHash(url)}
             aria-hidden={!showing}
@@ -126,17 +137,24 @@ export function PdfPreview({ document }: { document: ReactElement<DocumentProps>
               revealTimers.current.push(id);
             }}
             className={cn(
-              'absolute inset-0 h-full w-full border-0 bg-white',
-              showing ? 'z-10' : 'pointer-events-none z-0',
+              'absolute inset-0 h-full w-full border-0 bg-white transition-opacity duration-150',
+              showing ? 'z-10 opacity-100' : 'pointer-events-none z-[1] opacity-0',
             )}
           />
         );
       })}
-      {painted ? null : (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-main-bg text-sm text-muted-foreground">
+      {!painted ? (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white text-sm text-muted-foreground">
           Loading PDF preview…
         </div>
-      )}
+      ) : pending ? (
+        <div
+          className="pointer-events-none absolute right-3 top-3 z-20 rounded-[2px] bg-black/50 px-2 py-1 text-[11px] text-white"
+          aria-hidden
+        >
+          Updating…
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -17,7 +17,7 @@ import { formatPartyAddress } from '@/lib/party-address';
 import { PdfPreview } from '@/components/documents/pdf-preview';
 import { withDocumentAcronym } from '@potta/components/generated-number-field';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface TableItem {
   name: string;
@@ -209,15 +209,22 @@ const PdfView = ({
     totalTax,
   ]);
 
+  /** Hold last stable props so typing does not rebuild the PDF every keystroke. */
+  const [stableProps, setStableProps] = useState(pdfProps);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setStableProps(pdfProps), 500);
+    return () => window.clearTimeout(handle);
+  }, [pdfProps]);
+
   const documentNode = useMemo(
-    () => <InvoicePdfDocument {...pdfProps} />,
-    [pdfProps],
+    () => <InvoicePdfDocument {...stableProps} />,
+    [stableProps],
   );
 
   const download = useCallback(async () => {
     const filename = pdfProps.invoiceNumber || 'INV-draft';
-    await downloadReactPdf(documentNode, filename);
-  }, [documentNode, pdfProps.invoiceNumber]);
+    await downloadReactPdf(<InvoicePdfDocument {...pdfProps} />, filename);
+  }, [pdfProps]);
 
   useEffect(() => {
     onRegisterDownload?.(download);
