@@ -22,11 +22,13 @@ import {
 } from '@potta/components/document-form-layout';
 import { Button as ShadcnButton } from '@/components/shadcn/button';
 import { Can } from '@/components/auth/can';
+import { invoiceApi } from '@potta/app/(routes)/account_receivables/invoice/_utils/api';
 import CreditNoteForm from './newtableInvoice';
 import { useCreateCreditNote, useCustomerInvoices } from '../../_hooks';
 import { CreateCreditNotePayload } from '../../_utils/types';
 import {
   computeCreditAmount,
+  invoiceLinesToTableRows,
   serializeLineItems,
 } from '../../_utils/lines';
 
@@ -65,6 +67,7 @@ const Left = ({ onOpenPreview }: LeftProps) => {
   const [note, setNote] = useState('');
   const [isAddCustomerDrawer, setIsAddCustomerDrawer] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [loadingInvoiceLines, setLoadingInvoiceLines] = useState(false);
 
   // Reset shared document state on mount (and on leave) so invoice/bill lines never leak in.
   useEffect(() => {
@@ -101,6 +104,15 @@ const Left = ({ onOpenPreview }: LeftProps) => {
   const clearError = (key: keyof ValidationErrors) =>
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
 
+  const clearLines = () => {
+    setContextData?.((prev: any) => ({
+      ...prev,
+      table: [],
+      creditAmount: 0,
+    }));
+    clearError('lineItems');
+  };
+
   const handleCustomerChange = (value: string) => {
     setCustomerId(value);
     setInvoiceId('');
@@ -109,12 +121,46 @@ const Left = ({ onOpenPreview }: LeftProps) => {
       ...prev,
       customerName: value,
       invoiceId: '',
+      table: [],
+      creditAmount: 0,
     }));
   };
 
-  const handleInvoiceChange = (value: string) => {
+  const handleInvoiceChange = async (value: string) => {
     setInvoiceId(value);
     setContextField('invoiceId', value);
+    if (!value) {
+      clearLines();
+      return;
+    }
+
+    setLoadingInvoiceLines(true);
+    try {
+      const invoice = await invoiceApi.getOne(value);
+      const rows = invoiceLinesToTableRows(invoice?.lineItems ?? []);
+      const nextCurrency =
+        typeof invoice?.currency === 'string' && invoice.currency
+          ? invoice.currency
+          : currency;
+      setCurrency(nextCurrency);
+      setContextData?.((prev: any) => ({
+        ...prev,
+        invoiceId: value,
+        currency: nextCurrency,
+        table: rows,
+      }));
+      clearError('lineItems');
+      if (rows.length === 0) {
+        toast.message('Invoice has no lines — add credit lines manually');
+      } else {
+        toast.success(`Loaded ${rows.length} line${rows.length === 1 ? '' : 's'} from invoice`);
+      }
+    } catch {
+      clearLines();
+      toast.error('Could not load invoice lines — add them manually');
+    } finally {
+      setLoadingInvoiceLines(false);
+    }
   };
 
   const handleIssueDateChange = (value: string) => {
@@ -214,7 +260,8 @@ const Left = ({ onOpenPreview }: LeftProps) => {
 
   return (
     <>
-      <DocumentFormShell className="bg-white">
+      <div className="flex min-h-full flex-col bg-white">
+      <DocumentFormShell className="flex-1 bg-white">
           {/* Customer + invoice + amount */}
           <DocumentFormCard flush>
             <div className="flex flex-wrap items-start justify-between gap-6">
@@ -252,12 +299,17 @@ const Left = ({ onOpenPreview }: LeftProps) => {
                     placeholder={
                       !customerId
                         ? 'Select a customer first'
-                        : !invoicesLoading && invoiceOptions.length === 0
-                          ? 'No invoices for this customer'
-                          : 'Select an invoice'
+                        : loadingInvoiceLines
+                          ? 'Loading invoice lines…'
+                          : !invoicesLoading && invoiceOptions.length === 0
+                            ? 'No invoices for this customer'
+                            : 'Select an invoice'
                     }
-                    isDisabled={!customerId || invoicesLoading}
+                    isDisabled={!customerId || invoicesLoading || loadingInvoiceLines}
                   />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Choosing an invoice fills the lines below. You can still edit or remove them.
+                  </p>
                 </div>
               </div>
               <DocumentBalanceDue label="Credit amount" amount={money(creditAmount)} />
@@ -357,6 +409,7 @@ const Left = ({ onOpenPreview }: LeftProps) => {
           </Can>
         }
       />
+      </div>
 
       <SliderCustomer open={isAddCustomerDrawer} setOpen={setIsAddCustomerDrawer} showTrigger={false} />
     </>
