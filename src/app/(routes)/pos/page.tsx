@@ -2,30 +2,24 @@
 import React from 'react';
 import SaleInvoiceTable from './component/saleInvoiceTable';
 import SaleInvoiceCard from './component/saleInvoiceCard';
-
-import Print from './component/print';
-import RootLayout from '../layout';
 import HeldOrders from './component/footer';
 
 const POS = () => {
   return (
-    <RootLayout>
-      <div className="h-full min-h-0 overflow-hidden">
-        <div className="h-[85vh] p-3 flex w-full">
-          <div className="w-[60%]">
-            <SaleInvoiceCard />
-          </div>
-          <div className="w-[40%]">
-            <SaleInvoiceTable />
-          </div>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 w-full">
+        <div className="min-h-0 min-w-0 basis-[57.14%] flex-[4]">
+          <SaleInvoiceCard />
         </div>
-        <div className="w-full h-[7vh] bg-[#005D1F] z-30 fixed bottom-0">
-          <div className="">
-            <HeldOrders />
-          </div>
+        <div className="min-h-0 min-w-0 basis-[42.86%] flex-[3] border-l border-[var(--pos-border)]">
+          <SaleInvoiceTable />
         </div>
       </div>
-    </RootLayout>
+      <div className="z-30 h-[100px] w-full shrink-0 bg-[var(--pos-green)]">
+        <HeldOrders />
+      </div>
+    </div>
   );
 };
+
 export default POS;

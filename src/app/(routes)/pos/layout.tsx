@@ -1,5 +1,12 @@
-'use client';
-import React, { FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
+import { Outfit } from 'next/font/google';
+import './pos-till.css';
+
+const outfit = Outfit({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-outfit',
+  display: 'swap',
+});
 
 interface Props {
   children: ReactNode;
@@ -7,13 +14,10 @@ interface Props {
 
 const POSLayout: FC<Props> = ({ children }) => {
   return (
-    <div className="w-full h-screen overflow-hidden">
-      <div className="w-full h-screen">
-        <div className="h-[100vh] w-full overflow-hidden relative p-0">
-          {children}
-        </div>
-      </div>
+    <div className={`${outfit.variable} pos-till h-screen w-full overflow-hidden`}>
+      <div className="relative h-full w-full overflow-hidden p-0">{children}</div>
     </div>
   );
 };
+
 export default POSLayout;

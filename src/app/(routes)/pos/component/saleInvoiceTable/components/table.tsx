@@ -1,28 +1,23 @@
 'use client';
 import React, { useEffect, useContext } from 'react';
-import type { ColumnDef } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from './orderSummary';
-import { computeLine, computeTotals, lineDiscount, type SaleLineItem } from '@potta/app/(routes)/pos/utils/sale';
+import { computeLine, computeTotals, type SaleLineItem } from '@potta/app/(routes)/pos/utils/sale';
 
-type Row = { row: { original: LineItem } };
-
-type LineItem = SaleLineItem & { stock?: number | null };
+type LineItem = SaleLineItem & { stock?: number | null; modifiersText?: string };
 
 const TableOPS = () => {
   const context = useContext(ContextData);
+  const items: LineItem[] = Array.isArray(context?.data) ? context.data : [];
 
-  const deleteItem = (productId: string) => {
-    if (context?.data && Array.isArray(context.data)) {
-      context.setData(
-        context.data.filter((item: LineItem) => item.productId !== productId)
-      );
-    }
+  const deleteItem = (key: string) => {
+    if (!context?.data || !Array.isArray(context.data)) return;
+    context.setData(
+      context.data.filter((item: LineItem) => (item.lineKey ?? item.productId) !== key)
+    );
   };
 
-  const calculateTotalPrice = () => {
-    const items: LineItem[] = Array.isArray(context?.data) ? context.data : [];
+  useEffect(() => {
     const totals = computeTotals(items, context?.orderSummary?.discount || 0);
     context?.setOrderSummary?.({
       subtotal: totals.subtotal,
@@ -31,141 +26,118 @@ const TableOPS = () => {
       itemDiscounts: totals.itemDiscounts,
       total: totals.total,
     });
-  };
-
-  useEffect(() => {
-    calculateTotalPrice();
   }, [context?.data, context?.orderSummary?.discount]);
 
-  const handleQuantityChange = (productId: string, change: number) => {
-    if (context?.data && Array.isArray(context.data)) {
-      context.setData((prevData: LineItem[]) => {
-        if (!Array.isArray(prevData)) return prevData;
-
-        return prevData.map((item: LineItem) => {
-          if (item.productId === productId) {
-            const newQuantity = item.quantity + change;
-            if (newQuantity < 1) return item;
-            if (item.stock != null && newQuantity > item.stock) return item;
-            return { ...item, quantity: newQuantity };
-          }
-          return item;
-        });
+  const handleQuantityChange = (key: string, change: number) => {
+    if (!context?.data || !Array.isArray(context.data)) return;
+    context.setData((prevData: LineItem[]) => {
+      if (!Array.isArray(prevData)) return prevData;
+      return prevData.map((item: LineItem) => {
+        if ((item.lineKey ?? item.productId) !== key) return item;
+        const newQuantity = item.quantity + change;
+        if (newQuantity < 1) return item;
+        if (item.stock != null && newQuantity > item.stock) return item;
+        return { ...item, quantity: newQuantity };
       });
-    }
+    });
   };
 
-  const calculateItemDiscount = (item: LineItem): number => lineDiscount(item);
-
-  const columns = [
-    {
-      accessorKey: 'description',
-      header: 'Name',
-      cell: ({ row: { original } }: Row) => original.description,
-    },
-    {
-      accessorKey: 'quantity',
-      header: 'Quantity',
-      cell: ({ row: { original } }: Row) => (
-        <div className="flex space-x-1 items-center">
-          <button
-            onClick={() => handleQuantityChange(original.productId, -1)}
-            disabled={original.quantity <= 1}
-            className="h-[20px] bg-red-500 border-red-500 px-2 items-center border text-white flex justify-center w-[20px]"
-          >
-            <i className="ri-subtract-line text-lg"></i>
-          </button>
-          <input
-            type="text"
-            value={original.quantity}
-            readOnly
-            className="h-[26px] w-[40px] text-base bg-slate-300 outline-none pl-2"
-          />
-          <button
-            onClick={() => handleQuantityChange(original.productId, 1)}
-            className="h-[20px] bg-green-800 border-green-800 px-2 text-white border-y border-r w-[20px] items-center flex justify-center"
-          >
-            <i className="ri-add-line text-lg"></i>
-          </button>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'unitPrice',
-      header: 'Price',
-      cell: ({ row: { original } }: Row) => {
-        const price = Number(original.unitPrice);
-        return isNaN(price) ? '0.00' : price.toFixed(2);
-      },
-    },
-    {
-      accessorKey: 'discount',
-      header: 'Discount',
-      cell: ({ row: { original } }: Row) => {
-        const discount = calculateItemDiscount(original);
-        return isNaN(discount) ? '0.00' : discount.toFixed(2);
-      },
-    },
-    {
-      accessorKey: 'total',
-      header: 'Total',
-      cell: ({ row: { original } }: Row) => `${computeLine(original).total.toFixed(2)} XAF`,
-    },
-    {
-      accessorKey: 'actions',
-      header: '',
-      cell: ({ row: { original } }: Row) => (
-        <button
-          className="text-red-500 hover:text-red-400"
-          onClick={() => deleteItem(original.productId)}
-        >
-          <i className="ri-delete-bin-line text-xl"></i>
-        </button>
-      ),
-    },
-  ];
-
   return (
-    <>
-      <div className="mt-2 flex flex-col justify-between bg-white h-full">
-        <div className=" p-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-800 mb-2">
-              Cart Items
-            </h3>
-            <div className="">
-              <DataTable<LineItem>
-                columns={columns as ColumnDef<LineItem>[]}
-                data={Array.isArray(context?.data) ? context.data : []}
-                showPagination={false}
-                showViewOptions={false}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-gray-100 p-4">
-          <OrderSummary
-            subtotal={context?.orderSummary?.subtotal || 0}
-            discount={context?.orderSummary?.discount || 0}
-            itemDiscounts={context?.orderSummary?.itemDiscounts || 0}
-            tax={context?.orderSummary?.tax || 0}
-            total={context?.orderSummary?.total || 0}
-            setDiscount={(newDiscount: number) => {
-              if (context?.setOrderSummary) {
-                context.setOrderSummary((prev) => ({
-                  ...prev,
-                  discount: newDiscount,
-                  total:
-                    prev.subtotal +
-                    prev.tax -
-                    (prev.itemDiscounts + newDiscount),
-                }));
-              }
-            }}
-          />
-        </div>
+    <div className="flex h-full flex-col justify-between bg-white">
+      <div className="min-h-0 flex-1 overflow-auto p-2.5">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="h-[45px] bg-[var(--pos-green)] text-left text-white">
+              <th className="px-3.5 font-bold">Name</th>
+              <th className="px-2 font-bold">Quantity</th>
+              <th className="px-2 font-bold">Price</th>
+              <th className="px-2 font-bold">Total</th>
+              <th className="w-[60px] px-1 font-bold" />
+            </tr>
+          </thead>
+          <tbody>
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  Cart is empty
+                </td>
+              </tr>
+            ) : (
+              items.map((item) => {
+                const key = item.lineKey ?? item.productId;
+                const line = computeLine(item);
+                const price = Number(item.unitPrice);
+                return (
+                  <tr
+                    key={key}
+                    className="h-[54px] border-b border-[var(--pos-border)] text-[14px]"
+                  >
+                    <td className="px-3.5 py-2 align-middle">
+                      <div className="truncate font-normal">{item.description}</div>
+                      {item.modifiersText ? (
+                        <div className="text-[11px] font-light text-[#666]">{item.modifiersText}</div>
+                      ) : null}
+                    </td>
+                    <td className="px-2 align-middle">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(key, -1)}
+                          disabled={item.quantity <= 1}
+                          className="flex h-6 w-6 items-center justify-center rounded-[3px] bg-red-600 text-sm font-bold text-white hover:bg-[#cc0000] disabled:opacity-40"
+                        >
+                          −
+                        </button>
+                        <span className="min-w-[25px] text-center font-medium">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange(key, 1)}
+                          className="flex h-6 w-6 items-center justify-center rounded-[3px] bg-[darkgreen] text-sm font-bold text-white hover:bg-[#228b22]"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-2 align-middle">{isNaN(price) ? '0' : Math.round(price).toLocaleString()}</td>
+                    <td className="px-2 align-middle font-semibold">
+                      {Math.round(line.total).toLocaleString()}
+                    </td>
+                    <td className="px-1 align-middle">
+                      <button
+                        type="button"
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-full text-red-500 hover:bg-[#ffe6e6]"
+                        onClick={() => deleteItem(key)}
+                        title="Delete item"
+                      >
+                        <i className="ri-delete-bin-line text-base" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
-    </>
+      <div className="shrink-0 border-t border-[var(--pos-border-soft)] p-3">
+        <OrderSummary
+          subtotal={context?.orderSummary?.subtotal || 0}
+          discount={context?.orderSummary?.discount || 0}
+          itemDiscounts={context?.orderSummary?.itemDiscounts || 0}
+          tax={context?.orderSummary?.tax || 0}
+          total={context?.orderSummary?.total || 0}
+          setDiscount={(newDiscount: number) => {
+            if (context?.setOrderSummary) {
+              context.setOrderSummary((prev) => ({
+                ...prev,
+                discount: newDiscount,
+                total: prev.subtotal + prev.tax - (prev.itemDiscounts + newDiscount),
+              }));
+            }
+          }}
+        />
+      </div>
+    </div>
   );
 };
 
