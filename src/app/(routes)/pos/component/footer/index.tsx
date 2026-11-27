@@ -59,40 +59,46 @@ const HeldOrders: React.FC = () => {
     setDeleteConfirmId(null);
   };
 
-  if (heldOrders.length === 0) {
-    return (
-      <div className="h-20 bg-[#005D1F]  flex items-center justify-center text-white">
-        No held orders
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="h-20 bg-[#005D1F] p-2">
-        <div className="flex gap-4 overflow-x-auto">
-          {heldOrders.map((order) => (
-            <div
-              key={order.id}
-              onClick={() => handleSelectOrder(order)}
-              className="flex items-center gap-8 min-w-fit px-4 py-3 bg-[#A0E86F] text-black hover:bg-[#8ae74d] transition-colors cursor-pointer"
-            >
-              <button type="button" className="">
-                ID:{order.id}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteConfirmId(order.id);
-                }}
-                className=" hover:text-white"
+      <div className="flex h-full items-center bg-[var(--pos-green)] px-2">
+        <button
+          type="button"
+          className="mr-2 flex h-12 w-12 shrink-0 items-center justify-center text-white"
+          aria-label="Menu"
+          tabIndex={-1}
+        >
+          <i className="ri-menu-line text-2xl" />
+        </button>
+
+        {heldOrders.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center text-sm text-white/80">
+            No held orders
+          </div>
+        ) : (
+          <div className="flex flex-1 gap-3 overflow-x-auto py-2 no-scrollbar">
+            {heldOrders.map((order) => (
+              <div
+                key={order.id}
+                onClick={() => handleSelectOrder(order)}
+                className="flex min-w-fit cursor-pointer items-center gap-4 bg-[var(--pos-held-chip)] px-4 py-3 text-black transition-colors hover:bg-[#8ae74d]"
               >
-                <i className="ri-close-line text-2xl"></i>
-              </button>
-            </div>
-          ))}
-        </div>
+                <span className="text-sm font-medium">ID:{order.id}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteConfirmId(order.id);
+                  }}
+                  className="hover:text-white"
+                  aria-label="Delete held order"
+                >
+                  <i className="ri-close-line text-xl" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

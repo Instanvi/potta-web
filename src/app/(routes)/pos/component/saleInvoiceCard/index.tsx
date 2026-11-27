@@ -86,7 +86,6 @@ const SaleInvoiceCard = () => {
   const products = useMemo(() => productPages?.pages.flatMap((p) => p?.data ?? []) ?? [], [productPages]);
   const menus: MenuItem[] = products.map(toMenuItem);
 
-  // Extract unique categories from products
   useEffect(() => {
     const categories = Array.from(new Set(products.map((product) => categoryName(product.category)))).map(
       (name) => ({ id: name, name })
@@ -101,7 +100,6 @@ const SaleInvoiceCard = () => {
     []
   );
 
-  /** Codes not in the loaded pages are looked up on the server by sku. */
   const lookupBarcode = async (code: string, notifyMissing: boolean) => {
     if (pendingLookup.current === code) return;
     pendingLookup.current = code;
@@ -130,7 +128,6 @@ const SaleInvoiceCard = () => {
     return !!item;
   };
 
-  // Handle barcode scanner input
   const handleBarcodeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setBarcodeInput(value);
@@ -150,7 +147,6 @@ const SaleInvoiceCard = () => {
     if (code && !matchLoaded(code)) lookupBarcode(code, true);
   };
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -206,29 +202,26 @@ const SaleInvoiceCard = () => {
     setActiveId(id);
   };
 
-  // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  // Filter menu items based on active category
   const filteredMenus = menus.filter((item) => !activeId || item.category === activeId);
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-red-500">
+      <div className="flex h-full w-full items-center justify-center text-red-500">
         Error loading products. Please try again.
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-slate-50 h-full py-3">
-      {/* Search Section */}
-      <div className="flex w-full px-3 space-x-2">
-        <div className="w-[50%] flex -mt-2">
-          <div className="bg-white mt-2 justify-center items-center border-y border-[#E5E7EB] border-l w-12 flex ">
-            <i className="ri-search-line text-2xl"></i>
+    <div className="flex h-full w-full flex-col bg-[var(--pos-catalog-bg)] py-3">
+      <div className="flex w-full gap-2 px-3">
+        <div className="flex h-10 w-1/2 overflow-hidden border border-[var(--pos-border)] bg-white">
+          <div className="flex w-10 shrink-0 items-center justify-center border-r border-[var(--pos-border)]">
+            <i className="ri-search-line text-lg text-gray-600" />
           </div>
           <input
             id="search-input"
@@ -237,15 +230,15 @@ const SaleInvoiceCard = () => {
             placeholder="Search Items (F2)"
             value={searchTerm}
             onChange={handleSearch}
-            className={`w-full py-2 px-4 border border-gray-200 rounded-[2px] outline-none mt-2 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500
-   `}
+            className="h-full w-full border-0 bg-white px-3 text-sm outline-none focus:ring-0"
           />
         </div>
-        <div className="w-[50%] flex -mt-2">
-          <div className="bg-white mt-2 justify-center items-center border-y border-[#E5E7EB] border-l w-12 flex">
-            <i className="ri-barcode-line text-2xl"></i>
+        <div className="flex h-10 w-1/2 overflow-hidden border border-[var(--pos-border)] bg-white">
+          <div className="flex w-10 shrink-0 items-center justify-center border-r border-[var(--pos-border)]">
+            <i className="ri-barcode-line text-lg text-gray-600" />
           </div>
           <input
+            id="barcode-input"
             type="text"
             placeholder="Scan Barcode (F3)"
             name="barcode"
@@ -253,95 +246,103 @@ const SaleInvoiceCard = () => {
             onChange={handleBarcodeInput}
             onKeyDown={handleBarcodeKeyDown}
             autoComplete="off"
-            className={`w-full py-2 px-4 border border-gray-200 rounded-[2px] outline-none mt-2 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500
-   `}
+            className="h-full w-full border-0 bg-white px-3 text-sm outline-none focus:ring-0"
           />
         </div>
       </div>
 
-      {/* Categories Section */}
-      <div className="w-full my-2 py-2 border-y">
+      <div className="my-2 w-full border-y border-[var(--pos-border-soft)] bg-[#fafafa] px-2 py-2">
         <div className="flex overflow-x-auto no-scrollbar">
-          {selected.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleActive(category.id)}
-              className={`${
-                activeId === category.id
-                  ? 'bg-[#0f6a2b] text-white'
-                  : 'bg-[#66e58f] text-black/85'
-              } rounded-full border border-black/5 px-3.5 py-1.5 text-sm font-normal hover:bg-[#0f6a2b] hover:text-white mx-2 min-w-fit whitespace-nowrap`}
-            >
-              {category.name}
-            </button>
-          ))}
+          {selected.map((category) => {
+            const active = activeId === category.id;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => handleActive(category.id)}
+                className={`mx-1.5 min-w-fit whitespace-nowrap rounded-[15px] px-3.5 py-1.5 text-xs transition-colors ${
+                  active
+                    ? 'bg-[var(--pos-green)] text-white'
+                    : 'bg-[#c8f0d0] text-black/85 hover:bg-[var(--pos-green)] hover:text-white'
+                }`}
+              >
+                {category.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Menu Items Grid */}
-      <div className="mt-2 w-full">
-        <div className="w-full h-[80vh] p-3 overflow-y-auto">
-          {isLoading ? (
-            <PottaLoader />
-          ) : (
-            <div className="grid grid-cols-4 gap-3">
-              {filteredMenus.map((menuItem) => (
-                <div
-                  key={menuItem.id}
-                  onClick={() => addItem(menuItem)}
-                  className={`bg-white hover:border-green-100 hover:bg-green-300 hover:border cursor-pointer h-48 items-center flex flex-col justify-center relative max-w-48  ${
-                    isOutOfStock(menuItem) ? 'opacity-50' : ''
-                  }`}
-                >
+      <div className="min-h-0 w-full flex-1 overflow-y-auto p-3">
+        {isLoading ? (
+          <PottaLoader />
+        ) : (
+          <div className="flex flex-wrap gap-3">
+            {filteredMenus.map((menuItem) => (
+              <div
+                key={menuItem.id}
+                onClick={() => addItem(menuItem)}
+                className={`relative flex h-[220px] w-[200px] max-w-[200px] cursor-pointer flex-col items-center border border-[var(--pos-border)] bg-white transition-colors hover:border-[var(--pos-green)] hover:bg-[#e8f5e8] ${
+                  isOutOfStock(menuItem) ? 'opacity-70' : ''
+                }`}
+              >
+                <div className="flex h-[150px] w-full items-center justify-center overflow-hidden">
                   <img
-                    width={100}
-                    height={100}
+                    width={140}
+                    height={140}
                     src={menuItem.image || '/images/placeholder.png'}
                     alt={menuItem.name}
-                    className="h-32 w-auto mt-2"
+                    className="max-h-[140px] w-auto object-contain"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = '/images/placeholder.png'; // Fallback image path
+                      target.src = '/images/placeholder.png';
                     }}
                   />
-                  <p className=" text-gray-500 font-normal">{menuItem.name}</p>
-                  {isOutOfStock(menuItem) && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 text-white">
-                      Out of Stock
-                    </div>
-                  )}
-                  <div className=" text-lg font-medium text-gray-700">
-                    {menuItem.price.toFixed(2)} XAF
-                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-          {!isLoading && hasNextPage && (
-            <div className="flex justify-center py-4">
-              <button
-                type="button"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="h-9 rounded-[2px] border border-input bg-background px-4 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-60"
-              >
-                {isFetchingNextPage ? 'Loading…' : 'Load more'}
-              </button>
-            </div>
-          )}
-          {filteredMenus.length === 0 && searchTerm !== '' && !isLoading && (
-            <div className="flex justify-center items-center h-full">
-              <p className="text-center text-gray-500">
-                No matching items found.
-              </p>
-            </div>
-          )}
-          {filteredMenus.length === 0 && searchTerm === '' && !isLoading && (
-            <div className="flex justify-center items-center h-full">
-              <p className="text-center text-gray-500">No items found.</p>
-            </div>
-          )}
-        </div>
+                <p className="mt-1 line-clamp-2 px-2 text-center text-[13px] font-normal text-gray-800">
+                  {menuItem.name}
+                </p>
+                <div className="mt-auto pb-2 text-sm font-bold text-gray-800">
+                  {menuItem.price.toFixed(2)} XAF
+                </div>
+                {menuItem.stock !== null && menuItem.stock > 0 && menuItem.stock <= 5 && (
+                  <span className="absolute bottom-1 left-2 text-[11px] font-light text-[#ff4444]">
+                    {menuItem.stock} left
+                  </span>
+                )}
+                {isOutOfStock(menuItem) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <span className="rounded bg-[var(--pos-oos)] px-2 py-1 text-xs font-semibold text-white">
+                      Out of Stock
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {!isLoading && hasNextPage && (
+          <div className="flex justify-center py-4">
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="h-9 border border-[var(--pos-border)] bg-white px-4 text-sm font-medium text-foreground hover:bg-[#e8f5e8] disabled:opacity-60"
+            >
+              {isFetchingNextPage ? 'Loading…' : 'Load more'}
+            </button>
+          </div>
+        )}
+        {filteredMenus.length === 0 && searchTerm !== '' && !isLoading && (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-center text-gray-500">No matching items found.</p>
+          </div>
+        )}
+        {filteredMenus.length === 0 && searchTerm === '' && !isLoading && (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-center text-gray-500">No items found.</p>
+          </div>
+        )}
       </div>
       <ProductChooser
         productId={chooserId}

@@ -65,11 +65,11 @@ const OtherPayment = () => {
   };
 
   return (
-    <div className="h-full bg-white p-8">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="h-full bg-white p-5">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="mb-2 text-2xl font-medium text-gray-800">Other Payment Methods</h3>
-          <p className="text-gray-600">Select how the customer pays</p>
+          <h3 className="mb-1 text-base font-semibold text-gray-900">Other Method</h3>
+          <p className="text-sm text-gray-500">Select how the customer pays</p>
         </div>
         <ReceiptPrinterFormatSelect printer={printer} />
       </div>
@@ -93,14 +93,14 @@ const OtherPayment = () => {
                     key={option.code}
                     type="button"
                     onClick={() => setMethodCode(option.code)}
-                    className={`flex w-full items-center space-x-3 border p-4 transition-colors ${
+                    className={`flex w-full items-center space-x-3 border p-3 text-left transition-colors ${
                       methodCode === option.code
-                        ? 'border-green-600 bg-green-50'
-                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                        ? 'border-[var(--pos-green)] bg-[#e8f5e8]'
+                        : 'border-[var(--pos-border)] bg-white hover:bg-[#f8f8f8]'
                     }`}
                   >
                     <i
-                      className={`text-2xl ${
+                      className={`text-xl ${
                         option.code === 'CREDIT'
                           ? 'ri-user-shared-line'
                           : option.code === 'BANK_TRANSFER'
@@ -118,8 +118,8 @@ const OtherPayment = () => {
           )}
         </div>
 
-        <div className="space-y-4 bg-gray-50 p-6">
-          <p className="text-gray-600">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
             Confirm payment with {selected?.label ?? 'the selected method'}, then complete the sale.
           </p>
           <div className="space-y-1">
@@ -131,13 +131,13 @@ const OtherPayment = () => {
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2.5 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500"
+              className="h-10 w-full border border-[var(--pos-border)] px-3 outline-none focus:border-[var(--pos-green)]"
             />
           </div>
           <CustomerPicker value={customerId} onChange={setCustomerId} required={needsCustomer} />
-          <div className="flex w-full justify-between bg-green-50 px-3 py-3">
+          <div className="flex w-full justify-between border-y border-[var(--pos-border)] py-3">
             <span className="font-medium text-gray-800">Amount due</span>
-            <p className="text-xl font-medium text-green-700">{totals.total.toFixed(2)} XAF</p>
+            <p className="text-base font-bold">{totals.total.toFixed(2)} XAF</p>
           </div>
           <Button
             width="full"
