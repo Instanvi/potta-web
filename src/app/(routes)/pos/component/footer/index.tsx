@@ -61,7 +61,7 @@ const HeldOrders: React.FC = () => {
 
   if (heldOrders.length === 0) {
     return (
-      <div className="h-20 bg-[#005D1F]  flex items-center justify-center text-white">
+      <div className="flex h-full items-center px-4 text-sm text-white/80">
         No held orders
       </div>
     );
@@ -69,26 +69,25 @@ const HeldOrders: React.FC = () => {
 
   return (
     <>
-      <div className="h-20 bg-[#005D1F] p-2">
-        <div className="flex gap-4 overflow-x-auto">
+      <div className="flex h-full items-center px-3 py-2">
+        <div className="flex gap-3 overflow-x-auto">
           {heldOrders.map((order) => (
             <div
               key={order.id}
               onClick={() => handleSelectOrder(order)}
-              className="flex items-center gap-8 min-w-fit px-4 py-3 bg-[#A0E86F] text-black hover:bg-[#8ae74d] transition-colors cursor-pointer"
+              className="flex min-w-fit cursor-pointer items-center gap-6 bg-[#A0E86F] px-4 py-3 text-black transition-colors hover:bg-[#8ae74d]"
             >
-              <button type="button" className="">
-                ID:{order.id}
-              </button>
+              <span className="text-sm font-medium">ID:{order.id}</span>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setDeleteConfirmId(order.id);
                 }}
-                className=" hover:text-white"
+                className="hover:text-white"
+                aria-label="Delete held order"
               >
-                <i className="ri-close-line text-2xl"></i>
+                <i className="ri-close-line text-2xl" />
               </button>
             </div>
           ))}

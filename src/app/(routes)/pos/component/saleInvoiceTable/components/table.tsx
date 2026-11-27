@@ -1,28 +1,22 @@
 'use client';
 import React, { useEffect, useContext } from 'react';
-import type { ColumnDef } from '@tanstack/react-table';
-import { DataTable } from '@potta/components/ui/data-table';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from './orderSummary';
 import { computeLine, computeTotals, lineDiscount, type SaleLineItem } from '@potta/app/(routes)/pos/utils/sale';
-
-type Row = { row: { original: LineItem } };
 
 type LineItem = SaleLineItem & { stock?: number | null };
 
 const TableOPS = () => {
   const context = useContext(ContextData);
+  const items: LineItem[] = Array.isArray(context?.data) ? context.data : [];
 
   const deleteItem = (productId: string) => {
     if (context?.data && Array.isArray(context.data)) {
-      context.setData(
-        context.data.filter((item: LineItem) => item.productId !== productId)
-      );
+      context.setData(context.data.filter((item: LineItem) => item.productId !== productId));
     }
   };
 
   const calculateTotalPrice = () => {
-    const items: LineItem[] = Array.isArray(context?.data) ? context.data : [];
     const totals = computeTotals(items, context?.orderSummary?.discount || 0);
     context?.setOrderSummary?.({
       subtotal: totals.subtotal,
@@ -55,117 +49,112 @@ const TableOPS = () => {
     }
   };
 
-  const calculateItemDiscount = (item: LineItem): number => lineDiscount(item);
-
-  const columns = [
-    {
-      accessorKey: 'description',
-      header: 'Name',
-      cell: ({ row: { original } }: Row) => original.description,
-    },
-    {
-      accessorKey: 'quantity',
-      header: 'Quantity',
-      cell: ({ row: { original } }: Row) => (
-        <div className="flex space-x-1 items-center">
-          <button
-            onClick={() => handleQuantityChange(original.productId, -1)}
-            disabled={original.quantity <= 1}
-            className="h-[20px] bg-red-500 border-red-500 px-2 items-center border text-white flex justify-center w-[20px]"
-          >
-            <i className="ri-subtract-line text-lg"></i>
-          </button>
-          <input
-            type="text"
-            value={original.quantity}
-            readOnly
-            className="h-[26px] w-[40px] text-base bg-slate-300 outline-none pl-2"
-          />
-          <button
-            onClick={() => handleQuantityChange(original.productId, 1)}
-            className="h-[20px] bg-green-800 border-green-800 px-2 text-white border-y border-r w-[20px] items-center flex justify-center"
-          >
-            <i className="ri-add-line text-lg"></i>
-          </button>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'unitPrice',
-      header: 'Price',
-      cell: ({ row: { original } }: Row) => {
-        const price = Number(original.unitPrice);
-        return isNaN(price) ? '0.00' : price.toFixed(2);
-      },
-    },
-    {
-      accessorKey: 'discount',
-      header: 'Discount',
-      cell: ({ row: { original } }: Row) => {
-        const discount = calculateItemDiscount(original);
-        return isNaN(discount) ? '0.00' : discount.toFixed(2);
-      },
-    },
-    {
-      accessorKey: 'total',
-      header: 'Total',
-      cell: ({ row: { original } }: Row) => `${computeLine(original).total.toFixed(2)} XAF`,
-    },
-    {
-      accessorKey: 'actions',
-      header: '',
-      cell: ({ row: { original } }: Row) => (
-        <button
-          className="text-red-500 hover:text-red-400"
-          onClick={() => deleteItem(original.productId)}
-        >
-          <i className="ri-delete-bin-line text-xl"></i>
-        </button>
-      ),
-    },
-  ];
+  const formatAmount = (value: number) =>
+    value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
-    <>
-      <div className="mt-2 flex flex-col justify-between bg-white h-full">
-        <div className=" p-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium text-gray-800 mb-2">
-              Cart Items
-            </h3>
-            <div className="">
-              <DataTable<LineItem>
-                columns={columns as ColumnDef<LineItem>[]}
-                data={Array.isArray(context?.data) ? context.data : []}
-                showPagination={false}
-                showViewOptions={false}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-gray-100 p-4">
-          <OrderSummary
-            subtotal={context?.orderSummary?.subtotal || 0}
-            discount={context?.orderSummary?.discount || 0}
-            itemDiscounts={context?.orderSummary?.itemDiscounts || 0}
-            tax={context?.orderSummary?.tax || 0}
-            total={context?.orderSummary?.total || 0}
-            setDiscount={(newDiscount: number) => {
-              if (context?.setOrderSummary) {
-                context.setOrderSummary((prev) => ({
-                  ...prev,
-                  discount: newDiscount,
-                  total:
-                    prev.subtotal +
-                    prev.tax -
-                    (prev.itemDiscounts + newDiscount),
-                }));
-              }
-            }}
-          />
+    <div className="flex h-full flex-col justify-between bg-white">
+      <div className="min-h-0 flex-1 overflow-y-auto p-2.5">
+        <div className="overflow-hidden border border-[#E0E0E0]">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="h-[45px] bg-[#1E5B13] text-left text-white">
+                <th className="px-3.5 font-bold">Name</th>
+                <th className="px-2 font-bold">Quantity</th>
+                <th className="px-2 font-bold">Price</th>
+                <th className="px-2 font-bold">Total</th>
+                <th className="w-[50px] px-1 font-bold" />
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-3.5 py-8 text-center text-gray-500">
+                    Cart is empty
+                  </td>
+                </tr>
+              ) : (
+                items.map((item) => {
+                  const line = computeLine(item);
+                  const discount = lineDiscount(item);
+                  return (
+                    <tr
+                      key={item.lineKey ?? item.productId}
+                      className="h-[50px] border-b border-[#E0E0E0] bg-white"
+                    >
+                      <td className="px-3.5 py-2 align-middle">
+                        <p className="line-clamp-2 text-sm text-gray-900">{item.description}</p>
+                        {discount > 0 && (
+                          <p className="text-[11px] text-[#666666]">
+                            Disc: {formatAmount(discount)}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-2 py-2 align-middle">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleQuantityChange(item.productId, -1)}
+                            disabled={item.quantity <= 1}
+                            className="flex h-6 w-6 items-center justify-center rounded-[3px] bg-red-600 text-sm font-bold text-white hover:bg-[#CC0000] disabled:opacity-40"
+                          >
+                            −
+                          </button>
+                          <span className="min-w-[25px] text-center text-sm font-medium">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleQuantityChange(item.productId, 1)}
+                            className="flex h-6 w-6 items-center justify-center rounded-[3px] bg-[#006400] text-sm font-bold text-white hover:bg-[#228B22]"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 align-middle text-sm">
+                        {formatAmount(Number(item.unitPrice) || 0)}
+                      </td>
+                      <td className="px-2 py-2 align-middle text-sm font-semibold">
+                        {formatAmount(line.total)}
+                      </td>
+                      <td className="px-1 py-2 align-middle text-center">
+                        <button
+                          type="button"
+                          className="flex h-[30px] w-[30px] items-center justify-center rounded-full text-red-500 hover:bg-[#FFE6E6]"
+                          onClick={() => deleteItem(item.productId)}
+                          aria-label="Delete item"
+                        >
+                          <i className="ri-delete-bin-line text-lg" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-    </>
+      <div className="shrink-0 border-t border-[#E0E0E0] p-2.5">
+        <OrderSummary
+          subtotal={context?.orderSummary?.subtotal || 0}
+          discount={context?.orderSummary?.discount || 0}
+          itemDiscounts={context?.orderSummary?.itemDiscounts || 0}
+          tax={context?.orderSummary?.tax || 0}
+          total={context?.orderSummary?.total || 0}
+          setDiscount={(newDiscount: number) => {
+            if (context?.setOrderSummary) {
+              context.setOrderSummary((prev) => ({
+                ...prev,
+                discount: newDiscount,
+                total: prev.subtotal + prev.tax - (prev.itemDiscounts + newDiscount),
+              }));
+            }
+          }}
+        />
+      </div>
+    </div>
   );
 };
 
