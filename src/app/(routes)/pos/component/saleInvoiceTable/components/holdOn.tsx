@@ -26,21 +26,18 @@ const HoldOrderButton: React.FC = () => {
       return;
     }
 
-    // Get existing held orders and calculate next order number
     const existingOrders: HoldOrder[] = JSON.parse(localStorage.getItem('heldOrders') || '[]');
     const nextOrderNum = existingOrders.length + 1;
-
-    // Format to 6 digits with leading zeros
     const formattedId = nextOrderNum.toString().padStart(6, '0');
 
     const newHoldOrder: HoldOrder = {
       id: formattedId,
       items: context.data,
       timestamp: new Date().toISOString(),
-      total: context.data.reduce((sum: number, item: CartItem) =>
-        sum + (Number(item.price) * Number(item.quantity)),
+      total: context.data.reduce(
+        (sum: number, item: CartItem) => sum + Number(item.price) * Number(item.quantity),
         0
-      )
+      ),
     };
 
     const updatedOrders = [...existingOrders, newHoldOrder];
@@ -51,11 +48,14 @@ const HoldOrderButton: React.FC = () => {
 
   return (
     <button
-      className='m-5 w-fit h-fit border rounded-full p-5 hover:bg-slate-300'
+      type="button"
+      className="flex h-[50px] w-[50px] items-center justify-center rounded-full border border-[#EEEEEE] bg-white shadow-sm hover:bg-[#F8F8F8] disabled:cursor-not-allowed disabled:opacity-40"
       onClick={handleHold}
       disabled={!context?.data || context.data.length === 0}
+      aria-label="Hold order"
+      title="Hold order"
     >
-       <img src="/icons/hold.svg" className=' cursor-pointer w-8 h-8' alt="" />
+      <img src="/icons/hold.svg" className="h-[25px] w-[25px]" alt="" />
     </button>
   );
 };
