@@ -7,6 +7,7 @@ export default function Page() {
     <BooksResourcePage
       resourcePath="estimate"
       title="Estimate"
+      createLabel="New Estimate"
       createHref="/account_receivables/estimates/new"
       documentKind="estimate"
       columns={[

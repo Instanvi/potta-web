@@ -56,7 +56,19 @@ function detailFields(
 ): { label: string; value: string }[] {
   const rows: { label: string; value: string }[] = [];
   for (const field of fields) {
-    if (field.type === 'lines' || field.type === 'customer' || field.type === 'vendor') continue;
+    if (
+      field.type === 'lines' ||
+      field.type === 'attachments' ||
+      field.type === 'customer' ||
+      field.type === 'vendor' ||
+      field.type === 'purchaseOrder' ||
+      field.type === 'salesOrder' ||
+      field.type === 'invoice' ||
+      field.type === 'bill' ||
+      field.type === 'estimate'
+    ) {
+      continue;
+    }
     const raw = (values[field.key] ?? '').trim();
     if (!raw || raw === 'false') continue;
     if (field.type === 'checkbox' || field.type === 'boolean') {

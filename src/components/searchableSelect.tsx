@@ -76,8 +76,8 @@ function buildStyles(error?: string) {
       paddingLeft: '0.25rem',
       paddingRight: '0.25rem',
       backgroundColor: state.isDisabled ? 'rgba(0,0,0,0.04)' : FIELD_BG,
-      minHeight: '40px',
-      height: '40px',
+      minHeight: '44px',
+      height: 'auto',
       outline: 'none',
       '&:hover': {
         borderColor: error
@@ -89,12 +89,13 @@ function buildStyles(error?: string) {
     }),
     valueContainer: (provided: any) => ({
       ...provided,
-      paddingTop: 0,
-      paddingBottom: 0,
+      paddingTop: 4,
+      paddingBottom: 4,
     }),
     indicatorsContainer: (provided: any) => ({
       ...provided,
-      height: '38px',
+      height: 'auto',
+      alignSelf: 'stretch',
     }),
     option: (provided: any, state: any) => ({
       ...provided,
@@ -104,7 +105,12 @@ function buildStyles(error?: string) {
           ? '#f1faf7'
           : undefined,
       color: state.isSelected ? 'white' : '#111111',
-      fontSize: '0.875rem',
+      fontSize: '0.9375rem',
+      lineHeight: 1.35,
+      whiteSpace: 'normal',
+      wordBreak: 'break-word',
+      paddingTop: 10,
+      paddingBottom: 10,
       '&:active': {
         backgroundColor: '#0b5d1e',
         color: 'white',
@@ -113,18 +119,26 @@ function buildStyles(error?: string) {
     placeholder: (provided: any) => ({
       ...provided,
       color: 'rgba(0,0,0,0.35)',
-      fontSize: '0.875rem',
+      fontSize: '0.9375rem',
+      whiteSpace: 'normal',
     }),
     singleValue: (provided: any) => ({
       ...provided,
       color: '#111111',
-      fontSize: '0.875rem',
+      fontSize: '0.9375rem',
+      lineHeight: 1.35,
+      whiteSpace: 'normal',
+      position: 'relative',
+      transform: 'none',
+      maxWidth: '100%',
     }),
     menu: (provided: any) => ({
       ...provided,
       borderRadius: '2px',
       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       zIndex: 60,
+      minWidth: '100%',
+      width: 'max(100%, 20rem)',
     }),
   };
 }

@@ -62,6 +62,8 @@ export type BooksResourcePageProps = {
   columns: BooksColumn[];
   fields: BooksField[];
   actions?: BooksAction[];
+  /** List/create button label. Defaults to `New ${title}`. */
+  createLabel?: string;
   /** When set, New navigates here instead of opening the create sheet. */
   createHref?: string;
   /** When set, shows Email/SMS send (versioned download links). */
@@ -88,11 +90,13 @@ export function BooksResourcePage({
   columns,
   fields,
   actions = [],
+  createLabel,
   createHref,
   documentKind,
   listParams,
   api = booksApi,
 }: BooksResourcePageProps) {
+  const newLabel = createLabel ?? `New ${title}`;
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [searchApplied, setSearchApplied] = useState('');
@@ -285,7 +289,7 @@ export function BooksResourcePage({
               />
               </ListActionsMenu>
               <Button type="button" size="sm" onClick={openCreate}>
-                New {title}
+                {newLabel}
               </Button>
             </>
           }
@@ -325,7 +329,7 @@ export function BooksResourcePage({
           <Sheet open={createOpen} onOpenChange={setCreateOpen}>
             <SheetContent side="right" className="bg-white">
               <SheetHeader>
-                <SheetTitle>New {title}</SheetTitle>
+                <SheetTitle>{newLabel}</SheetTitle>
               </SheetHeader>
               <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
                 <BooksFormFields
@@ -341,7 +345,7 @@ export function BooksResourcePage({
                   Cancel
                 </Button>
                 <Button type="button" onClick={() => void handleCreate()} disabled={saving}>
-                  {saving ? 'Saving…' : 'Create'}
+                  {saving ? 'Saving…' : newLabel}
                 </Button>
               </SheetFooter>
             </SheetContent>

@@ -82,98 +82,117 @@ function ProductCombobox({
   const label = line.description?.trim() || 'Select product / service';
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          disabled={loading}
-          className="h-10 w-full justify-start gap-2 rounded-[2px] px-3 font-normal"
-        >
-          <Package size={16} className="shrink-0 text-primary" weight="duotone" />
-          <span
-            className={cn(
-              'min-w-0 flex-1 truncate text-left',
-              !line.description && 'text-muted-foreground',
-            )}
+    <div className="flex items-stretch gap-2">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            disabled={loading}
+            className="h-auto min-h-11 w-full justify-start gap-2 rounded-[2px] px-3 py-2.5 text-left font-normal"
           >
-            {loading ? 'Loading…' : label}
-          </span>
-          <CaretDown size={14} className="shrink-0 text-muted-foreground" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-        <Command shouldFilter>
-          <CommandInput
-            placeholder="Search in-stock products or services…"
-            value={query}
-            onValueChange={setQuery}
-          />
-          <CommandList>
-            <CommandEmpty>
-              {query.trim() ? (
-                <button
-                  type="button"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
-                  onClick={() => {
-                    onPickCustom(query.trim());
-                    setOpen(false);
-                    setQuery('');
-                  }}
-                >
-                  Use “{query.trim()}” as a free-text line
-                </button>
-              ) : (
-                <span className="px-3 py-2 text-sm text-muted-foreground">
-                  No in-stock products or services found
-                </span>
+            <Package size={18} className="shrink-0 text-primary" weight="duotone" />
+            <span
+              className={cn(
+                'min-w-0 flex-1 whitespace-normal break-words text-left text-[0.9375rem] leading-snug',
+                !line.description && 'text-muted-foreground',
               )}
-            </CommandEmpty>
-            <CommandGroup heading="In stock / services">
-              {products.map((p) => {
-                const tracked = isStockTracked(p);
-                const stock = productStockOnHand(p);
-                return (
-                  <CommandItem
-                    key={p.uuid}
-                    value={`${p.name} ${stock}`}
-                    onSelect={() => {
-                      onPickProduct(p);
+            >
+              {loading ? 'Loading…' : label}
+            </span>
+            <CaretDown size={14} className="shrink-0 text-muted-foreground" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[min(36rem,max(100%,var(--radix-popover-trigger-width)))] p-0"
+          align="start"
+        >
+          <Command shouldFilter>
+            <CommandInput
+              placeholder="Search in-stock products or services…"
+              value={query}
+              onValueChange={setQuery}
+              className="h-11 text-[0.9375rem]"
+            />
+            <CommandList className="max-h-72">
+              <CommandEmpty>
+                {query.trim() ? (
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2.5 text-left text-[0.9375rem] hover:bg-accent"
+                    onClick={() => {
+                      onPickCustom(query.trim());
                       setOpen(false);
                       setQuery('');
                     }}
                   >
-                    <Package size={14} className="mr-2 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 flex-1 truncate">{p.name}</span>
-                    <span className="ml-2 shrink-0 text-xs tabular-nums text-muted-foreground">
-                      {tracked ? `${stock} in stock` : 'Service'}
-                    </span>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-            {query.trim() &&
-            products.every((p) => p.name.toLowerCase() !== query.trim().toLowerCase()) ? (
-              <CommandGroup>
-                <CommandItem
-                  value={`create-${query}`}
-                  onSelect={() => {
-                    onPickCustom(query.trim());
-                    setOpen(false);
-                    setQuery('');
-                  }}
-                >
-                  <Plus size={14} className="mr-2" />
-                  Use “{query.trim()}”
-                </CommandItem>
+                    Use “{query.trim()}” as a free-text line
+                  </button>
+                ) : (
+                  <span className="px-3 py-2.5 text-[0.9375rem] text-muted-foreground">
+                    No in-stock products or services found
+                  </span>
+                )}
+              </CommandEmpty>
+              <CommandGroup heading="In stock / services">
+                {products.map((p) => {
+                  const tracked = isStockTracked(p);
+                  const stock = productStockOnHand(p);
+                  return (
+                    <CommandItem
+                      key={p.uuid}
+                      value={`${p.name} ${stock}`}
+                      className="items-start gap-2 py-2.5"
+                      onSelect={() => {
+                        onPickProduct(p);
+                        setOpen(false);
+                        setQuery('');
+                      }}
+                    >
+                      <Package size={16} className="mt-0.5 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 whitespace-normal break-words text-[0.9375rem] leading-snug">
+                        {p.name}
+                      </span>
+                      <span className="ml-2 shrink-0 text-xs tabular-nums text-muted-foreground">
+                        {tracked ? `${stock} in stock` : 'Service'}
+                      </span>
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
-            ) : null}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+              {query.trim() &&
+              products.every((p) => p.name.toLowerCase() !== query.trim().toLowerCase()) ? (
+                <CommandGroup>
+                  <CommandItem
+                    value={`create-${query}`}
+                    onSelect={() => {
+                      onPickCustom(query.trim());
+                      setOpen(false);
+                      setQuery('');
+                    }}
+                  >
+                    <Plus size={14} className="mr-2" />
+                    Use “{query.trim()}”
+                  </CommandItem>
+                </CommandGroup>
+              ) : null}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <a
+        href="/inventory"
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
+        aria-label="New product"
+        title="New product"
+      >
+        <Plus size={18} weight="bold" />
+      </a>
+    </div>
   );
 }
 
