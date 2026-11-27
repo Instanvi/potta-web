@@ -32,69 +32,74 @@ const PayCash = () => {
     }
   };
 
-  const fmt = (n: number) => n.toFixed(2);
-
   return (
-    <div className="h-full bg-white p-5">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div className="p-4 h-full bg-white ">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+        <h3 className="text-2xl font-medium text-gray-800">Cash Payment</h3>
         <div className="flex flex-wrap items-end gap-3">
           <ReceiptPrinterFormatSelect printer={printer} />
           {lastOrder && (
             <button
-              type="button"
               onClick={reprint}
-              className="flex items-center gap-2 border border-[var(--pos-border)] px-3 py-2 text-sm text-gray-700 hover:bg-[#f8f8f8]"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 bg-gray-100 transition-colors"
             >
-              <i className="ri-printer-line" />
+              <i className="w-4 h-4 ri-printer-line"></i>
               Reprint Last Receipt
             </button>
           )}
         </div>
       </div>
 
-      <p className="mb-2 text-sm font-medium">Enter Cash Amount</p>
-      <input
-        id="cash_amount"
-        placeholder="00.00"
-        type="number"
-        name="cashAmount"
-        value={cashAmount || ''}
-        onChange={handleCashInput}
-        className="mb-4 h-10 w-full border border-[var(--pos-border)] px-3 text-base outline-none focus:border-[var(--pos-green)]"
-      />
-      {error ? <small className="mb-3 block text-red-500">{error}</small> : null}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-6">
+          <div className="bg-gray-50 p-6 space-y-4">
+            <div>
+              <h4 className="text-lg font-medium text-gray-800 mb-4">Enter Cash Amount</h4>
+              <input
+                id="cash_amount"
+                placeholder="00.00"
+                type="number"
+                name="cashAmount"
+                value={cashAmount || ''}
+                onChange={handleCashInput}
+                className="w-full py-3 px-4 border border-gray-300 outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg font-medium"
+              />
+              {error ? <small className="text-red-500 mt-2 block">{error}</small> : null}
+            </div>
+            <CustomerPicker value={customerId} onChange={setCustomerId} />
+          </div>
 
-      <div className="mb-6">
-        <CustomerPicker value={customerId} onChange={setCustomerId} />
+          <HoldOrderButton />
+        </div>
+
+        <div className="bg-gray-50 p-6">
+          <h4 className="text-lg font-medium text-gray-800 mb-4">Payment Summary</h4>
+          <div className="space-y-4">
+            <div className="w-full flex justify-between py-3 border-b border-gray-200">
+              <span className="font-medium text-gray-600">Total</span>
+              <p className="font-medium text-lg text-gray-800">{total.toFixed(2)} XAF</p>
+            </div>
+            <div className="w-full flex justify-between py-3 border-b border-gray-200">
+              <span className="font-medium text-gray-600">Cash Amount</span>
+              <p className="font-medium text-lg text-gray-800">{cashAmount.toFixed(2)} XAF</p>
+            </div>
+            <div className="w-full flex justify-between py-3 bg-green-50 px-3">
+              <span className="font-medium text-gray-800">Change</span>
+              <p className={`font-medium text-xl ${change < 0 ? 'text-red-500' : 'text-green-700'}`}>{change.toFixed(2)} XAF</p>
+            </div>
+            <div className="w-full mt-6">
+              <Button
+                width="full"
+                text={isPending ? 'Processing...' : 'Complete Payment'}
+                type="button"
+                onClick={handleComplete}
+                disabled={!canSell || items.length === 0 || total <= 0 || cashAmount < total || isPending}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mb-6 ml-auto w-full max-w-[370px]">
-        <div className="mb-3 flex justify-between text-sm">
-          <span className="font-medium">Total</span>
-          <span className="font-bold">{fmt(total)}</span>
-        </div>
-        <div className="mb-3 border-b border-[var(--pos-border)]" />
-        <div className="mb-3 flex justify-between text-sm">
-          <span className="font-medium">Cash Amount</span>
-          <span className="font-bold">{fmt(cashAmount)}</span>
-        </div>
-        <div className="mb-3 border-b border-[var(--pos-border)]" />
-        <div className="mb-4 flex justify-between text-sm">
-          <span className="font-medium">Change</span>
-          <span className={`font-bold ${change < 0 ? 'text-[var(--pos-discount)]' : ''}`}>
-            {fmt(change)}
-          </span>
-        </div>
-        <Button
-          width="full"
-          text={isPending ? 'Processing...' : 'Complete'}
-          type="button"
-          onClick={handleComplete}
-          disabled={!canSell || items.length === 0 || total <= 0 || cashAmount < total || isPending}
-        />
-      </div>
-
-      <HoldOrderButton />
       {printer.getIframeElement()}
     </div>
   );
