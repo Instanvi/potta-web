@@ -4,15 +4,19 @@
  * then VAT on the discounted line, then the sale-level (coupon) discount.
  */
 
+/** Fallback labels — prefer org methods from GET /payment-method at checkout. */
 export const PAYMENT_METHODS = [
   { value: 'CASH', label: 'Cash' },
   { value: 'MOBILE_MONEY', label: 'Mobile Money' },
   { value: 'CREDIT_CARD', label: 'Card' },
   { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
   { value: 'CREDIT', label: 'On account (credit)' },
+  { value: 'OTHER', label: 'Other' },
+  { value: 'DIGITAL_WALLET', label: 'Digital wallet' },
 ] as const;
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number]['value'] | 'OTHER' | 'DIGITAL_WALLET';
-export const PAYMENT_METHOD_VALUES = PAYMENT_METHODS.map((m) => m.value) as PaymentMethod[];
+/** Org payment-method code (string) — not limited to the fallback enum. */
+export type PaymentMethod = string;
+export const PAYMENT_METHOD_VALUES = PAYMENT_METHODS.map((m) => m.value) as string[];
 
 export const DISCOUNT_TYPES = ['PERCENTAGE', 'FLAT_RATE', 'PERCENTAGE_WITH_CAP'] as const;
 export type DiscountType = (typeof DISCOUNT_TYPES)[number];

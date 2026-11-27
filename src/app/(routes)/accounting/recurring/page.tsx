@@ -48,6 +48,7 @@ export default function Page() {
         { key: 'endDate', label: 'End date', type: 'date' },
         { key: 'customerId', label: 'Customer', type: 'customer' },
         { key: 'vendorId', label: 'Vendor', type: 'vendor' },
+        { key: 'paymentMethod', label: 'Payment method', type: 'paymentMethod' },
         { key: 'lines', label: 'Line items', type: 'lines' },
         { key: 'notes', label: 'Notes', type: 'textarea' },
       ]}

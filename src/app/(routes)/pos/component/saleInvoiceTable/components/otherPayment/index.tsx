@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Button from '@potta/components/button';
 import { ContextData } from '@potta/components/providers/DataProvider';
 import OrderSummary from '../orderSummary';
@@ -6,32 +6,57 @@ import CustomerPicker from '../CustomerPicker';
 import { useCheckout } from '../useCheckout';
 import type { PaymentMethod } from '@potta/app/(routes)/pos/utils/sale';
 import { ReceiptPrinterFormatSelect } from '../../../print/ReceiptPrinterFormatSelect';
+import { usePaymentMethods } from '@potta/app/(routes)/accounting/payment-methods/hooks';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
+import { Skeleton } from '@potta/components/ui/loaders';
 
-type Option = { id: string; method: PaymentMethod; label: string; icons: string[]; hint: string; referenceLabel: string };
+type MethodChoice = { code: string; label: string };
 
-const OPTIONS: Option[] = [
-  { id: 'mtn', method: 'MOBILE_MONEY', label: 'MTN Mobile Money', icons: ['/icons/mtn.svg'], hint: 'Dial *126# to pay', referenceLabel: 'Phone number or transaction ID' },
-  { id: 'orange', method: 'MOBILE_MONEY', label: 'Orange Money', icons: ['/icons/om.svg'], hint: 'Dial #150*62# to pay', referenceLabel: 'Phone number or transaction ID' },
-  { id: 'card', method: 'CREDIT_CARD', label: 'Visa / Mastercard', icons: ['/icons/visas.svg', '/icons/master.svg'], hint: 'Charge the card on the terminal', referenceLabel: 'Terminal approval code' },
-  { id: 'bank', method: 'BANK_TRANSFER', label: 'Bank transfer', icons: [], hint: 'Confirm the transfer was received', referenceLabel: 'Transfer reference' },
-  { id: 'credit', method: 'CREDIT', label: 'On account (credit)', icons: [], hint: "The total is added to the customer's balance", referenceLabel: 'Note (optional)' },
+const FALLBACK: MethodChoice[] = [
+  { code: 'MOBILE_MONEY', label: 'Mobile Money' },
+  { code: 'CREDIT_CARD', label: 'Card' },
+  { code: 'BANK_TRANSFER', label: 'Bank transfer' },
+  { code: 'CREDIT', label: 'On account (credit)' },
+  { code: 'OTHER', label: 'Other' },
 ];
 
 const OtherPayment = () => {
   const context = useContext(ContextData);
   const { totals, checkout, printer, isPending, items, canSell } = useCheckout();
-  const [selected, setSelected] = useState<Option>(OPTIONS[0]);
+  const { data, isLoading } = usePaymentMethods({ page: 1, limit: 100 });
+  const [methodCode, setMethodCode] = useState('');
   const [reference, setReference] = useState('');
   const [customerId, setCustomerId] = useState('');
 
-  const needsCustomer = selected.method === 'CREDIT';
-  const canSubmit = canSell && items.length > 0 && totals.total > 0 && !isPending && (!needsCustomer || Boolean(customerId));
+  const methods = useMemo<MethodChoice[]>(() => {
+    const fromApi = (data?.data ?? [])
+      .filter((m) => m.isActive && m.code !== 'CASH')
+      .map((m) => ({ code: m.code, label: m.name }));
+    return fromApi.length > 0 ? fromApi : FALLBACK;
+  }, [data?.data]);
+
+  useEffect(() => {
+    if (!methodCode && methods[0]) setMethodCode(methods[0].code);
+  }, [methodCode, methods]);
+
+  const selected = methods.find((m) => m.code === methodCode) ?? methods[0];
+  const needsCustomer = selected?.code === 'CREDIT';
+  const canSubmit =
+    canSell &&
+    items.length > 0 &&
+    totals.total > 0 &&
+    !isPending &&
+    Boolean(selected) &&
+    (!needsCustomer || Boolean(customerId));
 
   const handleComplete = async () => {
+    if (!selected) return;
     const ok = await checkout({
-      paymentMethod: selected.method,
+      paymentMethod: selected.code as PaymentMethod,
       customerId,
-      reference: reference.trim() ? `${selected.label}: ${reference.trim()}` : selected.label,
+      reference: reference.trim()
+        ? `${selected.label}: ${reference.trim()}`
+        : selected.label,
     });
     if (ok) {
       setReference('');
@@ -40,59 +65,88 @@ const OtherPayment = () => {
   };
 
   return (
-    <div className="p-8 h-full bg-white">
+    <div className="h-full bg-white p-8">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="text-2xl font-medium text-gray-800 mb-2">Other Payment Methods</h3>
+          <h3 className="mb-2 text-2xl font-medium text-gray-800">Other Payment Methods</h3>
           <p className="text-gray-600">Select how the customer pays</p>
         </div>
         <ReceiptPrinterFormatSelect printer={printer} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="space-y-2">
-          {OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => setSelected(option)}
-              className={`w-full p-4 flex items-center space-x-3 border transition-colors ${
-                selected.id === option.id ? 'border-green-600 bg-green-50' : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-              }`}
-            >
-              {option.icons.length > 0 ? (
-                option.icons.map((src) => <img key={src} src={src} alt="" className="w-8 h-8" />)
-              ) : (
-                <i className={`text-2xl ${option.method === 'CREDIT' ? 'ri-user-shared-line' : 'ri-bank-line'}`}></i>
-              )}
-              <p className="font-medium text-gray-800">{option.label}</p>
-            </button>
-          ))}
+      <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="space-y-3">
+          {isLoading && methods.length === 0 ? (
+            <Skeleton className="h-24 w-full" />
+          ) : (
+            <>
+              <PaymentMethodSelect
+                label="Payment method"
+                value={methodCode}
+                onChange={setMethodCode}
+                allowCreate
+                extraOptions={[{ label: 'On account (credit)', value: 'CREDIT' }]}
+              />
+              <div className="space-y-2">
+                {methods.map((option) => (
+                  <button
+                    key={option.code}
+                    type="button"
+                    onClick={() => setMethodCode(option.code)}
+                    className={`flex w-full items-center space-x-3 border p-4 transition-colors ${
+                      methodCode === option.code
+                        ? 'border-green-600 bg-green-50'
+                        : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                    }`}
+                  >
+                    <i
+                      className={`text-2xl ${
+                        option.code === 'CREDIT'
+                          ? 'ri-user-shared-line'
+                          : option.code === 'BANK_TRANSFER'
+                            ? 'ri-bank-line'
+                            : option.code === 'CREDIT_CARD'
+                              ? 'ri-bank-card-line'
+                              : 'ri-smartphone-line'
+                      }`}
+                    />
+                    <p className="font-medium text-gray-800">{option.label}</p>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="bg-gray-50 p-6 space-y-4">
-          <p className="text-gray-600">{selected.hint}</p>
+        <div className="space-y-4 bg-gray-50 p-6">
+          <p className="text-gray-600">
+            Confirm payment with {selected?.label ?? 'the selected method'}, then complete the sale.
+          </p>
           <div className="space-y-1">
             <label htmlFor="pos-reference" className="block text-sm font-medium text-gray-700">
-              {selected.referenceLabel}
+              Reference (optional)
             </label>
             <input
               id="pos-reference"
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2.5 outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              className="w-full border border-gray-300 px-3 py-2.5 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500"
             />
           </div>
           <CustomerPicker value={customerId} onChange={setCustomerId} required={needsCustomer} />
-          <div className="w-full flex justify-between py-3 bg-green-50 px-3">
+          <div className="flex w-full justify-between bg-green-50 px-3 py-3">
             <span className="font-medium text-gray-800">Amount due</span>
-            <p className="font-medium text-xl text-green-700">{totals.total.toFixed(2)} XAF</p>
+            <p className="text-xl font-medium text-green-700">{totals.total.toFixed(2)} XAF</p>
           </div>
           <Button
             width="full"
             type="button"
-            text={isPending ? 'Processing...' : `Complete with ${selected.label}`}
+            text={
+              isPending
+                ? 'Processing...'
+                : `Complete with ${selected?.label ?? 'payment'}`
+            }
             onClick={handleComplete}
             disabled={!canSubmit}
           />
@@ -105,10 +159,13 @@ const OtherPayment = () => {
         tax={context?.orderSummary?.tax || 0}
         itemDiscounts={context?.orderSummary?.itemDiscounts || 0}
         total={context?.orderSummary?.total || 0}
-        setDiscount={(newDiscount: number) => context?.setOrderSummary?.((prev) => ({ ...prev, discount: newDiscount }))}
+        setDiscount={(newDiscount: number) =>
+          context?.setOrderSummary?.((prev) => ({ ...prev, discount: newDiscount }))
+        }
       />
       {printer.getIframeElement()}
     </div>
   );
 };
+
 export default OtherPayment;

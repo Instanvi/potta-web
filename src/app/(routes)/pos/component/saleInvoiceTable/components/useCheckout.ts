@@ -17,7 +17,8 @@ import {
 
 const EMPTY_SUMMARY = { subtotal: 0, discount: 0, itemDiscounts: 0, tax: 0, total: 0 };
 
-const paymentLabel = (method: PaymentMethod) => PAYMENT_METHODS.find((m) => m.value === method)?.label ?? method;
+const paymentLabel = (method: PaymentMethod) =>
+  PAYMENT_METHODS.find((m) => m.value === method)?.label ?? method;
 
 /** Till checkout shared by the cash and other-payment panels: posts the sale, prints, resets the cart. */
 export function useCheckout() {

@@ -11,7 +11,7 @@ import { useDocumentLetterhead } from '@/hooks/use-document-letterhead';
 import { useOrganizationProfile } from '@/hooks/use-organization-profile';
 import { downloadReactPdf } from '@/lib/download-react-pdf';
 import { orgToSeller } from '@/lib/org-to-seller';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import useGetOneInvoice from '../../../invoice/_hooks/useGetOneInvoice';
 import {
   CreditNoteTableRow,
@@ -121,22 +121,28 @@ const PdfView = ({
     reference,
   ]);
 
+  /** Hold the last stable props so typing notes/lines does not rebuild the PDF every keystroke. */
+  const [stableProps, setStableProps] = useState(pdfProps);
+  useEffect(() => {
+    const handle = window.setTimeout(() => setStableProps(pdfProps), 500);
+    return () => window.clearTimeout(handle);
+  }, [pdfProps]);
+
   const documentNode = useMemo(
-    () => <CreditNotePdfDocument {...pdfProps} />,
-    [pdfProps],
+    () => <CreditNotePdfDocument {...stableProps} />,
+    [stableProps],
   );
 
   const download = useCallback(async () => {
-    const filename = pdfProps.reference
-      ? `credit-note-${pdfProps.reference}`
+    const filename = stableProps.reference
+      ? `credit-note-${stableProps.reference}`
       : 'draft-credit-note';
-    await downloadReactPdf(documentNode, filename);
-  }, [documentNode, pdfProps.reference]);
+    await downloadReactPdf(<CreditNotePdfDocument {...pdfProps} />, filename);
+  }, [pdfProps, stableProps.reference]);
 
   useEffect(() => {
     onRegisterDownload?.(download);
   }, [download, onRegisterDownload]);
-
 
   return <PdfPreview document={documentNode} />;
 };

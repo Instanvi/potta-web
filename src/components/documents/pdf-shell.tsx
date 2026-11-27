@@ -60,14 +60,13 @@ export const pdfShellStyles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   headerSellerName: {
-    color: '#ffffff',
+    color: '#111111',
     fontSize: 14,
     fontFamily: 'Helvetica-Bold',
     marginBottom: 3,
   },
   headerSellerLine: {
-    color: '#ffffff',
-    opacity: 0.85,
+    color: '#4b5563',
     fontSize: 8.5,
     lineHeight: 1.4,
   },
@@ -76,21 +75,20 @@ export const pdfShellStyles = StyleSheet.create({
     maxWidth: '45%',
   },
   headerTitle: {
-    color: '#ffffff',
+    color: '#111111',
     fontSize: 22,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: 0.5,
     textAlign: 'right',
   },
   headerSub: {
-    color: '#ffffff',
-    opacity: 0.85,
+    color: '#6b7280',
     fontSize: 10,
     marginTop: 4,
     textAlign: 'right',
   },
   headerMeta: {
-    color: '#ffffff',
+    color: '#4b5563',
     fontSize: 9,
     marginTop: 2,
     textAlign: 'right',
@@ -137,29 +135,37 @@ export const pdfShellStyles = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     marginBottom: 8,
   },
+  table: {
+    borderWidth: 0.5,
+    borderColor: '#d1d5db',
+  },
   tableHeader: {
     flexDirection: 'row',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderBottomWidth: 1,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 0.5,
     borderBottomColor: '#d1d5db',
-    backgroundColor: '#f3f4f6',
   },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#d1d5db',
   },
   th: {
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    color: '#4b5563',
+    color: '#111111',
     textTransform: 'uppercase',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRightWidth: 0.5,
+    borderRightColor: '#d1d5db',
   },
   td: {
     fontSize: 9,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRightWidth: 0.5,
+    borderRightColor: '#d1d5db',
   },
   right: { textAlign: 'right' },
   notes: {
@@ -281,10 +287,10 @@ export function LetterheadHeader({
 
   if (spec.header === 'band') {
     return (
-      <View style={[s.header, { backgroundColor: accent }]}>
-        <SellerIdentity seller={seller} light />
+      <View style={[s.header, { borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }]}>
+        <SellerIdentity seller={seller} light={false} />
         <View style={s.headerRight}>
-          <Text style={s.headerTitle}>{title.toUpperCase()}</Text>
+          <Text style={[s.headerTitle, { color: accent }]}>{title.toUpperCase()}</Text>
           {subtitle ? <Text style={s.headerSub}>{subtitle}</Text> : null}
           {meta.map((m) => (
             <Text key={m.label} style={s.headerMeta}>
@@ -309,7 +315,7 @@ export function LetterheadHeader({
           </View>
           <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: accent }}>{title.toUpperCase()}</Text>
         </View>
-        <View style={{ marginHorizontal: 36, marginTop: 10, backgroundColor: '#f3f4f6', paddingVertical: 6, paddingHorizontal: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ marginHorizontal: 36, marginTop: 10, borderWidth: 0.5, borderColor: '#d1d5db', paddingVertical: 6, paddingHorizontal: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
           {subtitle ? <Text style={{ fontSize: 8, color: '#374151' }}>{subtitle}</Text> : <Text />}
           {meta.map((m) => (
             <Text key={m.label} style={{ fontSize: 8, color: '#374151' }}>
@@ -402,17 +408,15 @@ export function templateTableHeaderStyle(
   accent: string = PDF_ACCENT,
 ) {
   const spec = documentTemplate(template);
-  if (spec.table === 'accent') {
-    return [pdfShellStyles.tableHeader, { backgroundColor: accent, borderBottomWidth: 0 }];
-  }
   if (spec.table === 'open') {
-    return [pdfShellStyles.tableHeader, { backgroundColor: '#ffffff', borderBottomColor: accent }];
+    return [pdfShellStyles.tableHeader, { borderBottomColor: accent }];
   }
   return pdfShellStyles.tableHeader;
 }
 
-export function templateTableHeaderColor(template?: DocumentTemplateId): string | undefined {
-  return documentTemplate(template).table === 'accent' ? '#ffffff' : undefined;
+/** Header text stays dark — table headers no longer use filled backgrounds. */
+export function templateTableHeaderColor(_template?: DocumentTemplateId): string | undefined {
+  return undefined;
 }
 
 /** Line table shared by invoices, bills, receipts, and purchase orders. */
@@ -434,19 +438,21 @@ export function LineItemsTable({
   const align = (column?: { align?: 'right' }) =>
     column?.align === 'right' ? s.right : undefined;
   const headerStyle =
-    spec.table === 'accent'
-      ? [s.tableHeader, { backgroundColor: accent, borderBottomWidth: 0 }]
-      : spec.table === 'open'
-        ? [s.tableHeader, { backgroundColor: '#ffffff', borderBottomColor: accent }]
-        : s.tableHeader;
-  const headerText = spec.table === 'accent' ? { color: '#ffffff' } : undefined;
+    spec.table === 'open'
+      ? [s.tableHeader, { borderBottomColor: accent }]
+      : s.tableHeader;
   return (
-    <View style={{ marginBottom: spec.totals === 'under' ? 4 : 20 }}>
+    <View style={[{ marginBottom: spec.totals === 'under' ? 4 : 20 }, s.table]}>
       <View style={headerStyle}>
-        {columns.map((column) => (
+        {columns.map((column, columnIndex) => (
           <Text
             key={column.header}
-            style={[s.th, headerText, align(column), { width: column.width }]}
+            style={[
+              s.th,
+              align(column),
+              { width: column.width },
+              columnIndex === columns.length - 1 ? { borderRightWidth: 0 } : null,
+            ]}
           >
             {column.header}
           </Text>
@@ -456,11 +462,23 @@ export function LineItemsTable({
         <Text style={s.emptyLine}>{emptyLabel}</Text>
       ) : (
         rows.map((cells, index) => (
-          <View key={`line-${index}`} style={s.tableRow} wrap={false}>
+          <View
+            key={`line-${index}`}
+            style={[
+              s.tableRow,
+              index === rows.length - 1 ? { borderBottomWidth: 0 } : null,
+            ]}
+            wrap={false}
+          >
             {cells.map((cell, cellIndex) => (
               <Text
                 key={`${columns[cellIndex]?.header ?? 'cell'}-${cellIndex}`}
-                style={[s.td, align(columns[cellIndex]), { width: columns[cellIndex]?.width }]}
+                style={[
+                  s.td,
+                  align(columns[cellIndex]),
+                  { width: columns[cellIndex]?.width },
+                  cellIndex === cells.length - 1 ? { borderRightWidth: 0 } : null,
+                ]}
               >
                 {cell}
               </Text>

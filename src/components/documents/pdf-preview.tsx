@@ -4,9 +4,9 @@ import { useCallback, useEffect, useRef, useState, type ReactElement } from 'rea
 import type { DocumentProps } from '@react-pdf/renderer';
 import { cn } from '@potta/lib/utils';
 
-const UPDATE_DELAY_MS = 350;
+const UPDATE_DELAY_MS = 650;
 /** Let the PDF plugin paint the covered frame before we bring it forward. */
-const REVEAL_DELAY_MS = 150;
+const REVEAL_DELAY_MS = 200;
 
 type SlotUrl = string | null;
 

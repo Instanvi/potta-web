@@ -29,6 +29,7 @@ import {
   loadPurchaseOrderForReceipt,
 } from '@/lib/books-entities';
 import { sanitizeDocumentPayload } from '@/lib/document-api-fields';
+import PaymentMethodSelect from '@potta/components/payment-method-select';
 
 export type BooksField = {
   key: string;
@@ -36,7 +37,8 @@ export type BooksField = {
   /**
    * text | number | textarea | checkbox | date | lines | select | json |
    * customer | vendor | estimate | purchaseOrder | salesOrder |
-   * invoice | bill | opportunity | lead | proposal | account
+   * invoice | bill | opportunity | lead | proposal | account |
+   * paymentMethod
    */
   type?: string;
   options?: { value: string; label: string }[];
@@ -201,6 +203,15 @@ export function FieldInput({
         entity={type as BooksEntityKind}
         label={field.label}
         value={value}
+        onChange={onChange}
+      />
+    );
+  }
+  if (type === 'paymentMethod') {
+    return (
+      <PaymentMethodSelect
+        label={field.label}
+        value={value || ''}
         onChange={onChange}
       />
     );
