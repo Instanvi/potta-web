@@ -1,6 +1,7 @@
 'use client';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import Select from '@potta/components/select';
 import SearchableSelect, {
   Option as SearchableSelectOption,
@@ -154,26 +155,41 @@ const Left = ({ onOpenPreview }: LeftProps) => {
     );
   }, [creditAmount, setContextData]);
 
-  const validateForm = () => {
+  const validateForm = (): ValidationErrors => {
     const next: ValidationErrors = {};
     if (!customerId) next.customerName = 'Customer is required';
     if (!issueDate) next.issueDate = 'Issue date is required';
+    if (!note.trim()) next.reason = 'Notes / reason is required';
     if (serializeLineItems(tableRows).length === 0 || creditAmount <= 0) {
       next.lineItems = 'Add at least one line with a quantity and price';
     }
     setErrors(next);
-    return Object.keys(next).length === 0;
+    return next;
   };
+
+  // Clear the line-items error once the table has a valid credit amount.
+  useEffect(() => {
+    if (errors.lineItems && serializeLineItems(tableRows).length > 0 && creditAmount > 0) {
+      clearError('lineItems');
+    }
+  }, [tableRows, creditAmount, errors.lineItems]);
 
   const mutation = useCreateCreditNote();
 
   const handleSave = () => {
-    if (!validateForm()) {
-      setTimeout(() => {
+    const nextErrors = validateForm();
+    const count = Object.keys(nextErrors).length;
+    if (count > 0) {
+      toast.error(
+        count === 1
+          ? 'Please fix the required field before saving.'
+          : 'Please fix the required fields before saving.',
+      );
+      requestAnimationFrame(() => {
         document
           .querySelector('.error-field')
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 0);
+      });
       return;
     }
 
@@ -214,22 +230,18 @@ const Left = ({ onOpenPreview }: LeftProps) => {
                         placeholder="Select a customer"
                         isDisabled={customersLoading}
                         required
+                        error={errors.customerName}
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsAddCustomerDrawer(true)}
-                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-brand-hover"
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-primary text-white hover:bg-brand-hover"
                       aria-label="Add customer"
                     >
                       <i className="ri-add-line text-xl" />
                     </button>
                   </div>
-                  {errors.customerName ? (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.customerName}
-                    </p>
-                  ) : null}
                 </div>
                 <div>
                   <SearchableSelect
@@ -304,14 +316,13 @@ const Left = ({ onOpenPreview }: LeftProps) => {
                 value={note}
                 placeholder="e.g. Returned goods, billing error"
                 onchange={(e: any) => handleNoteChange(e.target.value)}
+                errors={errors.reason}
               />
-              {errors.reason ? (
-                <p className="mt-1 text-sm text-red-500">{errors.reason}</p>
-              ) : (
+              {!errors.reason ? (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Saved as both the credit note reason and notes.
                 </p>
-              )}
+              ) : null}
             </div>
           </DocumentFormCard>
       </DocumentFormShell>
