@@ -67,7 +67,7 @@ const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
   setOpen,
   invoice,
 }) => {
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
   const context = useContext(ContextData);

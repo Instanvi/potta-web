@@ -64,7 +64,7 @@ export function BooksDocumentCreatePage({
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [acting, setActing] = useState(false);
 
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const { registerDownload, onDownloadPdf } = usePreviewDownload();
 
   const { partyFields, dateFields, lineFields, noteFields, detailFields } = useMemo(() => {
